@@ -1,0 +1,14 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.layout-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; // que todo mida al menos el alto de la pantalla
+}
+
+.main-content {
+  flex: 1; // se estira para ocupar todo el espacio disponible
+}

@@ -1,0 +1,33 @@
+<nav class="navbar" [class.scrolled]="scrolled">
+  <div class="navbar-container">
+    <div class="navbar-logo">
+      <a routerLink="/">
+        <!--<img src="assets/hospital-logo.svg" alt="Logo" class="logo-image" />-->
+        <span class="logo-text">Home</span>
+      </a>
+    </div>
+
+    <div class="navbar-menu-toggle" (click)="toggleMenu()">
+      <span class="menu-icon" [class.open]="isMenuOpen">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </div>
+
+    <div class="navbar-links" [class.open]="isMenuOpen">
+      @for (item of navItems; track item.label) {
+        <a 
+          [routerLink]="item.route" 
+          routerLinkActive="active" 
+          [routerLinkActiveOptions]="{exact: item.route === '/'}"
+          (click)="isMenuOpen = false"
+        >
+          {{item.label}}
+        </a>
+      }
+      <button class="navbar-cta">Emergencias</button>
+    </div>
+  </div>
+</nav>
+

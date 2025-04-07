@@ -1,0 +1,90 @@
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-top">
+
+      <!-- Brand + Redes + Contacto -->
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <h2>Hospital SDLG</h2>
+        </div>
+        <p class="footer-description">
+          Sistema de turnos hospitalarios diseñado para brindar una experiencia eficiente y cómoda a nuestros pacientes.
+        </p>
+
+        <div class="footer-social">
+          @for (social of socialLinks; track social.name) {
+            <a [href]="social.url" target="_blank" rel="noopener noreferrer" class="social-icon" [attr.aria-label]="social.name">
+              <i [ngClass]="['fab', 'fa-' + social.icon]"></i>
+            </a>
+          }
+        </div>
+
+        <div class="footer-contact">
+          <p>Av. Salud y Esperanza 1234, Barrio Centro</p>
+          <p>CP. 5010 - Córdoba, Argentina</p>
+          <p>Atención al Paciente: 0800-123-4567</p>
+          <p>Email: info&#64;hospitalsdlg.com</p>
+        </div>
+      </div>
+
+      <!-- Footer Links -->
+      <div class="footer-links-container">
+        <div class="footer-links">
+          <h3>Institucional</h3>
+          <ul>
+            @for (link of hospitalLinks; track link.label) {
+              <li><a [routerLink]="link.route">{{link.label}}</a></li>
+            }
+            <li><a href="#">Nuestras Autoridades</a></li>
+            <li><a href="#">Equipo de Salud</a></li>
+            <li><a href="#">¿Cómo llegar?</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h3>Pacientes y Familia</h3>
+          <ul>
+            @for (link of pacientesLinks; track link.label) {
+              <li><a [routerLink]="link.route">{{link.label}}</a></li>
+            }
+            <li><a href="#">Residentes</a></li>
+            <li><a href="#">Turnos</a></li>
+            <li><a href="#">Contacto</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h3>Especialidades</h3>
+          <ul>
+            <li><a href="#">Cardiología Clínica</a></li>
+            <li><a href="#">Urología</a></li>
+            <li><a href="#">Trabajo Social</a></li>
+            <li><a href="#">Medicina Transfusional</a></li>
+            <li><a href="#">Quemados y Cirugía Plástica</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h3>Legal</h3>
+          <ul>
+            @for (link of legalLinks; track link.label) {
+              <li><a [routerLink]="link.route">{{link.label}}</a></li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="footer-bottom">
+      <div class="copyright">
+        <p>&copy; {{currentYear}} Hospital SDLG - Sistema de Turnos Hospitalarios. Todos los derechos reservados.</p>
+      </div>
+      <div class="footer-bottom-links">
+        @for (link of legalLinks; track link.label) {
+          <a [routerLink]="link.route">{{link.label}}</a>
+        }
+      </div>
+    </div>
+  </div>
+</footer>
