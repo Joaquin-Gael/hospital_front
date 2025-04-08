@@ -19,5 +19,5 @@ import { LayoutComponent } from './layout/layout/layout.component';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'CursoBigoteAngular';
+  title = 'HospitalSDLG'
 }
