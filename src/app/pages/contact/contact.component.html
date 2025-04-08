@@ -1,0 +1,119 @@
+<section class="contact-section">
+  <div class="container">
+    <div class="contact-header">
+      <h2>Contáctenos</h2>
+      <p>Estamos aquí para ayudarle con cualquier consulta sobre nuestro sistema de turnos</p>
+    </div>
+
+    <div class="contact-content">
+      <div class="contact-info">
+        <div class="info-card">
+          <div class="icon">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <h3>Dirección</h3>
+          <p>Av. Salud 1234, Ciudad Médica</p>
+        </div>
+
+        <div class="info-card">
+          <div class="icon">
+            <i class="fas fa-phone-alt"></i>
+          </div>
+          <h3>Teléfono</h3>
+          <p>+54 11 4567-8900</p>
+          <p>+54 11 4567-8901</p>
+        </div>
+
+        <div class="info-card">
+          <div class="icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h3>Email</h3>
+          <p>contacto&#64;hospitalsalud.com</p>
+          <p>turnos&#64;hospitalsalud.com</p>
+        </div>
+
+        <div class="info-card">
+          <div class="icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <h3>Horario de Atención</h3>
+          <p>Lunes a Viernes: 8:00 - 20:00</p>
+          <p>Sábados: 8:00 - 14:00</p>
+        </div>
+      </div>
+
+      <div class="contact-form-container">
+        <h3>Envíenos un mensaje</h3>
+        
+        <!-- Mensaje de éxito -->
+        <div *ngIf="submitSuccess" class="alert alert-success">
+          <i class="fas fa-check-circle"></i>
+          <p>¡Su mensaje ha sido enviado con éxito! Nos pondremos en contacto con usted pronto.</p>
+        </div>
+        
+        <!-- Mensaje de error -->
+        <div *ngIf="submitError" class="alert alert-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <p>{{ errorMessage }}</p>
+        </div>
+        
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+          <div class="form-group">
+            <label for="name">Nombre completo</label>
+            <input type="text" id="name" formControlName="name" placeholder="Ingrese su nombre completo">
+            <div class="error-message" *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched">
+              El nombre es requerido
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" formControlName="email" placeholder="Ingrese su correo electrónico">
+            <div class="error-message" *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
+              Ingrese un correo electrónico válido
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Teléfono</label>
+            <input type="tel" id="phone" formControlName="phone" placeholder="Ingrese su número de teléfono">
+            <div class="error-message" *ngIf="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched">
+              Ingrese un número de teléfono válido (10 dígitos)
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="subject">Asunto</label>
+            <select id="subject" formControlName="subject">
+              <option value="" disabled selected>Seleccione un asunto</option>
+              <option value="turnos">Consulta sobre turnos</option>
+              <option value="cancelacion">Cancelación de turno</option>
+              <option value="informacion">Información general</option>
+              <option value="sugerencia">Sugerencia</option>
+              <option value="otro">Otro</option>
+            </select>
+            <div class="error-message" *ngIf="contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched">
+              Seleccione un asunto
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Mensaje</label>
+            <textarea id="message" formControlName="message" rows="5" placeholder="Escriba su mensaje aquí"></textarea>
+            <div class="error-message" *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched">
+              El mensaje debe tener al menos 10 caracteres
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" [disabled]="contactForm.invalid || isSubmitting">
+            <span *ngIf="isSubmitting">
+              <i class="fas fa-spinner fa-spin"></i> Enviando...
+            </span>
+            <span *ngIf="!isSubmitting">Enviar mensaje</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
