@@ -5,16 +5,20 @@ export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
-    children: [], 
+    children: [
+      {
+        path: 'contact',
+        loadComponent: () =>
+          import('./pages/contact/contact.component').then((m) => m.ContactComponent),
+      }
+      ],
   },
 
-  // Página sin layout
   {
     path: 'user_panel',
     loadComponent: () =>
       import('./pages/user-panel/user-panel.component').then((m) => m.UserPanelComponent),
   },
 
-  // Redirección
   { path: '**', redirectTo: '' },
 ];
