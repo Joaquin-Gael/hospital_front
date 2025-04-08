@@ -18,7 +18,7 @@ export class NavbarComponent {
     { label: "Solicitar Turno", route: "/solicitar-turno" },
     { label: "Especialidades", route: "/especialidades" },
     { label: "Mi Cuenta", route: "/mi-cuenta" },
-    { label: "Contacto", route: "/contacto" },
+    { label: "Contacto", route: "/contact" },
   ]
 
   toggleMenu() {

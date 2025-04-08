@@ -28,7 +28,8 @@ export class FooterComponent {
 
   pacientesLinks = [
     { label: 'Mi Turno', route: '/mi-turno' },
-    { label: 'Historial', route: '/historial' }
+    { label: 'Historial', route: '/historial' },
+    { label: 'Contacto', route: '/contact' }
   ];
 
   legalLinks = [
