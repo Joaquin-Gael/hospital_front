@@ -1,0 +1,205 @@
+@use 'sass:color';
+@use '../styles/variables' as vars;
+
+.doctor-profile {
+  background-color: vars.$card-background;
+  border-radius: vars.$border-radius-lg;
+  padding: vars.$spacing-6;
+  margin-bottom: vars.$spacing-8;
+  box-shadow: vars.$shadow-md;
+  transition: all vars.$transition-normal;
+  animation: fadeIn 0.5s ease;
+  
+  &:hover {
+    box-shadow: vars.$shadow-lg;
+  }
+  
+  @media (max-width: vars.$breakpoint-md) {
+    padding: vars.$spacing-4;
+    margin-bottom: vars.$spacing-6;
+  }
+  
+  &__loading {
+    @include vars.flex-center;
+    flex-direction: column;
+    padding: vars.$spacing-8;
+    
+    p {
+      margin-top: vars.$spacing-4;
+      color: vars.$text-secondary;
+      font-size: vars.$font-size-sm;
+    }
+  }
+  
+  &__content {
+    display: flex;
+    align-items: center;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+  
+  &__avatar {
+    position: relative;
+    margin-right: vars.$spacing-6;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      margin-right: 0;
+      margin-bottom: vars.$spacing-4;
+    }
+  }
+  
+  &__image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid vars.$card-background;
+    box-shadow: vars.$shadow-md;
+    transition: transform vars.$transition-normal;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+    
+    @media (max-width: vars.$breakpoint-sm) {
+      width: 80px;
+      height: 80px;
+    }
+  }
+  
+  &__status-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid vars.$card-background;
+    box-shadow: vars.$shadow-sm;
+    
+    &--available {
+      background-color: vars.$success-color;
+    }
+    
+    &--busy {
+      background-color: vars.$warning-color;
+    }
+    
+    &--offline {
+      background-color: vars.$muted-color;
+    }
+  }
+  
+  &__info {
+    flex: 1;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      margin-bottom: vars.$spacing-4;
+    }
+  }
+  
+  &__name {
+    font-size: vars.$font-size-2xl;
+    font-weight: 700;
+    margin: 0 0 vars.$spacing-1;
+    color: vars.$text-primary;
+  }
+  
+  &__specialty {
+    font-size: vars.$font-size-md;
+    color: vars.$primary-color;
+    margin: 0 0 vars.$spacing-1;
+    font-weight: 500;
+  }
+  
+  &__license {
+    font-size: vars.$font-size-sm;
+    color: vars.$text-secondary;
+    margin: 0 0 vars.$spacing-3;
+  }
+  
+  &__status {
+    margin-bottom: vars.$spacing-3;
+  }
+  
+  &__actions {
+    display: flex;
+    gap: vars.$spacing-2;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      justify-content: center;
+    }
+    
+    @media (max-width: vars.$breakpoint-sm) {
+      flex-direction: column;
+      width: 100%;
+    }
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: vars.$spacing-1 vars.$spacing-3;
+  border-radius: vars.$border-radius-full;
+  font-size: vars.$font-size-xs;
+  font-weight: 600;
+  
+  &--available {
+    background-color: color.adjust(vars.$success-color, $alpha: -0.85);
+    color: vars.$success-color;
+  }
+  
+  &--busy {
+    background-color: color.adjust(vars.$warning-color, $alpha: -0.85);
+    color: vars.$warning-color;
+  }
+  
+  &--offline {
+    background-color: color.adjust(vars.$muted-color, $alpha: -0.85);
+    color: vars.$text-secondary;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: vars.$spacing-2 vars.$spacing-4;
+  border-radius: vars.$border-radius-md;
+  font-weight: 500;
+  transition: all vars.$transition-fast;
+  cursor: pointer;
+  font-size: vars.$font-size-sm;
+  
+  @media (max-width: vars.$breakpoint-sm) {
+    width: 100%;
+  }
+  
+  &--outline {
+    background-color: transparent;
+    border: 1px solid vars.$border-color;
+    color: vars.$text-primary;
+    
+    &:hover:not(:disabled) {
+      background-color: color.adjust(vars.$background-color, $lightness: -5%);
+      border-color: vars.$text-secondary;
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid color.adjust(vars.$primary-color, $alpha: -0.7);
+  border-top-color: vars.$primary-color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
