@@ -1,5 +1,4 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
@@ -90,9 +89,13 @@
               "src/favicon.ico"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/flyonui/src/vendor/apexcharts.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/lodash/lodash.js",
+              "node_modules/apexcharts/dist/apexcharts.js"
+            ]
           }
         }
       }
