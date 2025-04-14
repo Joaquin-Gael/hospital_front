@@ -1,0 +1,375 @@
+@use 'sass:color';
+@use '../styles/variables' as vars;
+
+.medical-history {
+  background-color: vars.$card-background;
+  border-radius: vars.$border-radius-lg;
+  padding: vars.$spacing-6;
+  margin-bottom: vars.$spacing-6;
+  box-shadow: vars.$shadow-md;
+  transition: all vars.$transition-normal;
+  
+  &:hover {
+    box-shadow: vars.$shadow-lg;
+  }
+  
+  @media (max-width: vars.$breakpoint-md) {
+    padding: vars.$spacing-4;
+  }
+  
+  &__header {
+    @include vars.flex-between;
+    margin-bottom: vars.$spacing-4;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: vars.$spacing-4;
+    }
+  }
+  
+  &__title {
+    font-size: vars.$font-size-lg;
+    font-weight: 600;
+    margin: 0;
+    color: vars.$text-primary;
+    position: relative;
+    padding-bottom: vars.$spacing-2;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background-color: vars.$primary-color;
+      border-radius: vars.$border-radius-full;
+    }
+  }
+  
+  &__search {
+    position: relative;
+    width: 280px;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      width: 100%;
+    }
+  }
+  
+  &__search-input {
+    width: 100%;
+    padding: vars.$spacing-2 vars.$spacing-4 vars.$spacing-2 vars.$spacing-10;
+    border-radius: vars.$border-radius-full;
+    border: 1px solid vars.$border-color;
+    background-color: vars.$background-color;
+    font-size: vars.$font-size-sm;
+    transition: all vars.$transition-fast;
+    
+    &:focus {
+      outline: none;
+      border-color: vars.$primary-color;
+      box-shadow: 0 0 0 2px color.adjust(vars.$primary-color, $alpha: -0.8);
+    }
+  }
+  
+  &__search-icon {
+    position: absolute;
+    left: vars.$spacing-3;
+    top: 50%;
+    transform: translateY(-50%);
+    color: vars.$text-secondary;
+    pointer-events: none;
+  }
+  
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: vars.$spacing-2;
+    margin-bottom: vars.$spacing-6;
+  }
+  
+  &__loading, &__empty {
+    @include vars.flex-center;
+    flex-direction: column;
+    padding: vars.$spacing-8;
+    text-align: center;
+    color: vars.$text-secondary;
+    
+    p {
+      margin-top: vars.$spacing-4;
+      font-size: vars.$font-size-sm;
+    }
+  }
+}
+
+.filter-btn {
+  padding: vars.$spacing-2 vars.$spacing-3;
+  border-radius: vars.$border-radius-full;
+  font-size: vars.$font-size-xs;
+  font-weight: 500;
+  background-color: vars.$background-color;
+  color: vars.$text-secondary;
+  border: 1px solid vars.$border-color;
+  cursor: pointer;
+  transition: all vars.$transition-fast;
+  
+  &:hover {
+    background-color: color.adjust(vars.$background-color, $lightness: -3%);
+  }
+  
+  &--active {
+    background-color: vars.$primary-color;
+    color: white;
+    border-color: vars.$primary-color;
+    
+    &:hover {
+      background-color: color.adjust(vars.$primary-color, $lightness: -5%);
+    }
+  }
+}
+
+.history-timeline {
+  position: relative;
+  padding-left: vars.$spacing-8;
+  animation: fadeIn 0.5s ease;
+  
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0.75rem;
+    width: 2px;
+    background-color: vars.$border-color;
+  }
+}
+
+.history-entry {
+  position: relative;
+  margin-bottom: vars.$spacing-6;
+  animation: slideInUp 0.5s ease;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  &__icon {
+    position: absolute;
+    top: 0;
+    left: -2rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background-color: vars.$primary-color;
+    color: white;
+    @include vars.flex-center;
+    z-index: 1;
+    box-shadow: vars.$shadow-sm;
+    transition: transform vars.$transition-normal;
+    
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+  
+  &__content {
+    background-color: vars.$background-color;
+    border-radius: vars.$border-radius-lg;
+    padding: vars.$spacing-4;
+    border-left: 3px solid transparent;
+    box-shadow: vars.$shadow-sm;
+    transition: all vars.$transition-normal;
+    
+    &:hover {
+      box-shadow: vars.$shadow-md;
+      transform: translateY(-2px);
+    }
+    
+    @media (max-width: vars.$breakpoint-md) {
+      padding: vars.$spacing-3;
+    }
+  }
+  
+  &__header {
+    @include vars.flex-between;
+    margin-bottom: vars.$spacing-2;
+    
+    @media (max-width: vars.$breakpoint-sm) {
+      flex-direction: column;
+      gap: vars.$spacing-2;
+    }
+  }
+  
+  &__title {
+    margin: 0;
+    font-size: vars.$font-size-md;
+    font-weight: 600;
+    color: vars.$text-primary;
+  }
+  
+  &__type {
+    display: inline-block;
+    padding: vars.$spacing-1 vars.$spacing-2;
+    border-radius: vars.$border-radius-full;
+    font-size: vars.$font-size-xs;
+    font-weight: 600;
+    
+    &--consultation {
+      background-color: color.adjust(vars.$primary-color, $alpha: -0.85);
+      color: vars.$primary-color;
+    }
+    
+    &--procedure {
+      background-color: color.adjust(vars.$warning-color, $alpha: -0.85);
+      color: vars.$warning-color;
+    }
+    
+    &--diagnosis {
+      background-color: color.adjust(vars.$info-color, $alpha: -0.85);
+      color: vars.$info-color;
+    }
+    
+    &--medication {
+      background-color: color.adjust(vars.$success-color, $alpha: -0.85);
+      color: vars.$success-color;
+    }
+    
+    &--lab {
+      background-color: color.adjust(vars.$secondary-color, $alpha: -0.85);
+      color: vars.$secondary-color;
+    }
+    
+    &--imaging {
+      background-color: color.adjust(vars.$danger-color, $alpha: -0.85);
+      color: vars.$danger-color;
+    }
+  }
+  
+  &__meta {
+    display: flex;
+    gap: vars.$spacing-4;
+    margin-bottom: vars.$spacing-3;
+    font-size: vars.$font-size-xs;
+    color: vars.$text-secondary;
+    
+    @media (max-width: vars.$breakpoint-sm) {
+      flex-direction: column;
+      gap: vars.$spacing-1;
+    }
+  }
+  
+  &__description {
+    margin: 0 0 vars.$spacing-3;
+    font-size: vars.$font-size-sm;
+    color: vars.$text-primary;
+    line-height: 1.6;
+  }
+  
+  &__attachments {
+    margin-top: vars.$spacing-4;
+    padding-top: vars.$spacing-3;
+    border-top: 1px solid vars.$border-color;
+  }
+  
+  &__attachments-title {
+    font-size: vars.$font-size-xs;
+    font-weight: 600;
+    margin: 0 0 vars.$spacing-2;
+    color: vars.$text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.attachment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: vars.$spacing-2;
+}
+
+.attachment-item {
+  font-size: vars.$font-size-sm;
+}
+
+.attachment-link {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-2;
+  color: vars.$primary-color;
+  text-decoration: none;
+  transition: all vars.$transition-fast;
+  
+  &:hover {
+    text-decoration: underline;
+    color: color.adjust(vars.$primary-color, $lightness: -10%);
+  }
+}
+
+.attachment-icon {
+  @include vars.flex-center;
+}
+
+// Icons
+.icon-search, .icon-user-check, .icon-activity, .icon-clipboard,
+.icon-pill, .icon-flask, .icon-image, .icon-file-text,
+.icon-file-pdf, .icon-file-image {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-search {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+}
+
+.icon-user-check {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>');
+}
+
+.icon-activity {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>');
+}
+
+.icon-clipboard {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>');
+}
+
+.icon-pill {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7.5"></path><path d="M17.5 22v-8.34"></path><path d="M15 22v-4"></path><path d="M20 22v-4"></path><path d="M22 19h-8"></path></svg>');
+}
+
+.icon-flask {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v2H9zM9 5v1.5a1.5 1.5 0 0 0 1.5 1.5h3a1.5 1.5 0 0 0 1.5-1.5V5"></path><path d="M8 10v11a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V10"></path><path d="M7 10h10"></path><path d="M7 14h10"></path></svg>');
+}
+
+.icon-image {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>');
+}
+
+.icon-file-text {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>');
+}
+
+.icon-file-pdf {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M9 15h6"></path><path d="M9 18h6"></path><path d="M9 12h2"></path></svg>');
+}
+
+.icon-file-image {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><circle cx="10" cy="13" r="2"></circle><path d="M20 17l-3.5-3.5-2 2-4-4L6 16"></path></svg>');
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid color.adjust(vars.$primary-color, $alpha: -0.7);
+  border-top-color: vars.$primary-color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
