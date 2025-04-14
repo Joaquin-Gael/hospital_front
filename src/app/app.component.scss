@@ -1,4 +1,143 @@
-html, body {
-  height: 100%;
+@use './pages/styles/variables' as vars;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  @include vars.scrollbar;
+}
+
+body {
+  font-family: var(--font-family, vars.$font-family);
+  background-color: vars.$background-color;
+  color: vars.$text-primary;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  --font-family: #{vars.$font-family};
+  --primary-color: #{vars.$primary-color};
+  --secondary-color: #{vars.$secondary-color};
+  --success-color: #{vars.$success-color};
+  --info-color: #{vars.$info-color};
+  --warning-color: #{vars.$warning-color};
+  --danger-color: #{vars.$danger-color};
+  --muted-color: #{vars.$muted-color};
+  --text-primary: #{vars.$text-primary};
+  --text-secondary: #{vars.$text-secondary};
+  --background-color: #{vars.$background-color};
+  --card-background: #{vars.$card-background};
+  --border-color: #{vars.$border-color};
+  --sidebar-background: #{vars.$sidebar-background};
+  --sidebar-text: #{vars.$sidebar-text};
+  --sidebar-border: #{vars.$sidebar-border};
+  --sidebar-hover: #{vars.$sidebar-hover};
+  --sidebar-active: #{vars.$sidebar-active};
+  --shadow-sm: #{vars.$shadow-sm};
+  --shadow-md: #{vars.$shadow-md};
+  --shadow-lg: #{vars.$shadow-lg};
+  --border-radius-sm: #{vars.$border-radius-sm};
+  --border-radius-md: #{vars.$border-radius-md};
+  --border-radius-lg: #{vars.$border-radius-lg};
+  --border-radius-xl: #{vars.$border-radius-xl};
+  --border-radius-full: #{vars.$border-radius-full};
+  --font-size-xs: #{vars.$font-size-xs};
+  --font-size-sm: #{vars.$font-size-sm};
+  --font-size-md: #{vars.$font-size-md};
+  --font-size-lg: #{vars.$font-size-lg};
+  --font-size-xl: #{vars.$font-size-xl};
+  --font-size-2xl: #{vars.$font-size-2xl};
+  --spacing-1: #{vars.$spacing-1};
+  --spacing-2: #{vars.$spacing-2};
+  --spacing-3: #{vars.$spacing-3};
+  --spacing-4: #{vars.$spacing-4};
+  --spacing-5: #{vars.$spacing-5};
+  --spacing-6: #{vars.$spacing-6};
+  --spacing-8: #{vars.$spacing-8};
+  --spacing-10: #{vars.$spacing-10};
+  --spacing-12: #{vars.$spacing-12};
+  --transition-fast: #{vars.$transition-fast};
+  --transition-normal: #{vars.$transition-normal};
+  --transition-slow: #{vars.$transition-slow};
+  --z-index-dropdown: #{vars.$z-index-dropdown};
+  --z-index-sticky: #{vars.$z-index-sticky};
+  --z-index-fixed: #{vars.$z-index-fixed};
+  --z-index-modal-backdrop: #{vars.$z-index-modal-backdrop};
+  --z-index-modal: #{vars.$z-index-modal};
+  --z-index-popover: #{vars.$z-index-popover};
+  --z-index-tooltip: #{vars.$z-index-tooltip};
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.5s ease;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.flex-center {
+  @include vars.flex-center;
+}
+
+.flex-between {
+  @include vars.flex-between;
+}
+
+.flex-column {
+  @include vars.flex-column;
+}
+
+.card {
+  @include vars.card;
+}
+
+.responsive-padding {
+  @include vars.responsive-padding;
+}
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid vars.$primary-color;
+  outline-offset: 2px;
+}
+
+/* Typography responsive */
+@media (max-width: vars.$breakpoint-md) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: vars.$breakpoint-sm) {
+  html {
+    font-size: 13px;
+  }
 }
