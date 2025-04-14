@@ -1,0 +1,73 @@
+<div class="medic-panel">
+  <app-panel-ui (sectionChange)="onSectionChange($event)">
+    <div class="medic-panel__content">
+      <!-- Panel principal (Dashboard) -->
+      <div *ngIf="activeSection === 'panel'" class="medic-panel__dashboard">
+        <div class="medic-panel__main">
+          <app-doctor-profile></app-doctor-profile>
+          
+          <div class="medic-panel__section">
+            <h2 class="section-title">Agenda del día</h2>
+            <app-appointment-schedule></app-appointment-schedule>
+          </div>
+          
+          <div class="medic-panel__section">
+            <h2 class="section-title">Tareas pendientes</h2>
+            <app-task-list></app-task-list>
+          </div>
+        </div>
+        
+        <div class="medic-panel__sidebar">
+          <app-notification-panel></app-notification-panel>
+          
+          <ng-container *ngIf="selectedPatientId">
+            <app-patient-detail [patientId]="selectedPatientId"></app-patient-detail>
+            <app-medical-history [patientId]="selectedPatientId"></app-medical-history>
+          </ng-container>
+          
+          <div class="medic-panel__actions">
+            <app-electronic-prescription 
+              *ngIf="selectedPatientId"
+              [patientId]="selectedPatientId">
+            </app-electronic-prescription>
+            
+            <app-study-request 
+              *ngIf="selectedPatientId"
+              [patientId]="selectedPatientId">
+            </app-study-request>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sección de Pacientes -->
+      <div *ngIf="activeSection === 'patients'" class="medic-panel__section-container">
+        <app-patients></app-patients>
+      </div>
+      
+      <!-- Sección de Agenda -->
+      <div *ngIf="activeSection === 'schedule'" class="medic-panel__section-container">
+        <app-schedule></app-schedule>
+      </div>
+      
+      <!-- Sección de Historiales -->
+      <div *ngIf="activeSection === 'records'" class="medic-panel__section-container">
+        <app-records></app-records>
+      </div>
+      
+      <!-- Sección de Mensajes -->
+      <div *ngIf="activeSection === 'messages'" class="medic-panel__section-container">
+        <app-messages></app-messages>
+      </div>
+      
+      <!-- Sección de Estadísticas -->
+      <div *ngIf="activeSection === 'statistics'" class="medic-panel__section-container">
+        <app-statistics></app-statistics>
+      </div>
+      
+      <!-- Sección de Configuración -->
+      <div *ngIf="activeSection === 'settings'" class="medic-panel__section-container">
+        <app-settings></app-settings>
+      </div>
+    </div>
+  </app-panel-ui>
+</div>
