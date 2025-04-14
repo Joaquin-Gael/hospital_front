@@ -1,0 +1,87 @@
+<div class="task-list">
+  <div class="task-list__header">
+    
+    <div class="task-list__filters">
+      <select 
+        class="task-list__filter-select" 
+        [(ngModel)]="priorityFilter" 
+        (change)="applyFilters()"
+      >
+        <option value="all">Todas las prioridades</option>
+        <option value="high">Prioridad alta</option>
+        <option value="medium">Prioridad media</option>
+        <option value="low">Prioridad baja</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="task-list__content">
+    <ng-container *ngIf="isLoading; else taskListContent">
+      <div class="task-list__loading">
+        <div class="loading-spinner"></div>
+        <p>Cargando tareas...</p>
+      </div>
+    </ng-container>
+    
+    <ng-template #taskListContent>
+      <div class="task-list__empty" *ngIf="filteredTasks.length === 0">
+        <p>No hay tareas con los filtros seleccionados.</p>
+      </div>
+      
+      <ul class="task-items" *ngIf="filteredTasks.length > 0">
+        <li 
+          *ngFor="let task of filteredTasks" 
+          class="task-item"
+          [ngClass]="{
+            'task-item--completed': task.completed,
+            'task-item--high': task.priority === 'high' && !task.completed,
+            'task-item--medium': task.priority === 'medium' && !task.completed,
+            'task-item--low': task.priority === 'low' && !task.completed
+          }"
+        >
+          <div class="task-item__checkbox">
+            <input 
+              type="checkbox" 
+              [id]="'task-' + task.id" 
+              [checked]="task.completed"
+              (change)="toggleTaskCompletion(task.id)"
+              class="task-item__checkbox-input"
+            >
+            <label [for]="'task-' + task.id" class="task-item__checkbox-label"></label>
+          </div>
+          
+          <div class="task-item__content">
+            <div class="task-item__header">
+              <h4 class="task-item__title">{{ task.title }}</h4>
+              <span 
+                class="task-item__priority"
+                [ngClass]="'task-item__priority--' + task.priority"
+              >
+                {{ getPriorityLabel(task.priority) }}
+              </span>
+            </div>
+            
+            <p class="task-item__description">{{ task.description }}</p>
+            
+            <div class="task-item__footer">
+              <span class="task-item__due-date" *ngIf="task.dueDate">
+                <span class="icon-clock"></span>
+                {{ formatDueDate(task.dueDate) }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="task-item__actions">
+            <button 
+              class="btn btn--icon btn--sm" 
+              (click)="deleteTask(task.id)"
+              title="Eliminar tarea"
+            >
+              <span class="icon-trash"></span>
+            </button>
+          </div>
+        </li>
+      </ul>
+    </ng-template>
+  </div>
+</div>
