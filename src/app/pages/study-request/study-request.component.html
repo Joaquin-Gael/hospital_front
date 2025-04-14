@@ -1,0 +1,179 @@
+<div class="study-request">
+  <h3 class="study-request__title">Solicitud de Estudios</h3>
+  
+  <div class="study-request__content">
+    <div class="study-request__empty" *ngIf="!patientId">
+      <p>Seleccione un paciente para solicitar estudios.</p>
+    </div>
+    
+    <form 
+      [formGroup]="studyForm" 
+      (ngSubmit)="onSubmit()" 
+      class="study-form"
+      *ngIf="patientId"
+    >
+      <div class="form-group">
+        <label class="form-label">Categoría</label>
+        <div class="category-filter">
+          <button 
+            type="button" 
+            class="category-btn" 
+            [ngClass]="{'category-btn--active': selectedCategory === 'all'}"
+            (click)="selectedCategory = 'all'; applyFilters()"
+          >
+            Todos
+          </button>
+          <button 
+            type="button" 
+            class="category-btn" 
+            [ngClass]="{'category-btn--active': selectedCategory === 'laboratorio'}"
+            (click)="selectedCategory = 'laboratorio'; applyFilters()"
+          >
+            Laboratorio
+          </button>
+          <button 
+            type="button" 
+            class="category-btn" 
+            [ngClass]="{'category-btn--active': selectedCategory === 'imagenes'}"
+            (click)="selectedCategory = 'imagenes'; applyFilters()"
+          >
+            Imágenes
+          </button>
+          <button 
+            type="button" 
+            class="category-btn" 
+            [ngClass]="{'category-btn--active': selectedCategory === 'cardiologia'}"
+            (click)="selectedCategory = 'cardiologia'; applyFilters()"
+          >
+            Cardiología
+          </button>
+          <button 
+            type="button" 
+            class="category-btn" 
+            [ngClass]="{'category-btn--active': selectedCategory === 'interconsulta'}"
+            (click)="selectedCategory = 'interconsulta'; applyFilters()"
+          >
+            Interconsulta
+          </button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="studyType" class="form-label">Tipo de estudio</label>
+        <select 
+          id="studyType" 
+          formControlName="studyTypeId" 
+          class="form-select"
+          [ngClass]="{'form-select--error': studyForm.get('studyTypeId')?.invalid && studyForm.get('studyTypeId')?.touched}"
+        >
+          <option value="">Seleccionar estudio</option>
+          <option *ngFor="let study of filteredStudyTypes" [value]="study.id">
+            {{ study.name }}
+          </option>
+        </select>
+        <div 
+          class="form-error" 
+          *ngIf="studyForm.get('studyTypeId')?.invalid && studyForm.get('studyTypeId')?.touched"
+        >
+          Seleccione un tipo de estudio.
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="clinicalQuestion" class="form-label">Pregunta clínica</label>
+        <textarea 
+          id="clinicalQuestion" 
+          formControlName="clinicalQuestion" 
+          class="form-textarea"
+          rows="3"
+          placeholder="¿Qué información busca obtener con este estudio?"
+          [ngClass]="{'form-textarea--error': studyForm.get('clinicalQuestion')?.invalid && studyForm.get('clinicalQuestion')?.touched}"
+        ></textarea>
+        <div 
+          class="form-error" 
+          *ngIf="studyForm.get('clinicalQuestion')?.invalid && studyForm.get('clinicalQuestion')?.touched"
+        >
+          La pregunta clínica es obligatoria.
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Urgencia</label>
+        <div class="urgency-options">
+          <label class="urgency-option">
+            <input 
+              type="radio" 
+              formControlName="urgency" 
+              value="normal" 
+              class="urgency-option__input"
+            >
+            <span class="urgency-option__label">Normal</span>
+          </label>
+          
+          <label class="urgency-option">
+            <input 
+              type="radio" 
+              formControlName="urgency" 
+              value="priority" 
+              class="urgency-option__input"
+            >
+            <span class="urgency-option__label">Prioritario</span>
+          </label>
+          
+          <label class="urgency-option">
+            <input 
+              type="radio" 
+              formControlName="urgency" 
+              value="urgent" 
+              class="urgency-option__input"
+            >
+            <span class="urgency-option__label">Urgente</span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="scheduledDate" class="form-label">Fecha programada (opcional)</label>
+        <input 
+          type="date" 
+          id="scheduledDate" 
+          formControlName="scheduledDate" 
+          class="form-input"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="notes" class="form-label">Notas adicionales</label>
+        <textarea 
+          id="notes" 
+          formControlName="notes" 
+          class="form-textarea"
+          rows="3"
+          placeholder="Instrucciones especiales o información adicional"
+        ></textarea>
+      </div>
+      
+      <div class="study-form__actions">
+        <button 
+          type="submit" 
+          class="btn btn--primary"
+          [disabled]="isSubmitting"
+        >
+          <span *ngIf="isSubmitting">
+            <span class="btn-spinner"></span> Enviando...
+          </span>
+          <span *ngIf="!isSubmitting">Enviar solicitud</span>
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn--outline"
+          (click)="resetForm()"
+          [disabled]="isSubmitting"
+        >
+          Limpiar formulario
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
