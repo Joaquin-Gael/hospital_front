@@ -1,0 +1,205 @@
+<div class="electronic-prescription">
+  <h3 class="electronic-prescription__title">Receta Electrónica</h3>
+  
+  <div class="electronic-prescription__content">
+    <div class="electronic-prescription__empty" *ngIf="!patientId">
+      <p>Seleccione un paciente para crear una receta.</p>
+    </div>
+    
+    <form 
+      [formGroup]="prescriptionForm" 
+      (ngSubmit)="onSubmit()" 
+      class="prescription-form"
+      *ngIf="patientId"
+    >
+      <div class="form-group">
+        <label for="diagnosis" class="form-label">Diagnóstico</label>
+        <input 
+          type="text" 
+          id="diagnosis" 
+          formControlName="diagnosis" 
+          class="form-input"
+          [ngClass]="{'form-input--error': prescriptionForm.get('diagnosis')?.invalid && prescriptionForm.get('diagnosis')?.touched}"
+        >
+        <div 
+          class="form-error" 
+          *ngIf="prescriptionForm.get('diagnosis')?.invalid && prescriptionForm.get('diagnosis')?.touched"
+        >
+          El diagnóstico es obligatorio.
+        </div>
+      </div>
+      
+      <div formArrayName="medications">
+        <div class="prescription-form__section-title">Medicamentos</div>
+        
+        <div 
+          *ngFor="let medicationGroup of medicationsArray.controls; let i = index" 
+          [formGroupName]="i"
+          class="medication-item"
+        >
+          <div class="medication-item__header">
+            <h4 class="medication-item__title">Medicamento {{ i + 1 }}</h4>
+            <button 
+              type="button" 
+              class="btn btn--icon btn--sm" 
+              (click)="removeMedication(i)"
+              *ngIf="medicationsArray.length > 1"
+              title="Eliminar medicamento"
+            >
+              <span class="icon-trash"></span>
+            </button>
+          </div>
+          
+          <div class="form-group">
+            <label [for]="'medication-' + i" class="form-label">Medicamento</label>
+            <select 
+              [id]="'medication-' + i" 
+              formControlName="medicationId" 
+              class="form-select"
+              [ngClass]="{'form-select--error': medicationGroup.get('medicationId')?.invalid && medicationGroup.get('medicationId')?.touched}"
+            >
+              <option value="">Seleccionar medicamento</option>
+              <option *ngFor="let med of medications" [value]="med.id">
+                {{ med.name }} ({{ med.presentation }})
+              </option>
+            </select>
+            <div 
+              class="form-error" 
+              *ngIf="medicationGroup.get('medicationId')?.invalid && medicationGroup.get('medicationId')?.touched"
+            >
+              Seleccione un medicamento.
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group form-group--half">
+              <label [for]="'dosage-' + i" class="form-label">Dosis</label>
+              <input 
+                type="text" 
+                [id]="'dosage-' + i" 
+                formControlName="dosage" 
+                class="form-input"
+                placeholder="Ej: 1 tableta"
+                [ngClass]="{'form-input--error': medicationGroup.get('dosage')?.invalid && medicationGroup.get('dosage')?.touched}"
+              >
+              <div 
+                class="form-error" 
+                *ngIf="medicationGroup.get('dosage')?.invalid && medicationGroup.get('dosage')?.touched"
+              >
+                La dosis es obligatoria.
+              </div>
+            </div>
+            
+            <div class="form-group form-group--half">
+              <label [for]="'frequency-' + i" class="form-label">Frecuencia</label>
+              <input 
+                type="text" 
+                [id]="'frequency-' + i" 
+                formControlName="frequency" 
+                class="form-input"
+                placeholder="Ej: Cada 8 horas"
+                [ngClass]="{'form-input--error': medicationGroup.get('frequency')?.invalid && medicationGroup.get('frequency')?.touched}"
+              >
+              <div 
+                class="form-error" 
+                *ngIf="medicationGroup.get('frequency')?.invalid && medicationGroup.get('frequency')?.touched"
+              >
+                La frecuencia es obligatoria.
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label [for]="'route-' + i" class="form-label">Vía de administración</label>
+            <select 
+              [id]="'route-' + i" 
+              formControlName="route" 
+              class="form-select"
+            >
+              <option value="oral">Oral</option>
+              <option value="sublingual">Sublingual</option>
+              <option value="tópica">Tópica</option>
+              <option value="inhalada">Inhalada</option>
+              <option value="rectal">Rectal</option>
+              <option value="vaginal">Vaginal</option>
+              <option value="oftálmica">Oftálmica</option>
+              <option value="ótica">Ótica</option>
+              <option value="nasal">Nasal</option>
+              <option value="parenteral">Parenteral</option>
+            </select>
+          </div>
+        </div>
+        
+        <button 
+          type="button" 
+          class="btn btn--outline btn--sm prescription-form__add-btn" 
+          (click)="addMedication()"
+        >
+          <span class="icon-plus"></span> Agregar otro medicamento
+        </button>
+      </div>
+      
+      <div class="form-group">
+        <label for="instructions" class="form-label">Instrucciones adicionales</label>
+        <textarea 
+          id="instructions" 
+          formControlName="instructions" 
+          class="form-textarea"
+          rows="3"
+          placeholder="Instrucciones especiales para el paciente"
+        ></textarea>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group form-group--half">
+          <label for="duration" class="form-label">Duración del tratamiento</label>
+          <input 
+            type="number" 
+            id="duration" 
+            formControlName="duration" 
+            class="form-input"
+            min="1"
+            [ngClass]="{'form-input--error': prescriptionForm.get('duration')?.invalid && prescriptionForm.get('duration')?.touched}"
+          >
+          <div 
+            class="form-error" 
+            *ngIf="prescriptionForm.get('duration')?.invalid && prescriptionForm.get('duration')?.touched"
+          >
+            La duración debe ser mayor a 0.
+          </div>
+        </div>
+        
+        <div class="form-group form-group--half">
+          <label for="durationUnit" class="form-label">Unidad</label>
+          <select id="durationUnit" formControlName="durationUnit" class="form-select">
+            <option value="días">Días</option>
+            <option value="semanas">Semanas</option>
+            <option value="meses">Meses</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="prescription-form__actions">
+        <button 
+          type="submit" 
+          class="btn btn--primary"
+          [disabled]="isSubmitting"
+        >
+          <span *ngIf="isSubmitting">
+            <span class="btn-spinner"></span> Generando...
+          </span>
+          <span *ngIf="!isSubmitting">Generar receta</span>
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn--outline"
+          (click)="resetForm()"
+          [disabled]="isSubmitting"
+        >
+          Limpiar formulario
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

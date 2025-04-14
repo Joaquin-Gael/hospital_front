@@ -1,0 +1,263 @@
+@use 'sass:color';
+@use '../styles/variables' as vars;
+
+.electronic-prescription {
+  background-color: vars.$card-background;
+  border-radius: vars.$border-radius-lg;
+  padding: vars.$spacing-6;
+  margin-bottom: vars.$spacing-6;
+  box-shadow: vars.$shadow-md;
+  transition: all vars.$transition-normal;
+  
+  &:hover {
+    box-shadow: vars.$shadow-lg;
+  }
+  
+  @media (max-width: vars.$breakpoint-md) {
+    padding: vars.$spacing-4;
+  }
+  
+  &__title {
+    font-size: vars.$font-size-lg;
+    font-weight: 600;
+    margin: 0 0 vars.$spacing-4;
+    color: vars.$text-primary;
+    position: relative;
+    padding-bottom: vars.$spacing-2;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background-color: vars.$primary-color;
+      border-radius: vars.$border-radius-full;
+    }
+  }
+  
+  &__empty {
+    @include vars.flex-center;
+    padding: vars.$spacing-8;
+    text-align: center;
+    color: vars.$text-secondary;
+    font-size: vars.$font-size-sm;
+  }
+}
+
+.prescription-form {
+  animation: fadeIn 0.5s ease;
+  
+  &__section-title {
+    font-size: vars.$font-size-md;
+    font-weight: 600;
+    margin: vars.$spacing-6 0 vars.$spacing-4;
+    color: vars.$text-primary;
+  }
+  
+  &__add-btn {
+    margin-top: vars.$spacing-4;
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-2;
+  }
+  
+  &__actions {
+    display: flex;
+    gap: vars.$spacing-4;
+    margin-top: vars.$spacing-8;
+    
+    @media (max-width: vars.$breakpoint-sm) {
+      flex-direction: column;
+      gap: vars.$spacing-3;
+    }
+  }
+}
+
+.medication-item {
+  background-color: color.adjust(vars.$background-color, $lightness: -1%);
+  border-radius: vars.$border-radius-lg;
+  padding: vars.$spacing-4;
+  margin-bottom: vars.$spacing-4;
+  animation: slideInUp 0.3s ease;
+  
+  &__header {
+    @include vars.flex-between;
+    margin-bottom: vars.$spacing-4;
+  }
+  
+  &__title {
+    font-size: vars.$font-size-md;
+    font-weight: 600;
+    margin: 0;
+    color: vars.$text-primary;
+  }
+}
+
+.form-group {
+  margin-bottom: vars.$spacing-4;
+  
+  &--half {
+    width: calc(50% - 0.5rem);
+    
+    @media (max-width: vars.$breakpoint-sm) {
+      width: 100%;
+    }
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: vars.$spacing-4;
+  
+  @media (max-width: vars.$breakpoint-sm) {
+    flex-direction: column;
+    gap: vars.$spacing-4;
+  }
+}
+
+.form-label {
+  display: block;
+  font-size: vars.$font-size-sm;
+  font-weight: 500;
+  margin-bottom: vars.$spacing-2;
+  color: vars.$text-primary;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: vars.$spacing-3 vars.$spacing-4;
+  border-radius: vars.$border-radius-md;
+  border: 1px solid vars.$border-color;
+  background-color: vars.$card-background;
+  font-size: vars.$font-size-sm;
+  transition: all vars.$transition-fast;
+  
+  &:focus {
+    outline: none;
+    border-color: vars.$primary-color;
+    box-shadow: 0 0 0 2px color.adjust(vars.$primary-color, $alpha: -0.8);
+  }
+  
+  &--error {
+    border-color: vars.$danger-color;
+    
+    &:focus {
+      box-shadow: 0 0 0 2px color.adjust(vars.$danger-color, $alpha: -0.8);
+    }
+  }
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-error {
+  font-size: vars.$font-size-xs;
+  color: vars.$danger-color;
+  margin-top: vars.$spacing-1;
+  animation: fadeIn 0.3s ease;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: vars.$spacing-3 vars.$spacing-4;
+  border-radius: vars.$border-radius-md;
+  font-weight: 500;
+  transition: all vars.$transition-fast;
+  cursor: pointer;
+  font-size: vars.$font-size-sm;
+  
+  @media (max-width: vars.$breakpoint-sm) {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  &--primary {
+    background-color: vars.$primary-color;
+    color: white;
+    border: 1px solid vars.$primary-color;
+    
+    &:hover:not(:disabled) {
+      background-color: color.adjust(vars.$primary-color, $lightness: -5%);
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+  
+  &--outline {
+    background-color: transparent;
+    color: vars.$text-primary;
+    border: 1px solid vars.$border-color;
+    
+    &:hover:not(:disabled) {
+      background-color: color.adjust(vars.$background-color, $lightness: -2%);
+      border-color: vars.$text-secondary;
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+  
+  &--icon {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: vars.$border-radius-md;
+    border: none;
+    background: none;
+    color: vars.$text-secondary;
+    
+    &:hover {
+      background-color: color.adjust(vars.$background-color, $lightness: -5%);
+      color: vars.$danger-color;
+    }
+  }
+  
+  &--sm {
+    font-size: vars.$font-size-xs;
+    padding: vars.$spacing-2 vars.$spacing-3;
+    
+    &.btn--icon {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+  }
+}
+
+.icon-trash, .icon-plus {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-trash {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>');
+}
+
+.icon-plus {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>');
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: vars.$spacing-2;
+}
