@@ -1,0 +1,100 @@
+<div class="records">
+  <div class="records__header">
+    <h1 class="records__title">Historiales Médicos</h1>
+    
+    <div class="records__actions">
+      <div class="records__search">
+        <input 
+          type="text" 
+          placeholder="Buscar por paciente, ID o tipo..." 
+          class="records__search-input"
+          (input)="searchRecords($event)"
+        >
+        <span class="records__search-icon icon-search"></span>
+      </div>
+      
+      <div class="records__filters">
+        <button 
+          class="btn" 
+          [ngClass]="{'btn--primary': selectedFilter === 'all'}"
+          (click)="filterByStatus('all')"
+        >
+          Todos
+        </button>
+        <button 
+          class="btn" 
+          [ngClass]="{'btn--primary': selectedFilter === 'completado'}"
+          (click)="filterByStatus('completado')"
+        >
+          Completados
+        </button>
+        <button 
+          class="btn" 
+          [ngClass]="{'btn--primary': selectedFilter === 'pendiente'}"
+          (click)="filterByStatus('pendiente')"
+        >
+          Pendientes
+        </button>
+        <button 
+          class="btn" 
+          [ngClass]="{'btn--primary': selectedFilter === 'en proceso'}"
+          (click)="filterByStatus('en proceso')"
+        >
+          En proceso
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="records__content">
+    <table class="records__table">
+      <thead>
+        <tr>
+          <th>Paciente</th>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Médico</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let record of filteredRecords">
+          <td>{{ record.patientName }}</td>
+          <td>{{ record.patientId }}</td>
+          <td>{{ record.date | date:'dd/MM/yyyy' }}</td>
+          <td>{{ record.recordType }}</td>
+          <td>{{ record.doctor }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="{
+              'status-badge--completed': record.status === 'Completado',
+              'status-badge--pending': record.status === 'Pendiente',
+              'status-badge--in-progress': record.status === 'En proceso'
+            }">
+              {{ record.status }}
+            </span>
+          </td>
+          <td>
+            <div class="records__actions-cell">
+              <button class="btn btn--icon" (click)="viewRecordDetails(record.id)">
+                <span class="icon-eye"></span>
+              </button>
+              <button class="btn btn--icon">
+                <span class="icon-download"></span>
+              </button>
+              <button class="btn btn--icon">
+                <span class="icon-printer"></span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div *ngIf="filteredRecords.length === 0" class="records__empty">
+      <span class="icon-file-text records__empty-icon"></span>
+      <p class="records__empty-text">No se encontraron historiales médicos que coincidan con los criterios de búsqueda.</p>
+    </div>
+  </div>
+</div>
