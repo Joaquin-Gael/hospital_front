@@ -1,0 +1,270 @@
+@use 'sass:color';
+@use '../styles/variables' as vars;
+
+.notification-panel {
+  background-color: vars.$card-background;
+  border-radius: vars.$border-radius-lg;
+  margin-bottom: vars.$spacing-6;
+  box-shadow: vars.$shadow-md;
+  overflow: hidden;
+  transition: all vars.$transition-normal;
+  
+  &:hover {
+    box-shadow: vars.$shadow-lg;
+  }
+  
+  &__header {
+    @include vars.flex-between;
+    padding: vars.$spacing-4 vars.$spacing-6;
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: background-color vars.$transition-fast;
+    
+    &:hover {
+      background-color: color.adjust(vars.$background-color, $lightness: -2%);
+    }
+    
+    @media (max-width: vars.$breakpoint-md) {
+      padding: vars.$spacing-4;
+    }
+  }
+  
+  &__title-container {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-3;
+  }
+  
+  &__title {
+    font-size: vars.$font-size-lg;
+    font-weight: 600;
+    margin: 0;
+    color: vars.$text-primary;
+  }
+  
+  &__content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s ease;
+    
+    &--expanded {
+      max-height: 600px;
+      border-top: 1px solid vars.$border-color;
+    }
+  }
+  
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: vars.$spacing-3 vars.$spacing-6 0;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      padding: vars.$spacing-3 vars.$spacing-4 0;
+    }
+  }
+  
+  &__empty {
+    @include vars.flex-center;
+    padding: vars.$spacing-8 vars.$spacing-6;
+    text-align: center;
+    color: vars.$text-secondary;
+    font-size: vars.$font-size-sm;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      padding: vars.$spacing-6 vars.$spacing-4;
+    }
+  }
+}
+
+.notification-badge {
+  @include vars.flex-center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  border-radius: vars.$border-radius-full;
+  background-color: vars.$danger-color;
+  color: white;
+  font-size: vars.$font-size-xs;
+  font-weight: 600;
+  padding: 0 vars.$spacing-2;
+  animation: pulse 2s infinite;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  animation: fadeIn 0.5s ease;
+}
+
+.notification-item {
+  display: flex;
+  padding: vars.$spacing-4 vars.$spacing-6;
+  border-bottom: 1px solid vars.$border-color;
+  transition: background-color vars.$transition-fast;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover {
+    background-color: color.adjust(vars.$background-color, $lightness: -2%);
+  }
+  
+  &--unread {
+    background-color: color.adjust(vars.$primary-color, $alpha: -0.95);
+    
+    &:hover {
+      background-color: color.adjust(vars.$primary-color, $alpha: -0.9);
+    }
+    
+    .notification-item__title {
+      font-weight: 600;
+    }
+  }
+  
+  &--info {
+    border-left: 3px solid vars.$info-color;
+  }
+  
+  &--warning {
+    border-left: 3px solid vars.$warning-color;
+  }
+  
+  &--success {
+    border-left: 3px solid vars.$success-color;
+  }
+  
+  &--error {
+    border-left: 3px solid vars.$danger-color;
+  }
+  
+  &__content {
+    flex: 1;
+    cursor: pointer;
+  }
+  
+  &__header {
+    @include vars.flex-between;
+    margin-bottom: vars.$spacing-2;
+    
+    @media (max-width: vars.$breakpoint-sm) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: vars.$spacing-1;
+    }
+  }
+  
+  &__title {
+    margin: 0;
+    font-size: vars.$font-size-sm;
+    color: vars.$text-primary;
+  }
+  
+  &__time {
+    font-size: vars.$font-size-xs;
+    color: vars.$text-secondary;
+    white-space: nowrap;
+    margin-left: vars.$spacing-2;
+    
+    @media (max-width: vars.$breakpoint-sm) {
+      margin-left: 0;
+    }
+  }
+  
+  &__message {
+    margin: 0;
+    font-size: vars.$font-size-sm;
+    color: vars.$text-secondary;
+    line-height: 1.5;
+  }
+  
+  &__actions {
+    @include vars.flex-column;
+    gap: vars.$spacing-2;
+    margin-left: vars.$spacing-4;
+    opacity: 0;
+    transition: opacity vars.$transition-fast;
+  }
+  
+  &:hover &__actions {
+    opacity: 1;
+  }
+  
+  @media (max-width: vars.$breakpoint-md) {
+    padding: vars.$spacing-4;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: vars.$border-radius-md;
+  font-weight: 500;
+  transition: all vars.$transition-fast;
+  cursor: pointer;
+  border: none;
+  background: none;
+  
+  &--icon {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: vars.$border-radius-md;
+    color: vars.$text-secondary;
+    
+    &:hover {
+      background-color: color.adjust(vars.$background-color, $lightness: -5%);
+      color: vars.$text-primary;
+    }
+  }
+  
+  &--sm {
+    font-size: vars.$font-size-xs;
+    padding: vars.$spacing-1 vars.$spacing-2;
+    
+    &.btn--icon {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+  }
+  
+  &--text {
+    color: vars.$primary-color;
+    
+    &:hover {
+      background-color: color.adjust(vars.$primary-color, $alpha: -0.9);
+    }
+    
+    &:disabled {
+      color: vars.$text-secondary;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.icon-check, .icon-trash, .icon-chevron-up, .icon-chevron-down {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-check {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+}
+
+.icon-trash {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>');
+}
+
+.icon-chevron-up {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>');
+}
+
+.icon-chevron-down {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+}
