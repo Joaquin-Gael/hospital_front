@@ -1,0 +1,196 @@
+<div class="statistics">
+  <div class="statistics__header">
+    <h1 class="statistics__title">Estadísticas</h1>
+    
+    <div class="statistics__filters">
+      <button 
+        class="btn" 
+        [ngClass]="{'btn--primary': timeFilter === timeFilterEnum.Day}"
+        (click)="changeTimeFilter(timeFilterEnum.Day)"
+      >
+        Día
+      </button>
+      <button 
+        class="btn" 
+        [ngClass]="{'btn--primary': timeFilter === timeFilterEnum.Week}"
+        (click)="changeTimeFilter(timeFilterEnum.Week)"
+      >
+        Semana
+      </button>
+      <button 
+        class="btn" 
+        [ngClass]="{'btn--primary': timeFilter === timeFilterEnum.Month}"
+        (click)="changeTimeFilter(timeFilterEnum.Month)"
+      >
+        Mes
+      </button>
+      <button 
+        class="btn" 
+        [ngClass]="{'btn--primary': timeFilter === timeFilterEnum.Year}"
+        (click)="changeTimeFilter(timeFilterEnum.Year)"
+      >
+        Año
+      </button>
+    </div>
+  </div>
+  
+  <div class="statistics__cards">
+    <div *ngFor="let card of statCards" class="statistics__card" [ngStyle]="{'--card-color': card.color}">
+      <div class="statistics__card-icon">
+        <span [ngClass]="card.icon"></span>
+      </div>
+      
+      <div class="statistics__card-content">
+        <h3 class="statistics__card-title">{{ card.title }}</h3>
+        <div class="statistics__card-value">
+          {{ card.value }} <span class="statistics__card-unit">{{ card.unit }}</span>
+        </div>
+        
+        <div class="statistics__card-change" [ngClass]="{'statistics__card-change--positive': card.change > 0, 'statistics__card-change--negative': card.change < 0}">
+          <span class="statistics__card-change-icon" [ngClass]="card.change > 0 ? 'icon-trending-up' : 'icon-trending-down'"></span>
+          {{ getChangeLabel(card.change) }}
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="statistics__charts">
+    <div class="statistics__chart-container">
+      <div class="statistics__chart-header">
+        <h2 class="statistics__chart-title">Pacientes por {{ timeFilter === 'day' ? 'Día' : timeFilter === 'week' ? 'Semana' : timeFilter === 'month' ? 'Mes' : 'Año' }}</h2>
+        <div class="statistics__chart-actions">
+          <button class="btn btn--icon">
+            <span class="icon-download"></span>
+          </button>
+          <button class="btn btn--icon">
+            <span class="icon-more-horizontal"></span>
+          </button>
+        </div>
+      </div>
+      
+      <div #patientsChart class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4" *ngIf="!isLoading"></div>
+      <div *ngIf="isLoading" class="statistics__chart-loading">Cargando...</div>
+    </div>
+    
+    <div class="statistics__chart-container">
+      <div class="statistics__chart-header">
+        <h2 class="statistics__chart-title">Estado de Citas por {{ timeFilter === 'day' ? 'Día' : timeFilter === 'week' ? 'Semana' : timeFilter === 'month' ? 'Mes' : 'Año' }}</h2>
+        <div class="statistics__chart-actions">
+          <button class="btn btn--icon">
+            <span class="icon-download"></span>
+          </button>
+          <button class="btn btn--icon">
+            <span class="icon-more-horizontal"></span>
+          </button>
+        </div>
+      </div>
+      
+      <div #appointmentsChart class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4" *ngIf="!isLoading"></div>
+      <div *ngIf="isLoading" class="statistics__chart-loading">Cargando...</div>
+    </div>
+  </div>
+  
+  <div class="statistics__charts">
+    <div class="statistics__chart-container">
+      <div class="statistics__chart-header">
+        <h2 class="statistics__chart-title">Diagnósticos más comunes</h2>
+        <div class="statistics__chart-actions">
+          <button class="btn btn--icon">
+            <span class="icon-download"></span>
+          </button>
+          <button class="btn btn--icon">
+            <span class="icon-more-horizontal"></span>
+          </button>
+        </div>
+      </div>
+      
+      <div #diagnosesChart class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4" *ngIf="!isLoading"></div>
+      <div *ngIf="isLoading" class="statistics__chart-loading">Cargando...</div>
+    </div>
+    
+    <div class="statistics__chart-container">
+      <div class="statistics__chart-header">
+        <h2 class="statistics__chart-title">Satisfacción de pacientes por {{ timeFilter === 'day' ? 'Día' : timeFilter === 'week' ? 'Semana' : timeFilter === 'month' ? 'Mes' : 'Año' }}</h2>
+        <div class="statistics__chart-actions">
+          <button class="btn btn--icon">
+            <span class="icon-download"></span>
+          </button>
+          <button class="btn btn--icon">
+            <span class="icon-more-horizontal"></span>
+          </button>
+        </div>
+      </div>
+      
+      <div #satisfactionChart class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4" *ngIf="!isLoading"></div>
+      <div *ngIf="isLoading" class="statistics__chart-loading">Cargando...</div>
+    </div>
+  </div>
+  
+  <div class="statistics__table-container">
+    <div class="statistics__table-header">
+      <h2 class="statistics__table-title">Actividad Reciente</h2>
+      <button class="btn btn--text">
+        Ver todo <span class="icon-arrow-right"></span>
+      </button>
+    </div>
+    
+    <table class="statistics__table">
+      <thead>
+        <tr>
+          <th>Paciente</th>
+          <th>Servicio</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+          <th>Ingresos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Carlos Rodríguez</td>
+          <td>Consulta General</td>
+          <td>15 Abr, 2023</td>
+          <td>
+            <span class="status-badge status-badge--completed">Completado</span>
+          </td>
+          <td>80 €</td>
+        </tr>
+        <tr>
+          <td>María López</td>
+          <td>Análisis de Sangre</td>
+          <td>14 Abr, 2023</td>
+          <td>
+            <span class="status-badge status-badge--pending">Pendiente</span>
+          </td>
+          <td>120 €</td>
+        </tr>
+        <tr>
+          <td>José García</td>
+          <td>Radiografía</td>
+          <td>13 Abr, 2023</td>
+          <td>
+            <span class="status-badge status-badge--completed">Completado</span>
+          </td>
+          <td>150 €</td>
+        </tr>
+        <tr>
+          <td>Laura Fernández</td>
+          <td>Consulta Especialista</td>
+          <td>12 Abr, 2023</td>
+          <td>
+            <span class="status-badge status-badge--in-progress">En proceso</span>
+          </td>
+          <td>100 €</td>
+        </tr>
+        <tr>
+          <td>Pedro Martínez</td>
+          <td>Ecografía</td>
+          <td>11 Abr, 2023</td>
+          <td>
+            <span class="status-badge status-badge--completed">Completado</span>
+          </td>
+          <td>200 €</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
