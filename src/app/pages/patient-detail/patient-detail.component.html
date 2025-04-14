@@ -1,0 +1,79 @@
+<div class="patient-detail">
+  <h3 class="patient-detail__title">Información del Paciente</h3>
+  
+  <ng-container *ngIf="isLoading; else patientContent">
+    <div class="patient-detail__loading">
+      <div class="loading-spinner"></div>
+      <p>Cargando información del paciente...</p>
+    </div>
+  </ng-container>
+  
+  <ng-template #patientContent>
+    <div class="patient-detail__content" *ngIf="patient">
+      <div class="patient-detail__header">
+        <h4 class="patient-detail__name">{{ patient.name }}</h4>
+        <div class="patient-detail__basic-info">
+          <span class="patient-detail__age">{{ patient.age }} años</span>
+          <span class="patient-detail__gender">
+            {{ patient.gender === 'male' ? 'Masculino' : (patient.gender === 'female' ? 'Femenino' : 'Otro') }}
+          </span>
+          <span class="patient-detail__blood-type">{{ patient.bloodType }}</span>
+        </div>
+      </div>
+      
+      <div class="patient-detail__section">
+        <h5 class="patient-detail__section-title">Información Médica</h5>
+        
+        <div class="patient-detail__info-group">
+          <span class="patient-detail__label">Alergias:</span>
+          <span class="patient-detail__value">{{ formatAllergies(patient.allergies) }}</span>
+        </div>
+        
+        <div class="patient-detail__info-group">
+          <span class="patient-detail__label">Condiciones crónicas:</span>
+          <span class="patient-detail__value">{{ formatChronicConditions(patient.chronicConditions) }}</span>
+        </div>
+      </div>
+      
+      <div class="patient-detail__section">
+        <h5 class="patient-detail__section-title">Información de Contacto</h5>
+        
+        <div class="patient-detail__info-group">
+          <span class="patient-detail__label">Teléfono:</span>
+          <span class="patient-detail__value">{{ patient.contactPhone }}</span>
+        </div>
+        
+        <div class="patient-detail__info-group">
+          <span class="patient-detail__label">Email:</span>
+          <span class="patient-detail__value">{{ patient.contactEmail }}</span>
+        </div>
+        
+        <div class="patient-detail__info-group">
+          <span class="patient-detail__label">Contacto de emergencia:</span>
+          <span class="patient-detail__value">
+            {{ patient.emergencyContact.name }} ({{ patient.emergencyContact.relationship }})
+            <br>{{ patient.emergencyContact.phone }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="patient-detail__section">
+        <h5 class="patient-detail__section-title">Seguro Médico</h5>
+        
+        <div class="patient-detail__info-group">
+          <span class="patient-detail__label">Proveedor:</span>
+          <span class="patient-detail__value">{{ patient.insuranceProvider }}</span>
+        </div>
+        
+        <div class="patient-detail__info-group">
+          <span class="patient-detail__label">Número de póliza:</span>
+          <span class="patient-detail__value">{{ patient.insuranceNumber }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="patient-detail__empty" *ngIf="!patient && !isLoading">
+      <p>Seleccione un paciente para ver sus detalles.</p>
+    </div>
+  </ng-template>
+</div>
