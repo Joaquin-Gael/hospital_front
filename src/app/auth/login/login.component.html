@@ -1,0 +1,51 @@
+<div class="hospital-auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+          </svg>
+        </div>
+        <h1>Patient Portal Login</h1>
+        <p>Access your healthcare information securely</p>
+      </div>
+  
+      <form class="auth-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" name="email" [(ngModel)]="loginObj.email" id="email" placeholder="Enter your email" required>
+        </div>
+  
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-input">
+            <input type="password" name="password" [(ngModel)]="loginObj.password" id="password" placeholder="Enter your password" required>
+            <button type="button" class="toggle-password">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+  
+        <div class="form-options">
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="remember">
+            <label for="remember">Remember me</label>
+          </div>
+          <a href="#" class="forgot-password">Forgot password?</a>
+        </div>
+  
+        <button type="submit" class="btn-primary" (click)="onLogin()">Sign In</button>
+  
+        <div class="divider">
+          <span>or</span>
+        </div>
+  
+        <div class="auth-footer">
+          <p>Don't have an account? <a routerLink="/register">Register Now</a></p>
+        </div>
+      </form>
+    </div>
+  </div>

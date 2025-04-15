@@ -1,0 +1,235 @@
+@use 'sass:color';
+
+
+// Variables
+$primary-color: #1976d2;
+$secondary-color: #4caf50;
+$accent-color: #e91e63;
+$text-color: #333;
+$light-text: #666;
+$border-color: #ddd;
+$error-color: #f44336;
+$success-color: #4caf50;
+$background-color: #f5f7fa;
+$card-background: #fff;
+$shadow-color: rgba(0, 0, 0, 0.1);
+$hospital-blue: #0077cc;
+$hospital-green: #00a86b;
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin card-shadow {
+  box-shadow: 0 4px 12px $shadow-color;
+}
+
+// Base Styles
+.hospital-auth-container {
+  min-height: 100vh;
+  background-color: $background-color;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(240, 249, 255, 0.8) 100%);
+  @include flex-center;
+  padding: 2rem 1rem;
+  font-family: 'Roboto', sans-serif;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 600px;
+  background-color: $card-background;
+  border-radius: 12px;
+  overflow: hidden;
+  @include card-shadow;
+  margin: 1rem;
+}
+
+.auth-header {
+  background: linear-gradient(135deg, $hospital-blue, color.adjust($hospital-blue, $lightness: 10%));
+  color: white;
+  padding: 2rem;
+  text-align: center;
+
+  .logo {
+    @include flex-center;
+    margin-bottom: 1rem;
+
+    svg {
+      color: white;
+    }
+  }
+
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: 1.8rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+  }
+}
+
+.auth-form {
+  padding: 2rem;
+
+  .form-group {
+    margin-bottom: 1.5rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: $text-color;
+      font-size: 0.9rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid $border-color;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+
+      &:focus {
+        outline: none;
+        border-color: $hospital-blue;
+        box-shadow: 0 0 0 3px rgba($hospital-blue, 0.2);
+      }
+
+      &::placeholder {
+        color: $light-text;
+      }
+    }
+  }
+
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .form-group {
+      flex: 1 1 calc(50% - 0.5rem);
+      min-width: 200px;
+    }
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+
+    input[type="checkbox"] {
+      width: auto;
+      margin-top: 0.25rem;
+    }
+
+    label {
+      margin: 0;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    a {
+      color: $hospital-blue;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .password-strength {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    span {
+      color: $light-text;
+    }
+
+    .strength-meter {
+      display: flex;
+      gap: 2px;
+      flex-grow: 1;
+
+      .meter-segment {
+        height: 4px;
+        flex: 1;
+        background-color: $border-color;
+        border-radius: 2px;
+
+        &:nth-child(1) {
+          background-color: $error-color;
+        }
+      }
+    }
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 0.85rem;
+    background-color: $hospital-blue;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: color.adjust($hospital-blue, $lightness: 10%);
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+
+  .auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: $light-text;
+
+    a {
+      color: $hospital-blue;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+  .auth-header {
+    padding: 1.5rem;
+
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .auth-form {
+    padding: 1.5rem;
+  }
+
+  .form-row .form-group {
+    flex: 1 1 100%;
+  }
+}
