@@ -1,20 +1,15 @@
 @use 'sass:color';
 
-// Variables
-$primary-color: #1976d2;
-$secondary-color: #4caf50;
-$accent-color: #e91e63;
-$text-color: #333;
-$light-text: #666;
-$border-color: #ddd;
-$error-color: #f44336;
-$success-color: #4caf50;
-$background-color: #f5f7fa;
-$card-background: #fff;
-$shadow-color: rgba(0, 0, 0, 0.1);
-$hospital-blue: #0077cc;
-$hospital-green: #00a86b;
-$emergency-red: #e53935;
+$primary-color: #2c7be5;
+$secondary-color: #6c757d;
+$success-color: #00b894;
+$warning-color: #fdcb6e;
+$danger-color: #e74c3c;
+$light-color: #f8f9fa;
+$dark-color: #343a40;
+$border-radius: 8px;
+$box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+$transition: all 0.3s ease;
 
 // Mixins
 @mixin flex-center {
@@ -23,254 +18,217 @@ $emergency-red: #e53935;
   align-items: center;
 }
 
-@mixin card-shadow {
-  box-shadow: 0 4px 12px $shadow-color;
+@mixin form-control {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: $border-radius;
+  transition: $transition;
+  outline: none;
+  
+  &:focus {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
+  }
 }
 
-// Base Styles
+// Estilos principales
 .hospital-auth-container {
   min-height: 100vh;
-  background-color: $background-color;
-  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(240, 249, 255, 0.8) 100%);
   @include flex-center;
-  padding: 2rem 1rem;
-  font-family: 'Roboto', sans-serif;
+  padding: 20px;
+  background-color: #f5f7fb;
+  margin-top: 80px; 
 }
 
 .auth-card {
   width: 100%;
   max-width: 450px;
-  background-color: $card-background;
-  border-radius: 12px;
+  background-color: white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
   overflow: hidden;
-  @include card-shadow;
-  margin: 1rem;
 }
 
 .auth-header {
-  background: linear-gradient(135deg, $hospital-blue, color.adjust($hospital-blue, $lightness: 10%));
-  color: white;
-  padding: 2rem;
+  padding: 30px;
   text-align: center;
-
+  background-color: $light-color;
+  border-bottom: 1px solid #eee;
+  
   .logo {
-    @include flex-center;
-    margin-bottom: 1rem;
-
+    margin-bottom: 20px;
+    
     svg {
-      color: white;
+      color: $primary-color;
+      width: 50px;
+      height: 50px;
     }
   }
-
+  
   h1 {
-    margin: 0 0 0.5rem;
-    font-size: 1.8rem;
-    font-weight: 500;
+    margin: 0 0 10px;
+    color: $dark-color;
+    font-size: 24px;
+    font-weight: 600;
   }
-
+  
   p {
     margin: 0;
-    opacity: 0.9;
-    font-size: 0.95rem;
+    color: $secondary-color;
+    font-size: 16px;
   }
 }
 
 .auth-form {
-  padding: 2rem;
+  padding: 30px;
+}
 
-  .form-group {
-    margin-bottom: 1.5rem;
-
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-      color: $text-color;
-      font-size: 0.9rem;
-    }
-
-    input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid $border-color;
-      border-radius: 6px;
-      font-size: 1rem;
-      transition: border-color 0.3s, box-shadow 0.3s;
-
-      &:focus {
-        outline: none;
-        border-color: $hospital-blue;
-        box-shadow: 0 0 0 3px rgba($hospital-blue, 0.2);
-      }
-
-      &::placeholder {
-        color: $light-text;
-      }
-    }
+.form-group {
+  margin-bottom: 20px;
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: $dark-color;
   }
-
-  .password-input {
-    position: relative;
-
-    input {
-      padding-right: 3rem;
-    }
-
-    .toggle-password {
-      position: absolute;
-      right: 0.75rem;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: $light-text;
-      cursor: pointer;
-      padding: 0.25rem;
-
-      &:hover {
-        color: $hospital-blue;
-      }
-    }
+  
+  input[type="email"],
+  input[type="password"],
+  input[type="text"] {
+    @include form-control;
   }
+}
 
-  .form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 0;
-
-      input[type="checkbox"] {
-        width: auto;
-      }
-
-      label {
-        margin: 0;
-        font-size: 0.85rem;
-      }
-    }
-
-    .forgot-password {
-      font-size: 0.85rem;
-      color: $hospital-blue;
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
+.password-input {
+  position: relative;
+  
+  input {
+    padding-right: 45px;
   }
-
-  .btn-primary {
-    width: 100%;
-    padding: 0.85rem;
-    background-color: $hospital-blue;
-    color: white;
+  
+  .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
     border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 500;
+    color: $secondary-color;
     cursor: pointer;
-    transition: background-color 0.3s;
-
+    padding: 5px;
+    
     &:hover {
-      background-color: color.adjust($hospital-blue, $lightness: 10%);
+      color: $dark-color;
     }
-
-    &:active {
-      transform: translateY(1px);
-    }
-  }
-
-  .divider {
-    display: flex;
-    align-items: center;
-    margin: 1.5rem 0;
-    color: $light-text;
-    font-size: 0.85rem;
-
-    &::before,
-    &::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background-color: $border-color;
-    }
-
-    span {
-      padding: 0 1rem;
-    }
-  }
-
-  .btn-secondary {
-    width: 100%;
-    padding: 0.85rem;
-    background-color: white;
-    color: $text-color;
-    border: 1px solid $border-color;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s, border-color 0.3s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-
+    
     svg {
-      color: $hospital-green;
+      vertical-align: middle;
     }
+  }
+}
 
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    
+    input[type="checkbox"] {
+      margin-right: 8px;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+      accent-color: $primary-color;
+    }
+    
+    label {
+      margin-bottom: 0;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  }
+  
+  .forgot-password {
+    color: $primary-color;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    
     &:hover {
-      background-color: #f9f9f9;
-      border-color: color.adjust($border-color, $lightness: 10%);
-    }
-
-    &:active {
-      transform: translateY(1px);
+      text-decoration: underline;
     }
   }
+}
 
-  .emergency-access {
-    margin-top: 1.5rem;
-    text-align: center;
-
-    a {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: $emergency-red;
-      font-size: 0.9rem;
-      font-weight: 500;
-      text-decoration: none;
-
-      svg {
-        color: $emergency-red;
-      }
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background-color: $primary-color;
+  color: white;
+  border: none;
+  border-radius: $border-radius;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: $transition;
+  
+  &:hover {
+    background-color: color.adjust($primary-color, $lightness: 10%);
   }
+  
+  &:disabled {
+    background-color: color.adjust($primary-color, $lightness: 20%);
+    cursor: not-allowed;
+  }
+}
 
-  .auth-footer {
-    text-align: center;
-    margin-top: 1.5rem;
-    font-size: 0.9rem;
-    color: $light-text;
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 25px 0;
+  
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #eee;
+  }
+  
+  span {
+    position: relative;
+    display: inline-block;
+    padding: 0 15px;
+    background-color: white;
+    color: $secondary-color;
+    font-size: 14px;
+  }
+}
 
+.auth-footer {
+  text-align: center;
+  margin-top: 10px;
+  
+  p {
+    color: $secondary-color;
+    font-size: 15px;
+    margin: 0;
+    
     a {
-      color: $hospital-blue;
+      color: $primary-color;
       text-decoration: none;
       font-weight: 500;
-
+      
       &:hover {
         text-decoration: underline;
       }
@@ -278,23 +236,14 @@ $emergency-red: #e53935;
   }
 }
 
-// Responsive adjustments
+// Responsive
 @media (max-width: 480px) {
-  .auth-header {
-    padding: 1.5rem;
-
-    h1 {
-      font-size: 1.5rem;
-    }
-  }
-
-  .auth-form {
-    padding: 1.5rem;
-  }
-
   .form-options {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
+    
+    .forgot-password {
+      margin-top: 10px;
+    }
   }
 }
