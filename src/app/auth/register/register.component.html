@@ -39,6 +39,7 @@
         <input 
           type="text" 
           id="dni" 
+          name="dni"
           formControlName="dni" 
           placeholder="Ingrese su DNI (8 dígitos)"
           [ngClass]="{'invalid': registerForm.get('dni')?.invalid && registerForm.get('dni')?.touched}"

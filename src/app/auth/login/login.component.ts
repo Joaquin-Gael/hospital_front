@@ -1,8 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from "@angular/common";
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { AuthService } from '../../auth/service/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -23,21 +23,17 @@ export class LoginComponent {
     this.showPassword = !this.showPassword; 
   }
 
-  http = inject(HttpClient);
-  router = inject(Router)
+  constructor(private authService: AuthService, private router: Router) { }
 
   onLogin() {
     debugger;
-    this.http.post<{ access_token: string }>('http://127.0.0.1:8000/auth/login', this.loginObj).subscribe((response) => {
-        console.log('¡Login exitoso!', response);
-        localStorage.setItem('auth_token', response.access_token);
-        this.router.navigateByUrl('user_panel')
+    this.authService.login(this.loginObj).subscribe({
+      next: (response) => {
+        this.authService.setUser(response);
+        this.router.navigate(['/user_panel']);
       },
-      (err) => {
-        console.error('Error de la API:', JSON.stringify(err.error.detail, null, 2));
-        alert('Algo salió mal, revisa el email o la contraseña');
-      }
-    );
+      error: (error) => console.error('Login error:', error, JSON.stringify(error.error.detail, null, 2)),
+    });
   }
 }
 
