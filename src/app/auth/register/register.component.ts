@@ -92,7 +92,7 @@ export class RegisterComponent {
 
     const payload = { email, username, first_name, last_name, dni, password };
 
-    this.http.post('http://127.0.0.1:8000/user/add', payload).subscribe(
+    this.http.post('http://127.0.0.1:8000/users/add', payload).subscribe(
       () => {
         console.log("¡Registro exitoso!");
         alert("Te registraste con éxito. Iniciá sesión.");
