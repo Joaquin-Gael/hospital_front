@@ -1,0 +1,271 @@
+@use 'sass:color';
+@use '../../styles/_variables.scss' as vars;
+
+.study-request {
+  background-color: vars.$card-background;
+  border-radius: vars.$border-radius-lg;
+  padding: vars.$spacing-6;
+  margin-bottom: vars.$spacing-6;
+  box-shadow: vars.$shadow-md;
+  transition: all vars.$transition-normal;
+  
+  &:hover {
+    box-shadow: vars.$shadow-lg;
+  }
+  
+  @media (max-width: vars.$breakpoint-md) {
+    padding: vars.$spacing-4;
+  }
+  
+  &__title {
+    font-size: vars.$font-size-lg;
+    font-weight: 600;
+    margin: 0 0 vars.$spacing-4;
+    color: vars.$text-primary;
+    position: relative;
+    padding-bottom: vars.$spacing-2;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background-color: vars.$primary-color;
+      border-radius: vars.$border-radius-full;
+    }
+  }
+  
+  &__empty {
+    @include vars.flex-center;
+    padding: vars.$spacing-8;
+    text-align: center;
+    color: vars.$text-secondary;
+    font-size: vars.$font-size-sm;
+  }
+}
+
+.study-form {
+  animation: fadeIn 0.5s ease;
+  
+  &__actions {
+    display: flex;
+    gap: vars.$spacing-4;
+    margin-top: vars.$spacing-8;
+    
+    @media (max-width: vars.$breakpoint-sm) {
+      flex-direction: column;
+      gap: vars.$spacing-3;
+    }
+  }
+}
+
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: vars.$spacing-2;
+  margin-bottom: vars.$spacing-2;
+}
+
+.category-btn {
+  padding: vars.$spacing-2 vars.$spacing-3;
+  border-radius: vars.$border-radius-full;
+  font-size: vars.$font-size-xs;
+  font-weight: 500;
+  background-color: vars.$background-color;
+  color: vars.$text-secondary;
+  border: 1px solid vars.$border-color;
+  cursor: pointer;
+  transition: all vars.$transition-fast;
+  
+  &:hover {
+    background-color: color.adjust(vars.$background-color, $lightness: -3%);
+  }
+  
+  &--active {
+    background-color: vars.$primary-color;
+    color: white;
+    border-color: vars.$primary-color;
+    
+    &:hover {
+      background-color: color.adjust(vars.$primary-color, $lightness: -5%);
+    }
+  }
+}
+
+.urgency-options {
+  display: flex;
+  gap: vars.$spacing-4;
+  
+  @media (max-width: vars.$breakpoint-sm) {
+    flex-direction: column;
+    gap: vars.$spacing-2;
+  }
+}
+
+.urgency-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  
+  &__input {
+    position: absolute;
+    opacity: 0;
+    
+    &:checked + .urgency-option__label {
+      background-color: color.adjust(vars.$primary-color, $alpha: -0.9);
+      color: vars.$primary-color;
+      border-color: color.adjust(vars.$primary-color, $alpha: -0.7);
+      
+      &:before {
+        transform: scale(1);
+      }
+    }
+  }
+  
+  &__label {
+    display: flex;
+    align-items: center;
+    padding: vars.$spacing-2 vars.$spacing-4;
+    border-radius: vars.$border-radius-md;
+    border: 1px solid vars.$border-color;
+    font-size: vars.$font-size-sm;
+    transition: all vars.$transition-fast;
+    position: relative;
+    padding-left: vars.$spacing-8;
+    
+    &:hover {
+      background-color: color.adjust(vars.$background-color, $lightness: -2%);
+    }
+    
+    &:before {
+      content: '';
+      position: absolute;
+      left: vars.$spacing-3;
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+      background-color: vars.$primary-color;
+      transform: scale(0);
+      transition: transform vars.$transition-fast;
+    }
+    
+    &:after {
+      content: '';
+      position: absolute;
+      left: calc(#{vars.$spacing-3} - 2px);
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      border: 2px solid vars.$border-color;
+    }
+  }
+}
+
+.form-group {
+  margin-bottom: vars.$spacing-5;
+}
+
+.form-label {
+  display: block;
+  font-size: vars.$font-size-sm;
+  font-weight: 500;
+  margin-bottom: vars.$spacing-2;
+  color: vars.$text-primary;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: vars.$spacing-3 vars.$spacing-4;
+  border-radius: vars.$border-radius-md;
+  border: 1px solid vars.$border-color;
+  background-color: vars.$card-background;
+  font-size: vars.$font-size-sm;
+  transition: all vars.$transition-fast;
+  
+  &:focus {
+    outline: none;
+    border-color: vars.$primary-color;
+    box-shadow: 0 0 0 2px color.adjust(vars.$primary-color, $alpha: -0.8);
+  }
+  
+  &--error {
+    border-color: vars.$danger-color;
+    
+    &:focus {
+      box-shadow: 0 0 0 2px color.adjust(vars.$danger-color, $alpha: -0.8);
+    }
+  }
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-error {
+  font-size: vars.$font-size-xs;
+  color: vars.$danger-color;
+  margin-top: vars.$spacing-1;
+  animation: fadeIn 0.3s ease;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: vars.$spacing-3 vars.$spacing-4;
+  border-radius: vars.$border-radius-md;
+  font-weight: 500;
+  transition: all vars.$transition-fast;
+  cursor: pointer;
+  font-size: vars.$font-size-sm;
+  
+  @media (max-width: vars.$breakpoint-sm) {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  &--primary {
+    background-color: vars.$primary-color;
+    color: white;
+    border: 1px solid vars.$primary-color;
+    
+    &:hover:not(:disabled) {
+      background-color: color.adjust(vars.$primary-color, $lightness: -5%);
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+  
+  &--outline {
+    background-color: transparent;
+    color: vars.$text-primary;
+    border: 1px solid vars.$border-color;
+    
+    &:hover:not(:disabled) {
+      background-color: color.adjust(vars.$background-color, $lightness: -2%);
+      border-color: vars.$text-secondary;
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: vars.$spacing-2;
+}

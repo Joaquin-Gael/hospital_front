@@ -1,0 +1,419 @@
+@use 'sass:color';
+@use '../../styles/_variables.scss' as vars;
+
+.patients-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+  
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: vars.$text-primary;
+    margin: 0;
+  }
+  
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      width: 100%;
+    }
+  }
+  
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      flex-direction: column;
+      width: 100%;
+    }
+  }
+  
+  &__search {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      width: 100%;
+    }
+  }
+  
+  &__search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border: 1px solid vars.$border-color;
+    border-radius: vars.$border-radius-md;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: vars.$primary-color;
+      box-shadow: 0 0 0 2px rgba(vars.$primary-color, 0.1);
+    }
+  }
+  
+  &__search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: vars.$text-secondary;
+    pointer-events: none;
+  }
+  
+  &__filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      width: 100%;
+    }
+    
+    label {
+      font-size: 0.9rem;
+      color: vars.$text-secondary;
+      white-space: nowrap;
+    }
+    
+    select {
+      padding: 0.75rem 1rem;
+      border: 1px solid vars.$border-color;
+      border-radius: vars.$border-radius-md;
+      background-color: white;
+      font-size: 0.9rem;
+      min-width: 150px;
+      
+      @media (max-width: vars.$breakpoint-md) {
+        flex: 1;
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: vars.$primary-color;
+      }
+    }
+  }
+  
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  &__loading, &__empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+    
+    p {
+      margin-top: 1rem;
+      color: vars.$text-secondary;
+    }
+  }
+}
+
+.patients-table-container {
+  flex: 1;
+  background-color: white;
+  border-radius: vars.$border-radius-lg;
+  box-shadow: vars.$shadow-md;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.patients-table-wrapper {
+  flex: 1;
+  overflow: auto;
+}
+
+.patients-table {
+  width: 100%;
+  border-collapse: collapse;
+  
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid vars.$border-color;
+    
+    @media (max-width: vars.$breakpoint-md) {
+      padding: 0.75rem;
+    }
+  }
+  
+  th {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: vars.$text-secondary;
+    z-index: 10;
+    
+    &.sortable-column {
+      cursor: pointer;
+      transition: background-color 0.2s;
+      
+      &:hover {
+        background-color: color.adjust(vars.$background-color, $lightness: -3%);
+      }
+    }
+  }
+  
+  tbody tr {
+    transition: background-color 0.2s;
+    cursor: pointer;
+    
+    &:hover {
+      background-color: rgba(vars.$primary-color, 0.05);
+    }
+    
+    &.selected {
+      background-color: rgba(vars.$primary-color, 0.1);
+    }
+  }
+}
+
+.sort-icon {
+  display: inline-block;
+  margin-left: 0.25rem;
+  vertical-align: middle;
+}
+
+.patient-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.patient-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: vars.$primary-color;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.patient-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.patient-name {
+  font-weight: 600;
+  color: vars.$text-primary;
+}
+
+.patient-details {
+  font-size: 0.75rem;
+  color: vars.$text-secondary;
+}
+
+.patient-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: vars.$text-secondary;
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  
+  &--active {
+    background-color: rgba(vars.$success-color, 0.15);
+    color: vars.$success-color;
+  }
+  
+  &--inactive {
+    background-color: rgba(vars.$muted-color, 0.15);
+    color: vars.$text-secondary;
+  }
+  
+  &--pending {
+    background-color: rgba(vars.$warning-color, 0.15);
+    color: vars.$warning-color;
+  }
+}
+
+.patient-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  
+  &__icon {
+    font-size: 3rem;
+    color: color.adjust(vars.$text-secondary, $lightness: 30%);
+    margin-bottom: 1.5rem;
+  }
+  
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: vars.$text-primary;
+    margin: 0 0 0.5rem;
+  }
+  
+  &__message {
+    color: vars.$text-secondary;
+    max-width: 400px;
+    text-align: center;
+    margin: 0 0 1.5rem;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  border-radius: vars.$border-radius-md;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-size: 0.9rem;
+  border: none;
+  gap: 0.5rem;
+  
+  &--primary {
+    background-color: vars.$primary-color;
+    color: white;
+    
+    &:hover {
+      background-color: color.adjust(vars.$primary-color, $lightness: -5%);
+    }
+  }
+  
+  &--icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border-radius: vars.$border-radius-md;
+    background-color: transparent;
+    color: vars.$text-secondary;
+    
+    &:hover {
+      background-color: color.adjust(vars.$background-color, $lightness: -5%);
+      color: vars.$primary-color;
+    }
+  }
+  
+  &--sm {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.75rem;
+    
+    &.btn--icon {
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+}
+
+.icon-search, .icon-plus, .icon-chevron-up, .icon-chevron-down,
+.icon-mail, .icon-phone, .icon-file-text, .icon-calendar, .icon-edit, .icon-users {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-search {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+}
+
+.icon-plus {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>');
+}
+
+.icon-chevron-up {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>');
+}
+
+.icon-chevron-down {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+}
+
+.icon-mail {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>');
+}
+
+.icon-phone {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>');
+}
+
+.icon-file-text {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>');
+}
+
+.icon-calendar {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
+}
+
+.icon-edit {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>');
+}
+
+.icon-users {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>');
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid color.adjust(vars.$primary-color, $alpha: -0.7);
+  border-top-color: vars.$primary-color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}

@@ -1,0 +1,117 @@
+<div class="medical-history">
+    <div class="medical-history__header">
+      <h3 class="medical-history__title">Historial Médico</h3>
+      
+      <div class="medical-history__search">
+        <input 
+          type="text" 
+          class="medical-history__search-input" 
+          placeholder="Buscar en historial..." 
+          (input)="onSearch($event)"
+        >
+        <span class="medical-history__search-icon icon-search"></span>
+      </div>
+    </div>
+    
+    <div class="medical-history__filters">
+      <button 
+        class="filter-btn" 
+        [ngClass]="{'filter-btn--active': typeFilter === 'all'}"
+        (click)="typeFilter = 'all'; applyFilters()"
+      >
+        Todos
+      </button>
+      <button 
+        class="filter-btn" 
+        [ngClass]="{'filter-btn--active': typeFilter === 'consultation'}"
+        (click)="typeFilter = 'consultation'; applyFilters()"
+      >
+        Consultas
+      </button>
+      <button 
+        class="filter-btn" 
+        [ngClass]="{'filter-btn--active': typeFilter === 'diagnosis'}"
+        (click)="typeFilter = 'diagnosis'; applyFilters()"
+      >
+        Diagnósticos
+      </button>
+      <button 
+        class="filter-btn" 
+        [ngClass]="{'filter-btn--active': typeFilter === 'medication'}"
+        (click)="typeFilter = 'medication'; applyFilters()"
+      >
+        Medicaciones
+      </button>
+      <button 
+        class="filter-btn" 
+        [ngClass]="{'filter-btn--active': typeFilter === 'lab'}"
+        (click)="typeFilter = 'lab'; applyFilters()"
+      >
+        Laboratorio
+      </button>
+      <button 
+        class="filter-btn" 
+        [ngClass]="{'filter-btn--active': typeFilter === 'imaging'}"
+        (click)="typeFilter = 'imaging'; applyFilters()"
+      >
+        Imágenes
+      </button>
+    </div>
+    
+    <ng-container *ngIf="isLoading; else historyContent">
+      <div class="medical-history__loading">
+        <div class="loading-spinner"></div>
+        <p>Cargando historial médico...</p>
+      </div>
+    </ng-container>
+    
+    <ng-template #historyContent>
+      <div class="medical-history__empty" *ngIf="filteredEntries.length === 0">
+        <p>No hay entradas en el historial médico con los filtros seleccionados.</p>
+      </div>
+      
+      <div class="history-timeline" *ngIf="filteredEntries.length > 0">
+        <div 
+          *ngFor="let entry of filteredEntries" 
+          class="history-entry"
+        >
+          <div class="history-entry__icon" [ngClass]="getTypeIcon(entry.type)"></div>
+          
+          <div class="history-entry__content">
+            <div class="history-entry__header">
+              <h4 class="history-entry__title">{{ entry.title }}</h4>
+              <span 
+                class="history-entry__type"
+                [ngClass]="'history-entry__type--' + entry.type"
+              >
+                {{ getTypeLabel(entry.type) }}
+              </span>
+            </div>
+            
+            <div class="history-entry__meta">
+              <span>{{ formatDate(entry.date) }}</span>
+              <span>{{ entry.doctor }}</span>
+            </div>
+            
+            <p class="history-entry__description">{{ entry.description }}</p>
+            
+            <div class="history-entry__attachments" *ngIf="entry.attachments && entry.attachments.length > 0">
+              <h5 class="history-entry__attachments-title">Archivos adjuntos</h5>
+              <ul class="attachment-list">
+                <li *ngFor="let attachment of entry.attachments" class="attachment-item">
+                  <a [href]="attachment.url" target="_blank" class="attachment-link">
+                    <span 
+                      class="attachment-icon" 
+                      [ngClass]="attachment.type === 'pdf' ? 'icon-file-pdf' : 'icon-file-image'"
+                    ></span>
+                    {{ attachment.name }}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+  
