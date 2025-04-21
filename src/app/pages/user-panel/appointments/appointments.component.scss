@@ -1,0 +1,96 @@
+@use '../shared.scss' as *;
+
+.appointments {
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+}
+
+.appointment-card {
+  @include card;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $box-shadow-lg;
+  }
+  
+  &__header {
+    @include flex-between;
+    padding: 16px;
+    background-color: $primary-bg;
+  }
+  
+  &__date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  &__day-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: $primary-color;
+    text-transform: uppercase;
+  }
+  
+  &__day {
+    font-size: 24px;
+    font-weight: 700;
+    color: $primary-color;
+    line-height: 1;
+  }
+  
+  &__month {
+    font-size: 14px;
+    font-weight: 500;
+    color: $primary-color;
+    text-transform: capitalize;
+  }
+  
+  &__time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: $primary-color;
+    font-weight: 500;
+    
+    .icon {
+      color: $primary-color;
+    }
+  }
+  
+  &__body {
+    padding: 16px;
+  }
+  
+  &__specialty {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 16px;
+    color: $text-color;
+  }
+  
+  &__doctor, &__location {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: $text-light;
+    font-size: 14px;
+    
+    .icon {
+      color: $text-lighter;
+    }
+  }
+  
+  &__footer {
+    padding: 16px;
+    border-top: 1px solid $border-color;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+}

@@ -1,0 +1,27 @@
+<header class="header">
+  <div class="header__title">
+    @if (activeSection === 'appointments') {
+      <h1>Turnos Agendados</h1>
+    } @else if (activeSection === 'history') {
+      <h1>Historial</h1>
+    } @else if (activeSection === 'notifications') {
+      <h1>Notificaciones</h1>
+    } @else if (activeSection === 'documents') {
+      <h1>Documentos</h1>
+    } @else if (activeSection === 'profile') {
+      <h1>Perfil</h1>
+    }
+  </div>
+  <div class="header__actions">
+    @if (activeSection === 'appointments') {
+      <button class="btn btn--primary" (click)="requestNewAppointment()">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Nuevo Turno
+      </button>
+    } @else if (activeSection === 'profile') {
+      <button class="btn btn--primary" (click)="onEditProfile()">Editar Perfil</button>
+    }
+  </div>
+</header>

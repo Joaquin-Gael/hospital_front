@@ -1,0 +1,69 @@
+<section class="profile">
+  <div class="profile__card">
+    <!-- Mensaje de carga -->
+    <div *ngIf="!user" class="loading">
+      <span>Cargando datos...</span>
+    </div>
+
+    <!-- Contenido del perfil -->
+    <div *ngIf="user">
+      <div class="profile__header">
+        <div class="profile__avatar">
+          <span class="profile__avatar-initials">{{ getInitials(fullName) }}</span>
+        </div>
+        <div>
+          <h2 class="profile__name">{{ fullName }}</h2>
+          <p class="profile__id">ID: {{ user.id }}</p>
+        </div>
+      </div>
+      <div class="profile__body">
+        <div class="profile__section">
+          <h3 class="profile__section-title">Información Personal</h3>
+          <div class="profile__grid">
+            <div class="profile__field">
+              <span class="profile__label">Nombre Completo</span>
+              <p class="profile__value">{{ fullName }}</p>
+            </div>
+            <div class="profile__field">
+              <span class="profile__label">Fecha de Nacimiento</span>
+              <p class="profile__value">{{ formatDate(birthDate) }}</p>
+            </div>
+            <div class="profile__field">
+              <span class="profile__label">Tipo de Sangre</span>
+              <p class="profile__value">{{ bloodType }}</p>
+            </div>
+            <div class="profile__field">
+              <span class="profile__label">Correo Electrónico</span>
+              <p class="profile__value">{{ user.email }}</p>
+            </div>
+            <div class="profile__field">
+              <span class="profile__label">Teléfono</span>
+              <p class="profile__value">{{ phone }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="profile__section">
+          <h3 class="profile__section-title">Información Adicional</h3>
+          <div class="profile__grid">
+            <div class="profile__field">
+              <span class="profile__label">Dirección</span>
+              <p class="profile__value">{{ address }}</p>
+            </div>
+            <div class="profile__field">
+              <span class="profile__label">Obra Social</span>
+              <p class="profile__value">{{ insurance }}</p>
+            </div>
+            <div class="profile__field">
+              <span class="profile__label">Última Visita</span>
+              <p class="profile__value">{{ formatDate(lastVisit) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="profile__footer">
+        <button class="btn btn--outline" (click)="onChangePassword()">Cambiar Contraseña</button>
+        <button class="btn btn--primary" (click)="onEditProfile()">Editar Perfil</button>
+      </div>
+    </div>
+  </div>
+</section>

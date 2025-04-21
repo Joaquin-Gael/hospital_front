@@ -1,0 +1,20 @@
+@use '../shared.scss' as *;
+
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background-color: $background-color;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: $sidebar-width;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 32px;
+}

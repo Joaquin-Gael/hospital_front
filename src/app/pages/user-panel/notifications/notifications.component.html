@@ -1,0 +1,36 @@
+<section class="notifications">
+  @if (notifications.length === 0) {
+    <div class="empty-state">
+      <div class="empty-state__icon">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      </div>
+      <h2>No hay notificaciones</h2>
+      <p>Estás al día con todas tus notificaciones.</p>
+    </div>
+  } @else {
+    <div class="notifications__list">
+      @for (notification of notifications; track notification.id) {
+        <div class="notification-card" [ngClass]="{'notification-card--unread': !notification.read}" (click)="onMarkAsRead(notification)">
+          <div class="notification-card__icon" [ngClass]="{
+            'notification-card__icon--reminder': notification.type === 'warning',
+            'notification-card__icon--change': notification.type === 'success',
+            'notification-card__icon--info': notification.type === 'info'
+          }">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </div>
+          <div class="notification-card__content">
+            <p class="notification-card__message">{{ notification.message }}</p>
+            <p class="notification-card__date">{{ formatDate(notification.createdAt) }}</p>
+          </div>
+          @if (!notification.read) {
+            <span class="notification-card__badge"></span>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

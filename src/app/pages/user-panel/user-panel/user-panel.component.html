@@ -1,0 +1,33 @@
+<div class="dashboard">
+  <app-sidebar
+    [user]="currentUser"
+    [activeSection]="activeSection"
+    (sectionChange)="changeSection($event)"
+    (logout)="onLogout()"
+  ></app-sidebar>
+  <div class="main-content">
+    <app-header [activeSection]="activeSection"></app-header>
+    <div class="content">
+      <app-appointments *ngIf="activeSection === 'appointments'"
+        [appointments]="appointments"
+        (reschedule)="onRescheduleAppointment($event)"
+        (cancel)="onCancelAppointment($event)"
+      ></app-appointments>
+      <app-history *ngIf="activeSection === 'history'"
+        [appointments]="appointmentHistory"
+      ></app-history>
+      <app-notifications *ngIf="activeSection === 'notifications'"
+        [notifications]="notifications"
+        (markAsRead)="markAsRead($event)"
+      ></app-notifications>
+      <app-documents *ngIf="activeSection === 'documents'"
+        [documents]="documents"
+      ></app-documents>
+      <app-profile *ngIf="activeSection === 'profile'"
+        [user]="currentUser"
+        (editProfile)="onEditProfile()"
+        (changePassword)="onChangePassword()"
+      ></app-profile>
+    </div>
+  </div>
+</div>

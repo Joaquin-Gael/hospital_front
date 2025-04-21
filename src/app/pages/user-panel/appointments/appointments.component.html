@@ -1,0 +1,54 @@
+<section class="appointments">
+  @if (appointments.length === 0) {
+    <div class="empty-state">
+      <div class="empty-state__icon">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h2>No hay turnos agendados</h2>
+      <p>Agenda un nuevo turno para comenzar.</p>
+      <button class="btn btn--primary" (click)="requestNewAppointment()">Agendar turno</button>
+    </div>
+  } @else {
+    <div class="appointments__grid">
+      @for (appointment of appointments; track appointment.id) {
+        <div class="appointment-card">
+          <div class="appointment-card__header">
+            <div class="appointment-card__date">
+              <span class="appointment-card__day-name">{{ getDayName(appointment.date) }}</span>
+              <span class="appointment-card__day">{{ appointment.date.getDate() }}</span>
+              <span class="appointment-card__month">{{ appointment.date.toLocaleString('es-AR', { month: 'long' }) }}</span>
+            </div>
+            <div class="appointment-card__time">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {{ appointment.time }}
+            </div>
+          </div>
+          <div class="appointment-card__body">
+            <h3 class="appointment-card__specialty">{{ appointment.specialty }}</h3>
+            <div class="appointment-card__doctor">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              {{ appointment.doctorName }}
+            </div>
+            <div class="appointment-card__location">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {{ appointment.location }}
+            </div>
+          </div>
+          <div class="appointment-card__footer">
+            <button class="btn btn--outline btn--sm" (click)="onReschedule(appointment.id)">Reprogramar</button>
+            <button class="btn btn--danger btn--sm" (click)="onCancel(appointment.id)">Cancelar</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

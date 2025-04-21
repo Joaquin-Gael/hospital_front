@@ -1,0 +1,26 @@
+@use '../shared.scss' as *;
+
+.header {
+  height: $header-height;
+  padding: 0 32px;
+  @include flex-between;
+  background-color: white;
+  border-bottom: 1px solid $border-color;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  
+  &__title {
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0;
+      color: $text-color;
+    }
+  }
+  
+  &__actions {
+    display: flex;
+    gap: 12px;
+  }
+}

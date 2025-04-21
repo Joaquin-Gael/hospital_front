@@ -1,0 +1,75 @@
+@use '../shared.scss' as *;
+
+.documents {
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+}
+
+.document-card {
+  @include card;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  transition: $transition;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $box-shadow-lg;
+  }
+  
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: $border-radius-sm;
+    background-color: rgba($primary-color, 0.1);
+    color: $primary-color;
+    @include flex-center;
+    flex-direction: column;
+    gap: 4px;
+    
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
+    
+    span {
+      font-size: 10px;
+      font-weight: 600;
+    }
+  }
+  
+  &__content {
+    flex: 1;
+  }
+  
+  &__title {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 4px;
+    color: $text-color;
+  }
+  
+  &__date {
+    font-size: 12px;
+    color: $text-light;
+    margin: 0;
+  }
+  
+  &__download {
+    color: $text-light;
+    transition: $transition;
+    
+    &:hover {
+      color: $primary-color;
+    }
+    
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
