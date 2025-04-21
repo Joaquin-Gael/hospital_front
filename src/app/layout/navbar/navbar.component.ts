@@ -16,8 +16,8 @@ export class NavbarComponent {
   navItems = [
     { label: "Inicio", route: "/" },
     { label: "Solicitar Turno", route: "/solicitar-turno" },
-    { label: "Especialidades", route: "/especialidades" },
-    { label: "Mi Cuenta", route: "/mi-cuenta" },
+    { label: "Servicios", route: "/especialidades" },
+    { label: "Mi Cuenta", route: "/user_panel" },
     { label: "Contacto", route: "/contact" },
   ]
 
