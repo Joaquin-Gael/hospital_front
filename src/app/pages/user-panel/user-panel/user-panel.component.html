@@ -1,9 +1,8 @@
 <div class="dashboard">
   <app-sidebar
-    [user]="currentUser"
+    [user]="user"
     [activeSection]="activeSection"
     (sectionChange)="changeSection($event)"
-    (logout)="onLogout()"
   ></app-sidebar>
   <div class="main-content">
     <app-header [activeSection]="activeSection"></app-header>
@@ -24,7 +23,7 @@
         [documents]="documents"
       ></app-documents>
       <app-profile *ngIf="activeSection === 'profile'"
-        [user]="currentUser"
+        [user]="user"
         (editProfile)="onEditProfile()"
         (changePassword)="onChangePassword()"
       ></app-profile>

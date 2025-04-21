@@ -14,11 +14,11 @@
     <!-- Información del usuario -->
     <div *ngIf="user" class="sidebar__user-content">
       <div class="sidebar__avatar">
-        <span class="sidebar__avatar-initials">{{ getInitials(fullName) }}</span>
+        <span class="sidebar__avatar-initials">{{ getInitials(user.username) }}</span>
       </div>
       <div class="sidebar__user-info">
-        <h3 class="sidebar__user-name">{{ fullName }}</h3>
-        <p class="sidebar__user-id">ID: {{ user.id }}</p>
+        <h3 class="sidebar__user-name">{{ user.username }}</h3>
+        <p class="sidebar__user-id">ID: {{ user.dni }}</p>
       </div>
     </div>
   </div>

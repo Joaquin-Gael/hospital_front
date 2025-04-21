@@ -1,3 +1,7 @@
+export interface UserResponse{
+  user: User;
+}
+
 export interface User {
     id: string;
     is_active: boolean;

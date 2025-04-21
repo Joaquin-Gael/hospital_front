@@ -10,23 +10,9 @@ import { User } from '../models/user.model';
   imports: [CommonModule]
 })
 export class ProfileComponent {
-  @Input() user: User | null = null;
+  @Input() user: User | null = null; 
   @Output() editProfile = new EventEmitter<void>();
   @Output() changePassword = new EventEmitter<void>();
-
-  get fullName(): string {
-    if (!this.user) return 'No disponible';
-    return `${this.user.first_name} ${this.user.last_name}`.trim() || 'No disponible';
-  }
-
-  get phone(): string {
-    return this.user?.telephone || 'No especificado';
-  }
-
-  get birthDate(): Date {
-    if (!this.user) return new Date();
-    return new Date(this.user.date_joined); 
-  }
 
   get bloodType(): string {
     return 'O+'; 
