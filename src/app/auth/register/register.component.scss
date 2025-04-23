@@ -38,12 +38,12 @@ $transition: all 0.3s ease;
   }
 }
 
+
 // Main Styles
 .register-container {
   min-height: 100vh;
   @include flex-center;
   padding: 20px;
-  background-color: #f5f7fb;
   margin-top: 80px; 
 }
 
@@ -51,7 +51,9 @@ $transition: all 0.3s ease;
 .register-card {
   width: 100%;
   max-width: 500px;
-  background-color: white;
+  background-color: rgba(2, 20, 28, 0.5);
+  backdrop-filter: blur(11px) saturate(157%);
+  -webkit-backdrop-filter: blur(11px) saturate(157%);
   border-radius: $border-radius;
   box-shadow: $box-shadow;
   overflow: hidden;
@@ -60,7 +62,9 @@ $transition: all 0.3s ease;
 .register-header {
   padding: 30px;
   text-align: center;
-  background-color: $light-color;
+  background-color: rgba(2, 20, 28, 0.5);
+  -webkit-backdrop-filter: blur(11px) saturate(157%);
+  backdrop-filter: blur(11px) saturate(157%);
   border-bottom: 1px solid #eee;
   
   h1 {

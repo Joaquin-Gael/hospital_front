@@ -13,7 +13,11 @@ export class AuthService {
     user$ = this.userSubject.asObservable();
   
     constructor(private http: HttpClient) {}
-  
+    
+    isLoggedIn(): boolean {
+      return this.userSubject.value !== null;
+    }
+
     login(loginObj: { email: string; password: string }): Observable<UserResponse> {
       return this.http.post<UserResponse>(this.apiUrl, loginObj);
     }
