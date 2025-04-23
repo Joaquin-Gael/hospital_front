@@ -16,9 +16,9 @@ export class FooterComponent {
   email = '';
 
   socialLinks = [
-    { name: 'Facebook', url: 'https://facebook.com', icon: '[tabler--brand-facebook]' },
-    { name: 'Twitter', url: 'https://x.com/hospitalsdlg', icon: '[tabler--brand-x]' },
-    { name: 'Instagram', url: 'https://instagram.com/hospital_s.d.l.g/', icon: '[tabler--brand-instagram]' }
+    { name: 'Facebook', url: 'https://facebook.com', icon: 'facebook' },
+    { name: 'Twitter', url: 'https://x.com/hospitalsdlg', icon: 'x-twitter' },
+    { name: 'Instagram', url: 'https://instagram.com/hospital_s.d.l.g/', icon: 'instagram' }
   ];
 
   hospitalLinks = [

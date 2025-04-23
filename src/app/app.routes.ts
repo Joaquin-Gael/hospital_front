@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout/layout.component';
+import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
   {
@@ -26,6 +27,7 @@ export const routes: Routes = [
 
   {
     path: 'user_panel',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/user-panel/user-panel/user-panel.component').then((m) => m.UserPanelComponent),
   },

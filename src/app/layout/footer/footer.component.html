@@ -14,7 +14,7 @@
         <div class="footer-social">
           @for (social of socialLinks; track social.name) {
             <a [href]="social.url" target="_blank" rel="noopener noreferrer" class="social-icon" [attr.aria-label]="social.name">
-              <i [ngClass]="['icon-' + social.icon]"></i>
+              <i [ngClass]="['fab', 'fa-' + social.icon]"></i>
             </a>
           }
         </div>

@@ -43,15 +43,16 @@
         font-size: 1.25rem;
         color: #666;
         transition: all 0.3s ease;
+        size: 40px;
 
         &:hover {
           transform: scale(1.1);
         }
 
         // Colores por red social
-        &[aria-label="facebook"] { color: #1877f2; }
-        &[aria-label="x"] { color: #000; }
-        &[aria-label="instagram"] { color: #e1306c; }
+        &[aria-label="Facebook"] { color: #1877f2; }
+        &[aria-label="Twitter"] { color: #000; }
+        &[aria-label="Instagram"] { color: #e1306c; }
       }
     }
 
