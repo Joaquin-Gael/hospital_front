@@ -3,10 +3,17 @@ import { LayoutComponent } from './layout/layout/layout.component';
 import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+
   {
     path: '',
     component: LayoutComponent,
     children: [
+      {
+        path: 'home',
+        loadComponent: () =>
+          import('./pages/home/home.component').then((m) => m.HomeComponent),
+      },
       {
         path: 'contact',
         loadComponent: () =>
@@ -36,6 +43,4 @@ export const routes: Routes = [
     path: "medic_panel",
     loadComponent: () => import('./pages/medic-panel/medic-panel/medic-panel.component').then((m) => m.MedicPanelComponent),
   },
-
-  { path: '**', redirectTo: '' },
 ];

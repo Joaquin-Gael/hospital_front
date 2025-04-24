@@ -2,14 +2,15 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { User } from '../models/user.model';
 import { AuthService } from '../../../auth/service/auth.service';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { SidebarComponent } from '../sidebar/sidebar.component'; 
-import { HeaderComponent } from '../header/header.component'; 
-import { AppointmentsComponent } from '../appointments/appointments.component'; 
+import { SidebarComponent } from '../sidebar/sidebar.component';
+import { HeaderComponent } from '../header/header.component';
+import { AppointmentsComponent } from '../appointments/appointments.component';
 import { HistoryComponent } from '../history/history.component';
-import { NotificationsComponent } from '../notifications/notifications.component'; 
-import { DocumentsComponent } from '../documents/documents.component'; 
-import { ProfileComponent } from '../profile/profile.component'; 
+import { NotificationsComponent } from '../notifications/notifications.component';
+import { DocumentsComponent } from '../documents/documents.component';
+import { ProfileComponent } from '../profile/profile.component';
 
 @Component({
   selector: 'app-user-panel',
@@ -25,7 +26,7 @@ import { ProfileComponent } from '../profile/profile.component';
     ProfileComponent,
     CommonModule
   ],
-  standalone: true 
+  standalone: true
 })
 export class UserPanelComponent implements OnInit, OnDestroy {
   user: User | null = null;
@@ -39,13 +40,23 @@ export class UserPanelComponent implements OnInit, OnDestroy {
   documents: any[] = [];
 
   private destroy$ = new Subject<void>();
-  constructor(private authService: AuthService) {}
+
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    this.authService.user$.subscribe(user =>{
-      this.user = user;
-    })
+    this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (user) => {
+        this.user = user;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Error al cargar los datos del usuario';
+        this.loading = false;
+        console.error('Error fetching user:', err);
+      }
+    });
 
+    // Datos de ejemplo (mantengo tu lógica original)
     this.appointments = [
       { id: '1', title: 'Cita médica', date: '2025-04-22T10:00:00' },
       { id: '2', title: 'Consulta dental', date: '2025-04-23T14:00:00' }
@@ -84,6 +95,18 @@ export class UserPanelComponent implements OnInit, OnDestroy {
 
   onChangePassword(): void {
     console.log('Change password triggered');
+  }
+
+  onLogout(): void {
+    this.authService.logout().pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        console.error('Error during logout:', err);
+        this.router.navigate(['/login']); // Redirige incluso si hay error
+      }
+    });
   }
 
   ngOnDestroy(): void {
