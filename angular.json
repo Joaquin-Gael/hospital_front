@@ -91,12 +91,9 @@
               }
             ],
             "styles": [
-              "src/styles.scss",
-              "node_modules/flyonui/src/vendor/apexcharts.css"
+              "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/lodash/lodash.js",
-              "node_modules/apexcharts/dist/apexcharts.js"
             ]
           }
         }
