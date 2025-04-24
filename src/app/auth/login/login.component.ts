@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from "@angular/common";
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/service/auth.service';
 
@@ -13,27 +13,24 @@ import { AuthService } from '../../auth/service/auth.service';
 })
 export class LoginComponent {
   loginObj: any = {
-    "email": "",
-    "password": ""
+    email: '',
+    password: ''
   };
 
-  showPassword: boolean = false; 
+  showPassword: boolean = false;
 
   togglePassword(): void {
-    this.showPassword = !this.showPassword; 
+    this.showPassword = !this.showPassword;
   }
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router) {}
 
   onLogin() {
-    debugger;
     this.authService.login(this.loginObj).subscribe({
-      next: (response) => {
-        this.authService.setUser(response);
+      next: () => {
         this.router.navigate(['/user_panel']);
       },
-      error: (error) => console.error('Login error:', error, JSON.stringify(error.error.detail, null, 2)),
+      error: (error) => console.error('Login error:', error, JSON.stringify(error.error.detail, null, 2))
     });
   }
 }
-
