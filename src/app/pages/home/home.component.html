@@ -1,0 +1,315 @@
+<main class="home-container">
+  <!-- Header/Hero Section -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge">Centro Médico de Excelencia</div>
+      <h1>Hospital SDLG</h1>
+      <p class="hero-subtitle">Comprometidos con tu salud y bienestar con atención médica de calidad y tecnología avanzada</p>
+      <div class="hero-cta">
+        <button class="btn-primary">
+          <span class="material-icons">event</span>
+          Agendar Cita
+        </button>
+        <button class="btn-secondary">
+          <span class="material-icons">phone</span>
+          Contacto de Emergencia
+        </button>
+      </div>
+      <div class="hero-badges">
+        <div class="badge">
+          <span class="material-icons">verified</span>
+          Acreditación JCI
+        </div>
+        <div class="badge">
+          <span class="material-icons">verified</span>
+          ISO 9001
+        </div>
+        <div class="badge">
+          <span class="material-icons">verified</span>
+          Hospital Universitario
+        </div>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="floating-card card-1">
+        <span class="material-icons">medical_services</span>
+        <span>Atención 24/7</span>
+      </div>
+      <div class="floating-card card-2">
+        <span class="material-icons">health_and_safety</span>
+        <span>Excelencia Médica</span>
+      </div>
+      <div class="floating-card card-3">
+        <span class="material-icons">healing</span>
+        <span>Tecnología Avanzada</span>
+      </div>
+      <div class="image-container">
+        <div class="image-placeholder" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="stats-container">
+      <div class="stat-item" *ngFor="let stat of stats">
+        <div class="stat-icon">
+          <span class="material-icons">{{stat.icon}}</span>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{stat.value}}</span>
+          <span class="stat-label">{{stat.label}}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="services-section" aria-labelledby="services-heading">
+    <div class="section-header">
+      <h2 id="services-heading">Nuestros Servicios</h2>
+      <p class="section-description">Ofrecemos una amplia gama de servicios médicos con los más altos estándares de calidad</p>
+    </div>
+    
+    <div class="features-grid">
+      <div class="feature-card" *ngFor="let department of departments">
+        <div class="feature-icon">
+          <span class="material-icons">{{department.icon}}</span>
+        </div>
+        <div class="feature-content">
+          <h3>{{department.name}}</h3>
+          <p>{{department.description}}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Specialties Section -->
+  <section class="specialties-section">
+    <div class="section-header">
+      <h2>Especialidades Médicas</h2>
+      <p class="section-description">Contamos con especialistas en todas las áreas de la medicina para brindarle la mejor atención</p>
+    </div>
+    
+    <div class="specialties-grid">
+      <div class="specialty-card" *ngFor="let specialty of specialties">
+        <div class="specialty-icon">
+          <span class="material-icons">{{specialty.icon}}</span>
+        </div>
+        <h3>{{specialty.name}}</h3>
+        <p>{{specialty.description}}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Overview Section -->
+  <section class="platform-section">
+    <div class="section-header">
+      <h2>Servicios Destacados</h2>
+      <p class="section-description">Conoce nuestros servicios especializados diseñados para cubrir todas tus necesidades de salud</p>
+    </div>
+
+    <div class="platform-tabs">
+      <div class="tab-headers">
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'emergencies'"
+          (click)="setActiveTab('emergencies')">
+          <span class="material-icons">emergency</span>
+          Emergencias
+        </button>
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'checkups'"
+          (click)="setActiveTab('checkups')">
+          <span class="material-icons">health_and_safety</span>
+          Chequeos Preventivos
+        </button>
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'surgery'"
+          (click)="setActiveTab('surgery')">
+          <span class="material-icons">medical_services</span>
+          Cirugía
+        </button>
+      </div>
+      
+      <div class="tab-content">
+        <div class="tab-pane" *ngIf="activeTab === 'emergencies'">
+          <div class="tab-image">
+            <div class="image-placeholder hospital-image"></div>
+          </div>
+          <div class="tab-info">
+            <h3>Servicio de Emergencias</h3>
+            <p>Nuestro servicio de emergencias está disponible las 24 horas del día, los 365 días del año. Contamos con médicos especialistas, equipamiento de última generación y protocolos de atención rápida para garantizar la mejor atención en momentos críticos.</p>
+            <ul class="feature-list">
+              <li><span class="material-icons">check_circle</span> Atención inmediata 24/7</li>
+              <li><span class="material-icons">check_circle</span> Equipo médico especializado</li>
+              <li><span class="material-icons">check_circle</span> Unidad de trauma y shock</li>
+              <li><span class="material-icons">check_circle</span> Diagnóstico por imágenes inmediato</li>
+              <li><span class="material-icons">check_circle</span> Unidad de cuidados intensivos</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="tab-pane" *ngIf="activeTab === 'checkups'">
+          <div class="tab-image">
+            <div class="image-placeholder clinic-image"></div>
+          </div>
+          <div class="tab-info">
+            <h3>Chequeos Médicos Preventivos</h3>
+            <p>Programas de chequeo médico diseñados para detectar factores de riesgo y enfermedades en etapas tempranas. Nuestros paquetes están personalizados según edad, género y antecedentes médicos para una evaluación integral de su salud.</p>
+            <ul class="feature-list">
+              <li><span class="material-icons">check_circle</span> Evaluación médica completa</li>
+              <li><span class="material-icons">check_circle</span> Análisis de laboratorio</li>
+              <li><span class="material-icons">check_circle</span> Estudios de imagen</li>
+              <li><span class="material-icons">check_circle</span> Evaluación cardiológica</li>
+              <li><span class="material-icons">check_circle</span> Informe médico detallado</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="tab-pane" *ngIf="activeTab === 'surgery'">
+          <div class="tab-image">
+            <div class="image-placeholder doctor-image"></div>
+          </div>
+          <div class="tab-info">
+            <h3>Centro Quirúrgico</h3>
+            <p>Nuestro centro quirúrgico cuenta con quirófanos equipados con tecnología de vanguardia y un equipo de cirujanos altamente especializados. Realizamos procedimientos de mínima invasión hasta cirugías de alta complejidad con los más altos estándares de seguridad.</p>
+            <ul class="feature-list">
+              <li><span class="material-icons">check_circle</span> Quirófanos de última generación</li>
+              <li><span class="material-icons">check_circle</span> Cirugía mínimamente invasiva</li>
+              <li><span class="material-icons">check_circle</span> Cirugía robótica</li>
+              <li><span class="material-icons">check_circle</span> Recuperación postoperatoria especializada</li>
+              <li><span class="material-icons">check_circle</span> Seguimiento personalizado</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Doctors Section -->
+  <section class="testimonials-section">
+    <div class="section-header">
+      <h2>Nuestros Especialistas</h2>
+      <p class="section-description">Contamos con un equipo médico de excelencia comprometido con tu salud</p>
+    </div>
+    
+    <div class="testimonials-container">
+      <div class="testimonial-card" *ngFor="let doctor of doctors; let i = index" [class.active]="i === currentDoctorIndex">
+        <div class="testimonial-content">
+          <blockquote>
+            <p>"{{doctor.description}}"</p>
+          </blockquote>
+          <div class="testimonial-rating">
+            <span class="material-icons star" *ngFor="let star of getStars(doctor.rating)">star</span>
+          </div>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-avatar">
+            <span class="material-icons">{{doctor.avatar}}</span>
+          </div>
+          <div class="author-info">
+            <h4>{{doctor.name}}</h4>
+            <p>{{doctor.specialty}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="testimonial-dots">
+      <span 
+        class="dot" 
+        *ngFor="let doctor of doctors; let i = index" 
+        [class.active]="i === currentDoctorIndex"
+        (click)="currentDoctorIndex = i">
+      </span>
+    </div>
+  </section>
+
+  <!-- News Section -->
+  <section class="news-section">
+    <div class="section-header">
+      <h2>Noticias y Eventos</h2>
+      <p class="section-description">Mantente informado sobre las últimas novedades de nuestro hospital</p>
+    </div>
+    
+    <div class="news-grid">
+      <div class="news-card" *ngFor="let item of news">
+        <div class="news-image">
+          <div class="image-placeholder"></div>
+        </div>
+        <div class="news-content">
+          <span class="news-date">{{item.date}}</span>
+          <h3>{{item.title}}</h3>
+          <p>{{item.summary}}</p>
+          <a href="#" class="news-link">Leer más</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section">
+    <div class="section-header">
+      <h2>Preguntas Frecuentes</h2>
+      <p class="section-description">Respuestas a las consultas más comunes sobre nuestros servicios</p>
+    </div>
+    
+    <div class="faq-container">
+      <div class="faq-item" *ngFor="let faq of faqs">
+        <div class="faq-question" (click)="toggleFaq(faq)">
+          <h3>{{faq.question}}</h3>
+          <span class="material-icons">{{faq.isOpen ? 'remove' : 'add'}}</span>
+        </div>
+        <div class="faq-answer" [@expandCollapse]="faq.isOpen ? 'expanded' : 'collapsed'">
+          <p>{{faq.answer}}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2>Su Salud es Nuestra Prioridad</h2>
+      <p>Agende una cita con nuestros especialistas y experimente atención médica de excelencia</p>
+      <div class="cta-buttons">
+        <button class="btn-primary">
+          <span class="material-icons">event</span>
+          Agendar Cita
+        </button>
+        <button class="btn-outline">
+          <span class="material-icons">phone</span>
+          Contactar
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Section -->
+  <section class="newsletter-section">
+    <div class="newsletter-content">
+      <div class="newsletter-info">
+        <h2>Boletín Informativo</h2>
+        <p>Suscríbase para recibir información sobre campañas de salud, nuevos servicios y consejos médicos</p>
+      </div>
+      <div class="newsletter-form">
+        <div class="form-group">
+          <input 
+            type="email" 
+            [(ngModel)]="email" 
+            placeholder="Su correo electrónico" 
+            aria-label="Correo electrónico para boletín"
+          >
+          <button (click)="submitNewsletter()">
+            <span class="material-icons">send</span>
+          </button>
+        </div>
+        <p class="privacy-note">Al suscribirse, acepta nuestra <a href="#">Política de Privacidad</a></p>
+      </div>
+    </div>
+  </section>
+</main>
