@@ -1,25 +1,22 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
+import { ApiService } from './api.service'; 
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://127.0.0.1:8000/auth/login';
-  private userMeUrl = 'http://127.0.0.1:8000/users/me';
-  private logoutUrl = 'http://127.0.0.1:8000/auth/logout';
   private tokenKey = 'auth_token';
 
-  constructor(private http: HttpClient) {}
+  constructor(private apiService: ApiService) {}
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem(this.tokenKey);
   }
 
   login(loginObj: { email: string; password: string }): Observable<{ access_token: string }> {
-    return this.http.post<{ access_token: string }>(this.apiUrl, loginObj).pipe(
+    return this.apiService.post<{ access_token: string }>('auth/login', loginObj).pipe(
       tap(response => {
         if (response.access_token) {
           localStorage.setItem(this.tokenKey, response.access_token);
@@ -32,7 +29,7 @@ export class AuthService {
     if (!this.isLoggedIn()) {
       return of(null);
     }
-    return this.http.get<any>(this.userMeUrl).pipe(
+    return this.apiService.get<any>('users/me').pipe(
       catchError(() => of(null))
     );
   }
@@ -42,7 +39,7 @@ export class AuthService {
       localStorage.removeItem(this.tokenKey);
       return of(undefined);
     }
-    return this.http.post<void>(this.logoutUrl, {}).pipe(
+    return this.apiService.post<void>('auth/logout', {}).pipe(
       tap(() => localStorage.removeItem(this.tokenKey)),
       catchError(() => {
         localStorage.removeItem(this.tokenKey);
