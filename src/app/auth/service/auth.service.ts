@@ -31,7 +31,7 @@ export class AuthService {
     );
   }
 
-  getUser(): Observable<any | null> {
+  getUser(): Observable<any | null> { 
     if (!this.isLoggedIn()) {
       return of(null);
     }

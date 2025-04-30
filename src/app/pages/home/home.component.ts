@@ -108,7 +108,7 @@ export class HomeComponent implements OnInit {
       id: 3,
       name: "Diagnóstico por Imágenes",
       description: "Tecnología avanzada para diagnósticos precisos: resonancia, tomografía y ecografía.",
-      icon: "radiology",
+      icon: "radio",
     },
     {
       id: 4,
@@ -120,7 +120,7 @@ export class HomeComponent implements OnInit {
       id: 5,
       name: "Cirugía",
       description: "Quirófanos equipados con tecnología de vanguardia y equipo médico especializado.",
-      icon: "surgical",
+      icon: "monitor_heart",
     },
     {
       id: 6,

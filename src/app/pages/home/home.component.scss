@@ -69,6 +69,8 @@ $z-index-tooltip: 1070;
 
 @mixin responsive-padding {
   padding: 2rem;
+  margin-bottom: 4rem;
+  position: relative;
   
   @media (min-width: 768px) {
     padding: 3rem;
@@ -93,6 +95,7 @@ $z-index-tooltip: 1070;
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
+  margin-top: 80px;
   color: $text-color;
   font-family: 'Inter', 'Segoe UI', sans-serif;
   overflow-x: hidden;
@@ -100,8 +103,6 @@ $z-index-tooltip: 1070;
 
 section {
   @include responsive-padding;
-  margin-bottom: 4rem;
-  position: relative;
 }
 
 h1, h2, h3, h4, h5, h6 {

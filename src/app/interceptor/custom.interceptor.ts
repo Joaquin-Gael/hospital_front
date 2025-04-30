@@ -1,5 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../auth/service/auth.service';
@@ -7,7 +7,7 @@ import { AuthService } from '../auth/service/auth.service';
 export const customInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('auth_token');
   const router = inject(Router);
-  const authService = inject(AuthService);
+  const injector = inject(Injector); // Inyectar Injector
 
   const publicEndpoints = [
     '/users/add',
@@ -31,6 +31,8 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
   return next(clonedReq).pipe(
     catchError((error) => {
       if (error.status === 401) {
+        // Obtener AuthService de forma diferida
+        const authService = injector.get(AuthService);
         return authService.refreshToken().pipe(
           switchMap((response) => {
             // Nuevo token obtenido, reintentar la petición
