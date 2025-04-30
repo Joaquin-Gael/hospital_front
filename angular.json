@@ -94,6 +94,7 @@
               "src/styles.scss"
             ],
             "scripts": [
+              "https://cdn.jsdelivr.net/npm/animejs/lib/anime.iife.min.js"
             ]
           }
         }
