@@ -68,7 +68,22 @@
         </div>
       </div>
       
-      <div #patientsChart class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4" *ngIf="!isLoading"></div>
+      <apx-chart
+        *ngIf="!isLoading"
+        [series]="patientsChartOptions.series"
+        [chart]="patientsChartOptions.chart"
+        [dataLabels]="patientsChartOptions.dataLabels"
+        [markers]="patientsChartOptions.markers"
+        [fill]="patientsChartOptions.fill"
+        [yaxis]="patientsChartOptions.yaxis"
+        [xaxis]="patientsChartOptions.xaxis"
+        [tooltip]="patientsChartOptions.tooltip"
+        [stroke]="patientsChartOptions.stroke"
+        [grid]="patientsChartOptions.grid"
+        [legend]="patientsChartOptions.legend"
+        [plotOptions]="patientsChartOptions.plotOptions"
+        class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4"
+      ></apx-chart>
       <div *ngIf="isLoading" class="statistics__chart-loading">Cargando...</div>
     </div>
     
@@ -85,7 +100,22 @@
         </div>
       </div>
       
-      <div #appointmentsChart class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4" *ngIf="!isLoading"></div>
+      <apx-chart
+        *ngIf="!isLoading"
+        [series]="appointmentsChartOptions.series"
+        [chart]="appointmentsChartOptions.chart"
+        [dataLabels]="appointmentsChartOptions.dataLabels"
+        [plotOptions]="appointmentsChartOptions.plotOptions"
+        [yaxis]="appointmentsChartOptions.yaxis"
+        [xaxis]="appointmentsChartOptions.xaxis"
+        [tooltip]="appointmentsChartOptions.tooltip"
+        [stroke]="appointmentsChartOptions.stroke"
+        [grid]="appointmentsChartOptions.grid"
+        [legend]="appointmentsChartOptions.legend"
+        [fill]="appointmentsChartOptions.fill"
+        [markers]="appointmentsChartOptions.markers"
+        class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4"
+      ></apx-chart>
       <div *ngIf="isLoading" class="statistics__chart-loading">Cargando...</div>
     </div>
   </div>
@@ -104,7 +134,19 @@
         </div>
       </div>
       
-      <div #diagnosesChart class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4" *ngIf="!isLoading"></div>
+      <apx-chart
+        *ngIf="!isLoading"
+        [series]="diagnosesChartOptions.series"
+        [chart]="diagnosesChartOptions.chart"
+        [dataLabels]="diagnosesChartOptions.dataLabels"
+        [plotOptions]="diagnosesChartOptions.plotOptions"
+        [tooltip]="diagnosesChartOptions.tooltip"
+        [legend]="diagnosesChartOptions.legend"
+        [stroke]="diagnosesChartOptions.stroke"
+        [fill]="diagnosesChartOptions.fill"
+        [labels]="diagnosesChartOptions.labels!"
+        class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4"
+      ></apx-chart>
       <div *ngIf="isLoading" class="statistics__chart-loading">Cargando...</div>
     </div>
     
@@ -121,7 +163,21 @@
         </div>
       </div>
       
-      <div #satisfactionChart class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4" *ngIf="!isLoading"></div>
+      <apx-chart
+        *ngIf="!isLoading"
+        [series]="satisfactionChartOptions.series"
+        [chart]="satisfactionChartOptions.chart"
+        [dataLabels]="satisfactionChartOptions.dataLabels"
+        [markers]="satisfactionChartOptions.markers"
+        [yaxis]="satisfactionChartOptions.yaxis"
+        [xaxis]="satisfactionChartOptions.xaxis"
+        [tooltip]="satisfactionChartOptions.tooltip"
+        [stroke]="satisfactionChartOptions.stroke"
+        [grid]="satisfactionChartOptions.grid"
+        [legend]="satisfactionChartOptions.legend"
+        [plotOptions]="satisfactionChartOptions.plotOptions"
+        class="statistics__chart w-full h-96 bg-white rounded-lg shadow-md p-4"
+      ></apx-chart>
       <div *ngIf="isLoading" class="statistics__chart-loading">Cargando...</div>
     </div>
   </div>
