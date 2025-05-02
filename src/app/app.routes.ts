@@ -20,6 +20,11 @@ export const routes: Routes = [
           import('./pages/contact/contact.component').then((m) => m.ContactComponent),
       },
       {
+        path: 'shifts',
+        loadComponent: () =>
+          import('./pages/shifts/shift.component').then((m) => m.ShiftsComponent),
+      },
+      {
         path: 'register',
         loadComponent: () =>
           import('./auth/register/register.component').then((m) => m.RegisterComponent),
