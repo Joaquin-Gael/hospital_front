@@ -1,0 +1,236 @@
+<div class="appointment-scheduler-container" @fadeInOut>
+  <div class="appointment-card" [class.success-state]="formSubmitted">
+    <!-- Encabezado -->
+    <div class="card-header">
+      <h2 class="appointment-title">
+        <span class="title-icon" @rotateIcon>
+          <i class="material-icons">event_available</i>
+        </span>
+        <span class="title-text">Reserva tu turno</span>
+      </h2>
+      
+      <!-- Indicador de pasos -->
+      <div class="steps-indicator" *ngIf="!formSubmitted">
+        <div class="steps-track">
+          <div class="steps-progress" [style.width.%]="(currentStep / totalSteps) * 100"></div>
+        </div>
+        <div class="steps-circles">
+          <div 
+            *ngFor="let step of [1, 2, 3, 4]; let i = index" 
+            class="step-circle" 
+            [class.active]="currentStep >= step"
+            [class.completed]="currentStep > step"
+            (click)="isStepValid(step - 1) && (currentStep = step)">
+            <span class="step-number">{{step}}</span>
+            <i *ngIf="currentStep > step" class="material-icons step-check">check</i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Contenido del formulario -->
+    <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="appointment-form">
+      <!-- Mensaje de éxito -->
+      <div *ngIf="formSubmitted" class="success-message" @fadeInOut>
+        <div class="success-icon">
+          <i class="material-icons">check_circle</i>
+        </div>
+        <h3>¡Turno Reservado!</h3>
+        <p>Te hemos enviado un correo con los detalles de tu cita.</p>
+      </div>
+      
+      <!-- Paso 1: Fecha y Hora -->
+      <div *ngIf="currentStep === 1 && !formSubmitted" class="form-step" @staggerIn>
+        <h3 class="step-title">¿Cuándo quieres tu cita?</h3>
+        
+        <!-- Fecha del turno -->
+        <div class="custom-form-field">
+          <label class="field-label">
+            <i class="material-icons field-icon">calendar_today</i>
+            Fecha
+          </label>
+          <div class="field-input-container">
+            <input 
+              [matDatepicker]="picker" 
+              formControlName="appointmentDate"
+              [min]="minDate"
+              placeholder="Selecciona una fecha"
+              aria-label="Selecciona la fecha para tu turno"
+              class="custom-input date-input">
+            <div class="field-icon-end" (click)="picker.open()">
+              <i class="material-icons">event</i>
+            </div>
+          </div>
+          <mat-datepicker #picker></mat-datepicker>
+          <div *ngIf="appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched" class="error-message">
+            {{ getErrorMessage('appointmentDate') }}
+          </div>
+        </div>
+        
+        <!-- Hora del turno -->
+        <div class="custom-form-field">
+          <label class="field-label">
+            <i class="material-icons field-icon">schedule</i>
+            Hora
+          </label>
+          <div class="field-input-container">
+            <select 
+              formControlName="appointmentTime"
+              [disabled]="!appointmentForm.get('appointmentDate')?.value"
+              aria-label="Selecciona la hora para tu turno"
+              class="custom-input time-input">
+              <option value="" disabled selected>Selecciona una hora</option>
+              <option *ngFor="let timeSlot of availableTimeSlots" [value]="timeSlot">
+                {{ timeSlot }}
+              </option>
+            </select>
+            <div class="field-icon-end">
+              <i class="material-icons">access_time</i>
+            </div>
+          </div>
+          <div *ngIf="appointmentForm.get('appointmentTime')?.invalid && appointmentForm.get('appointmentTime')?.touched" class="error-message">
+            {{ getErrorMessage('appointmentTime') }}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Paso 2: Servicio -->
+      <div *ngIf="currentStep === 2 && !formSubmitted" class="form-step" @staggerIn>
+        <h3 class="step-title">¿Qué servicio necesitas?</h3>
+        
+        <div class="service-options">
+          <div 
+            *ngFor="let service of services" 
+            class="service-card" 
+            [class.selected]="appointmentForm.get('service')?.value === service.id"
+            (click)="appointmentForm.get('service')?.setValue(service.id)">
+            <div class="service-icon">
+              <i class="material-icons">{{service.icon}}</i>
+            </div>
+            <div class="service-name">{{service.name}}</div>
+          </div>
+        </div>
+        
+        <div *ngIf="appointmentForm.get('service')?.invalid && appointmentForm.get('service')?.touched" class="error-message centered-error">
+          {{ getErrorMessage('service') }}
+        </div>
+      </div>
+      
+      <!-- Paso 3: Motivo -->
+      <div *ngIf="currentStep === 3 && !formSubmitted" class="form-step" @staggerIn>
+        <h3 class="step-title">¿Cuál es el motivo de tu visita?</h3>
+        
+        <div class="reason-options">
+          <div 
+            *ngFor="let reason of reasonOptions" 
+            class="reason-card" 
+            [class.selected]="appointmentForm.get('reasonOption')?.value === reason.id"
+            (click)="appointmentForm.get('reasonOption')?.setValue(reason.id)">
+            <div class="reason-name">{{reason.name}}</div>
+          </div>
+        </div>
+        
+        <!-- Campo para motivo personalizado (aparece solo si se selecciona "Otro") -->
+        <div *ngIf="showCustomReason" class="custom-form-field custom-reason-field" @fadeInOut>
+          <label class="field-label">
+            <i class="material-icons field-icon">edit</i>
+            Especifica el motivo
+          </label>
+          <div class="field-input-container">
+            <textarea 
+              formControlName="customReason"
+              placeholder="Describe el motivo de tu visita"
+              rows="3"
+              aria-label="Describe el motivo específico de tu visita"
+              class="custom-input textarea-input"></textarea>
+          </div>
+          <div *ngIf="appointmentForm.get('customReason')?.invalid && appointmentForm.get('customReason')?.touched" class="error-message">
+            {{ getErrorMessage('customReason') }}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Paso 4: Confirmación -->
+      <div *ngIf="currentStep === 4 && !formSubmitted" class="form-step" @staggerIn>
+        <h3 class="step-title">Confirma tu cita</h3>
+        
+        <div class="confirmation-card">
+          <div class="confirmation-item">
+            <div class="confirmation-label">Fecha y Hora:</div>
+            <div class="confirmation-value">
+              <i class="material-icons">event</i>
+              <span>
+                {{ appointmentForm.get('appointmentDate')?.value | date:'fullDate':'':'es' }} a las 
+                {{ appointmentForm.get('appointmentTime')?.value }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="confirmation-item">
+            <div class="confirmation-label">Servicio:</div>
+            <div class="confirmation-value">
+              <i class="material-icons">{{ getServiceIcon(appointmentForm.get('service')?.value) }}</i>
+              <span>{{ getServiceName(appointmentForm.get('service')?.value) }}</span>
+            </div>
+          </div>
+          
+          <div class="confirmation-item">
+            <div class="confirmation-label">Motivo:</div>
+            <div class="confirmation-value">
+              <i class="material-icons">description</i>
+              <span>{{ getReasonText(appointmentForm.get('reasonOption')?.value, appointmentForm.get('customReason')?.value) }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="terms-checkbox">
+          <label class="checkbox-container">
+            <input type="checkbox" checked>
+            <span class="checkmark"></span>
+            <span class="checkbox-label">Acepto los términos y condiciones</span>
+          </label>
+        </div>
+      </div>
+      
+      <!-- Botones de navegación -->
+      <div class="form-navigation" *ngIf="!formSubmitted">
+        <button 
+          type="button" 
+          class="nav-button back-button"
+          *ngIf="currentStep > 1"
+          (click)="prevStep()"
+          aria-label="Volver al paso anterior">
+          <i class="material-icons">arrow_back</i>
+          Atrás
+        </button>
+        
+        <button 
+          *ngIf="currentStep < totalSteps"
+          type="button" 
+          class="nav-button next-button"
+          (click)="nextStep()"
+          [disabled]="!isStepValid(currentStep)"
+          aria-label="Continuar al siguiente paso"
+          [@pulse]="buttonState"
+          (mouseenter)="onButtonHover(true)"
+          (mouseleave)="onButtonHover(false)">
+          Continuar
+          <i class="material-icons">arrow_forward</i>
+        </button>
+        
+        <button 
+          *ngIf="currentStep === totalSteps"
+          type="submit" 
+          class="nav-button submit-button"
+          [disabled]="appointmentForm.invalid"
+          aria-label="Reservar turno"
+          [@pulse]="buttonState"
+          (mouseenter)="onButtonHover(true)"
+          (mouseleave)="onButtonHover(false)">
+          <i class="material-icons">check_circle</i>
+          Confirmar Reserva
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
