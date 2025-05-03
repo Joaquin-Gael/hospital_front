@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError, switchMap, tap } from 'rxjs/operators';
+import { catchError, tap, map } from 'rxjs/operators';
 import { ApiService } from './api.service';
+import { User, UserResponse } from '../../pages/user-panel/models/user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -16,27 +17,52 @@ export class AuthService {
     return !!localStorage.getItem(this.tokenKey);
   }
 
-  login(credentials: { email: string; password: string }): Observable<{ access_token: string, refresh_token: string }> {
+  login(credentials: { email: string; password: string }): Observable<{ access_token: string; refresh_token: string }> {
     return this.apiService.post<{ access_token: string; refresh_token: string }>('auth/login', credentials).pipe(
       tap(response => {
         if (response.access_token && response.refresh_token) {
           localStorage.setItem(this.tokenKey, response.access_token);
           localStorage.setItem(this.refreshTokenKey, response.refresh_token);
-          // Generar cookie de sesión
-          this.apiService.put('auth/session', {}).subscribe({
-            error: (err) => console.error('Error setting session cookie:', err),
-          });
         }
+      }),
+      catchError((err) => {
+        if (err.message === 'UUID not available') {
+          return throwError(() => new Error('UUID not available'));
+        }
+        return throwError(() => err);
       })
     );
   }
 
-  getUser(): Observable<any | null> { 
+  getUser(): Observable<User | null> {
     if (!this.isLoggedIn()) {
       return of(null);
     }
-    return this.apiService.get<any>('users/me').pipe(
-      catchError(() => of(null))
+    return this.apiService.get<UserResponse>('users/me').pipe(
+      tap(response => console.log('Raw response from users/me:', response)), // Depuración
+      map(response => {
+        if (!response || !response.user) {
+          return null;
+        }
+        return {
+          id: response.user.id,
+          username: response.user.username,
+          email: response.user.email,
+          first_name: response.user.first_name,
+          last_name: response.user.last_name,
+          is_active: response.user.is_active,
+          is_admin: response.user.is_admin,
+          is_superuser: response.user.is_superuser,
+          last_login: response.user.last_login,
+          date_joined: response.user.date_joined,
+          dni: response.user.dni,
+          telephone: response.user.telephone, 
+        } as User;
+      }),
+      catchError((err) => {
+        console.error('Error fetching user:', err);
+        return of(null);
+      })
     );
   }
 
@@ -75,15 +101,6 @@ export class AuthService {
         localStorage.removeItem(this.tokenKey);
         localStorage.removeItem(this.refreshTokenKey);
         return throwError(() => err);
-      })
-    );
-  }
-
-  checkSessionStatus(): Observable<{ session: boolean; state: string }> {
-    return this.apiService.get<{ session: boolean; state: string }>('auth/session/status').pipe(
-      catchError((err) => {
-        console.error('Session status check failed:', err);
-        return of({ session: false, state: 'no_session' });
       })
     );
   }

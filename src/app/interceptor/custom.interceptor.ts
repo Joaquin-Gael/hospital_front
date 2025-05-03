@@ -11,9 +11,7 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
 
   const publicEndpoints = [
     '/users/add',
-    '/auth/login',
     '/id_prefix_api_secret/',
-    '/auth/session',
   ];
 
   const isPublic = publicEndpoints.some(endpoint => req.url.includes(endpoint));
