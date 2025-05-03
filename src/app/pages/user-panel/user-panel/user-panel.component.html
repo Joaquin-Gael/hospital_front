@@ -3,6 +3,7 @@
     [user]="user"
     [activeSection]="activeSection"
     (sectionChange)="changeSection($event)"
+    (logout)="onLogout()"
   ></app-sidebar>
   <div class="main-content">
     <app-header [activeSection]="activeSection"></app-header>

@@ -24,9 +24,9 @@ import { ProfileComponent } from '../profile/profile.component';
     NotificationsComponent,
     DocumentsComponent,
     ProfileComponent,
-    CommonModule
+    CommonModule,
   ],
-  standalone: true
+  standalone: true,
 })
 export class UserPanelComponent implements OnInit, OnDestroy {
   user: User | null = null;
@@ -44,37 +44,52 @@ export class UserPanelComponent implements OnInit, OnDestroy {
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    console.log('Initial state - activeSection:', this.activeSection, 'loading:', this.loading); // Depuración
+
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe({
       next: (user) => {
+        console.log('Mapped user in UserPanelComponent:', user); // Depuración
         this.user = user;
         this.loading = false;
+        console.log('After fetching user - user:', this.user, 'loading:', this.loading, 'activeSection:', this.activeSection); // Depuración
+        if (!user) {
+          this.error = 'No se encontraron datos del usuario';
+          this.router.navigate(['/login']);
+        }
       },
       error: (err) => {
         this.error = 'Error al cargar los datos del usuario';
         this.loading = false;
         console.error('Error fetching user:', err);
-      }
+        this.router.navigate(['/login']);
+      },
     });
 
-    // Datos de ejemplo (mantengo tu lógica original)
+    // Datos de ejemplo
     this.appointments = [
       { id: '1', title: 'Cita médica', date: '2025-04-22T10:00:00' },
-      { id: '2', title: 'Consulta dental', date: '2025-04-23T14:00:00' }
+      { id: '2', title: 'Consulta dental', date: '2025-04-23T14:00:00' },
     ];
     this.appointmentHistory = [
-      { id: '3', title: 'Cita pasada', date: '2025-04-20T09:00:00' }
+      { id: '3', title: 'Cita pasada', date: '2025-04-20T09:00:00' },
     ];
     this.notifications = [
       { id: '1', message: 'Nueva cita programada', read: false },
-      { id: '2', message: 'Recordatorio de cita', read: false }
+      { id: '2', message: 'Recordatorio de cita', read: false },
     ];
     this.documents = [
-      { id: '1', name: 'Informe médico.pdf', url: '#' }
+      { id: '1', name: 'Informe médico.pdf', url: '#' },
     ];
   }
 
   changeSection(section: string): void {
     this.activeSection = section;
+    console.log('Section changed to:', this.activeSection); // Depuración
   }
 
   onRescheduleAppointment(event: any): void {
@@ -91,6 +106,7 @@ export class UserPanelComponent implements OnInit, OnDestroy {
 
   onEditProfile(): void {
     console.log('Edit profile triggered');
+    this.activeSection = 'profile';
   }
 
   onChangePassword(): void {
@@ -104,8 +120,8 @@ export class UserPanelComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error during logout:', err);
-        this.router.navigate(['/login']); // Redirige incluso si hay error
-      }
+        this.router.navigate(['/login']);
+      },
     });
   }
 

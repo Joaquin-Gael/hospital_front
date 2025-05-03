@@ -16,6 +16,8 @@ export class SidebarComponent {
   @Output() sectionChange = new EventEmitter<string>();
   @Output() logout = new EventEmitter<void>();
 
+  isEditing = false;
+
   notifications: Notification[] = [
     {
       id: '1',
