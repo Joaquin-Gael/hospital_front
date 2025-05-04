@@ -25,6 +25,16 @@ export const routes: Routes = [
           import('./pages/shifts/shift.component').then((m) => m.ShiftsComponent),
       },
       {
+        path: 'authorities',
+        loadComponent: () =>
+          import('./pages/authorities/authorities.component').then((m) => m.AuthoritiesComponent),
+      },
+      {
+        path: 'about-appointments',
+        loadComponent: () =>
+          import('./pages/about-appointments/about-appointments.component').then((m) => m.AboutAppointmentsComponent),
+      },
+      {
         path: 'register',
         loadComponent: () =>
           import('./auth/register/register.component').then((m) => m.RegisterComponent),
