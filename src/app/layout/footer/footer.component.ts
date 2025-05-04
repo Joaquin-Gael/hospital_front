@@ -23,11 +23,10 @@ export class FooterComponent {
 
   hospitalLinks = [
     { label: 'Sobre Nosotros', route: '/sobre-nosotros' },
-    { label: 'Especialidades', route: '/especialidades' }
+    { label: 'Servicios', route: '/servicios' }
   ];
 
   pacientesLinks = [
-    { label: 'Mi Turno', route: '/mi-turno' },
     { label: 'Historial', route: '/historial' },
     { label: 'Contacto', route: '/contact' }
   ];
@@ -39,6 +38,5 @@ export class FooterComponent {
 
   subscribe() {
     console.log(`Suscripción enviada: ${this.email}`);
-    // Podés agregar lógica real de envío aquí si querés.
   }
 }

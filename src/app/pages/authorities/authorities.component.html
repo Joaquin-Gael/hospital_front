@@ -1,0 +1,41 @@
+<section class="authorities-section">
+    <div class="container">
+      <h2 class="section-title">Nuestras Autoridades</h2>
+      
+      <div class="authorities-grid">
+        @for (authority of authorities; track authority.id) {
+          <div class="authority-card" @fadeIn>
+            <div class="authority-photo-container">
+              <img 
+                [src]="authority.photoUrl" 
+                [alt]="'Fotografía de ' + authority.name" 
+                class="authority-photo"
+                loading="lazy">
+            </div>
+            <div class="authority-info">
+              <h3 class="authority-name">{{ authority.name }}</h3>
+              <p class="authority-position">{{ authority.position }}</p>
+              <div class="authority-description">
+                @for (line of authority.description; track $index) {
+                  <p>{{ line }}</p>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+      
+      <div class="department-heads-section">
+        <h3 class="department-heads-title">Jefes de Departamento</h3>
+        <div class="department-heads-list">
+          @for (head of departmentHeads; track head.id) {
+            <div class="department-head-item" @fadeIn>
+              <p class="department-head-info">
+                <strong>{{ head.name }}</strong> - {{ head.department }}
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>

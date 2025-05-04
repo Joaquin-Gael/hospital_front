@@ -1,0 +1,64 @@
+<section class="appointment-section">
+  <div class="appointment-header">
+    <h2 class="appointment-title">NUESTROS TURNOS</h2>
+  </div>
+  
+  <div class="container">
+    <div class="info-container" @fadeIn>
+      <h3 class="info-title">Información Útil</h3>
+      
+      <div class="contact-methods" @listAnimation>
+        @for (method of contactMethods; track method.id) {
+          <div class="contact-method" [attr.aria-label]="'Método de contacto: ' + method.type">
+            @switch (method.type) {
+              @case ('location') {
+                <span class="contact-icon location-icon" aria-hidden="true"></span>
+              }
+              @case ('phone') {
+                <span class="contact-icon phone-icon" aria-hidden="true"></span>
+              }
+              @case ('email') {
+                <span class="contact-icon email-icon" aria-hidden="true"></span>
+              }
+              @case ('online') {
+                <span class="contact-icon online-icon" aria-hidden="true"></span>
+              }
+            }
+            <div class="contact-details">
+              @if (method.link) {
+                <a [href]="method.link" class="contact-value">{{ method.value }}</a>
+              } @else {
+                <p class="contact-value">{{ method.value }}</p>
+              }
+              <p class="contact-description">{{ method.description }}</p>
+            </div>
+          </div>
+        }
+      </div>
+      
+      <div class="info-items" @listAnimation>
+        @for (item of appointmentInfoItems; track item.id) {
+          <div class="info-item" [class.highlighted]="item.isHighlighted">
+            <h4 class="item-title">{{ item.title }}</h4>
+            <div class="item-content">
+              @for (paragraph of item.content; track $index) {
+                <p>{{ paragraph }}</p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      
+      <div class="online-appointment" @fadeIn>
+        <h4>¡Solicita tu turno online!</h4>
+        <p>Puedes solicitar tu turno médico directamente desde nuestra página web, sin necesidad de llamadas telefónicas o visitas presenciales. El sistema está disponible las 24 horas.</p>
+        <a [href]="onlineAppointmentUrl" class="online-btn">Solicitar Turno Online</a>
+      </div>
+      
+      <div class="important-note" @fadeIn>
+        <h4 class="note-title">Importante</h4>
+        <p>Los turnos están sujetos a disponibilidad. Se recomienda solicitarlos con anticipación. En caso de no poder asistir, por favor cancelar el turno con 24hs de anticipación para que pueda ser asignado a otro paciente.</p>
+      </div>
+    </div>
+  </div>
+</section>
