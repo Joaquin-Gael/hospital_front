@@ -62,17 +62,20 @@
           <div class="form-group">
             <label for="name">Nombre completo</label>
             <div class="input-with-icon">
-                <i class="fas fa-user"></i>
-                <input type="text" id="name" formControlName="name" placeholder="Ingrese su nombre completo">
+              <i class="fas fa-user"></i>
+              <input type="text" id="name" formControlName="name" placeholder="Ingrese su nombre completo">
             </div>
-              <div class="error-message" *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched">
-                  El nombre es requerido
-              </div>
+            <div class="error-message" *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched">
+              El nombre es requerido
+            </div>
           </div>
 
           <div class="form-group">
             <label for="email">Correo electrónico</label>
-            <input type="email" id="email" formControlName="email" placeholder="Ingrese su correo electrónico">
+            <div class="input-with-icon">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="email" formControlName="email" placeholder="Ingrese su correo electrónico">
+            </div>
             <div class="error-message" *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
               Ingrese un correo electrónico válido
             </div>
@@ -80,7 +83,10 @@
 
           <div class="form-group">
             <label for="phone">Teléfono</label>
-            <input type="tel" id="phone" formControlName="phone" placeholder="Ingrese su número de teléfono">
+            <div class="input-with-icon">
+              <i class="fas fa-phone-alt"></i>
+              <input type="tel" id="phone" formControlName="phone" placeholder="Ingrese su número de teléfono">
+            </div>
             <div class="error-message" *ngIf="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched">
               Ingrese un número de teléfono válido (10 dígitos)
             </div>
@@ -88,14 +94,17 @@
 
           <div class="form-group">
             <label for="subject">Asunto</label>
-            <select id="subject" formControlName="subject">
-              <option value="" disabled selected>Seleccione un asunto</option>
-              <option value="turnos">Consulta sobre turnos</option>
-              <option value="cancelacion">Cancelación de turno</option>
-              <option value="informacion">Información general</option>
-              <option value="sugerencia">Sugerencia</option>
-              <option value="otro">Otro</option>
-            </select>
+            <div class="input-with-icon">
+              <i class="fas fa-tag"></i>
+              <select id="subject" formControlName="subject">
+                <option value="" disabled selected>Seleccione un asunto</option>
+                <option value="turnos">Consulta sobre turnos</option>
+                <option value="cancelacion">Cancelación de turno</option>
+                <option value="informacion">Información general</option>
+                <option value="sugerencia">Sugerencia</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
             <div class="error-message" *ngIf="contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched">
               Seleccione un asunto
             </div>
@@ -103,7 +112,10 @@
 
           <div class="form-group">
             <label for="message">Mensaje</label>
-            <textarea id="message" formControlName="message" rows="5" placeholder="Escriba su mensaje aquí"></textarea>
+            <div class="input-with-icon">
+              <i class="fas fa-comment"></i>
+              <textarea id="message" formControlName="message" rows="5" placeholder="Escriba su mensaje aquí"></textarea>
+            </div>
             <div class="error-message" *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched">
               El mensaje debe tener al menos 10 caracteres
             </div>

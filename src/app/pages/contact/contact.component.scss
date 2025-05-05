@@ -1,7 +1,20 @@
-/* Base styles */
+@use 'sass:color';
+
+$primary-color: #2c6aa0;
+$accent-color: #4caf50;
+$text-color: #333;
+$secondary-text-color: #757575;
+$background-color: #e9f2fa;
+$white: #fff;
+$dark-bg: #f5f5f5; 
+$gray: #afafaf; 
+$light-gray: #afafaf;
+$error-color: #f44336;
+
+// Base styles
 body {
   font-family: "Arial", sans-serif;
-  color: #333;
+  color: $text-color;
   line-height: 1.6;
   margin: 0;
   padding: 0;
@@ -11,237 +24,236 @@ body {
   box-sizing: border-box;
 }
 
-/* Contact Section Styles */
+// Contact Section Styles
 .contact-section {
   padding: 80px 0;
-  background-color: #e9f2fa;
+  background-color: $background-color;
   margin-top: 80px;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .contact-header {
+    text-align: center;
+    margin-bottom: 50px;
+
+    h2 {
+      font-size: 2.5rem;
+      color: $primary-color;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: $secondary-text-color;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+  }
+
+  .contact-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+
+  .contact-info {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+
+    .info-card {
+      background-color: $white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+
+        .icon {
+          background-color: transparent;
+          border-color: $accent-color;
+          color: $accent-color;
+        }
+      }
+
+      .icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 60px;
+        height: 60px;
+        background-color: transparent;
+        color: $primary-color;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+        border: 2px solid $primary-color;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+      }
+
+      h3 {
+        font-size: 1.2rem;
+        color: $primary-color;
+        margin-bottom: 10px;
+      }
+
+      p {
+        color: $secondary-text-color;
+        margin: 5px 0;
+      }
+    }
+  }
+
+  .contact-form-container {
+    flex: 1;
+    background-color: $white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    h3 {
+      font-size: 1.5rem;
+      color: $primary-color;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+
+        label {
+          font-weight: 500;
+          margin-bottom: 5px;
+          color: $text-color;
+        }
+
+        .input-with-icon {
+          position: relative;
+          display: flex;
+          align-items: center;
+
+          i {
+            position: absolute;
+            left: 12px;
+            color: $secondary-text-color;
+            width: 18px;
+            height: 18px;
+            z-index: 1;
+            transition: color 0.3s ease;
+          }
+        }
+
+        input,
+        select,
+        textarea {
+          background-color: $dark-bg; 
+          padding: 12px 15px 12px 40px;
+          border: 2px solid $white;
+          border-radius: 5px;
+          font-size: 1rem;
+          color: $text-color; 
+          width: 100%;
+          transition: all 0.3s ease;
+        }
+
+        textarea {
+          resize: vertical;
+        }
+
+        .error-message {
+          color: $error-color;
+          font-size: 0.85rem;
+          margin-top: 5px;
+        }
+      }
+
+      .submit-btn {
+        background-color: $primary-color;
+        color: $white;
+        border: none;
+        padding: 14px 20px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          background-color: $accent-color;
+          transform: translateY(-3px);
+          box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        &:disabled {
+          background-color: $light-gray;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
 }
 
-.contact-section .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.contact-section .contact-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.contact-section .contact-header h2 {
-  font-size: 2.5rem;
-  color: #2c6aa0;
-  margin-bottom: 15px;
-}
-
-.contact-section .contact-header p {
-  font-size: 1.1rem;
-  color: #757575;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.contact-section .contact-content {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-}
-
-.contact-section .contact-info {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.contact-section .contact-info .info-card {
-  background-color: white;
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.contact-section .contact-info .info-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-}
-
-.contact-section .contact-info .info-card:hover .icon {
-  background-color: transparent;
-  border-color: #4caf50;
-  color: #4caf50;
-}
-
-.contact-section .contact-info .info-card .icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 60px;
-  height: 60px;
-  background-color: transparent;
-  color: #2c6aa0;
-  margin-bottom: 15px;
-  font-size: 1.5rem;
-  /* Círculo con contorno */
-  border: 2px solid #2c6aa0;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-}
-
-.contact-section .contact-info .info-card h3 {
-  font-size: 1.2rem;
-  color: #2c6aa0;
-  margin-bottom: 10px;
-}
-
-.contact-section .contact-info .info-card p {
-  color: #757575;
-  margin: 5px 0;
-}
-
-.contact-section .contact-form-container {
-  flex: 1;
-  background-color: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.contact-section .contact-form-container h3 {
-  font-size: 1.5rem;
-  color: #2c6aa0;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.contact-section .contact-form-container .contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.contact-section .contact-form-container .contact-form .form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.contact-section .contact-form-container .contact-form .form-group label {
-  font-weight: 500;
-  margin-bottom: 5px;
-  color: #333;
-}
-
-/* Estilos para el contenedor de input con icono */
-.contact-section .contact-form-container .contact-form .form-group .input-with-icon {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.contact-section .contact-form-container .contact-form .form-group .input-with-icon svg {
-  position: absolute;
-  left: 12px;
-  color: #757575;
-  width: 18px;
-  height: 18px;
-  z-index: 1;
-  transition: color 0.3s ease;
-}
-
-/* Efecto de Uiverse.io por Yaseen549 */
-.contact-section .contact-form-container .contact-form .form-group input,
-.contact-section .contact-form-container .contact-form .form-group select,
-.contact-section .contact-form-container .contact-form .form-group textarea {
-  background-color: #212121;
-  padding: 12px 15px 12px 40px;
-  border: 2px solid white;
+// Alert styles
+.alert {
+  padding: 15px;
   border-radius: 5px;
-  font-size: 1rem;
-  color: white;
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.contact-section .contact-form-container .contact-form .form-group input:focus,
-.contact-section .contact-form-container .contact-form .form-group select:focus,
-.contact-section .contact-form-container .contact-form .form-group textarea:focus {
-  color: rgb(0, 255, 255);
-  background-color: #212121;
-  outline-color: rgb(0, 255, 255);
-  box-shadow: -3px -3px 15px rgb(0, 255, 255);
-  transition: .1s;
-  transition-property: box-shadow;
-}
-
-/* Cambiar color del icono cuando el input está enfocado */
-.contact-section .contact-form-container .contact-form .form-group .input-with-icon input:focus + svg,
-.contact-section .contact-form-container .contact-form .form-group .input-with-icon select:focus + svg,
-.contact-section .contact-form-container .contact-form .form-group .input-with-icon textarea:focus + svg {
-  color: rgb(0, 255, 255);
-}
-
-.contact-section .contact-form-container .contact-form .form-group input::placeholder,
-.contact-section .contact-form-container .contact-form .form-group select::placeholder,
-.contact-section .contact-form-container .contact-form .form-group textarea::placeholder {
-  color: #aaaaaa;
-}
-
-.contact-section .contact-form-container .contact-form .form-group textarea {
-  resize: vertical;
-}
-
-.contact-section .contact-form-container .contact-form .form-group .error-message {
-  color: #f44336;
-  font-size: 0.85rem;
-  margin-top: 5px;
-}
-
-.contact-section .contact-form-container .contact-form .submit-btn {
-  background-color: #2c6aa0;
-  color: white;
-  border: none;
-  padding: 14px 20px;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 10px;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+
+  &.alert-success {
+    background-color: color.adjust($accent-color, $lightness: 40%);
+    color: color.adjust($accent-color, $lightness: -10%);
+  }
+
+  &.alert-error {
+    background-color: color.adjust($error-color, $lightness: 30%);
+    color: color.adjust($error-color, $lightness: -10%);
+  }
+
+  i {
+    font-size: 1.2rem;
+  }
 }
 
-.contact-section .contact-form-container .contact-form .submit-btn:hover {
-  background-color: #4caf50; /* Cambio a color verde (accent-color del SASS) */
-  transform: translateY(-3px); /* Elevación reducida */
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-}
-
-.contact-section .contact-form-container .contact-form .submit-btn:disabled {
-  background-color: #e0e0e0;
-  cursor: not-allowed;
-}
-
-/* Responsive adjustments */
+// Responsive adjustments
 @media (max-width: 992px) {
-  .contact-section .contact-content {
-    flex-direction: column;
+  .contact-section {
+    .contact-content {
+      flex-direction: column;
+    }
   }
 }
 
 @media (max-width: 768px) {
   .contact-section {
     padding: 50px 0;
-  }
 
-  .contact-section .contact-header h2 {
-    font-size: 2rem;
-  }
+    .contact-header h2 {
+      font-size: 2rem;
+    }
 
-  .contact-section .contact-info {
-    grid-template-columns: 1fr;
+    .contact-info {
+      grid-template-columns: 1fr;
+    }
   }
 }
