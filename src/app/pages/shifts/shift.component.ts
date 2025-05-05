@@ -83,7 +83,7 @@ export class ShiftsComponent implements OnInit {
   
   services = [
     { id: 1, name: 'Consulta médica', icon: 'medical_services' },
-    { id: 2, name: 'Tratamiento dental', icon: 'dentistry' },
+    { id: 2, name: 'Tratamiento dental', icon: 'favorite' },
     { id: 3, name: 'Terapia física', icon: 'fitness_center' },
     { id: 4, name: 'Asesoría nutricional', icon: 'restaurant' },
     { id: 5, name: 'Consulta psicológica', icon: 'psychology' }

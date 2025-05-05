@@ -25,10 +25,6 @@ export class ProfileComponent implements OnChanges {
     return 'O+'; // Esto debería venir del backend
   }
 
-  get address(): string {
-    return 'Av. Siempre Viva 123, Springfield';
-  }
-
   get insurance(): string {
     return 'OSDE'; // Esto debería venir del backend
   }
