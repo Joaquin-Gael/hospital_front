@@ -61,10 +61,13 @@
         <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
           <div class="form-group">
             <label for="name">Nombre completo</label>
-            <input type="text" id="name" formControlName="name" placeholder="Ingrese su nombre completo">
-            <div class="error-message" *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched">
-              El nombre es requerido
+            <div class="input-with-icon">
+                <i class="fas fa-user"></i>
+                <input type="text" id="name" formControlName="name" placeholder="Ingrese su nombre completo">
             </div>
+              <div class="error-message" *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched">
+                  El nombre es requerido
+              </div>
           </div>
 
           <div class="form-group">

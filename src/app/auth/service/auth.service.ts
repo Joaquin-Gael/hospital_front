@@ -34,7 +34,7 @@ export class AuthService {
     );
   }
 
-  getUser(): Observable<User | null> {
+  getUser(): Observable<any | null> {
     if (!this.isLoggedIn()) {
       return of(null);
     }
@@ -56,7 +56,7 @@ export class AuthService {
           last_login: response.user.last_login,
           date_joined: response.user.date_joined,
           dni: response.user.dni,
-          telephone: response.user.telephone, 
+          telephone: response.user.telephone,
         } as User;
       }),
       catchError((err) => {
