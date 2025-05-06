@@ -40,35 +40,33 @@
       text-align: center;
     }
   }
-  
+
   &__avatar {
-    position: relative;
-    margin-right: vars.$spacing-6;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-right: 20px;
+    background-color: vars.$primary-color;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     
-    @media (max-width: vars.$breakpoint-md) {
-      margin-right: 0;
-      margin-bottom: vars.$spacing-4;
+    &-initials {
+      color: white;
+      font-size: 32px;
+      font-weight: 600;
     }
+  }
+    
+  &:hover {
+    transform: scale(1.05);
+  }
+    
+  @media (max-width: vars.$breakpoint-sm) {
+    width: 80px;
+    height: 80px;
   }
   
-  &__image {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid vars.$card-background;
-    box-shadow: vars.$shadow-md;
-    transition: transform vars.$transition-normal;
-    
-    &:hover {
-      transform: scale(1.05);
-    }
-    
-    @media (max-width: vars.$breakpoint-sm) {
-      width: 80px;
-      height: 80px;
-    }
-  }
   
   &__status-indicator {
     position: absolute;
@@ -138,7 +136,7 @@
       width: 100%;
     }
   }
-}
+
 
 .status-badge {
   display: inline-block;
@@ -202,4 +200,5 @@
   border-top-color: vars.$primary-color;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
 }

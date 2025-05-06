@@ -9,12 +9,12 @@
   <ng-template #profileContent>
     <div class="doctor-profile__content" *ngIf="doctor">
       <div class="doctor-profile__avatar">
-        <img [src]="doctor.avatarUrl" alt="Foto de perfil" class="doctor-profile__image">
+        <span class="doctor-profile__avatar-initials"> {{ getInitials(doctor.name) }} </span>
         <div class="doctor-profile__status-indicator" [ngClass]="'doctor-profile__status-indicator--' + doctor.status"></div>
       </div>
       
       <div class="doctor-profile__info">
-        <h1 class="doctor-profile__name">{{ doctor.name }}</h1>
+        <h1 class="doctor-profile__name">Dr. {{ doctor.name }}</h1>
         <p class="doctor-profile__specialty">{{ doctor.specialty }}</p>
         <p class="doctor-profile__license">Matrícula: {{ doctor.licenseNumber }}</p>
         

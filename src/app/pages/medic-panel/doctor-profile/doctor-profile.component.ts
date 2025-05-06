@@ -7,7 +7,6 @@ interface Doctor {
   specialty: string
   licenseNumber: string
   status: "available" | "busy" | "offline"
-  avatarUrl: string
 }
 
 @Component({
@@ -28,14 +27,22 @@ export class DoctorProfileComponent implements OnInit {
     setTimeout(() => {
       this.doctor = {
         id: "doc-123",
-        name: "Dr. Ana Martínez",
+        name: "Ana Martínez",
         specialty: "Cardiología",
         licenseNumber: "MN-45678",
         status: "available",
-        avatarUrl: "assets/images/doctor-avatar.jpg",
       }
       this.isLoading = false
     }, 800)
+  }
+
+  getInitials(name: string): string {
+    if (!name || name === 'No disponible') return 'ND';
+    return name
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join('');
   }
 
   getStatusLabel(status: "available" | "busy" | "offline"): string {
