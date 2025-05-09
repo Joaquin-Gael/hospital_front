@@ -1,37 +1,13 @@
-@use 'sass:color';
-
-$primary-color: #3f51b5; // indigo-500
-$accent-color: #ff4081;  // pink-A200
-$background-color: #f5f7fa;
-$card-background: #ffffff;
-$text-color: #333333;
-$error-color: #f44336;   // red-500
-
-$primary-light: color.scale($primary-color, $lightness: 80%);
-$primary-dark: color.scale($primary-color, $lightness: -20%);
-$border-color: color.scale($background-color, $lightness: -10%);
-$shadow-color: rgba(0, 0, 0, 0.1);
-
-// Colores modernos
-$gradient-start: #6a11cb;
-$gradient-end: #2575fc;
-$success-color: #00c853;
-$warning-color: #ffd600;
-$info-color: #00b0ff;
-$glass-bg: rgba(255, 255, 255, 0.25);
-$glass-border: rgba(255, 255, 255, 0.18);
-$glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-
 @mixin card-shadow {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 @mixin glass-effect {
-  background: $glass-bg;
+  background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid $glass-border;
-  box-shadow: $glass-shadow;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
 @mixin responsive-padding {
@@ -47,14 +23,13 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
 @mixin gradient-text {
-  background: linear-gradient(to right, $gradient-start, $gradient-end);
+  background: linear-gradient(to right, #6a11cb, #2575fc);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   display: inline-block;
 }
 
-// Estilos del componente
 .appointment-scheduler-container {
   display: flex;
   justify-content: center;
@@ -70,7 +45,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
 .appointment-card {
-  background-color: $card-background;
+  background-color: #ffffff;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   width: 100%;
@@ -91,7 +66,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     left: 0;
     width: 100%;
     height: 6px;
-    background: linear-gradient(to right, $gradient-start, $gradient-end);
+    background: linear-gradient(to right, #6a11cb, #2575fc);
   }
 }
 
@@ -105,7 +80,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
 .appointment-title {
-  color: $text-color;
+  color: #333333;
   margin-top: 0;
   margin-bottom: 1.5rem;
   font-size: 2rem;
@@ -117,7 +92,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   
   .title-icon {
     margin-right: 12px;
-    background: linear-gradient(to right, $gradient-start, $gradient-end);
+    background: linear-gradient(to right, #6a11cb, #2575fc);
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -164,7 +139,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     .steps-progress {
       position: absolute;
       height: 100%;
-      background: linear-gradient(to right, $gradient-start, $gradient-end);
+      background: linear-gradient(to right, #6a11cb, #2575fc);
       border-radius: 3px;
       transition: width 0.4s ease;
     }
@@ -190,13 +165,13 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       transition: all 0.3s ease;
       
       &.active {
-        border-color: $gradient-end;
-        color: $gradient-end;
-        box-shadow: 0 0 0 4px rgba($gradient-end, 0.2);
+        border-color: #2575fc;
+        color: #2575fc;
+        box-shadow: 0 0 0 4px rgba(#2575fc, 0.2);
       }
       
       &.completed {
-        background: linear-gradient(to right, $gradient-start, $gradient-end);
+        background: linear-gradient(to right, #6a11cb, #2575fc);
         border-color: transparent;
         color: white;
       }
@@ -232,7 +207,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: $text-color;
+  color: #333333;
   text-align: center;
   
   @media (max-width: 480px) {
@@ -253,7 +228,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     
     .field-icon {
       margin-right: 8px;
-      color: $primary-color;
+      color: #3f51b5;
     }
   }
   
@@ -269,7 +244,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       cursor: pointer;
       
       &:hover {
-        color: $primary-color;
+        color: #3f51b5;
       }
     }
   }
@@ -285,8 +260,8 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     
     &:focus {
       outline: none;
-      border-color: $primary-color;
-      box-shadow: 0 0 0 4px rgba($primary-color, 0.1);
+      border-color: #3f51b5;
+      box-shadow: 0 0 0 4px rgba(#3f51b5, 0.1);
     }
     
     &.date-input, &.time-input {
@@ -308,7 +283,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   }
   
   .error-message {
-    color: $error-color;
+    color: #f44336;
     font-size: 0.8rem;
     margin-top: 0.5rem;
     display: flex;
@@ -317,14 +292,13 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     &::before {
       content: "error";
       font-family: 'Material Icons';
-      margin-right: 4px;
-      font-size: 16px;
-    }
+    margin-right: 4px;
+    font-size: 16px;
   }
-  
-  &.custom-reason-field {
-    margin-top: 1.5rem;
-  }
+}
+
+&.custom-reason-field {
+  margin-top: 1.5rem;
 }
 
 .centered-error {
@@ -335,7 +309,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 
 .service-options {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
   margin-bottom: 1.5rem;
   
@@ -357,12 +331,12 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     }
     
     &.selected {
-      border-color: $primary-color;
-      background-color: rgba($primary-color, 0.05);
-      box-shadow: 0 10px 20px rgba($primary-color, 0.1);
+      border-color: #3f51b5;
+      background-color: rgba(#3f51b5, 0.05);
+      box-shadow: 0 10px 20px rgba(#3f51b5, 0.1);
       
       .service-icon {
-        background: linear-gradient(to right, $gradient-start, $gradient-end);
+        background: linear-gradient(to right, #6a11cb, #2575fc);
         
         i {
           color: white;
@@ -418,9 +392,9 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     }
     
     &.selected {
-      border-color: $primary-color;
-      background-color: rgba($primary-color, 0.05);
-      box-shadow: 0 6px 12px rgba($primary-color, 0.1);
+      border-color: #3f51b5;
+      background-color: rgba(#3f51b5, 0.05);
+      box-shadow: 0 6px 12px rgba(#3f51b5, 0.1);
     }
     
     .reason-name {
@@ -458,7 +432,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       
       i {
         margin-right: 8px;
-        color: $primary-color;
+        color: #3f51b5;
       }
     }
   }
@@ -483,8 +457,8 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       width: 0;
       
       &:checked ~ .checkmark {
-        background-color: $primary-color;
-        border-color: $primary-color;
+        background-color: #3f51b5;
+        border-color: #3f51b5;
         
         &:after {
           display: block;
@@ -534,7 +508,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     justify-content: center;
     padding: 12px 24px;
     border-radius: 12px;
-    font-size: 1rem;
+    font�-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -555,12 +529,12 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       
       &:hover {
         background-color: #f5f5f5;
-        color: $text-color;
+        color: #333333;
       }
     }
     
     &.next-button, &.submit-button {
-      background: linear-gradient(to right, $gradient-start, $gradient-end);
+      background: linear-gradient(to right, #6a11cb, #2575fc);
       color: white;
       
       i {
@@ -568,7 +542,7 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       }
       
       &:hover:not(:disabled) {
-        box-shadow: 0 10px 20px rgba($gradient-start, 0.3);
+        box-shadow: 0 10px 20px rgba(#6a11cb, 0.3);
         transform: translateY(-2px);
       }
       
@@ -612,26 +586,25 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   }
 }
 
-// Estilos para los campos del formulario
 ::ng-deep {
   .mat-mdc-form-field-focus-overlay {
-    background-color: $primary-light;
+    background-color: #b3c0ff;
   }
   
   .mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
-    color: $primary-color;
+    color: #3f51b5;
   }
   
   .mat-mdc-form-field-error {
-    color: $error-color;
+    color: #f44336;
     font-size: 0.75rem;
   }
   
-  // Mejora la apariencia en dispositivos móviles
   @media (max-width: 480px) {
     .mat-mdc-form-field-infix {
       padding-top: 0.5rem;
       padding-bottom: 0.5rem;
     }
+  }
   }
 }

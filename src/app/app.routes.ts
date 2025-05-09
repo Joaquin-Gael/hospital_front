@@ -1,9 +1,18 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout/layout.component';
+import { AdminLayoutComponent } from './admin/admin-layout/admin-layout.component';
 import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
+
+
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    children: [
+    ]       
+  },
 
   {
     path: '',

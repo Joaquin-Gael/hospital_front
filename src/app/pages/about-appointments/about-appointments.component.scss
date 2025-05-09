@@ -1,27 +1,3 @@
-@use 'sass:color';
-
-// Variables de color
-$primary-color: #0056b3; 
-$secondary-color: #2980b9; 
-$text-color: #333333;
-$light-text: #666666;
-$background-color: #ffffff;
-$highlight-color: #f8f9fa;
-$border-color: #e0e0e0;
-$success-color: #28a745;
-
-// Variaciones de colores
-$primary-light: color.scale($primary-color, $lightness: 90%);
-$primary-dark: color.scale($primary-color, $lightness: -10%);
-$secondary-light: color.scale($secondary-color, $lightness: 80%);
-
-// Breakpoints
-$breakpoint-sm: 576px;
-$breakpoint-md: 768px;
-$breakpoint-lg: 992px;
-$breakpoint-xl: 1200px;
-
-// Mixins
 @mixin icon-base {
   display: flex;
   align-items: center;
@@ -30,8 +6,8 @@ $breakpoint-xl: 1200px;
   height: 40px;
   border-radius: 50%;
   margin-right: 1rem;
-  background-color: $secondary-light;
-  color: $secondary-color;
+  background-color: #d4e6f1; /* Aproximación de secondary-light */
+  color: #2980b9;
   
   &::before {
     font-family: 'Material Icons', sans-serif;
@@ -44,7 +20,7 @@ $breakpoint-xl: 1200px;
   margin-top: 80px;
   
   .appointment-header {
-    color: $primary-color; 
+    color: #0056b3;
     padding: 1.5rem 0;
     text-align: center;
     margin-bottom: 2rem;
@@ -64,7 +40,7 @@ $breakpoint-xl: 1200px;
   }
   
   .info-container {
-    background-color: $background-color;
+    background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     padding: 2rem;
@@ -72,7 +48,7 @@ $breakpoint-xl: 1200px;
   }
   
   .info-title {
-    color: $primary-color;
+    color: #0056b3;
     font-size: 1.75rem;
     margin-bottom: 2rem;
     position: relative;
@@ -84,7 +60,7 @@ $breakpoint-xl: 1200px;
       left: 0;
       width: 60px;
       height: 3px;
-      background-color: $secondary-color;
+      background-color: #2980b9;
     }
   }
   
@@ -94,11 +70,11 @@ $breakpoint-xl: 1200px;
     gap: 1rem;
     margin-bottom: 2rem;
     
-    @media (min-width: $breakpoint-md) {
+    @media (min-width: 768px) {
       grid-template-columns: repeat(2, 1fr);
     }
     
-    @media (min-width: $breakpoint-lg) {
+    @media (min-width: 992px) {
       grid-template-columns: repeat(4, 1fr);
     }
   }
@@ -107,7 +83,7 @@ $breakpoint-xl: 1200px;
     display: flex;
     align-items: center;
     padding: 1rem;
-    background-color: $highlight-color;
+    background-color: #f8f9fa;
     border-radius: 6px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     
@@ -143,13 +119,13 @@ $breakpoint-xl: 1200px;
   
   .contact-value {
     font-weight: 600;
-    color: $primary-color;
+    color: #0056b3;
     margin: 0 0 0.25rem;
   }
   
   .contact-description {
     font-size: 0.85rem;
-    color: $light-text;
+    color: #666666;
     margin: 0;
   }
   
@@ -159,16 +135,16 @@ $breakpoint-xl: 1200px;
     gap: 1.5rem;
     margin-bottom: 2rem;
     
-    @media (min-width: $breakpoint-md) {
+    @media (min-width: 768px) {
       grid-template-columns: repeat(2, 1fr);
     }
   }
   
   .info-item {
     padding: 1.5rem;
-    background-color: $highlight-color;
+    background-color: #f8f9fa;
     border-radius: 8px;
-    border-left: 4px solid $secondary-color;
+    border-left: 4px solid #2980b9;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     
     &:hover {
@@ -177,26 +153,26 @@ $breakpoint-xl: 1200px;
     }
     
     &.highlighted {
-      border-left-color: $primary-dark;
-      background-color: $primary-light;
+      border-left-color: #003d80; /* Aproximación de primary-dark */
+      background-color: #e6f0ff; /* Aproximación de primary-light */
     }
   }
   
   .item-title {
-    color: $primary-color;
+    color: #0056b3;
     font-size: 1.2rem;
     margin-top: 0;
     margin-bottom: 1rem;
     
     .highlighted & {
-      color: $primary-dark;
+      color: #003d80; /* Aproximación de primary-dark */
     }
   }
   
   .item-content {
     p {
       margin: 0 0 0.75rem;
-      color: $text-color;
+      color: #333333;
       line-height: 1.5;
       
       &:last-child {
@@ -205,13 +181,13 @@ $breakpoint-xl: 1200px;
     }
     
     a {
-      color: $primary-color;
+      color: #0056b3;
       text-decoration: none;
       font-weight: 500;
       transition: color 0.2s ease;
       
       &:hover {
-        color: $primary-dark;
+        color: #003d80; /* Aproximación de primary-dark */
         text-decoration: underline;
       }
     }
@@ -219,14 +195,14 @@ $breakpoint-xl: 1200px;
   
   .important-note {
     padding: 1.5rem;
-    background-color: $primary-light;
+    background-color: #e6f0ff; /* Aproximación de primary-light */
     border-radius: 8px;
-    border-left: 4px solid $primary-color;
+    border-left: 4px solid #0056b3;
     margin-top: 2rem;
   }
   
   .note-title {
-    color: $primary-color;
+    color: #0056b3;
     font-size: 1.2rem;
     margin-top: 0;
     margin-bottom: 1rem;
@@ -244,12 +220,12 @@ $breakpoint-xl: 1200px;
   .online-appointment {
     margin-top: 2rem;
     padding: 1.5rem;
-    background-color: $primary-light;
+    background-color: #e6f0ff; /* Aproximación de primary-light */
     border-radius: 8px;
     text-align: center;
     
     h4 {
-      color: $primary-color;
+      color: #0056b3;
       font-size: 1.3rem;
       margin-top: 0;
       margin-bottom: 1rem;
@@ -261,7 +237,7 @@ $breakpoint-xl: 1200px;
     
     .online-btn {
       display: inline-block;
-      background-color: $primary-color;
+      background-color: #0056b3;
       color: white;
       padding: 0.75rem 1.5rem;
       border-radius: 4px;
@@ -270,7 +246,7 @@ $breakpoint-xl: 1200px;
       transition: background-color 0.2s ease;
       
       &:hover {
-        background-color: $primary-dark;
+        background-color: #003d80; /* Aproximación de primary-dark */
       }
       
       &::after {

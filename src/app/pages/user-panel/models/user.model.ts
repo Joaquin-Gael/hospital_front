@@ -16,4 +16,4 @@ export interface User {
     last_name: string;
     dni: string;
     address: string;
-  }
+}

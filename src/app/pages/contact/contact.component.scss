@@ -1,20 +1,9 @@
 @use 'sass:color';
 
-$primary-color: #2c6aa0;
-$accent-color: #4caf50;
-$text-color: #333;
-$secondary-text-color: #757575;
-$background-color: #e9f2fa;
-$white: #fff;
-$dark-bg: #f5f5f5; 
-$gray: #afafaf; 
-$light-gray: #afafaf;
-$error-color: #f44336;
-
 // Base styles
 body {
   font-family: "Arial", sans-serif;
-  color: $text-color;
+  color: #333;
   line-height: 1.6;
   margin: 0;
   padding: 0;
@@ -27,7 +16,7 @@ body {
 // Contact Section Styles
 .contact-section {
   padding: 80px 0;
-  background-color: $background-color;
+  background-color: #e9f2fa;
   margin-top: 80px;
 
   .container {
@@ -42,13 +31,13 @@ body {
 
     h2 {
       font-size: 2.5rem;
-      color: $primary-color;
+      color: #2c6aa0;
       margin-bottom: 15px;
     }
 
     p {
       font-size: 1.1rem;
-      color: $secondary-text-color;
+      color: #757575;
       max-width: 700px;
       margin: 0 auto;
     }
@@ -67,7 +56,7 @@ body {
     gap: 20px;
 
     .info-card {
-      background-color: $white;
+      background-color: #fff;
       padding: 25px;
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -79,8 +68,8 @@ body {
 
         .icon {
           background-color: transparent;
-          border-color: $accent-color;
-          color: $accent-color;
+          border-color: #4caf50;
+          color: #4caf50;
         }
       }
 
@@ -91,22 +80,22 @@ body {
         width: 60px;
         height: 60px;
         background-color: transparent;
-        color: $primary-color;
+        color: #2c6aa0;
         margin-bottom: 15px;
         font-size: 1.5rem;
-        border: 2px solid $primary-color;
+        border: 2px solid #2c6aa0;
         border-radius: 50%;
         transition: all 0.3s ease;
       }
 
       h3 {
         font-size: 1.2rem;
-        color: $primary-color;
+        color: #2c6aa0;
         margin-bottom: 10px;
       }
 
       p {
-        color: $secondary-text-color;
+        color: #757575;
         margin: 5px 0;
       }
     }
@@ -114,14 +103,14 @@ body {
 
   .contact-form-container {
     flex: 1;
-    background-color: $white;
+    background-color: #fff;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
     h3 {
       font-size: 1.5rem;
-      color: $primary-color;
+      color: #2c6aa0;
       margin-bottom: 20px;
       text-align: center;
     }
@@ -138,7 +127,7 @@ body {
         label {
           font-weight: 500;
           margin-bottom: 5px;
-          color: $text-color;
+          color: #333;
         }
 
         .input-with-icon {
@@ -149,7 +138,7 @@ body {
           i {
             position: absolute;
             left: 12px;
-            color: $secondary-text-color;
+            color: #757575;
             width: 18px;
             height: 18px;
             z-index: 1;
@@ -160,12 +149,12 @@ body {
         input,
         select,
         textarea {
-          background-color: $dark-bg; 
+          background-color: #f5f5f5;
           padding: 12px 15px 12px 40px;
-          border: 2px solid $white;
+          border: 2px solid #fff;
           border-radius: 5px;
           font-size: 1rem;
-          color: $text-color; 
+          color: #333;
           width: 100%;
           transition: all 0.3s ease;
         }
@@ -175,15 +164,15 @@ body {
         }
 
         .error-message {
-          color: $error-color;
+          color: #f44336;
           font-size: 0.85rem;
           margin-top: 5px;
         }
       }
 
       .submit-btn {
-        background-color: $primary-color;
-        color: $white;
+        background-color: #2c6aa0;
+        color: #fff;
         border: none;
         padding: 14px 20px;
         border-radius: 8px;
@@ -197,13 +186,13 @@ body {
         justify-content: center;
 
         &:hover {
-          background-color: $accent-color;
+          background-color: #4caf50;
           transform: translateY(-3px);
           box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
         }
 
         &:disabled {
-          background-color: $light-gray;
+          background-color: #afafaf;
           cursor: not-allowed;
         }
       }
@@ -221,13 +210,13 @@ body {
   gap: 10px;
 
   &.alert-success {
-    background-color: color.adjust($accent-color, $lightness: 40%);
-    color: color.adjust($accent-color, $lightness: -10%);
+    background-color: color.adjust(#4caf50, $lightness: 40%);
+    color: color.adjust(#4caf50, $lightness: -10%);
   }
 
   &.alert-error {
-    background-color: color.adjust($error-color, $lightness: 30%);
-    color: color.adjust($error-color, $lightness: -10%);
+    background-color: color.adjust(#f44336, $lightness: 30%);
+    color: color.adjust(#f44336, $lightness: -10%);
   }
 
   i {
