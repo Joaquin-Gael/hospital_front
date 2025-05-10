@@ -2,19 +2,20 @@ import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../service/api.service';
+import { UserService } from '../../services/user.service';
+import { UserCreate } from '../../services/interfaces/user.interface';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, RouterModule],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.scss',
+  styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
-  fb = inject(FormBuilder);
-  apiService = inject(ApiService); // Inyecta el ApiService
-  router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  private readonly userService = inject(UserService);
+  private readonly router = inject(Router);
 
   showPassword = false;
   showConfirmPassword = false;
@@ -29,7 +30,7 @@ export class RegisterComponent {
       last_name: ['', [Validators.required]],
       dni: ['', [Validators.required, Validators.pattern(/^[0-9]{8}$/)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]],
+      confirmPassword: ['', [Validators.required]]
     },
     { validators: [RegisterComponent.passwordMatchValidator] }
   );
@@ -92,18 +93,18 @@ export class RegisterComponent {
     const { email, first_name, last_name, dni, password } = this.registerForm.value;
     const username = this.generateUsername(first_name, last_name);
 
-    const payload = { email, username, first_name, last_name, dni, password };
+    const payload: UserCreate = { email, username, first_name, last_name, dni, password };
 
-    this.apiService.post('users/add', payload).subscribe({
+    this.userService.createUser(payload).subscribe({
       next: () => {
         console.log('¡Registro exitoso!');
         alert('Te registraste con éxito. Iniciá sesión.');
         this.router.navigateByUrl('/login');
       },
       error: (err) => {
-        console.error('Error en el registro:', JSON.stringify(err.error?.detail, null, 2));
-        alert('Algo salió mal: ' + (err.error?.detail || 'verificá tus datos.'));
-      },
+        console.error('Error en el registro:', err.message);
+        alert('Algo salió mal: ' + (err.message || 'verificá tus datos.'));
+      }
     });
   }
 }
