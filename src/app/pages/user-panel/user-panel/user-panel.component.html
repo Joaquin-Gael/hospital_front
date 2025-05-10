@@ -8,22 +8,32 @@
   <div class="main-content">
     <app-header [activeSection]="activeSection"></app-header>
     <div class="content">
-      <app-appointments *ngIf="activeSection === 'appointments'"
+      <div *ngIf="loading" class="loading">Cargando...</div>
+      <div *ngIf="error" class="error">{{ error }}</div>
+      <app-appointments
+        *ngIf="activeSection === 'appointments' && !loading && !error"
         [appointments]="appointments"
         (reschedule)="onRescheduleAppointment($event)"
         (cancel)="onCancelAppointment($event)"
+        (newAppointment)="onNewAppointment()"
       ></app-appointments>
-      <app-history *ngIf="activeSection === 'history'"
+      <app-history
+        *ngIf="activeSection === 'history' && !loading && !error"
         [appointments]="appointmentHistory"
+        (viewDetails)="onViewDetails($event)"
+        (downloadReceipt)="onDownloadReceipt($event)"
       ></app-history>
-      <app-notifications *ngIf="activeSection === 'notifications'"
+      <app-notifications
+        *ngIf="activeSection === 'notifications' && !loading && !error"
         [notifications]="notifications"
         (markAsRead)="markAsRead($event)"
       ></app-notifications>
-      <app-documents *ngIf="activeSection === 'documents'"
+      <app-documents
+        *ngIf="activeSection === 'documents' && !loading && !error"
         [documents]="documents"
       ></app-documents>
-      <app-profile *ngIf="activeSection === 'profile'"
+      <app-profile
+        *ngIf="activeSection === 'profile' && !loading && !error"
         [user]="user"
         (editProfile)="onEditProfile()"
         (changePassword)="onChangePassword()"

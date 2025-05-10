@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Document } from '../models/models';
+import { Document } from '../interfaces/user-panel.interfaces';
 
 @Component({
   selector: 'app-documents',
@@ -12,7 +12,8 @@ import { Document } from '../models/models';
 export class DocumentsComponent {
   @Input() documents: Document[] = [];
 
-  formatDate(date: Date): string {
+  formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
     return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 }

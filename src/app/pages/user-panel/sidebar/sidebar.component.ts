@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { User } from '../models/user.model';
-import { Notification } from '../models/models';
+import { User, Notification } from '../interfaces/user-panel.interfaces';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,7 +10,7 @@ import { Notification } from '../models/models';
   imports: [CommonModule]
 })
 export class SidebarComponent {
-  @Input() user: User | null = null; 
+  @Input() user: User | null = null;
   @Input() activeSection: string = 'appointments';
   @Output() sectionChange = new EventEmitter<string>();
   @Output() logout = new EventEmitter<void>();

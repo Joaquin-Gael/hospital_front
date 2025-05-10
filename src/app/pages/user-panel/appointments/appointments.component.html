@@ -17,8 +17,8 @@
           <div class="appointment-card__header">
             <div class="appointment-card__date">
               <span class="appointment-card__day-name">{{ getDayName(appointment.date) }}</span>
-              <span class="appointment-card__day">{{ appointment.date.getDate() }}</span>
-              <span class="appointment-card__month">{{ appointment.date.toLocaleString('es-AR', { month: 'long' }) }}</span>
+              <span class="appointment-card__day">{{ getDayNumber(appointment.date) }}</span>
+              <span class="appointment-card__month">{{ getMonthName(appointment.date) }}</span>
             </div>
             <div class="appointment-card__time">
               <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">

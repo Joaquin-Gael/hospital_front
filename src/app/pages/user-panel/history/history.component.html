@@ -40,7 +40,7 @@
                   'status-badge--cancelled': appointment.status === 'cancelled'
                 }">
                   <span class="status-badge__dot"></span>
-                  {{ appointment.status === 'completed' ? 'Completada' : 'Cancelada' }}
+                  {{ appointment.status === 'completed' ? 'Completada' : appointment.status === 'cancelled' ? 'Cancelada' : 'Pendiente' }}
                 </span>
               </td>
               <td class="table__actions">

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Appointment } from '../models/models';
+import { Appointment } from '../interfaces/user-panel.interfaces';
 
 @Component({
   selector: 'app-appointments',
@@ -15,8 +15,19 @@ export class AppointmentsComponent {
   @Output() cancel = new EventEmitter<string>();
   @Output() newAppointment = new EventEmitter<void>();
 
-  getDayName(date: Date): string {
-    return date.toLocaleString('es-AR', { weekday: 'long' });
+  getDayName(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('es-AR', { weekday: 'long' });
+  }
+
+  getDayNumber(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.getDate().toString().padStart(2, '0');
+  }
+
+  getMonthName(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('es-AR', { month: 'long' });
   }
 
   requestNewAppointment(): void {

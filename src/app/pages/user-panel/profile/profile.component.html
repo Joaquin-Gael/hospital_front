@@ -9,10 +9,10 @@
     <div *ngIf="user">
       <div class="profile__header">
         <div class="profile__avatar">
-          <span class="profile__avatar-initials">{{ getInitials(user.username) }}</span>
+          <span class="profile__avatar-initials">{{ getInitials() }}</span>
         </div>
         <div>
-          <h2 class="profile__name">{{ user.first_name }} {{user.last_name}}</h2>
+          <h2 class="profile__name">{{ user.first_name }} {{ user.last_name }}</h2>
           <p class="profile__id">DNI: {{ user.dni }}</p>
         </div>
       </div>
@@ -22,7 +22,7 @@
           <div class="profile__grid">
             <div class="profile__field">
               <span class="profile__label">Nombre Completo</span>
-              <p class="profile__value">{{ user.first_name}} {{user.last_name}}</p>
+              <p class="profile__value">{{ user.first_name }} {{ user.last_name }}</p>
             </div>
             <div class="profile__field">
               <span class="profile__label">Tipo de Sangre</span>
@@ -58,7 +58,7 @@
       </div>
       <div class="profile__footer">
         <button class="btn btn--outline" (click)="onChangePassword()">Cambiar Contraseña</button>
-        <button class="btn btn--primary">Editar Perfil</button>
+        <button class="btn btn--primary" (click)="onEditProfile()">Editar Perfil</button>
       </div>
     </div>
   </div>

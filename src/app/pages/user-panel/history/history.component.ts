@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Appointment } from '../models/models';
+import { Appointment } from '../interfaces/user-panel.interfaces';
 
 @Component({
   selector: 'app-history',
@@ -14,7 +14,8 @@ export class HistoryComponent {
   @Output() viewDetails = new EventEmitter<Appointment>();
   @Output() downloadReceipt = new EventEmitter<Appointment>();
 
-  formatShortDate(date: Date): string {
+  formatShortDate(dateStr: string): string {
+    const date = new Date(dateStr);
     return date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' });
   }
 

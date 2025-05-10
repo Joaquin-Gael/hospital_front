@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { User } from '../models/user.model';
-import { AuthService } from '../../../auth/service/auth.service';
+import { User, Appointment, Notification, Document } from '../interfaces/user-panel.interfaces';
+import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../sidebar/sidebar.component';
@@ -24,39 +24,84 @@ import { ProfileComponent } from '../profile/profile.component';
     NotificationsComponent,
     DocumentsComponent,
     ProfileComponent,
-    CommonModule,
+    CommonModule
   ],
-  standalone: true,
+  standalone: true
 })
 export class UserPanelComponent implements OnInit, OnDestroy {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   user: User | null = null;
   activeSection: string = 'profile';
   error: string | null = null;
   loading: boolean = true;
 
-  appointments: any[] = [];
-  appointmentHistory: any[] = [];
-  notifications: any[] = [];
-  documents: any[] = [];
+  appointments: Appointment[] = [
+    {
+      id: '1',
+      title: 'Cita médica',
+      date: '2025-04-22T10:00:00',
+      time: '10:00',
+      specialty: 'Cardiología',
+      doctorName: 'Dr. Juan Pérez',
+      location: 'Consultorio 3',
+      status: 'pending'
+    },
+    {
+      id: '2',
+      title: 'Consulta dental',
+      date: '2025-04-23T14:00:00',
+      time: '14:00',
+      specialty: 'Odontología',
+      doctorName: 'Dra. María Gómez',
+      location: 'Consultorio 5',
+      status: 'pending'
+    }
+  ];
+  appointmentHistory: Appointment[] = [
+    {
+      id: '3',
+      title: 'Cita pasada',
+      date: '2025-04-20T09:00:00',
+      time: '09:00',
+      specialty: 'Dermatología',
+      doctorName: 'Dr. Carlos López',
+      location: 'Consultorio 2',
+      status: 'completed'
+    }
+  ];
+  notifications: Notification[] = [
+    { id: '1', message: 'Nueva cita programada', read: false, createdAt: new Date('2025-04-21') },
+    { id: '2', message: 'Recordatorio de cita', read: false, createdAt: new Date('2025-04-22') }
+  ];
+  documents: Document[] = [
+    {
+      id: '1',
+      name: 'Informe médico.pdf',
+      url: '#',
+      type: 'PDF',
+      date: '2025-04-20T00:00:00',
+      downloadUrl: '#'
+    }
+  ];
 
-  private destroy$ = new Subject<void>();
-
-  constructor(private authService: AuthService, private router: Router) {}
+  private readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
     if (!this.authService.isLoggedIn()) {
+      console.log('UserPanel: No autenticado, redirigiendo a /login');
       this.router.navigate(['/login']);
       return;
     }
 
-    console.log('Initial state - activeSection:', this.activeSection, 'loading:', this.loading); // Depuración
+    console.log('UserPanel: Iniciando carga de usuario, activeSection:', this.activeSection);
 
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe({
       next: (user) => {
-        console.log('Mapped user in UserPanelComponent:', user); // Depuración
         this.user = user;
         this.loading = false;
-        console.log('After fetching user - user:', this.user, 'loading:', this.loading, 'activeSection:', this.activeSection); // Depuración
+        console.log('UserPanel: Usuario cargado:', user, 'loading:', this.loading);
         if (!user) {
           this.error = 'No se encontraron datos del usuario';
           this.router.navigate(['/login']);
@@ -65,63 +110,68 @@ export class UserPanelComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.error = 'Error al cargar los datos del usuario';
         this.loading = false;
-        console.error('Error fetching user:', err);
+        console.error('UserPanel: Error al cargar usuario:', err.message);
         this.router.navigate(['/login']);
-      },
+      }
     });
-
-    // Datos de ejemplo
-    this.appointments = [
-      { id: '1', title: 'Cita médica', date: '2025-04-22T10:00:00' },
-      { id: '2', title: 'Consulta dental', date: '2025-04-23T14:00:00' },
-    ];
-    this.appointmentHistory = [
-      { id: '3', title: 'Cita pasada', date: '2025-04-20T09:00:00' },
-    ];
-    this.notifications = [
-      { id: '1', message: 'Nueva cita programada', read: false },
-      { id: '2', message: 'Recordatorio de cita', read: false },
-    ];
-    this.documents = [
-      { id: '1', name: 'Informe médico.pdf', url: '#' },
-    ];
   }
 
   changeSection(section: string): void {
     this.activeSection = section;
-    console.log('Section changed to:', this.activeSection); // Depuración
+    console.log('UserPanel: Sección cambiada a:', section);
   }
 
-  onRescheduleAppointment(event: any): void {
-    console.log('Reschedule appointment:', event);
+  onRescheduleAppointment(appointmentId: string): void {
+    console.log('UserPanel: Reprogramar cita:', appointmentId);
   }
 
-  onCancelAppointment(event: any): void {
-    console.log('Cancel appointment:', event);
+  onCancelAppointment(appointmentId: string): void {
+    console.log('UserPanel: Cancelar cita:', appointmentId);
+  }
+
+  onNewAppointment(): void {
+    console.log('UserPanel: Solicitar nuevo turno');
+    // TODO: Implementar lógica para agendar nuevo turno (ej. abrir modal o redirigir)
+  }
+
+  onViewDetails(appointment: Appointment): void {
+    console.log('UserPanel: Ver detalles de cita:', appointment);
+    // TODO: Implementar lógica para mostrar detalles (ej. abrir modal)
+  }
+
+  onDownloadReceipt(appointment: Appointment): void {
+    console.log('UserPanel: Descargar comprobante de cita:', appointment);
+    // TODO: Implementar lógica para descargar comprobante
   }
 
   markAsRead(notificationId: string): void {
-    console.log('Mark notification as read:', notificationId);
+    console.log('UserPanel: Marcar notificación como leída:', notificationId);
+    this.notifications = this.notifications.map(n =>
+      n.id === notificationId ? { ...n, read: true } : n
+    );
   }
 
   onEditProfile(): void {
-    console.log('Edit profile triggered');
+    console.log('UserPanel: Editar perfil');
     this.activeSection = 'profile';
   }
 
   onChangePassword(): void {
-    console.log('Change password triggered');
+    console.log('UserPanel: Cambiar contraseña');
   }
 
   onLogout(): void {
     this.authService.logout().pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
+        localStorage.removeItem('rememberEmail'); // Limpiar email guardado
+        console.log('UserPanel: Logout exitoso, redirigiendo a /login');
         this.router.navigate(['/login']);
       },
       error: (err) => {
-        console.error('Error during logout:', err);
+        console.error('UserPanel: Error al cerrar sesión:', err.message);
+        localStorage.removeItem('rememberEmail'); // Limpiar incluso si hay error
         this.router.navigate(['/login']);
-      },
+      }
     });
   }
 

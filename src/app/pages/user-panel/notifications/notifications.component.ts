@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Notification } from '../models/models';
+import { Notification } from '../interfaces/user-panel.interfaces';
 
 @Component({
   selector: 'app-notifications',
