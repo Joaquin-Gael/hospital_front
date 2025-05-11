@@ -2,8 +2,8 @@ import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { UserService } from '../../services/user.service';
-import { UserCreate } from '../../services/interfaces/user.interface';
+import { UserService } from '../../services/user/user.service';
+import { UserCreate } from '../../services/interfaces/user.interfaces';
 
 @Component({
   selector: 'app-register',

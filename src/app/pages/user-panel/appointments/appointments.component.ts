@@ -1,23 +1,23 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Appointment } from '../interfaces/user-panel.interfaces';
+import { AppointmentViewModel } from '../../../services/interfaces/appointment.interfaces';
 
 @Component({
   selector: 'app-appointments',
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule],
 })
 export class AppointmentsComponent {
-  @Input() appointments: Appointment[] = [];
-  @Output() reschedule = new EventEmitter<string>();
-  @Output() cancel = new EventEmitter<string>();
+  @Input() appointments: AppointmentViewModel[] = [];
+  @Output() reschedule = new EventEmitter<number>();
+  @Output() cancel = new EventEmitter<number>();
   @Output() newAppointment = new EventEmitter<void>();
 
   getDayName(dateStr: string): string {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('es-AR', { weekday: 'long' });
+    return date.toLocaleDateString('es-AR', { weekday: 'long' }).toLowerCase();
   }
 
   getDayNumber(dateStr: string): string {
@@ -27,18 +27,18 @@ export class AppointmentsComponent {
 
   getMonthName(dateStr: string): string {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('es-AR', { month: 'long' });
+    return date.toLocaleDateString('es-AR', { month: 'long' }).toLowerCase();
   }
 
   requestNewAppointment(): void {
     this.newAppointment.emit();
   }
 
-  onReschedule(appointmentId: string): void {
+  onReschedule(appointmentId: number): void {
     this.reschedule.emit(appointmentId);
   }
 
-  onCancel(appointmentId: string): void {
-    this.cancel.emit(appointmentId);
+  onCancel(turnId: number): void {
+    this.cancel.emit(turnId);
   }
 }

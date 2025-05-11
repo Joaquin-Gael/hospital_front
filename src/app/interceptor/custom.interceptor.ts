@@ -2,8 +2,8 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
-import { AuthService } from '../services/auth.service';
-import { TokenUserResponse } from '../services/interfaces/user.interface';
+import { AuthService } from '../services/auth/auth.service';
+import { TokenUserResponse } from '../services/interfaces/user.interfaces';
 
 // Lista de endpoints públicos que no requieren autenticación
 const PUBLIC_ENDPOINTS = [

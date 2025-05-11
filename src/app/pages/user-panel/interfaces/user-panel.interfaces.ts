@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  id: number;
   email: string;
   username: string;
   first_name: string;
@@ -7,17 +7,6 @@ export interface User {
   dni: string;
   telephone?: string;
   address?: string;
-}
-
-export interface Appointment {
-  id: string;
-  title: string;
-  date: string; // ISO 8601, e.g., "2025-04-22T10:00:00"
-  time: string; // e.g., "10:00"
-  specialty: string; // e.g., "Cardiología"
-  doctorName: string; // e.g., "Dr. Juan Pérez"
-  location: string; // e.g., "Consultorio 3"
-  status?: 'completed' | 'cancelled' | 'pending'; // Para HistoryComponent
 }
 
 export interface Notification {
