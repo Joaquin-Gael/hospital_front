@@ -1,8 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 
+/**
+ * Service to handle HTTP requests to the backend API, encapsulating URL construction
+ * with a dynamic UUID prefix.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -15,6 +19,9 @@ export class ApiService {
     this.fetchUuid();
   }
 
+  /**
+   * Fetches the UUID prefix from the backend and updates the BehaviorSubject.
+   */
   private fetchUuid(): void {
     this.http
       .get<{ id_prefix_api_secret: string }>(`${this.baseUrl}/id_prefix_api_secret/`)
@@ -30,6 +37,11 @@ export class ApiService {
       });
   }
 
+  /**
+   * Builds the full URL for an endpoint, including the UUID prefix.
+   * @param endpoint The API endpoint (e.g., '/doctors/').
+   * @returns Observable of the constructed URL.
+   */
   private buildUrl(endpoint: string): Observable<string> {
     return this.uuid$.pipe(
       switchMap((uuid) => {
@@ -44,10 +56,15 @@ export class ApiService {
     );
   }
 
-  // GET
-  get<T>(endpoint: string): Observable<T> {
+  /**
+   * Performs a GET request to the specified endpoint.
+   * @param endpoint The API endpoint.
+   * @param options Optional HTTP options (e.g., query parameters).
+   * @returns Observable of the response data.
+   */
+  get<T>(endpoint: string, options?: { params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
-      switchMap((url) => this.http.get<T>(url)),
+      switchMap((url) => this.http.get<T>(url, options)),
       catchError((err) => {
         console.error(`Error in GET ${endpoint}:`, err);
         return throwError(() => err);
@@ -55,10 +72,16 @@ export class ApiService {
     );
   }
 
-  // POST
-  post<T>(endpoint: string, payload: any): Observable<T> {
+  /**
+   * Performs a POST request to the specified endpoint.
+   * @param endpoint The API endpoint.
+   * @param payload The request body.
+   * @param options Optional HTTP options (e.g., query parameters).
+   * @returns Observable of the response data.
+   */
+  post<T>(endpoint: string, payload: any, options?: { params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
-      switchMap((url) => this.http.post<T>(url, payload)),
+      switchMap((url) => this.http.post<T>(url, payload, options)),
       catchError((err) => {
         console.error(`Error in POST ${endpoint}:`, err);
         return throwError(() => err);
@@ -66,10 +89,16 @@ export class ApiService {
     );
   }
 
-  // PUT
-  put<T>(endpoint: string, payload: any): Observable<T> {
+  /**
+   * Performs a PUT request to the specified endpoint.
+   * @param endpoint The API endpoint.
+   * @param payload The request body.
+   * @param options Optional HTTP options (e.g., query parameters).
+   * @returns Observable of the response data.
+   */
+  put<T>(endpoint: string, payload: any, options?: { params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
-      switchMap((url) => this.http.put<T>(url, payload)),
+      switchMap((url) => this.http.put<T>(url, payload, options)),
       catchError((err) => {
         console.error(`Error in PUT ${endpoint}:`, err);
         return throwError(() => err);
@@ -77,10 +106,15 @@ export class ApiService {
     );
   }
 
-  // DELETE
-  delete<T>(endpoint: string): Observable<T> {
+  /**
+   * Performs a DELETE request to the specified endpoint.
+   * @param endpoint The API endpoint.
+   * @param options Optional HTTP options (e.g., query parameters).
+   * @returns Observable of the response data.
+   */
+  delete<T>(endpoint: string, options?: { params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
-      switchMap((url) => this.http.delete<T>(url)),
+      switchMap((url) => this.http.delete<T>(url, options)),
       catchError((err) => {
         console.error(`Error in DELETE ${endpoint}:`, err);
         return throwError(() => err);
@@ -88,10 +122,16 @@ export class ApiService {
     );
   }
 
-  // PATCH
-  patch<T>(endpoint: string, payload: any): Observable<T> {
+  /**
+   * Performs a PATCH request to the specified endpoint.
+   * @param endpoint The API endpoint.
+   * @param payload The request body.
+   * @param options Optional HTTP options (e.g., query parameters).
+   * @returns Observable of the response data.
+   */
+  patch<T>(endpoint: string, payload: any, options?: { params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
-      switchMap((url) => this.http.patch<T>(url, payload)),
+      switchMap((url) => this.http.patch<T>(url, payload, options)),
       catchError((err) => {
         console.error(`Error in PATCH ${endpoint}:`, err);
         return throwError(() => err);
