@@ -30,10 +30,6 @@ export class AppointmentsComponent {
     return date.toLocaleDateString('es-AR', { month: 'long' }).toLowerCase();
   }
 
-  requestNewAppointment(): void {
-    this.newAppointment.emit();
-  }
-
   onReschedule(appointmentId: number): void {
     this.reschedule.emit(appointmentId);
   }
