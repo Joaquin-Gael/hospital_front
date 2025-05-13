@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { ApiService } from '../api.service';
-import { LoggerService } from '../logger.service';
-import { StorageService } from '../storage.service';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { ApiService } from '../core/api.service';
+import { LoggerService } from '../core/logger.service';
+import { StorageService } from '../core/storage.service';
 import { DOCTOR_ENDPOINTS } from './doctor-endpoints';
+import { SCHEDULE_ENDPOINTS } from '../schedule/schedule-endpoints';
 import {
   Doctor,
   DoctorCreate,
@@ -14,6 +15,8 @@ import {
   DoctorMeResponse,
   MedicalSchedule,
 } from '../interfaces/doctor.interfaces';
+import { ServiceService } from '../service/service.service';
+import { Service } from '../interfaces/hospital.interfaces';
 
 /**
  * Service to manage doctor-related operations, interacting with the backend API.
@@ -28,6 +31,7 @@ export class DoctorService {
   private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
   private readonly storage = inject(StorageService);
+  private readonly serviceService = inject(ServiceService);
 
   /**
    * Retrieves the list of all doctors.
@@ -35,8 +39,56 @@ export class DoctorService {
    */
   getDoctors(): Observable<Doctor[]> {
     return this.apiService.get<Doctor[]>(DOCTOR_ENDPOINTS.GET_ALL).pipe(
-      map(response => response || []),
-      catchError(error => this.handleError(error, 'Failed to fetch doctors'))
+      map((response) => response || []),
+      catchError((error) => this.handleError(error, 'Failed to fetch doctors'))
+    );
+  }
+
+  /**
+   * Retrieves doctors by speciality ID.
+   * @param specialityId The UUID of the speciality.
+   * @returns Observable of an array of Doctor objects.
+   */
+  getDoctorsBySpeciality(specialityId: string): Observable<Doctor[]> {
+    const params = new HttpParams().set('speciality_id', specialityId);
+    return this.apiService.get<Doctor[]>(DOCTOR_ENDPOINTS.GET_ALL, { params }).pipe(
+      map((response) => response || []),
+      catchError((error) => this.handleError(error, `Failed to fetch doctors for speciality ${specialityId}`))
+    );
+  }
+
+  /**
+   * Retrieves available schedules for a service and optional date.
+   * @param serviceId The ID of the service.
+   * @param date Optional date to filter schedules (ISO format, e.g., '2025-05-15').
+   * @returns Observable of an array of MedicalSchedule objects.
+   */
+  getAvailableSchedules(serviceId: number, date?: string): Observable<MedicalSchedule[]> {
+    return this.serviceService.getServices().pipe(
+      map((services) => {
+        const service = services.find((s) => s.id === serviceId);
+        if (!service) {
+          throw new Error(`Service ${serviceId} not found`);
+        }
+        return service;
+      }),
+      switchMap((service: Service) =>
+        this.apiService.get<MedicalSchedule[]>(SCHEDULE_ENDPOINTS.GET_ALL).pipe(
+          map((schedules) =>
+            schedules.filter((schedule) => {
+              const hasMatchingDoctor = schedule.doctors?.some((doctorId) =>
+                this.getDoctorsBySpeciality(service.specialty_id).pipe(
+                  map((doctors) => doctors.some((doc) => doc.id === doctorId))
+                )
+              );
+              const matchesDate = date ? schedule.day === this.getDayOfWeek(date) : true;
+              return hasMatchingDoctor && matchesDate;
+            })
+          ),
+          map((response) => response || []),
+          catchError((error) => this.handleError(error, `Failed to fetch schedules for service ${serviceId}`))
+        )
+      )
     );
   }
 
@@ -47,7 +99,7 @@ export class DoctorService {
    */
   getDoctorById(doctorId: string): Observable<Doctor> {
     return this.apiService.get<Doctor>(DOCTOR_ENDPOINTS.GET_BY_ID(doctorId)).pipe(
-      catchError(error => this.handleError(error, `Failed to fetch doctor ${doctorId}`))
+      catchError((error) => this.handleError(error, `Failed to fetch doctor ${doctorId}`))
     );
   }
 
@@ -57,7 +109,7 @@ export class DoctorService {
    */
   getMe(): Observable<DoctorMeResponse> {
     return this.apiService.get<DoctorMeResponse>(DOCTOR_ENDPOINTS.GET_ME).pipe(
-      catchError(error => this.handleError(error, 'Failed to fetch authenticated doctor'))
+      catchError((error) => this.handleError(error, 'Failed to fetch authenticated doctor'))
     );
   }
 
@@ -68,7 +120,7 @@ export class DoctorService {
    */
   createDoctor(doctor: DoctorCreate): Observable<Doctor> {
     return this.apiService.post<Doctor>(DOCTOR_ENDPOINTS.CREATE, doctor).pipe(
-      catchError(error => this.handleError(error, 'Failed to create doctor'))
+      catchError((error) => this.handleError(error, 'Failed to create doctor'))
     );
   }
 
@@ -79,7 +131,7 @@ export class DoctorService {
    */
   deleteDoctor(doctorId: string): Observable<DoctorDelete> {
     return this.apiService.delete<DoctorDelete>(DOCTOR_ENDPOINTS.DELETE(doctorId)).pipe(
-      catchError(error => this.handleError(error, `Failed to delete doctor ${doctorId}`))
+      catchError((error) => this.handleError(error, `Failed to delete doctor ${doctorId}`))
     );
   }
 
@@ -93,7 +145,7 @@ export class DoctorService {
     return this.apiService.delete<Doctor>(
       DOCTOR_ENDPOINTS.DELETE_SCHEDULE(doctorId, scheduleId)
     ).pipe(
-      catchError(error =>
+      catchError((error) =>
         this.handleError(error, `Failed to delete schedule ${scheduleId} for doctor ${doctorId}`)
       )
     );
@@ -106,11 +158,8 @@ export class DoctorService {
    * @returns Observable of the updated DoctorUpdate object.
    */
   updateDoctor(doctorId: string, doctor: DoctorUpdate): Observable<DoctorUpdate> {
-    return this.apiService.put<DoctorUpdate>(
-      DOCTOR_ENDPOINTS.UPDATE(doctorId),
-      doctor
-    ).pipe(
-      catchError(error => this.handleError(error, `Failed to update doctor ${doctorId}`))
+    return this.apiService.put<DoctorUpdate>(DOCTOR_ENDPOINTS.UPDATE(doctorId), doctor).pipe(
+      catchError((error) => this.handleError(error, `Failed to update doctor ${doctorId}`))
     );
   }
 
@@ -118,14 +167,12 @@ export class DoctorService {
    * Adds a schedule to a doctor.
    * @param doctorId The UUID of the doctor.
    * @param scheduleId The UUID of the schedule to add.
-   * @returns Observable of the updated Doctor object.
+   * @returns Observable of the updated MedicalSchedule object.
    */
-  addSchedule(doctorId: string, scheduleId: string): Observable<Doctor> {
-    const params = new HttpParams()
-      .set('doc_id', doctorId)
-      .set('schedule_id', scheduleId);
-    return this.apiService.put<Doctor>(DOCTOR_ENDPOINTS.ADD_SCHEDULE, {}, { params }).pipe(
-      catchError(error =>
+  addSchedule(doctorId: string, scheduleId: string): Observable<MedicalSchedule> {
+    const params = new HttpParams().set('doc_id', doctorId).set('schedule_id', scheduleId);
+    return this.apiService.put<MedicalSchedule>(SCHEDULE_ENDPOINTS.ADD_DOCTOR, {}, { params }).pipe(
+      catchError((error) =>
         this.handleError(error, `Failed to add schedule ${scheduleId} to doctor ${doctorId}`)
       )
     );
@@ -141,7 +188,7 @@ export class DoctorService {
       DOCTOR_ENDPOINTS.BAN(doctorId),
       {}
     ).pipe(
-      catchError(error => this.handleError(error, `Failed to ban doctor ${doctorId}`))
+      catchError((error) => this.handleError(error, `Failed to ban doctor ${doctorId}`))
     );
   }
 
@@ -155,8 +202,19 @@ export class DoctorService {
       DOCTOR_ENDPOINTS.UNBAN(doctorId),
       {}
     ).pipe(
-      catchError(error => this.handleError(error, `Failed to unban doctor ${doctorId}`))
+      catchError((error) => this.handleError(error, `Failed to unban doctor ${doctorId}`))
     );
+  }
+
+  /**
+   * Converts an ISO date to a day of the week.
+   * @param date ISO date string (e.g., '2025-05-15').
+   * @returns Day of the week (e.g., 'Monday').
+   */
+  private getDayOfWeek(date: string): string {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const d = new Date(date);
+    return days[d.getDay()];
   }
 
   /**

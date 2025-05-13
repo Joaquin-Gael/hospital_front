@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { APPOINTMENT_ENDPOINTS } from './appointment-endpoints';
-import { ApiService } from '../api.service';
-import { LoggerService } from '../logger.service';
-import { StorageService } from '../storage.service';
+import { ApiService } from '../core/api.service';
+import { LoggerService } from '../core/logger.service';
+import { StorageService } from '../core/storage.service';
 import { Appointment, Turn, TurnCreate, TurnDelete } from '../interfaces/appointment.interfaces';
 
 @Injectable({

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { ApiService } from '../api.service';
-import { LoggerService } from '../logger.service';
-import { StorageService } from '../storage.service';
+import { ApiService } from '../core/api.service';
+import { LoggerService } from '../core/logger.service';
+import { StorageService } from '../core/storage.service';
 import { USER_ENDPOINTS } from './user-endpoints';
 import { UserRead, UserCreate, UserUpdate, UserDelete } from '../interfaces/user.interfaces';
 
