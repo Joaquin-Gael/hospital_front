@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { User } from '../interfaces/user-panel.interfaces';
+import { UserRead } from '../../../services/interfaces/user.interfaces';
 
 @Component({
   selector: 'app-profile',
@@ -10,7 +10,7 @@ import { User } from '../interfaces/user-panel.interfaces';
   imports: [CommonModule]
 })
 export class ProfileComponent implements OnChanges {
-  @Input() user: User | null = null;
+  @Input() user: UserRead | null = null;
   @Output() editProfile = new EventEmitter<void>();
   @Output() changePassword = new EventEmitter<void>();
 
@@ -18,10 +18,6 @@ export class ProfileComponent implements OnChanges {
     if (changes['user']) {
       console.log('ProfileComponent: Usuario recibido:', this.user);
     }
-  }
-
-  get bloodType(): string {
-    return 'O+'; // TODO: Obtener del backend
   }
 
   get insurance(): string {

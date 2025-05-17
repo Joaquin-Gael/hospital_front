@@ -6,7 +6,8 @@ import { AuthService } from '../../../services/auth/auth.service';
 import { AppointmentService } from '../../../services/appointment/appointments.service';
 import { StorageService } from '../../../services/core/storage.service';
 import { LoggerService } from '../../../services/core/logger.service';
-import { User, Notification, Document } from '../interfaces/user-panel.interfaces';
+import { Notification, Document } from '../interfaces/user-panel.interfaces';
+import { UserRead } from '../../../services/interfaces/user.interfaces';
 import { AppointmentViewModel, Appointment, TurnState, TurnCreate } from '../../../services/interfaces/appointment.interfaces';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HeaderComponent } from '../header/header.component';
@@ -39,7 +40,7 @@ export class UserPanelComponent implements OnInit, OnDestroy {
   private readonly logger = inject(LoggerService);
   private readonly router = inject(Router);
 
-  user: User | null = null;
+  user: UserRead | null = null;
   activeSection: string = 'appointments';
   error: string | null = null;
   loading: boolean = true;
