@@ -50,7 +50,7 @@ export class SpecialityService {
    * @param specialityId The ID of the speciality to delete.
    * @returns Observable of the SpecialtyDelete response.
    */
-  deleteSpeciality(specialityId: number): Observable<SpecialtyDelete> {
+  deleteSpeciality(specialityId: string): Observable<SpecialtyDelete> {
     return this.apiService.delete<SpecialtyDelete>(SPECIALITY_ENDPOINTS.DELETE(specialityId)).pipe(
       catchError((error) => this.handleError(`Failed to delete speciality ${specialityId}`, error))
     );
@@ -62,7 +62,7 @@ export class SpecialityService {
    * @param speciality The updated speciality data.
    * @returns Observable of the updated Specialty object.
    */
-  updateSpeciality(specialityId: number, speciality: SpecialtyUpdate): Observable<Specialty> {
+  updateSpeciality(specialityId: string, speciality: SpecialtyUpdate): Observable<Specialty> {
     return this.apiService.put<Specialty>(
       SPECIALITY_ENDPOINTS.UPDATE(specialityId),
       speciality

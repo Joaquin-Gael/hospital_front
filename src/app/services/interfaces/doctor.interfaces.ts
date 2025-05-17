@@ -19,11 +19,11 @@ export interface Doctor {
 
 export interface DoctorCreate {
   id?: string; // UUID, opcional (generado por backend si no se provee)
-  name: string;
+  username: string;
   email: string;
   password: string;
   first_name?: string;
-  lastname?: string;
+  last_name?: string;
   dni?: string;
   telephone?: string;
   speciality_id: string; // UUID

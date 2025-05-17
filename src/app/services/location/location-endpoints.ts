@@ -1,6 +1,6 @@
 export const LOCATION_ENDPOINTS = {
-  GET_ALL: 'locations',
-  ADD: 'locations/add',
-  DELETE: (locationId: number) => `locations/delete/${locationId}`,
-  UPDATE: (locationId: number) => `locations/update/${locationId}`,
+  GET_ALL: 'medic/locations',
+  ADD: 'medic/locations/add',
+  DELETE: (locationId: string) => `medic/locations/delete/${locationId}`,
+  UPDATE: (locationId: string) => `medic/locations/update/${locationId}`,
 } as const;

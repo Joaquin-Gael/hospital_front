@@ -7,11 +7,11 @@ import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
 import { SCHEDULE_ENDPOINTS } from './schedule-endpoints';
 import {
-  MedicalSchedule,
   MedicalScheduleCreate,
   MedicalScheduleUpdate,
   MedicalScheduleDelete,
 } from '../interfaces/hospital.interfaces';
+import { MedicalSchedule } from '../../services/interfaces/doctor.interfaces';
 
 /**
  * Service to manage medical schedule-related operations, interacting with the backend API.

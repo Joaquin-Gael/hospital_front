@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { catchError, switchMap, tap } from 'rxjs/operators';
+import { Observable, ReplaySubject, throwError } from 'rxjs';
+import { catchError, switchMap, tap, shareReplay, map } from 'rxjs/operators';
 
 /**
  * Service to handle HTTP requests to the backend API, encapsulating URL construction
@@ -12,46 +12,55 @@ import { catchError, switchMap, tap } from 'rxjs/operators';
 })
 export class ApiService {
   private baseUrl = 'http://127.0.0.1:8000';
-  private uuidSubject = new BehaviorSubject<string | null>(null);
+  private uuidSubject = new ReplaySubject<string>(1);
   private uuid$ = this.uuidSubject.asObservable();
+  private uuidLoaded$!: Observable<string>;
 
   constructor(private http: HttpClient) {
     this.fetchUuid();
   }
 
   /**
-   * Fetches the UUID prefix from the backend and updates the BehaviorSubject.
+   * Fetches the UUID prefix from the backend and updates the ReplaySubject.
+   * Caches the result to avoid multiple requests.
    */
   private fetchUuid(): void {
-    this.http
+    this.uuidLoaded$ = this.http
       .get<{ id_prefix_api_secret: string }>(`${this.baseUrl}/id_prefix_api_secret/`)
-      .subscribe({
-        next: (response) => {
-          this.uuidSubject.next(response.id_prefix_api_secret);
+      .pipe(
+        tap((response) => {
           console.log('UUID fetched:', response.id_prefix_api_secret);
-        },
-        error: (err) => {
+          this.uuidSubject.next(response.id_prefix_api_secret);
+        }),
+        map((response) => response.id_prefix_api_secret),
+        catchError((err) => {
           console.error('Error fetching UUID:', err);
-          this.uuidSubject.next(null);
-        },
-      });
+          return throwError(() => new Error('No se pudo cargar el UUID de la API'));
+        }),
+        shareReplay(1)
+      );
+
+    // Subscribe to ensure the UUID is fetched immediately
+    this.uuidLoaded$.subscribe({
+      error: (err) => console.error('UUID loading failed:', err),
+    });
   }
 
   /**
    * Builds the full URL for an endpoint, including the UUID prefix.
-   * @param endpoint The API endpoint (e.g., '/doctors/').
+   * @param endpoint The API endpoint (e.g., 'doctors/').
    * @returns Observable of the constructed URL.
    */
   private buildUrl(endpoint: string): Observable<string> {
-    return this.uuid$.pipe(
-      switchMap((uuid) => {
-        if (!uuid) {
-          return throwError(() => new Error('UUID not available'));
-        }
-        return new Observable<string>((observer) => {
-          observer.next(`${this.baseUrl}/${uuid}/${endpoint}`);
-          observer.complete();
-        });
+    return this.uuidLoaded$.pipe(
+      map((uuid) => {
+        // Remove leading/trailing slashes to avoid malformed URLs
+        const cleanEndpoint = endpoint.replace(/^\/+|\/+$/g, '');
+        return `${this.baseUrl}/${uuid}/${cleanEndpoint}`;
+      }),
+      catchError((err) => {
+        console.error('Error building URL:', err);
+        return throwError(() => err);
       })
     );
   }
@@ -67,7 +76,7 @@ export class ApiService {
       switchMap((url) => this.http.get<T>(url, options)),
       catchError((err) => {
         console.error(`Error in GET ${endpoint}:`, err);
-        return throwError(() => err);
+        return throwError(() => new Error(`Error al obtener datos de ${endpoint}`));
       })
     );
   }
@@ -84,7 +93,7 @@ export class ApiService {
       switchMap((url) => this.http.post<T>(url, payload, options)),
       catchError((err) => {
         console.error(`Error in POST ${endpoint}:`, err);
-        return throwError(() => err);
+        return throwError(() => new Error(`Error al enviar datos a ${endpoint}`));
       })
     );
   }
@@ -101,7 +110,7 @@ export class ApiService {
       switchMap((url) => this.http.put<T>(url, payload, options)),
       catchError((err) => {
         console.error(`Error in PUT ${endpoint}:`, err);
-        return throwError(() => err);
+        return throwError(() => new Error(`Error al actualizar datos en ${endpoint}`));
       })
     );
   }
@@ -117,7 +126,7 @@ export class ApiService {
       switchMap((url) => this.http.delete<T>(url, options)),
       catchError((err) => {
         console.error(`Error in DELETE ${endpoint}:`, err);
-        return throwError(() => err);
+        return throwError(() => new Error(`Error al eliminar datos en ${endpoint}`));
       })
     );
   }
@@ -134,7 +143,7 @@ export class ApiService {
       switchMap((url) => this.http.patch<T>(url, payload, options)),
       catchError((err) => {
         console.error(`Error in PATCH ${endpoint}:`, err);
-        return throwError(() => err);
+        return throwError(() => new Error(`Error al modificar datos en ${endpoint}`));
       })
     );
   }
