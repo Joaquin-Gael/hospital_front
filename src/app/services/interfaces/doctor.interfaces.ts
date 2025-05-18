@@ -17,6 +17,13 @@ export interface Doctor {
   is_banned?: boolean;
 }
 
+export interface TokenDoctorsResponse {
+  access_token: string;
+  token_type: string;
+  refresh_token: string;
+  doc: Doctor;
+}
+
 export interface DoctorCreate {
   id?: string; // UUID, opcional (generado por backend si no se provee)
   username: string;

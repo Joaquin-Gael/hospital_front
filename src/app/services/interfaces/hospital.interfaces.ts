@@ -1,3 +1,8 @@
+export interface Auth {
+  email: string;
+  password: string;
+}
+
 export interface Service {
   id: number;
   name: string;

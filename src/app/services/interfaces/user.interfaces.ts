@@ -23,6 +23,8 @@ export interface UserCreate {
   dni: string;
   password: string;
   address?: string;
+  is_superuser?: boolean;
+  is_admin?: boolean; 
 }
 
 export interface UserUpdate {
@@ -35,6 +37,8 @@ export interface UserUpdate {
   address?: string;
   telephone?: string;
   blood_type?: string;
+  is_admin?: boolean;
+  is_superuser?: boolean;
 }
 
 export interface UserDelete {
@@ -44,11 +48,6 @@ export interface UserDelete {
   first_name: string;
   last_name: string;
   dni: string;
-}
-
-export interface UserAuth {
-  email: string;
-  password: string;
 }
 
 export interface TokenUserResponse {
