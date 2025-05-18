@@ -35,6 +35,11 @@ export const routes: Routes = [
           import('./pages/about-appointments/about-appointments.component').then((m) => m.AboutAppointmentsComponent),
       },
       {
+        path: 'doctor-login',
+        loadComponent: () =>
+          import('./auth/doctor-login/doctor-login.component').then((m) => m.DoctorLoginComponent),
+      },
+      {
         path: 'register',
         loadComponent: () =>
           import('./auth/register/register.component').then((m) => m.RegisterComponent),
@@ -46,7 +51,7 @@ export const routes: Routes = [
       }
       ],
   },
-
+  
   {
     path: 'user_panel',
     canActivate: [authGuard],
