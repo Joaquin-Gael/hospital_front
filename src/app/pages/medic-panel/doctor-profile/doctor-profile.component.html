@@ -1,41 +1,77 @@
 <div class="doctor-profile">
-  <ng-container *ngIf="isLoading; else profileContent">
-    <div class="doctor-profile__loading">
-      <div class="loading-spinner"></div>
-      <p>Cargando perfil...</p>
-    </div>
-  </ng-container>
-  
-  <ng-template #profileContent>
-    <div class="doctor-profile__content" *ngIf="doctor">
-      <div class="doctor-profile__avatar">
-        <span class="doctor-profile__avatar-initials"> {{ getInitials(doctor.name) }} </span>
-        <div class="doctor-profile__status-indicator" [ngClass]="'doctor-profile__status-indicator--' + doctor.status"></div>
-      </div>
-      
-      <div class="doctor-profile__info">
-        <h1 class="doctor-profile__name">Dr. {{ doctor.name }}</h1>
-        <p class="doctor-profile__specialty">{{ doctor.specialty }}</p>
-        <p class="doctor-profile__license">Matrícula: {{ doctor.licenseNumber }}</p>
-        
-        <div class="doctor-profile__status">
-          <span class="status-badge" [ngClass]="'status-badge--' + doctor.status">
-            {{ getStatusLabel(doctor.status) }}
-          </span>
-        </div>
-      </div>
-      
-      <div class="doctor-profile__actions">
-        <button class="btn btn--outline" (click)="updateStatus('available')" [disabled]="doctor.status === 'available'">
-          Disponible
-        </button>
-        <button class="btn btn--outline" (click)="updateStatus('busy')" [disabled]="doctor.status === 'busy'">
-          En consulta
-        </button>
-        <button class="btn btn--outline" (click)="updateStatus('offline')" [disabled]="doctor.status === 'offline'">
-          Fuera de servicio
-        </button>
+  <!-- Error message -->
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <!-- Profile content -->
+  <div class="doctor-profile__content" *ngIf="doctor">
+    <div class="doctor-profile__avatar">
+      <span class="doctor-profile__avatar-initials">{{ getInitials() }}</span>
+      <div
+        class="doctor-profile__status-indicator"
+        [ngClass]="getStatusClass()">
       </div>
     </div>
-  </ng-template>
+
+    <div class="doctor-profile__info">
+      <h1 class="doctor-profile__name">
+        Dr. {{ doctor.first_name }} {{ doctor.last_name }}
+      </h1>
+      <p class="doctor-profile__specialty">
+        {{ doctor.speciality_id || 'Especialidad no disponible' }}
+      </p>
+      <p class="doctor-profile__license">
+        Matrícula: {{ doctor.dni || 'No disponible' }}
+      </p>
+
+      <div class="doctor-profile__status">
+        <span class="status-badge" [ngClass]="getStatusClass()">
+          {{ getStatusLabel() }}
+        </span>
+      </div>
+    </div>
+
+    <div class="doctor-profile__actions">
+      <button
+        class="btn btn--outline"
+        (click)="updateStatus('available')"
+        [disabled]="getStatusClass() === 'status-badge--available'">
+        Disponible
+      </button>
+      <button
+        class="btn btn--outline"
+        (click)="updateStatus('busy')"
+        [disabled]="getStatusClass() === 'status-badge--available'">
+        En consulta
+      </button>
+      <button
+        class="btn btn--outline"
+        (click)="updateStatus('offline')"
+        [disabled]="getStatusClass() === 'status-badge--offline'">
+        Fuera de servicio
+      </button>
+      <button
+        class="btn btn--outline"
+        (click)="onEditProfile()">
+        Editar perfil
+      </button>
+    </div>
+
+    <!-- Schedules Section -->
+    <div class="doctor-profile__schedules" *ngIf="schedules?.length">
+      <h2 class="section-title">Horarios</h2>
+      <ul class="schedule-list">
+        <li *ngFor="let schedule of schedules" class="schedule-item">
+          {{ schedule.day }}: {{ schedule.start_time }} - {{ schedule.end_time }}
+        </li>
+      </ul>
+    </div>
+    <div *ngIf="!schedules?.length" class="no-schedules">
+      No hay horarios asignados.
+    </div>
+  </div>
+
+  <!-- No doctor data -->
+  <div *ngIf="!doctor" class="no-data">
+    No se encontraron datos del doctor.
+  </div>
 </div>

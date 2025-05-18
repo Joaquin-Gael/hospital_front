@@ -23,7 +23,7 @@ export class FooterComponent {
 
   hospitalLinks = [
     { label: 'Sobre Nosotros', route: '/sobre-nosotros' },
-    { label: 'Servicios', route: '/servicios' }
+    { label: 'Servicios', route: '/servicios' },
   ];
 
   pacientesLinks = [

@@ -3,7 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
-import { UserAuth } from '../../services/interfaces/user.interfaces';
+import { Auth } from '../../services/interfaces/hospital.interfaces';
 
 @Component({
   selector: 'app-login',
@@ -53,7 +53,7 @@ export class LoginComponent implements OnInit {
       localStorage.removeItem('rememberEmail');
     }
 
-    const credentials: UserAuth = { email, password };
+    const credentials: Auth = { email, password };
 
     this.authService.login(credentials).subscribe({
       next: () => {
