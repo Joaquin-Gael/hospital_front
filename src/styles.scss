@@ -19,7 +19,7 @@ html, body {
   font-size: 16px;
   line-height: 1.5;
   color: vars.$text-color;
-  background-color: vars.$background-color-light;
+  background-color: vars.$background-color-dark;
   display: flex; /* From your app's styles */
   flex-direction: column; /* From your app's styles */
   min-height: 100vh; /* From your app's styles */

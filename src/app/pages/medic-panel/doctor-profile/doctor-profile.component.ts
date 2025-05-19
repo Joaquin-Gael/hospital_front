@@ -43,7 +43,7 @@ export class DoctorProfileComponent implements OnChanges {
     if (!this.doctor || this.doctor.is_banned || !this.doctor.is_active) {
       return 'Fuera de servicio';
     }
-    return 'Disponible'; // Assuming 'busy' requires appointment data
+    return 'Disponible'; 
   }
 
   getStatusClass(): string {

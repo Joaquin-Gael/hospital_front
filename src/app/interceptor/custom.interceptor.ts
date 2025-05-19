@@ -8,6 +8,7 @@ import { TokenUserResponse } from '../services/interfaces/user.interfaces';
 // Lista de endpoints públicos que no requieren autenticación
 const PUBLIC_ENDPOINTS = [
   '/users/add',
+  '/auth/doc/login',
   '/id_prefix_api_secret/'
 ];
 

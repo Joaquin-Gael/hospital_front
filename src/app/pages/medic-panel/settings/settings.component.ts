@@ -1,5 +1,6 @@
 import { Component, type OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
+import { Doctor } from "../../../services/interfaces/doctor.interfaces"
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from "@angular/forms"
 
 interface NotificationSetting {
@@ -17,6 +18,7 @@ interface NotificationSetting {
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
 })
 export class SettingsComponent implements OnInit {
+  doctor: Doctor | null = null;
   activeTab = "profile"
   profileForm!: FormGroup
   securityForm!: FormGroup
@@ -31,13 +33,13 @@ export class SettingsComponent implements OnInit {
 
   initForms(): void {
     this.profileForm = this.fb.group({
-      firstName: ["Ana", [Validators.required]],
-      lastName: ["Martínez", [Validators.required]],
-      email: ["ana.martinez@ejemplo.com", [Validators.required, Validators.email]],
-      phone: ["+34 612 345 678", [Validators.required]],
+      firstName: [this.doctor?.first_name, [Validators.required]],
+      lastName: [this.doctor?.last_name, [Validators.required]],
+      email: [this.doctor?.email, [Validators.required, Validators.email]],
+      phone: [this.doctor?.telephone, [Validators.required]],
       specialization: ["Medicina General", [Validators.required]],
       licenseNumber: ["MED-12345", [Validators.required]],
-      address: ["Calle Principal 123, Madrid", [Validators.required]],
+      address: [this.doctor?.address, [Validators.required]],
       bio: ["Médico general con más de 10 años de experiencia en atención primaria y urgencias."],
     })
 
