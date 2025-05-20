@@ -41,7 +41,7 @@ export class DoctorLoginComponent implements OnInit {
   private readonly storage = inject(StorageService);
 
   loginForm: FormGroup = this.fb.group({
-    email: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
     remember: [false],
   });
