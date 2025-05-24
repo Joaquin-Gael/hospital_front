@@ -2,30 +2,28 @@
   <div class="settings__header">
     <h1 class="settings__title">Configuración</h1>
   </div>
-  
+
   <div class="settings__container">
     <div class="settings__sidebar">
       <div class="settings__tabs">
-        <button 
-          class="settings__tab" 
+        <button
+          class="settings__tab"
           [ngClass]="{'settings__tab--active': activeTab === 'profile'}"
           (click)="setActiveTab('profile')"
         >
           <span class="icon-user settings__tab-icon"></span>
           Perfil
         </button>
-        
-        <button 
-          class="settings__tab" 
+        <button
+          class="settings__tab"
           [ngClass]="{'settings__tab--active': activeTab === 'security'}"
           (click)="setActiveTab('security')"
         >
           <span class="icon-lock settings__tab-icon"></span>
           Seguridad
         </button>
-        
-        <button 
-          class="settings__tab" 
+        <button
+          class="settings__tab"
           [ngClass]="{'settings__tab--active': activeTab === 'notifications'}"
           (click)="setActiveTab('notifications')"
         >
@@ -34,14 +32,17 @@
         </button>
       </div>
     </div>
-    
+
     <div class="settings__content">
       <!-- Perfil -->
       <div *ngIf="activeTab === 'profile'" class="settings__section">
         <h2 class="settings__section-title">Información de Perfil</h2>
         <p class="settings__section-description">Actualiza tu información personal y profesional</p>
-        
-        <form [formGroup]="profileForm" (ngSubmit)="saveProfileSettings()" class="settings__form">
+
+        <div *ngIf="loading" class="settings__loading">Cargando datos...</div>
+        <div *ngIf="error" class="settings__error">{{ error }}</div>
+
+        <div *ngIf="!loading && doctor" class="settings__profile-info">
           <div class="settings__form-avatar">
             <img src="assets/images/doctor-avatar.jpg" alt="Avatar" class="settings__avatar">
             <div class="settings__avatar-actions">
@@ -49,89 +50,82 @@
               <button type="button" class="btn btn--text btn--sm">Eliminar</button>
             </div>
           </div>
-          
+
           <div class="settings__form-row">
             <div class="settings__form-group">
               <label class="settings__form-label">Nombre</label>
-              <input type="text" formControlName="firstName" class="settings__form-input">
-              <div *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched" class="settings__form-error">
-                El nombre es obligatorio
-              </div>
+              <p class="settings__form-static">{{ doctor.first_name || 'No disponible' }}</p>
             </div>
-            
             <div class="settings__form-group">
               <label class="settings__form-label">Apellidos</label>
-              <input type="text" formControlName="lastName" class="settings__form-input">
-              <div *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched" class="settings__form-error">
-                Los apellidos son obligatorios
-              </div>
+              <p class="settings__form-static">{{ doctor.last_name || 'No disponible' }}</p>
             </div>
           </div>
-          
-          <div class="settings__form-row">
-            <div class="settings__form-group">
-              <label class="settings__form-label">Email</label>
-              <input type="email" formControlName="email" class="settings__form-input">
-              <div *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" class="settings__form-error">
-                Introduce un email válido
+
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfileSettings()" class="settings__form">
+            <div class="settings__form-row">
+              <div class="settings__form-group">
+                <label class="settings__form-label">Email</label>
+                <input type="email" formControlName="email" class="settings__form-input">
+                <div *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" class="settings__form-error">
+                  Introduce un email válido
+                </div>
+              </div>
+              <div class="settings__form-group">
+                <label class="settings__form-label">Teléfono</label>
+                <input type="tel" formControlName="telephone" class="settings__form-input">
+                <div *ngIf="profileForm.get('telephone')?.invalid && profileForm.get('telephone')?.touched" class="settings__form-error">
+                  El teléfono es obligatorio
+                </div>
               </div>
             </div>
-            
+
             <div class="settings__form-group">
-              <label class="settings__form-label">Teléfono</label>
-              <input type="tel" formControlName="phone" class="settings__form-input">
-              <div *ngIf="profileForm.get('phone')?.invalid && profileForm.get('phone')?.touched" class="settings__form-error">
-                El teléfono es obligatorio
+              <label class="settings__form-label">Dirección</label>
+              <input type="text" formControlName="address" class="settings__form-input">
+              <div *ngIf="profileForm.get('address')?.invalid && profileForm.get('address')?.touched" class="settings__form-error">
+                La dirección es obligatoria
               </div>
             </div>
-          </div>
-          
-          <div class="settings__form-row">
+            <!--
             <div class="settings__form-group">
               <label class="settings__form-label">Especialidad</label>
-              <input type="text" formControlName="specialization" class="settings__form-input">
-              <div *ngIf="profileForm.get('specialization')?.invalid && profileForm.get('specialization')?.touched" class="settings__form-error">
-                La especialidad es obligatoria
-              </div>
+              <p class="settings__form-static">{{ doctor.speciality_id || 'No disponible' }}</p>
             </div>
-            
+            -->
+
             <div class="settings__form-group">
-              <label class="settings__form-label">Número de licencia</label>
-              <input type="text" formControlName="licenseNumber" class="settings__form-input">
-              <div *ngIf="profileForm.get('licenseNumber')?.invalid && profileForm.get('licenseNumber')?.touched" class="settings__form-error">
-                El número de licencia es obligatorio
-              </div>
+              <label class="settings__form-label">DNI</label>
+              <p class="settings__form-static">{{ doctor.dni || 'No disponible' }}</p>
             </div>
-          </div>
-          
-          <div class="settings__form-group">
-            <label class="settings__form-label">Dirección</label>
-            <input type="text" formControlName="address" class="settings__form-input">
-            <div *ngIf="profileForm.get('address')?.invalid && profileForm.get('address')?.touched" class="settings__form-error">
-              La dirección es obligatoria
+
+            <div class="settings__form-group">
+              <label class="settings__form-label">Tipo de sangre</label>
+              <p class="settings__form-static">{{ doctor.blood_type || 'No disponible' }}</p>
             </div>
-          </div>
-          
-          <div class="settings__form-group">
-            <label class="settings__form-label">Biografía</label>
-            <textarea formControlName="bio" class="settings__form-textarea" rows="4"></textarea>
-          </div>
-          
-          <div class="settings__form-actions">
-            <button type="button" class="btn btn--text">Cancelar</button>
-            <button type="submit" class="btn btn--primary">Guardar cambios</button>
-          </div>
-        </form>
+
+            <div class="settings__form-group">
+              <label class="settings__form-label">Estado</label>
+              <p class="settings__form-static">{{ doctor.is_active ? 'Activo' : 'Inactivo' }}</p>
+            </div>
+
+            <div class="settings__form-actions">
+              <button type="button" class="btn btn--text">Cancelar</button>
+              <button type="submit" class="btn btn--primary">Guardar cambios</button>
+            </div>
+          </form>
+        </div>
       </div>
-      
+
       <!-- Seguridad -->
       <div *ngIf="activeTab === 'security'" class="settings__section">
         <h2 class="settings__section-title">Seguridad de la cuenta</h2>
         <p class="settings__section-description">Actualiza tu contraseña y configura la autenticación de dos factores</p>
-        
+
+        <div *ngIf="error" class="settings__error">{{ error }}</div>
+
         <div class="settings__card">
           <h3 class="settings__card-title">Cambiar contraseña</h3>
-          
           <form [formGroup]="securityForm" (ngSubmit)="saveSecuritySettings()" class="settings__form">
             <div class="settings__form-group">
               <label class="settings__form-label">Contraseña actual</label>
@@ -140,15 +134,13 @@
                 La contraseña actual es obligatoria
               </div>
             </div>
-            
             <div class="settings__form-group">
               <label class="settings__form-label">Nueva contraseña</label>
               <input type="password" formControlName="newPassword" class="settings__form-input">
               <div *ngIf="securityForm.get('newPassword')?.invalid && securityForm.get('newPassword')?.touched" class="settings__form-error">
-                La contraseña debe tener al menos 8 caracteres
+                La contraseña debe tener al menos 8 caracteres, una mayúscula y un número
               </div>
             </div>
-            
             <div class="settings__form-group">
               <label class="settings__form-label">Confirmar nueva contraseña</label>
               <input type="password" formControlName="confirmPassword" class="settings__form-input">
@@ -159,17 +151,15 @@
                 Las contraseñas no coinciden
               </div>
             </div>
-            
             <div class="settings__form-actions">
               <button type="submit" class="btn btn--primary">Actualizar contraseña</button>
             </div>
           </form>
         </div>
-        
+
         <div class="settings__card">
           <h3 class="settings__card-title">Autenticación de dos factores</h3>
           <p class="settings__card-description">Añade una capa adicional de seguridad a tu cuenta</p>
-          
           <div class="settings__toggle-container">
             <span class="settings__toggle-label">Autenticación de dos factores</span>
             <label class="settings__toggle">
@@ -177,36 +167,34 @@
               <span class="settings__toggle-slider"></span>
             </label>
           </div>
-          
           <button class="btn btn--outline">Configurar autenticación de dos factores</button>
         </div>
-        
+
         <div class="settings__card settings__card--danger">
           <h3 class="settings__card-title">Sesiones activas</h3>
           <p class="settings__card-description">Gestiona tus sesiones activas en diferentes dispositivos</p>
-          
           <button class="btn btn--danger">Cerrar todas las sesiones</button>
         </div>
       </div>
-      
+
       <!-- Notificaciones -->
       <div *ngIf="activeTab === 'notifications'" class="settings__section">
         <h2 class="settings__section-title">Preferencias de notificaciones</h2>
         <p class="settings__section-description">Configura cómo y cuándo quieres recibir notificaciones</p>
-        
+
+        <div *ngIf="error" class="settings__error">{{ error }}</div>
+
         <div class="settings__card">
           <div *ngFor="let setting of notificationSettings" class="settings__notification-item">
             <div class="settings__notification-info">
               <h3 class="settings__notification-title">{{ setting.label }}</h3>
               <p class="settings__notification-description">{{ setting.description }}</p>
             </div>
-            
             <label class="settings__toggle">
               <input type="checkbox" [checked]="setting.enabled" (change)="toggleNotification(setting)">
               <span class="settings__toggle-slider"></span>
             </label>
           </div>
-          
           <div class="settings__form-actions">
             <button type="button" class="btn btn--primary" (click)="saveNotificationSettings()">Guardar preferencias</button>
           </div>
