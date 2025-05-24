@@ -8,6 +8,7 @@ import { TokenUserResponse } from '../services/interfaces/user.interfaces';
 // Lista de endpoints públicos que no requieren autenticación
 const PUBLIC_ENDPOINTS = [
   '/users/add',
+  '/auth/doc/login',
   '/id_prefix_api_secret/'
 ];
 
@@ -15,16 +16,12 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('auth_token');
   const router = inject(Router);
   const injector = inject(Injector);
-
-  // Verificar si la petición es a un endpoint público
   const isPublic = PUBLIC_ENDPOINTS.some(endpoint => req.url.includes(endpoint));
 
-  // Si es público o no hay token, pasar la petición sin modificar
   if (isPublic || !token) {
     return next(req);
   }
 
-  // Clonar la petición y agregar el header de autorización
   const clonedReq = req.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`
@@ -47,7 +44,6 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
             return next(newClonedReq);
           }),
           catchError((refreshError) => {
-            // Si el refresh falla, limpiar tokens y redirigir a login
             localStorage.removeItem('auth_token');
             localStorage.removeItem('refresh_token');
             router.navigate(['/login']);
@@ -56,7 +52,7 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
           })
         );
       }
-      // Propagar otros errores
+      
       console.error(`Error en la petición ${req.url}:`, error.message);
       return throwError(() => error);
     })

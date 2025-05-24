@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { DoctorService } from '../../../services/doctor/doctor.service';
 import { LoggerService } from '../../../services/core/logger.service';
 import { StorageService } from '../../../services/core/storage.service';
+import { AuthService } from '../../../services/auth/auth.service';
 import { DoctorMeResponse, Doctor, MedicalSchedule } from '../../../services/interfaces/doctor.interfaces';
 import { DoctorProfileComponent } from '../doctor-profile/doctor-profile.component';
 import { AppointmentScheduleComponent } from '../appointment-schedule/appointment-schedule.component';
@@ -48,6 +49,7 @@ import { SettingsComponent } from '../settings/settings.component';
 })
 export class MedicPanelComponent implements OnInit, OnDestroy {
   private readonly doctorService = inject(DoctorService);
+  private readonly authService = inject(AuthService);
   private readonly logger = inject(LoggerService);
   private readonly storageService = inject(StorageService);
   private readonly router = inject(Router);
@@ -85,7 +87,7 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
         this.error = 'Error al cargar los datos del doctor';
         this.loading = false;
         this.logger.error('Failed to load doctor', err);
-        this.router.navigate(['/login']);
+        this.router.navigate(['/medic_panel']);
       },
     });
   }
@@ -102,9 +104,18 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
   }
 
   onLogout(): void {
-    this.storageService.clearStorage();
-    this.logger.info('Logout successful, redirecting to /login');
-    this.router.navigate(['/login']);
+    this.authService.logout().pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.storageService.clearStorage();
+        this.logger.info('Logout successful, redirecting to home');
+        this.router.navigate(['/home']);
+      },
+      error: (err) => {
+        this.storageService.clearStorage();
+        this.logger.error('Failed to logout', err);
+        this.router.navigate(['/home']);
+      },
+    });
   }
 
   ngOnDestroy(): void {

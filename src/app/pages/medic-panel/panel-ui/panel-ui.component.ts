@@ -18,6 +18,7 @@ interface MenuItem {
 })
 export class PanelUiComponent implements OnInit {
   @Output() sectionChange = new EventEmitter<string>()
+  @Output() logout = new EventEmitter<void>();
 
   isSidebarCollapsed = false
   isSidebarMobileOpen = false
@@ -33,8 +34,6 @@ export class PanelUiComponent implements OnInit {
     { label: "Estadísticas", icon: "icon-bar-chart", id: "statistics" },
     { label: "Configuración", icon: "icon-settings", id: "settings" },
   ]
-
-  doctorName = "Dr. Ana Martínez"
 
   constructor() {}
 
@@ -78,8 +77,7 @@ export class PanelUiComponent implements OnInit {
     }
   }
 
-  logout(): void {
-    // Handle logout logic
-    console.log("Logging out...")
+  onLogout(): void {
+    this.logout.emit()
   }
 }
