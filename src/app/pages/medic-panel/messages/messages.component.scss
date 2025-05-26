@@ -113,6 +113,7 @@ $status-indicator-size: 12px;
     font-weight: 600;
     font-size: vars.$font-size-sm;
     text-align: center;
+    display: block;
 
     &:hover {
       background: linear-gradient(135deg, color.adjust(vars.$primary-color, $lightness: 5%), vars.$primary-color);
