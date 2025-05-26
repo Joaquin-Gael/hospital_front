@@ -1,5 +1,5 @@
 <div class="medic-panel">
-  <app-panel-ui (sectionChange)="onSectionChange($event)">
+  <app-panel-ui (sectionChange)="onSectionChange($event)" (logout)="onLogout()">
     <div class="medic-panel__content">
       <!-- Error message -->
       <div *ngIf="error" class="error-message">{{ error }}</div>
@@ -15,8 +15,8 @@
           <app-doctor-profile
             [doctor]="doctor"
             [schedules]="schedules"
-            (editProfile)="onEditProfile()">
-          </app-doctor-profile>
+            (editProfile)="onEditProfile()"
+          ></app-doctor-profile>
 
           <div class="medic-panel__section">
             <h2 class="section-title">Agenda del día</h2>
@@ -40,13 +40,13 @@
           <div class="medic-panel__actions">
             <app-electronic-prescription
               *ngIf="selectedPatientId"
-              [patientId]="selectedPatientId">
-            </app-electronic-prescription>
+              [patientId]="selectedPatientId"
+            ></app-electronic-prescription>
 
             <app-study-request
               *ngIf="selectedPatientId"
-              [patientId]="selectedPatientId">
-            </app-study-request>
+              [patientId]="selectedPatientId"
+            ></app-study-request>
           </div>
         </div>
       </div>

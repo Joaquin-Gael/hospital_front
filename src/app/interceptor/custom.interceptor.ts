@@ -9,7 +9,8 @@ import { TokenUserResponse } from '../services/interfaces/user.interfaces';
 const PUBLIC_ENDPOINTS = [
   '/users/add',
   '/auth/doc/login',
-  '/id_prefix_api_secret/'
+  '/id_prefix_api_secret/',
+  'medic/chat/'
 ];
 
 export const customInterceptor: HttpInterceptorFn = (req, next) => {
@@ -46,7 +47,7 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
           catchError((refreshError) => {
             localStorage.removeItem('auth_token');
             localStorage.removeItem('refresh_token');
-            router.navigate(['/login']);
+            router.navigate(['/home']);
             console.error('Error al refrescar el token:', refreshError.message);
             return throwError(() => new Error('Sesión expirada, por favor iniciá sesión nuevamente.'));
           })

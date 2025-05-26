@@ -78,7 +78,7 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
         if (!this.doctor) {
           this.error = 'No se encontraron datos del doctor';
           this.logger.error('No doctor data found');
-          this.router.navigate(['/login']);
+          this.router.navigate(['/home']);
           return;
         }
         this.logger.info('Doctor data loaded', { doctorId: this.doctor.id });
@@ -87,7 +87,7 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
         this.error = 'Error al cargar los datos del doctor';
         this.loading = false;
         this.logger.error('Failed to load doctor', err);
-        this.router.navigate(['/medic_panel']);
+        this.router.navigate(['/home']);
       },
     });
   }
@@ -104,16 +104,14 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
   }
 
   onLogout(): void {
-    this.authService.logout().pipe(takeUntil(this.destroy$)).subscribe({
+    this.authService.logout().subscribe({
       next: () => {
-        this.storageService.clearStorage();
-        this.logger.info('Logout successful, redirecting to home');
-        this.router.navigate(['/home']);
+        this.logger.info('Logout successful, redirecting to /login');
+        this.router.navigate(['/login']);
       },
       error: (err) => {
-        this.storageService.clearStorage();
-        this.logger.error('Failed to logout', err);
-        this.router.navigate(['/home']);
+        this.logger.error('Logout failed, redirecting to /login', err);
+        this.router.navigate(['/login']);
       },
     });
   }
