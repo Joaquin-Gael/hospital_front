@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
@@ -45,6 +46,7 @@ import { SettingsComponent } from '../settings/settings.component';
     MessagesComponent,
     StatisticsComponent,
     SettingsComponent,
+    RouterModule
   ],
 })
 export class MedicPanelComponent implements OnInit, OnDestroy {
