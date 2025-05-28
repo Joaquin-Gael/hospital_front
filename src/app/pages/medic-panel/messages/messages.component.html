@@ -21,7 +21,9 @@
           (click)="selectChat(chat)"
         >
           <div class="messages__avatar-container">
-            <img [src]="'assets/images/avatar-default.jpg'" alt="Avatar" class="messages__avatar">
+            <div class="messages__avatar-initials">
+              {{ getInitials(getParticipant(chat)?.first_name, getParticipant(chat)?.last_name) }}
+            </div>
             <span
               class="messages__status-indicator"
               [ngClass]="{'messages__status-indicator--online': onlineStatus[getParticipant(chat)?.id || '']}"
@@ -73,7 +75,9 @@
         <div class="messages__header">
           <div class="messages__participant">
             <div class="messages__avatar-container">
-              <img [src]="'assets/images/avatar-default.jpg'" alt="Avatar" class="messages__avatar">
+              <div class="messages__avatar-initials">
+                {{ getInitials(getParticipant(selectedChat)?.first_name, getParticipant(selectedChat)?.last_name) }}
+              </div>
               <span
                 class="messages__status-indicator"
                 [ngClass]="{'messages__status-indicator--online': onlineStatus[getParticipant(selectedChat)?.id || '']}"
@@ -112,7 +116,9 @@
             [ngClass]="{'messages__message--sent': message.sender?.id === currentDoctorId}"
           >
             <div *ngIf="message.sender?.id !== currentDoctorId" class="messages__avatar-container messages__avatar-container--small">
-              <img [src]="'assets/images/avatar-default.jpg'" alt="Avatar" class="messages__avatar messages__avatar--small">
+              <div class="messages__avatar-initials messages__avatar-initials--small">
+                {{ getInitials(getParticipant(selectedChat)?.first_name, getParticipant(selectedChat)?.last_name) }}
+              </div>
             </div>
 
             <div class="messages__bubble">

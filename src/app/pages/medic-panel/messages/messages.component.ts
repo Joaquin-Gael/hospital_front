@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy,inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
@@ -30,7 +30,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   searchTerm = '';
   onlineStatus: { [doctorId: string]: boolean } = {};
   currentDoctorId: string | null = null;
-  lastViewed: { [chatId: string]: string } = {}; 
+  lastViewed: { [chatId: string]: string } = {};
 
   private readonly destroy$ = new Subject<void>();
 
@@ -178,6 +178,18 @@ export class MessagesComponent implements OnInit, OnDestroy {
    */
   getParticipant(chat: ChatResponse): DoctorResponse | undefined {
     return chat.doc_1?.id === this.currentDoctorId ? chat.doc_2 : chat.doc_1;
+  }
+
+  /**
+   * Genera las iniciales del nombre y apellido del médico.
+   * @param firstName Nombre del médico.
+   * @param lastName Apellido del médico.
+   * @returns Iniciales en formato string.
+   */
+  getInitials(firstName: string | undefined, lastName: string | undefined): string {
+    const first = firstName?.charAt(0) || '';
+    const last = lastName?.charAt(0) || '';
+    return `${first}${last}`.toUpperCase();
   }
 
   /**
