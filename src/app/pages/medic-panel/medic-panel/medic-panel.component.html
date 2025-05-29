@@ -1,5 +1,5 @@
 <div class="medic-panel">
-  <app-panel-ui (sectionChange)="onSectionChange($event)" (logout)="onLogout()">
+  <app-panel-ui (logout)="onLogout()">
     <div class="medic-panel__content">
       <!-- Error message -->
       <div *ngIf="error" class="error-message">{{ error }}</div>
@@ -8,7 +8,9 @@
       <div *ngIf="loading" class="loading-spinner">
         <p>Cargando panel...</p>
       </div>
-      <router-outlet></router-outlet>
+
+      <!-- Router Outlet for child routes -->
+      <router-outlet *ngIf="!loading && !error"></router-outlet>
     </div>
   </app-panel-ui>
 </div>

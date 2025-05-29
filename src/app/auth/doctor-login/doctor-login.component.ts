@@ -85,7 +85,7 @@ export class DoctorLoginComponent implements OnInit {
       next: () => {
         this.logger.info('Doctor login successful');
         this.isLoading = false;
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/medic_panel';
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/medic_panel/home';
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {

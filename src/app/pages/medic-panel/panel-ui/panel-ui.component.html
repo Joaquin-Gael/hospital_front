@@ -16,9 +16,10 @@
       <ul class="panel-ui__menu">
         <li *ngFor="let item of menuItems" class="panel-ui__menu-item">
           <a 
-            (click)="setActiveSection(item.id)" 
-            class="panel-ui__menu-link" 
-            [ngClass]="{'panel-ui__menu-link--active': item.active}"
+            [routerLink]="item.route" 
+            routerLinkActive="panel-ui__menu-link--active"
+            class="panel-ui__menu-link"
+            (click)="navigateTo(item.route)"
           >
             <span class="panel-ui__menu-icon" [ngClass]="item.icon"></span>
             <span class="panel-ui__menu-label">{{ item.label }}</span>

@@ -1,83 +1,79 @@
-import { Component, type OnInit, Output, EventEmitter, HostListener } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import { RouterModule } from "@angular/router"
+import { Component, OnInit, HostListener, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 
 interface MenuItem {
-  label: string
-  icon: string
-  id: string
-  active?: boolean
+  label: string;
+  icon: string;
+  route: string;
+  active?: boolean;
 }
 
 @Component({
-  selector: "app-panel-ui",
-  templateUrl: "./panel-ui.component.html",
-  styleUrls: ["./panel-ui.component.scss"],
+  selector: 'app-panel-ui',
+  templateUrl: './panel-ui.component.html',
+  styleUrls: ['./panel-ui.component.scss'],
   standalone: true,
   imports: [CommonModule, RouterModule],
 })
 export class PanelUiComponent implements OnInit {
-  @Output() sectionChange = new EventEmitter<string>()
-  @Output() logout = new EventEmitter<void>();
+  private readonly router = inject(Router);
 
-  isSidebarCollapsed = false
-  isSidebarMobileOpen = false
-  activeSection = "panel"
-  screenWidth = window.innerWidth
+  isSidebarCollapsed = false;
+  isSidebarMobileOpen = false;
+  screenWidth = window.innerWidth;
 
   menuItems: MenuItem[] = [
-    { label: "Panel", icon: "icon-dashboard", id: "panel" },
-    { label: "Pacientes", icon: "icon-users", id: "patients" },
-    { label: "Agenda", icon: "icon-calendar", id: "schedule" },
-    { label: "Historiales", icon: "icon-file-text", id: "records" },
-    { label: "Mensajes", icon: "icon-message-circle", id: "messages" },
-    { label: "Estadísticas", icon: "icon-bar-chart", id: "statistics" },
-    { label: "Configuración", icon: "icon-settings", id: "settings" },
-  ]
+    { label: 'Panel', icon: 'icon-dashboard', route: 'medic_panel/home' },
+    { label: 'Pacientes', icon: 'icon-users', route: 'medic_panel/patients' },
+    { label: 'Agenda', icon: 'icon-calendar', route: 'medic_panel/appointments' },
+    { label: 'Historiales', icon: 'icon-file-text', route: 'medic_panel/history' },
+    { label: 'Mensajes', icon: 'icon-message-circle', route: 'medic_panel/messages' },
+    { label: 'Estadísticas', icon: 'icon-bar-chart', route: 'medic_panel/statistics' },
+    { label: 'Configuración', icon: 'icon-settings', route: 'medic_panel/settings' },
+  ];
 
-  constructor() {}
-
-  @HostListener("window:resize", ["$event"])
+  @HostListener('window:resize', ['$event'])
   onResize(event: any) {
-    this.screenWidth = window.innerWidth
-
-    // Auto-close mobile sidebar on larger screens
+    this.screenWidth = window.innerWidth;
     if (this.screenWidth >= 992 && this.isSidebarMobileOpen) {
-      this.isSidebarMobileOpen = false
+      this.isSidebarMobileOpen = false;
     }
   }
 
   ngOnInit(): void {
-    // Set initial active section
-    this.setActiveSection("panel")
+    this.updateActiveMenuItem(this.router.url);
+    this.router.events.subscribe(() => {
+      this.updateActiveMenuItem(this.router.url);
+    });
   }
 
   toggleSidebar(): void {
-    this.isSidebarCollapsed = !this.isSidebarCollapsed
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
 
   toggleMobileSidebar(): void {
-    this.isSidebarMobileOpen = !this.isSidebarMobileOpen
+    this.isSidebarMobileOpen = !this.isSidebarMobileOpen;
   }
 
   closeMobileSidebar(): void {
-    this.isSidebarMobileOpen = false
+    this.isSidebarMobileOpen = false;
   }
 
-  setActiveSection(sectionId: string): void {
-    this.activeSection = sectionId
-    this.menuItems.forEach((item) => {
-      item.active = item.id === sectionId
-    })
-    this.sectionChange.emit(sectionId)
-
-    // Close mobile sidebar when selecting a section
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
     if (this.screenWidth < 992) {
-      this.isSidebarMobileOpen = false
+      this.isSidebarMobileOpen = false;
     }
   }
 
+  private updateActiveMenuItem(url: string): void {
+    this.menuItems.forEach((item) => {
+      item.active = url.includes(item.route);
+    });
+  }
+
   onLogout(): void {
-    this.logout.emit()
+    this.router.navigate(['/login']);
   }
 }
