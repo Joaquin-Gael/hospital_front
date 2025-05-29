@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout/layout.component';
+import { MedicPanelComponent } from './pages/medic-panel/medic-panel/medic-panel.component';
 import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
@@ -60,45 +61,43 @@ export const routes: Routes = [
   },
 
   {
-    path: "medic_panel",
-    loadComponent: () => import('./pages/medic-panel/medic-panel/medic-panel.component').then((m) => m.MedicPanelComponent),
+    path: 'medic_panel',
+    component: MedicPanelComponent,
     canActivate: [authGuard],
     children: [
       {
         path: 'home',
-        loadComponent: () =>
-          import('../app/pages/medic-panel/doctor-profile/doctor-profile.component').then((m) => m.DoctorProfileComponent),
+        loadComponent: () => import('./pages/medic-panel/doctor-profile/doctor-profile.component').then((m) => m.DoctorProfileComponent),
       },
       {
         path: 'patients',
-        loadComponent: () =>
-          import('../app/pages/medic-panel/patients/patients.component').then((m) => m.PatientsComponent),
+        loadComponent: () => import('./pages/medic-panel/patients/patients.component').then((m) => m.PatientsComponent),
       },
       {
         path: 'appointments',
-        loadComponent: () =>
-          import('../app/pages/medic-panel/appointment-schedule/appointment-schedule.component').then((m) => m.AppointmentScheduleComponent),
+        loadComponent: () => import('./pages/medic-panel/appointment-schedule/appointment-schedule.component').then((m) => m.AppointmentScheduleComponent),
       },
       {
         path: 'history',
-        loadComponent: () =>
-          import('../app/pages/medic-panel/medical-history/medical-history.component').then((m) => m.MedicalHistoryComponent),
+        loadComponent: () => import('./pages/medic-panel/medical-history/medical-history.component').then((m) => m.MedicalHistoryComponent),
       },
       {
         path: 'messages',
-        loadComponent: () =>
-          import('../app/pages/medic-panel/messages/messages.component').then((m) => m.MessagesComponent),
+        loadComponent: () => import('./pages/medic-panel/messages/messages.component').then((m) => m.MessagesComponent),
       },
       {
         path: 'statistics',
-        loadComponent: () =>
-          import('../app/pages/medic-panel/statistics/statistics.component').then((m) => m.StatisticsComponent),
+        loadComponent: () => import('./pages/medic-panel/statistics/statistics.component').then((m) => m.StatisticsComponent),
       },
       {
         path: 'settings',
-        loadComponent: () =>
-          import('../app/pages/medic-panel/settings/settings.component').then((m) => m.SettingsComponent),
-      }
-    ],   
+        loadComponent: () => import('./pages/medic-panel/settings/settings.component').then((m) => m.SettingsComponent),
+      },
+      {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full',
+      },
+    ],
   },
 ];
