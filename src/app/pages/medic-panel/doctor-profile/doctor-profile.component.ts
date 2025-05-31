@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, injec
 import { CommonModule } from '@angular/common';
 import { DoctorService } from '../../../services/doctor/doctor.service';
 import { LoggerService } from '../../../services/core/logger.service';
-import { Doctor, MedicalSchedule, DoctorUpdate } from '../../../services/interfaces/doctor.interfaces';
+import { Doctor, MedicalSchedule, DoctorUpdateResponse, DoctorUpdate } from '../../../services/interfaces/doctor.interfaces'; // Cambiado DoctorUpdateResponse por DoctorUpdate
 
 @Component({
   selector: 'app-doctor-profile',
@@ -43,7 +43,7 @@ export class DoctorProfileComponent implements OnChanges {
     if (!this.doctor || this.doctor.is_banned || !this.doctor.is_active) {
       return 'Fuera de servicio';
     }
-    return 'Disponible'; 
+    return 'Disponible';
   }
 
   getStatusClass(): string {
@@ -58,7 +58,7 @@ export class DoctorProfileComponent implements OnChanges {
       this.logger.error('No doctor data for status update');
       return;
     }
-    let updateData: DoctorUpdate = {};
+    let updateData: DoctorUpdate = {}; // Cambiado a DoctorUpdate
     if (newStatus === 'offline') {
       updateData = { is_active: false };
     } else if (newStatus === 'available' || newStatus === 'busy') {
@@ -66,8 +66,10 @@ export class DoctorProfileComponent implements OnChanges {
     }
 
     this.doctorService.updateDoctor(this.doctor.id, updateData).subscribe({
-      next: () => {
+      next: (updatedFields: DoctorUpdateResponse) => { // Mantengo DoctorUpdateResponse como tipo de respuesta
         this.logger.info('Doctor status updated', { doctorId: this.doctor!.id, newStatus });
+        // Actualizar el doctor localmente con el nuevo estado
+        this.doctor = { ...this.doctor!, is_active: updateData.is_active! };
         this.updateStatusEvent.emit({ doctor: this.doctor!, status: newStatus });
       },
       error: (err) => {

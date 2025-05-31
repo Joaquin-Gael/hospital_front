@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { DoctorService } from '../../../services/doctor/doctor.service';
 import { LoggerService } from '../../../services/core/logger.service';
 import { StorageService } from '../../../services/core/storage.service';
-import { DoctorMeResponse, Doctor, DoctorUpdate } from '../../../services/interfaces/doctor.interfaces';
+import { DoctorMeResponse, Doctor, DoctorUpdate, DoctorUpdateResponse } from '../../../services/interfaces/doctor.interfaces';
 
 interface NotificationSetting {
   id: string;
@@ -156,10 +156,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
         address: this.profileForm.get('address')?.value,
       };
       this.doctorService.updateDoctor(this.doctor.id, updateData).subscribe({
-        next: (updatedDoctor: Doctor) => {
+        next: (updatedFields: DoctorUpdateResponse) => {
           this.logger.info('Perfil actualizado', { doctorId: this.doctor!.id });
+          // Actualizar solo los campos devueltos por la API (email, telephone)
+          this.doctor = {
+            ...this.doctor!,
+            ...updatedFields,
+          };
           alert('Configuración de perfil guardada correctamente');
-          this.doctor = { ...this.doctor!, ...updateData };
         },
         error: (err) => {
           this.error = 'Error al guardar los cambios';
@@ -178,10 +182,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
         password: this.securityForm.get('newPassword')?.value,
       };
       this.doctorService.updateDoctor(this.doctor.id, updateData).subscribe({
-        next: () => {
+        next: (updatedFields: DoctorUpdateResponse) => {
           this.logger.info('Contraseña actualizada', { doctorId: this.doctor!.id });
           alert('Contraseña actualizada correctamente');
           this.securityForm.reset();
+          // No actualizamos this.doctor, ya que la API no devuelve datos útiles
         },
         error: (err) => {
           this.error = 'Error al actualizar la contraseña';
