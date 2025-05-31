@@ -23,8 +23,11 @@ export class LocationService {
    * @returns Observable of an array of Location objects.
    */
   getLocations(): Observable<Location[]> {
-    return this.apiService.get<Location[]>(LOCATION_ENDPOINTS.GET_ALL).pipe(
-      map((response) => response || []),
+    return this.apiService.get<{ locations: Location[] }>(LOCATION_ENDPOINTS.GET_ALL).pipe(
+      map((response) => {
+        console.log('Respuesta del endpoint /medic/locations:', response);
+        return response?.locations || []; // Extraer el array de locations o devolver un array vacío si no existe
+      }),
       catchError((error) => this.handleError('Failed to fetch locations', error))
     );
   }
@@ -45,7 +48,7 @@ export class LocationService {
    * @param locationId The ID of the location to delete.
    * @returns Observable of the LocationDelete response.
    */
-  deleteLocation(locationId: number): Observable<LocationDelete> {
+  deleteLocation(locationId: string): Observable<LocationDelete> {
     return this.apiService.delete<LocationDelete>(LOCATION_ENDPOINTS.DELETE(locationId)).pipe(
       catchError((error) => this.handleError(`Failed to delete location ${locationId}`, error))
     );
@@ -57,7 +60,7 @@ export class LocationService {
    * @param location The updated location data.
    * @returns Observable of the updated Location object.
    */
-  updateLocation(locationId: number, location: LocationUpdate): Observable<Location> {
+  updateLocation(locationId: string, location: LocationUpdate): Observable<Location> {
     return this.apiService.put<Location>(LOCATION_ENDPOINTS.UPDATE(locationId), location).pipe(
       catchError((error) => this.handleError(`Failed to update location ${locationId}`, error))
     );

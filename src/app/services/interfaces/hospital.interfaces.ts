@@ -29,7 +29,7 @@ export interface Department {
 }
 
 export interface Location {
-  id: string; // UUID
+  location_id: string; // UUID
   name: string;
   description: string;
   departments?: Department[];
@@ -79,10 +79,10 @@ export interface LocationCreate {
 export interface LocationUpdate {
   name?: string;
   description?: string;
+  location_id: string; 
 }
-
 export interface LocationDelete {
-  id: string; // UUID
+  location_id: string; // UUID
   message: string;
 }
 

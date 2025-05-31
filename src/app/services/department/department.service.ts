@@ -39,7 +39,7 @@ export class DepartmentService {
    * @param departmentId The ID of the department.
    * @returns Observable of a Department object.
    */
-  getDepartmentById(departmentId: number): Observable<Department> {
+  getDepartmentById(departmentId: string): Observable<Department> {
     return this.apiService.get<Department>(DEPARTMENT_ENDPOINTS.GET_BY_ID(departmentId)).pipe(
       catchError((error) => this.handleError(`Failed to fetch department ${departmentId}`, error))
     );
@@ -61,7 +61,7 @@ export class DepartmentService {
    * @param departmentId The ID of the department to delete.
    * @returns Observable of the DepartmentDelete response.
    */
-  deleteDepartment(departmentId: number): Observable<DepartmentDelete> {
+  deleteDepartment(departmentId: string): Observable<DepartmentDelete> {
     return this.apiService.delete<DepartmentDelete>(DEPARTMENT_ENDPOINTS.DELETE(departmentId)).pipe(
       catchError((error) => this.handleError(`Failed to delete department ${departmentId}`, error))
     );
@@ -73,7 +73,7 @@ export class DepartmentService {
    * @param department The updated department data.
    * @returns Observable of the updated Department object.
    */
-  updateDepartment(departmentId: number, department: DepartmentUpdate): Observable<Department> {
+  updateDepartment(departmentId: string, department: DepartmentUpdate): Observable<Department> {
     return this.apiService.patch<Department>(
       DEPARTMENT_ENDPOINTS.UPDATE(departmentId),
       department
