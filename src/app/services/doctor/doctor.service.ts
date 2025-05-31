@@ -11,6 +11,7 @@ import {
   Doctor,
   DoctorCreate,
   DoctorUpdate,
+  DoctorUpdateResponse,
   DoctorDelete,
   DoctorMeResponse,
   MedicalSchedule,
@@ -191,17 +192,76 @@ export class DoctorService {
   }
 
   /**
-   * Updates a doctor's information.
+   * Updates a doctor's basic information (username, first_name, last_name, telephone, email).
    * @param doctorId The UUID of the doctor to update.
-   * @param doctor The updated doctor data.
-   * @returns Observable of the updated DoctorUpdate object.
+   * @param doctor The updated doctor data (limited to allowed fields).
+   * @returns Observable of the updated Doctor object.
    */
-  updateDoctor(doctorId: string, doctor: DoctorUpdate): Observable<Doctor> {
+  updateDoctor(
+    doctorId: string,
+    doctor: Partial<DoctorUpdate>
+  ): Observable<DoctorUpdateResponse> {
+    const allowedFields = {
+      username: doctor.username,
+      first_name: doctor.first_name,
+      last_name: doctor.last_name,
+      telephone: doctor.telephone,
+      email: doctor.email,
+    };
     return this.apiService
-      .put<Doctor>(DOCTOR_ENDPOINTS.UPDATE(doctorId), doctor)
+      .patch<DoctorUpdateResponse>(
+        DOCTOR_ENDPOINTS.UPDATE(doctorId),
+        allowedFields
+      )
       .pipe(
+        map((response) => {
+          console.log('Respuesta de updateDoctor:', response);
+          return response;
+        }),
         catchError((error) =>
           this.handleError(error, `Failed to update doctor ${doctorId}`)
+        )
+      );
+  }
+  /**
+   * Updates a doctor's speciality.
+   * @param doctorId The UUID of the doctor to update.
+   * @param specialityId The UUID of the new speciality.
+   * @returns Observable of the updated Doctor object.
+   */
+  updateDoctorSpeciality(
+    doctorId: string,
+    specialityId: string
+  ): Observable<Doctor> {
+    return this.apiService
+      .patch<Doctor>(DOCTOR_ENDPOINTS.UPDATE_SPECIALITY(doctorId), {
+        speciality_id: specialityId,
+      })
+      .pipe(
+        catchError((error) =>
+          this.handleError(
+            error,
+            `Failed to update speciality for doctor ${doctorId}`
+          )
+        )
+      );
+  }
+
+  /**
+   * Updates a doctor's password.
+   * @param doctorId The UUID of the doctor to update.
+   * @param password The new password.
+   * @returns Observable of the updated Doctor object.
+   */
+  updateDoctorPassword(doctorId: string, password: string): Observable<Doctor> {
+    return this.apiService
+      .patch<Doctor>(DOCTOR_ENDPOINTS.UPDATE_PASSWORD(doctorId), { password })
+      .pipe(
+        catchError((error) =>
+          this.handleError(
+            error,
+            `Failed to update password for doctor ${doctorId}`
+          )
         )
       );
   }
@@ -220,7 +280,7 @@ export class DoctorService {
       .set('doc_id', doctorId)
       .set('schedule_id', scheduleId);
     return this.apiService
-      .put<MedicalSchedule>(SCHEDULE_ENDPOINTS.ADD_DOCTOR, {}, { params })
+      .patch<MedicalSchedule>(DOCTOR_ENDPOINTS.ADD_SCHEDULE, {}, { params })
       .pipe(
         catchError((error) =>
           this.handleError(
@@ -238,7 +298,10 @@ export class DoctorService {
    */
   banDoctor(doctorId: string): Observable<{ doc: Doctor; message: string }> {
     return this.apiService
-      .put<{ doc: Doctor; message: string }>(DOCTOR_ENDPOINTS.BAN(doctorId), {})
+      .patch<{ doc: Doctor; message: string }>(
+        DOCTOR_ENDPOINTS.BAN(doctorId),
+        {}
+      )
       .pipe(
         catchError((error) =>
           this.handleError(error, `Failed to ban doctor ${doctorId}`)
@@ -253,7 +316,7 @@ export class DoctorService {
    */
   unbanDoctor(doctorId: string): Observable<{ doc: Doctor; message: string }> {
     return this.apiService
-      .put<{ doc: Doctor; message: string }>(
+      .patch<{ doc: Doctor; message: string }>(
         DOCTOR_ENDPOINTS.UNBAN(doctorId),
         {}
       )

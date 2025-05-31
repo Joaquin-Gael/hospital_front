@@ -52,7 +52,6 @@ export const routes: Routes = [
       }
       ],
   },
-  
   {
     path: 'user_panel',
     canActivate: [authGuard],

@@ -53,6 +53,13 @@ export interface DoctorUpdate {
   is_admin?: boolean;
   is_superuser?: boolean;
 }
+export interface DoctorUpdateResponse {
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  telephone?: string;
+  email?: string;
+}
 
 export interface DoctorDelete {
   id: string; // UUID
