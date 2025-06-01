@@ -1,0 +1,98 @@
+<div class="entity-form">
+  <h3 class="entity-form__title">{{ title }}</h3>
+  
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="entity-form__form">
+    <div class="entity-form__fields">
+      <div *ngFor="let field of fields; trackBy: trackByField" class="entity-form__field">
+        <label [for]="field.key" class="entity-form__label">
+          {{ field.label }}
+          <span *ngIf="field.required" class="required-mark">*</span>
+        </label>
+        
+        <!-- Input de texto -->
+        <input 
+          *ngIf="field.type === 'text' || field.type === 'email' || field.type === 'password' || field.type === 'number' || field.type === 'date'"
+          [type]="field.type"
+          [id]="field.key"
+          [formControlName]="field.key"
+          class="entity-form__input"
+          [class.is-invalid]="hasError(field.key, 'required') || hasError(field.key, 'pattern')"
+          [attr.aria-invalid]="hasError(field.key, 'required') || hasError(field.key, 'pattern')"
+          [required]="field.required ?? false"
+          [attr.aria-required]="field.required ?? false"
+          [attr.readonly]="field.readonly ? true : null"
+        />
+        
+        <!-- Textarea -->
+        <textarea 
+          *ngIf="field.type === 'textarea'"
+          [id]="field.key"
+          [formControlName]="field.key"
+          class="entity-form__textarea"
+          [class.is-invalid]="hasError(field.key, 'required')"
+          [attr.aria-invalid]="hasError(field.key, 'required')"
+          [required]="field.required ?? false"
+          [attr.aria-required]="field.required ?? false"
+          [attr.readonly]="field.readonly ? true : null"
+        ></textarea>
+        
+        <!-- Select -->
+        <select 
+          *ngIf="field.type === 'select'"
+          [id]="field.key"
+          [formControlName]="field.key"
+          class="entity-form__select"
+          [class.is-invalid]="hasError(field.key, 'required')"
+          [attr.aria-invalid]="hasError(field.key, 'required')"
+          [required]="field.required ?? false"
+          [attr.aria-required]="field.required ?? false"
+        >
+          <option value="" disabled>Seleccione una opción</option>
+          <option *ngFor="let option of field.options" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+        
+        <!-- Checkbox -->
+        <div *ngIf="field.type === 'checkbox'" class="entity-form__checkbox-wrapper">
+          <input 
+            type="checkbox"
+            [id]="field.key"
+            [formControlName]="field.key"
+            class="entity-form__checkbox"
+          />
+          <label [for]="field.key" class="entity-form__checkbox-label">
+            {{ field.label }}
+          </label>
+        </div>
+        
+        <!-- Mensajes de error -->
+        <div *ngIf="hasError(field.key, 'required')" class="entity-form__error">
+          Este campo es obligatorio
+        </div>
+        <div *ngIf="field.key === 'password' && hasError(field.key, 'pattern')" class="entity-form__error">
+          La contraseña debe tener al menos 8 caracteres, incluyendo una letra minúscula, una mayúscula, un número y un carácter especial (&#64; $ ! % * ? &amp; #).
+        </div>
+      </div>
+    </div>
+    
+    <div class="entity-form__actions">
+      <button 
+        type="button" 
+        class="entity-form__button entity-form__button--cancel" 
+        (click)="onCancel()"
+        [disabled]="loading"
+      >
+        Cancelar
+      </button>
+      <button 
+        type="submit" 
+        class="entity-form__button entity-form__button--submit" 
+        [disabled]="loading"
+      >
+        <span *ngIf="loading" class="loading-spinner"></span>
+        {{ submitLabel }}
+      </button>
+    </div>
+  </form>
+</div>

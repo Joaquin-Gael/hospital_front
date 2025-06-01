@@ -1,0 +1,135 @@
+// Variables
+$primary-color: #3f51b5;
+$secondary-color: #f5f5f5;
+$text-color: #333;
+$text-light: #fff;
+$border-color: #e0e0e0;
+$shadow-color: rgba(0, 0, 0, 0.1);
+$transition-speed: 0.3s;
+$sidebar-width: 250px;
+$sidebar-collapsed-width: 70px;
+$header-height: 64px;
+
+.admin-panel {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  
+  &__sidebar {
+    width: $sidebar-width;
+    background-color: $primary-color;
+    color: $text-light;
+    transition: width $transition-speed ease;
+    box-shadow: 2px 0 5px $shadow-color;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    
+    @media (max-width: 768px) {
+      width: $sidebar-collapsed-width;
+    }
+  }
+  
+  &__logo {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      
+      @media (max-width: 768px) {
+        font-size: 0;
+        &::before {
+          content: 'A';
+          font-size: 1.5rem;
+        }
+      }
+    }
+  }
+  
+  &__nav {
+    flex: 1;
+    
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    li {
+      margin: 0;
+      padding: 0;
+    }
+  }
+  
+  &__nav-link {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: background-color $transition-speed ease;
+    
+    &:hover, &.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: $text-light;
+    }
+    
+    .material-icons {
+      margin-right: 15px;
+      
+      @media (max-width: 768px) {
+        margin-right: 0;
+      }
+    }
+    
+    span:not(.material-icons) {
+      @media (max-width: 768px) {
+        display: none;
+      }
+    }
+  }
+  
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  &__header {
+    height: $header-height;
+    background-color: $secondary-color;
+    border-bottom: 1px solid $border-color;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px $shadow-color;
+    z-index: 5;
+    
+    h2 {
+      margin: 0;
+      font-weight: 500;
+      color: $text-color;
+    }
+  }
+  
+  &__container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+  }
+}
+
+// Animación para transiciones de ruta
+.route-animation-fade {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

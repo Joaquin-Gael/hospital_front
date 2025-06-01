@@ -1,0 +1,43 @@
+<div class="location-list">
+  <div class="location-list__header">
+    <h3>Listado de Ubicaciones</h3>
+    <button 
+      class="add-button" 
+      (click)="onAddNew()"
+      aria-label="Agregar nueva ubicación"
+    >
+      <span class="material-icons">add</span>
+      Nueva Ubicación
+    </button>
+  </div>
+  
+  <div *ngIf="error" class="error-message" role="alert">
+    {{ error }}
+    <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+  
+  <div class="location-list__content" [class.hidden]="showForm">
+    <app-data-table
+      [data]="locations"
+      [columns]="tableColumns"
+      [loading]="loading"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (view)="onView($event)"
+    ></app-data-table>
+  </div>
+  
+  <div class="location-list__form" [class.hidden]="!showForm">
+    <app-entity-form
+      [fields]="formFields"
+      [initialData]="selectedLocation"
+      [title]="formMode === 'create' ? 'Nueva Ubicación' : 'Editar Ubicación'"
+      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+      [loading]="formLoading"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onFormCancel()"
+    ></app-entity-form>
+  </div>
+</div>

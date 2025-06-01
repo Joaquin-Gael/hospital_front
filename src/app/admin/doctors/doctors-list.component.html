@@ -1,0 +1,44 @@
+<div class="doctor-list">
+  <div class="doctor-list__header">
+    <h3>Listado de Doctores</h3>
+    <button 
+      class="add-button" 
+      (click)="onAddNew()"
+      aria-label="Agregar nuevo doctor"
+    >
+      <span class="material-icons">add</span>
+      Nuevo Doctor
+    </button>
+  </div>
+  
+  <div *ngIf="error" class="error-message" role="alert">
+    {{ error }}
+    <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+  
+  <div class="doctor-list__content" [class.hidden]="showForm">
+    <app-data-table
+      [data]="doctors"
+      [columns]="tableColumns"
+      [loading]="loading"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (view)="onView($event)"
+    ></app-data-table>
+  </div>
+  
+  <div class="doctor-list__form" [class.hidden]="!showForm">
+    <app-entity-form
+      [fields]="formFields"
+      [initialData]="selectedDoctor"
+      [mode]="formMode"
+      [title]="formMode === 'create' ? 'Nuevo Doctor' : 'Editar Doctor'"
+      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+      [loading]="formLoading"
+      (formSubmit)="onFormSubmit($event)"
+      (cancel)="onFormCancel()"
+    ></app-entity-form>
+  </div>
+</div>

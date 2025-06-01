@@ -1,0 +1,44 @@
+<div class="speciality-list">
+  <div class="speciality-list__header">
+    <h3>Listado de Especialidades</h3>
+    <button 
+      class="add-button" 
+      (click)="onAddNew()"
+      aria-label="Agregar nueva especialidad"
+    >
+      <span class="material-icons">add</span>
+      Nueva Especialidad
+    </button>
+  </div>
+  
+  <div *ngIf="error" class="error-message" role="alert">
+    {{ error }}
+    <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+  
+  <div class="speciality-list__content" [class.hidden]="showForm">
+    <app-data-table
+      [data]="specialities"
+      [columns]="tableColumns"
+      [loading]="loading"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (view)="onView($event)"
+    ></app-data-table>
+  </div>
+  
+  <div class="speciality-list__form" [class.hidden]="!showForm">
+    <app-entity-form
+      [fields]="formFields"
+      [initialData]="selectedSpeciality"
+      [mode]="formMode"
+      [title]="formMode === 'create' ? 'Nueva Especialidad' : 'Editar Especialidad'"
+      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+      [loading]="formLoading"
+      (formSubmit)="onFormSubmit($event)"
+      (cancel)="onFormCancel()"
+    ></app-entity-form>
+  </div>
+</div>

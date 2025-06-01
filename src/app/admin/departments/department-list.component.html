@@ -1,0 +1,43 @@
+<div class="department-list">
+  <div class="department-list__header">
+    <h3>Listado de Departamentos</h3>
+    <button 
+      class="add-button" 
+      (click)="onAddNew()"
+      aria-label="Agregar nuevo departamento"
+    >
+      <span class="material-icons">add</span>
+      Nuevo Departamento
+    </button>
+  </div>
+  
+  <div *ngIf="error" class="error-message" role="alert">
+    {{ error }}
+    <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+  
+  <div class="department-list__content" [class.hidden]="showForm">
+    <app-data-table
+      [data]="departments"
+      [columns]="tableColumns"
+      [loading]="loading"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (view)="onView($event)"
+    ></app-data-table>
+  </div>
+  
+  <div class="department-list__form" [class.hidden]="!showForm">
+    <app-entity-form
+      [fields]="formFields"
+      [initialData]="selectedDepartment"
+      [title]="formMode === 'create' ? 'Nuevo Departamento' : 'Editar Departamento'"
+      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+      [loading]="formLoading"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onFormCancel()"
+    ></app-entity-form>
+  </div>
+</div>

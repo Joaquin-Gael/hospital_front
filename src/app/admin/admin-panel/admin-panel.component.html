@@ -1,0 +1,32 @@
+<div class="admin-panel">
+  <aside class="admin-panel__sidebar">
+    <div class="admin-panel__logo">
+      <h1>Panel Admin</h1>
+    </div>
+    <nav class="admin-panel__nav">
+      <ul>
+        <li *ngFor="let section of sections">
+          <a
+            [routerLink]="['/admin_panel', section.id]"
+            routerLinkActive="active"
+            (click)="setActiveSection(section.id)"
+            [attr.aria-current]="activeSection === section.id ? 'page' : null"
+            class="admin-panel__nav-link"
+          >
+            <span class="material-icons">{{ section.icon }}</span>
+            <span>{{ section.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="admin-panel__content">
+    <header class="admin-panel__header">
+      <h2>{{ activeSectionLabel }}</h2>
+    </header>
+    <div class="admin-panel__container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>
