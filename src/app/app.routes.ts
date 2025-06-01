@@ -52,6 +52,14 @@ export const routes: Routes = [
       }
       ],
   },
+   
+  {
+    path: 'admin_panel',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+  },
+
   {
     path: 'user_panel',
     canActivate: [authGuard],
