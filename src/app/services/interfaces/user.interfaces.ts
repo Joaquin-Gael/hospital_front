@@ -28,17 +28,12 @@ export interface UserCreate {
 }
 
 export interface UserUpdate {
-  email?: string;
   username?: string;
   first_name?: string;
   last_name?: string;
-  dni?: string;
-  password?: string;
   address?: string;
   telephone?: string;
-  blood_type?: string;
-  is_admin?: boolean;
-  is_superuser?: boolean;
+  password?: string;
 }
 
 export interface UserDelete {
@@ -51,7 +46,6 @@ export interface UserDelete {
 }
 
 export interface TokenUserResponse {
-  access_token: string;
   token_type: string;
   user: UserRead;
   refresh_token: string;

@@ -57,7 +57,7 @@ export class UserService {
    * @returns Observable con los datos del usuario actualizado.
    */
   updateUser(userId: string, user: UserUpdate): Observable<UserRead> {
-    return this.apiService.put<UserRead>(USER_ENDPOINTS.UPDATE(userId), user).pipe(
+    return this.apiService.patch<UserRead>(USER_ENDPOINTS.UPDATE(userId), user).pipe(
       catchError(error => this.handleError('Update user', error))
     );
   }

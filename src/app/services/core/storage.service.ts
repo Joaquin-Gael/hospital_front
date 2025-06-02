@@ -4,8 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class StorageService {
-  private readonly STORAGE_KEY_TOKEN = 'auth_token';
-  private readonly STORAGE_KEY_REFRESH_TOKEN = 'refresh_token';
+  private readonly STORAGE_KEY_TOKEN = 'refresh_token';
   private readonly STORAGE_KEY_EMAIL = 'rememberEmail';
 
   getToken(): string | null {
@@ -18,18 +17,6 @@ export class StorageService {
 
   removeToken(): void {
     localStorage.removeItem(this.STORAGE_KEY_TOKEN);
-  }
-
-  getRefreshToken(): string | null {
-    return localStorage.getItem(this.STORAGE_KEY_REFRESH_TOKEN);
-  }
-
-  setRefreshToken(refreshToken: string): void {
-    localStorage.setItem(this.STORAGE_KEY_REFRESH_TOKEN, refreshToken);
-  }
-
-  removeRefreshToken(): void {
-    localStorage.removeItem(this.STORAGE_KEY_REFRESH_TOKEN);
   }
 
   getRememberEmail(): string | null {
@@ -46,7 +33,6 @@ export class StorageService {
 
   clearStorage(): void {
     this.removeToken();
-    this.removeRefreshToken();
     this.removeRememberEmail();
   }
 }

@@ -14,7 +14,7 @@ const PUBLIC_ENDPOINTS = [
 ];
 
 export const customInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem('refresh_token');
   const router = inject(Router);
   const injector = inject(Injector);
   const isPublic = PUBLIC_ENDPOINTS.some(endpoint => req.url.includes(endpoint));
@@ -32,20 +32,17 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
   return next(clonedReq).pipe(
     catchError((error) => {
       if (error.status === 401) {
-        // Obtener AuthService de forma diferida
         const authService = injector.get(AuthService);
         return authService.refreshToken().pipe(
           switchMap((response: TokenUserResponse) => {
-            // Nuevo token obtenido, reintentar la petición
             const newClonedReq = req.clone({
               setHeaders: {
-                Authorization: `Bearer ${response.access_token}`
+                Authorization: `Bearer ${response.refresh_token}` 
               }
             });
             return next(newClonedReq);
           }),
           catchError((refreshError) => {
-            localStorage.removeItem('auth_token');
             localStorage.removeItem('refresh_token');
             router.navigate(['/home']);
             console.error('Error al refrescar el token:', refreshError.message);

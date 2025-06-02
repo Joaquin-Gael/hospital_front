@@ -34,9 +34,8 @@ export class AuthService {
   login(credentials: Auth): Observable<TokenUserResponse> {
     return this.apiService.post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, credentials).pipe(
       tap(response => {
-        if (response.access_token && response.refresh_token) {
-          this.storage.setToken(response.access_token);
-          this.storage.setRefreshToken(response.refresh_token);
+        if (response.refresh_token) {
+          this.storage.setToken(response.refresh_token);
         }
       }),
       catchError(error => this.handleError('User Login', error))
@@ -51,9 +50,8 @@ export class AuthService {
   doctorLogin(credentials: Auth): Observable<TokenDoctorsResponse> {
     return this.apiService.post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, credentials).pipe(
       tap(response => {
-        if (response.access_token && response.refresh_token) {
-          this.storage.setToken(response.access_token);
-          this.storage.setRefreshToken(response.refresh_token);
+        if (response.refresh_token) {
+          this.storage.setToken(response.refresh_token);
         }
       }),
       catchError(error => this.handleError('Doctor Login', error))
@@ -97,16 +95,15 @@ export class AuthService {
    * @returns Observable con los nuevos tokens.
    */
   refreshToken(): Observable<TokenUserResponse> {
-    const refreshToken = this.storage.getRefreshToken();
-    if (!refreshToken) {
+    const Token = this.storage.getToken();
+    if (!Token) {
       this.storage.clearStorage();
       return throwError(() => new Error('No refresh token available'));
     }
     return this.apiService.get<TokenUserResponse>(AUTH_ENDPOINTS.REFRESH).pipe(
       tap(response => {
-        if (response.access_token && response.refresh_token) {
-          this.storage.setToken(response.access_token);
-          this.storage.setRefreshToken(response.refresh_token);
+        if (response.refresh_token) {
+          this.storage.setToken(response.refresh_token);
         }
       }),
       catchError(error => this.handleError('Refresh token', error))

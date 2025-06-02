@@ -259,18 +259,17 @@ export class UserListComponent implements OnInit {
       this.formLoading = false;
       return;
     }
-
+    
+    /*
     if (this.formMode === 'edit' && !formData.password) {
       delete formData.password;
     }
+    */
 
     if (this.formMode === 'create') {
       this.userService.createUser(formData as UserCreate).subscribe({
         next: (newUser) => {
           console.log('User created (full response):', newUser);
-          if ((formData.is_admin && !newUser.is_admin) || (formData.is_superuser && !newUser.is_superuser)) {
-            this.error = 'Advertencia: Los permisos de Admin o Superusuario no se aplicaron. Es posible que se requieran permisos adicionales.';
-          }
           this.users.push(newUser);
           this.formLoading = false;
           this.showForm = false;
