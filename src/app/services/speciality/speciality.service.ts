@@ -63,7 +63,7 @@ export class SpecialityService {
    * @returns Observable of the updated Specialty object.
    */
   updateSpeciality(specialityId: string, speciality: SpecialtyUpdate): Observable<Specialty> {
-    return this.apiService.put<Specialty>(
+    return this.apiService.patch<Specialty>(
       SPECIALITY_ENDPOINTS.UPDATE(specialityId),
       speciality
     ).pipe(

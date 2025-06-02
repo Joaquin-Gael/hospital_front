@@ -7,9 +7,6 @@ import { StorageService } from '../core/storage.service';
 import { SERVICE_ENDPOINTS } from './service-endpoints';
 import { Service, ServiceCreate, ServiceUpdate, ServiceDelete } from '../interfaces/hospital.interfaces';
 
-/**
- * Service to manage service-related operations, interacting with the backend API.
- */
 @Injectable({
   providedIn: 'root',
 })
@@ -18,10 +15,6 @@ export class ServiceService {
   private readonly logger = inject(LoggerService);
   private readonly storage = inject(StorageService);
 
-  /**
-   * Retrieves the list of all services.
-   * @returns Observable of an array of Service objects.
-   */
   getServices(): Observable<Service[]> {
     return this.apiService.get<Service[]>(SERVICE_ENDPOINTS.GET_ALL).pipe(
       map((response) => response || []),
@@ -29,47 +22,26 @@ export class ServiceService {
     );
   }
 
-  /**
-   * Creates a new service.
-   * @param service The service data to create.
-   * @returns Observable of the created Service object.
-   */
   createService(service: ServiceCreate): Observable<Service> {
     return this.apiService.post<Service>(SERVICE_ENDPOINTS.CREATE, service).pipe(
+      map((response) => {return response;}),
       catchError((error) => this.handleError('Failed to create service', error))
     );
   }
 
-  /**
-   * Updates a service by its ID.
-   * @param serviceId The ID of the service to update.
-   * @param service The updated service data.
-   * @returns Observable of the updated Service object.
-   */
   updateService(serviceId: string, service: ServiceUpdate): Observable<Service> {
-    return this.apiService.put<Service>(SERVICE_ENDPOINTS.UPDATE(serviceId), service).pipe(
+    return this.apiService.patch<Service>(SERVICE_ENDPOINTS.UPDATE(serviceId), service).pipe(
+      map((response) => {return response;}),
       catchError((error) => this.handleError(`Failed to update service ${serviceId}`, error))
     );
   }
 
-  /**
-   * Deletes a service by its ID.
-   * @param serviceId The ID of the service to delete.
-   * @returns Observable of a ServiceDelete object with deletion confirmation.
-   */
   deleteService(serviceId: string): Observable<ServiceDelete> {
     return this.apiService.delete<ServiceDelete>(SERVICE_ENDPOINTS.DELETE(serviceId)).pipe(
       catchError((error) => this.handleError(`Failed to delete service ${serviceId}`, error))
     );
   }
 
-  /**
-   * Handles HTTP errors, logging them and returning user-friendly messages.
-   * Clears storage on 401 Unauthorized errors.
-   * @param message The error message.
-   * @param error The HTTP error response.
-   * @returns Observable with a formatted error message.
-   */
   private handleError(message: string, error: unknown): Observable<never> {
     this.logger.error(message, error);
 

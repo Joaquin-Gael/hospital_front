@@ -29,7 +29,7 @@ export interface Department {
 }
 
 export interface Location {
-  location_id: string; // UUID
+  id: string; // UUID
   name: string;
   description: string;
   departments?: Department[];
@@ -44,7 +44,7 @@ export interface SpecialtyCreate {
 export interface SpecialtyUpdate {
   name?: string;
   description?: string;
-  department_id?: string; // UUID
+  department_id: string; 
 }
 
 export interface SpecialtyDelete {
@@ -63,7 +63,7 @@ export interface ServiceUpdate {
   name?: string;
   description?: string;
   price?: number;
-  specialty_id?: string; // UUID
+  specialty_id: string; // UUID
 }
 
 export interface ServiceDelete {
