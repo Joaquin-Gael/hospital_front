@@ -18,7 +18,6 @@ interface ExtendedLocation extends Location {
 interface LocationFormData {
   name: string;
   description: string;
-  location_id?: string; 
 }
 
 @Component({
@@ -51,10 +50,9 @@ export class LocationListComponent implements OnInit {
   baseFormFields: FormField[] = [
     { key: 'name', label: 'Nombre', type: 'text', required: true },
     { key: 'description', label: 'Descripción', type: 'textarea', required: false },
-    { key: 'location_id', label: 'ID de Ubicación', type: 'text', required: true, readonly: true }, // Campo de solo lectura
+    { key: 'id', label: 'ID de Ubicación', type: 'text', required: true, readonly: true },
   ];
 
-  // Cachear formFields para evitar recreación constante
   private _formFields: FormField[] = [];
   get formFields(): FormField[] {
     if (this.formMode === 'create') {
@@ -103,7 +101,7 @@ export class LocationListComponent implements OnInit {
     this.formMode = 'edit';
     this.selectedLocation = { 
       ...location,
-      location_id: location.location_id
+      id: location.id
     };
     console.log('selectedLocation en onEdit:', this.selectedLocation);
     this.showForm = true;
@@ -118,9 +116,9 @@ export class LocationListComponent implements OnInit {
       if (result) {
         this.loading = true;
 
-        this.locationService.deleteLocation(location.location_id).subscribe({
+        this.locationService.deleteLocation(location.id).subscribe({
           next: () => {
-            this.locations = this.locations.filter(l => l.location_id !== location.location_id);
+            this.locations = this.locations.filter(l => l.id !== location.id);
             this.loading = false;
             this.logger.info(`Ubicación "${location.name}" eliminada correctamente`);
           },
@@ -134,7 +132,7 @@ export class LocationListComponent implements OnInit {
   }
 
   onView(location: ExtendedLocation): void {
-    alert(`Detalles de la ubicación: ${location.name}\nDescripción: ${location.description || 'N/A'}\nID: ${location.location_id}\nDepartamentos: ${location.departments?.length || 0}`);
+    alert(`Detalles de la ubicación: ${location.name}\nDescripción: ${location.description || 'N/A'}\nID: ${location.id}\nDepartamentos: ${location.departments?.length || 0}`);
   }
 
   onFormSubmit(formData: LocationFormData): void {
@@ -168,12 +166,12 @@ export class LocationListComponent implements OnInit {
       const locationData: LocationUpdate = {
         name: formData.name,
         description: formData.description || '',
-        location_id: this.selectedLocation.location_id, // Usar location_id
+        location_id: this.selectedLocation.id, 
       };
 
-      this.locationService.updateLocation(this.selectedLocation.location_id, locationData).subscribe({
+      this.locationService.updateLocation(this.selectedLocation.id, locationData).subscribe({
         next: (updatedLocation) => {
-          const index = this.locations.findIndex(l => l.location_id === updatedLocation.location_id);
+          const index = this.locations.findIndex(l => l.id === updatedLocation.id);
           if (index !== -1) {
             this.locations[index] = {
               ...updatedLocation,

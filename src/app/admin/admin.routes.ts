@@ -8,7 +8,7 @@ export const ADMIN_ROUTES: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'services',
+        redirectTo: 'departments',
         pathMatch: 'full',
       },
       {

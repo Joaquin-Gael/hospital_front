@@ -21,7 +21,7 @@ export class AdminPanelComponent implements OnInit {
   private logger = inject(LoggerService);
   private router = inject(Router);
 
-  activeSection: string = 'services';
+  activeSection: string = 'departments';
 
   sections: Section[] = [
     { id: 'departments', label: 'Departamentos', icon: 'business' },
