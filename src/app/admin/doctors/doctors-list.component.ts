@@ -90,7 +90,7 @@ export class DoctorListComponent implements OnInit {
       key: 'password',
       label: 'Contraseña',
       type: 'password',
-      required: true,
+      required: false,
       validators: [
         Validators.minLength(8),
         Validators.pattern(this.passwordPattern),

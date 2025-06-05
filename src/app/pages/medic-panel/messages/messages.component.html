@@ -40,10 +40,6 @@
               </span>
             </div>
 
-            <div class="messages__conversation-subheader">
-              <span class="messages__conversation-role">{{ getParticipant(chat)?.speciality_id || 'Médico' }}</span>
-            </div>
-
             <p class="messages__conversation-preview">
               <ng-container *ngIf="chat.messages && chat.messages.length > 0; else noMessages">
                 {{ chat.messages[chat.messages.length - 1].content }}

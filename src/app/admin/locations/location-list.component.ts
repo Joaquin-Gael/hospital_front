@@ -50,7 +50,7 @@ export class LocationListComponent implements OnInit {
   baseFormFields: FormField[] = [
     { key: 'name', label: 'Nombre', type: 'text', required: true },
     { key: 'description', label: 'Descripción', type: 'textarea', required: false },
-    { key: 'id', label: 'ID de Ubicación', type: 'text', required: true, readonly: true },
+    //{ key: 'id', label: 'ID de Ubicación', type: 'text', required: true, readonly: true },
   ];
 
   private _formFields: FormField[] = [];
