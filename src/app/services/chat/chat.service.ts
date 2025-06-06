@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, Subject, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, tap, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
@@ -19,7 +19,6 @@ export class ChatService {
 
   private socket: WebSocket | null = null;
   private messageSubject = new Subject<WebSocketMessage>();
-  private readonly baseWsUrl = 'ws://127.0.0.1:8000';
 
   getChats(): Observable<ChatResponse[]> {
     return this.apiService.get<ChatResponse[]>(CHAT_ENDPOINTS.GET_CHATS()).pipe(
@@ -33,7 +32,7 @@ export class ChatService {
     return this.apiService
       .post<{ message: string }>(CHAT_ENDPOINTS.CREATE_CHAT(), {}, { params })
       .pipe(
-        tap((response) => this.logger.info('Chat created', { message: response.message })),
+        tap((response) => this.logger.info('Chat created', { response: response.message })),
         catchError((error) => this.handleError(error, 'Failed to create chat'))
       );
   }
@@ -50,31 +49,48 @@ export class ChatService {
       throw new Error('No authentication token available');
     }
 
-    const wsUrl = `${this.baseWsUrl}${CHAT_ENDPOINTS.WEBSOCKET(chatId)}?token=${token}`;
-    this.socket = new WebSocket(wsUrl);
+    // Usamos buildWsUrl del ApiService para construir la URL del WebSocket
+    const wsUrl$ = this.apiService.buildWsUrl(CHAT_ENDPOINTS.WEBSOCKET(chatId)).pipe(
+      map((wsUrl) => `${wsUrl}?token=${token}`)
+    );
 
-    this.socket.onopen = () => {
-      this.logger.info('WebSocket connected', { chatId });
-    };
+    return new Promise((resolve, reject) => {
+      wsUrl$.subscribe({
+        next: (wsUrl) => {
+          this.logger.info('Constructed WebSocket URL', { wsUrl });
+          this.socket = new WebSocket(wsUrl);
 
-    this.socket.onmessage = (event) => {
-      try {
-        const data: WebSocketMessage = JSON.parse(event.data);
-        this.messageSubject.next(data);
-      } catch (error) {
-        this.logger.error('Failed to parse WebSocket message', error);
-      }
-    };
+          this.socket.onopen = () => {
+            this.logger.info('WebSocket connected', { chatId });
+            resolve();
+          };
 
-    this.socket.onclose = (event) => {
-      this.logger.info('WebSocket disconnected', { code: event.code, reason: event.reason });
-      this.socket = null;
-    };
+          this.socket.onmessage = (event) => {
+            try {
+              const data: WebSocketMessage = JSON.parse(event.data);
+              this.messageSubject.next(data);
+            } catch (error) {
+              this.logger.error('Failed to parse WebSocket message', error);
+            }
+          };
 
-    this.socket.onerror = (error) => {
-      this.logger.error('WebSocket error', error);
-      this.messageSubject.error(error);
-    };
+          this.socket.onclose = (event) => {
+            this.logger.info('WebSocket disconnected', { code: event.code, reason: event.reason });
+            this.socket = null;
+          };
+
+          this.socket.onerror = (error) => {
+            this.logger.error('WebSocket error', error);
+            this.messageSubject.error(error);
+            reject(error);
+          };
+        },
+        error: (err) => {
+          this.logger.error('Failed to construct WebSocket URL', err);
+          reject(err);
+        },
+      });
+    });
   }
 
   sendMessage(chatId: string, content: string): void {

@@ -12,6 +12,7 @@ import { catchError, switchMap, tap, shareReplay, map } from 'rxjs/operators';
 })
 export class ApiService {
   private baseUrl = 'http://127.0.0.1:8000';
+  private baseWsUrl = 'ws://127.0.0.1:8000'; 
   private uuidSubject = new ReplaySubject<string>(1);
   private uuid$ = this.uuidSubject.asObservable();
   private uuidLoaded$!: Observable<string>;
@@ -60,6 +61,24 @@ export class ApiService {
       }),
       catchError((err) => {
         console.error('Error building URL:', err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  /**
+   * Builds the full URL for a WebSocket endpoint, including the UUID prefix.
+   * @param endpoint The WebSocket endpoint (e.g., 'medic/chat/ws/chat/<chatId>').
+   * @returns Observable of the constructed WebSocket URL.
+   */
+  public buildWsUrl(endpoint: string): Observable<string> {
+    return this.uuidLoaded$.pipe(
+      map((uuid) => {
+        const cleanEndpoint = endpoint.replace(/^\/+|\/+$/g, '');
+        return `${this.baseWsUrl}/${uuid}/${cleanEndpoint}`;
+      }),
+      catchError((err) => {
+        console.error('Error building WebSocket URL:', err);
         return throwError(() => err);
       })
     );
