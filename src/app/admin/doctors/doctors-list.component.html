@@ -23,9 +23,12 @@
       [data]="doctors"
       [columns]="tableColumns"
       [loading]="loading"
+      [showBanUnban]="true"  
       (edit)="onEdit($event)"
       (delete)="onDelete($event)"
       (view)="onView($event)"
+      (ban)="onBanEvent($event)"
+      (unban)="onUnbanEvent($event)"
     ></app-data-table>
   </div>
   

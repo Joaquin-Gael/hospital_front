@@ -33,7 +33,7 @@ export interface FormField {
   options?: { value: any; label: string }[];
   validators?: any[];
   defaultValue?: any;
-  readonly?: boolean; 
+  readonly?: boolean;
 }
 
 @Component({
@@ -42,7 +42,7 @@ export interface FormField {
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './entity-form.component.html',
   styleUrls: ['./entity-form.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush, // Usar OnPush para evitar bucles innecesarios
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EntityFormComponent implements OnInit, OnChanges {
   @Input() fields: FormField[] = [];
@@ -63,20 +63,34 @@ export class EntityFormComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // Solo reinicializar si hay cambios reales en fields o initialData
     if (
-      (changes['fields'] && !changes['fields'].firstChange) ||
-      (changes['initialData'] && !changes['initialData'].firstChange && changes['initialData'].currentValue !== changes['initialData'].previousValue)
+      changes['initialData'] &&
+      !changes['initialData'].firstChange &&
+      !this.isEqual(changes['initialData'].previousValue, changes['initialData'].currentValue)
     ) {
       this.initForm();
-      this.cdr.markForCheck(); // Forzar detección de cambios solo si es necesario
+      this.cdr.markForCheck();
     }
   }
 
-  private initForm(): void {
-    const formControls: any = {};
+  private isEqual(obj1: any, obj2: any): boolean {
+    if (obj1 === obj2) return true;
+    if (!obj1 || !obj2) return false;
+    return JSON.stringify(obj1) === JSON.stringify(obj2);
+  }
 
-    // Usar initialData si existe, de lo contrario usar valores por defecto
+  /** Método que loggea el foco en un campo */
+  logFocus(fieldKey: string): void {
+    const control = this.form.get(fieldKey);
+    console.log(
+      `Focus en ${fieldKey}`, 
+      'valor:', control?.value, 
+      'válido:', control?.valid
+    );
+  }
+
+  private initForm(): void {
+    const formControls: Record<string, any> = {};
     const data = this.initialData ? { ...this.initialData } : {};
 
     this.fields.forEach((field) => {
@@ -86,20 +100,14 @@ export class EntityFormComponent implements OnInit, OnChanges {
       }
 
       let value = data[field.key] ?? field.defaultValue ?? '';
-      if (field.type === 'select' && !value && field.options?.length) {
-        value = field.options[0].value; // Valor por defecto para select
+      if (field.type === 'select' && (value === '' || value === null) && field.options?.length) {
+        value = field.options[0].value;
       }
 
       formControls[field.key] = [value, validators];
-      console.log(
-        `Control ${field.key} inicializado con valor: ${value}, validadores:`,
-        validators
-      );
     });
 
-    // Crear o actualizar el formulario
     if (this.form) {
-      // Actualizar valores y validadores sin reinicializar el formulario completo
       Object.keys(formControls).forEach((key) => {
         const control = this.form.get(key);
         if (control) {

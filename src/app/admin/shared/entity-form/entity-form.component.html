@@ -9,7 +9,7 @@
           <span *ngIf="field.required" class="required-mark">*</span>
         </label>
         
-        <!-- Input de texto -->
+        <!-- Input de texto y variantes -->
         <input 
           *ngIf="field.type === 'text' || field.type === 'email' || field.type === 'password' || field.type === 'number' || field.type === 'date'"
           [type]="field.type"
@@ -21,6 +21,7 @@
           [required]="field.required ?? false"
           [attr.aria-required]="field.required ?? false"
           [attr.readonly]="field.readonly ? true : null"
+          (focus)="logFocus(field.key)"
         />
         
         <!-- Textarea -->
@@ -34,6 +35,7 @@
           [required]="field.required ?? false"
           [attr.aria-required]="field.required ?? false"
           [attr.readonly]="field.readonly ? true : null"
+          (focus)="logFocus(field.key)"
         ></textarea>
         
         <!-- Select -->
@@ -46,6 +48,7 @@
           [attr.aria-invalid]="hasError(field.key, 'required')"
           [required]="field.required ?? false"
           [attr.aria-required]="field.required ?? false"
+          (focus)="logFocus(field.key)"
         >
           <option value="" disabled>Seleccione una opción</option>
           <option *ngFor="let option of field.options" [value]="option.value">
@@ -60,6 +63,7 @@
             [id]="field.key"
             [formControlName]="field.key"
             class="entity-form__checkbox"
+            (focus)="logFocus(field.key)"
           />
           <label [for]="field.key" class="entity-form__checkbox-label">
             {{ field.label }}

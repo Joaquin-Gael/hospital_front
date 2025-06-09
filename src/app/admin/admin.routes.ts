@@ -27,6 +27,11 @@ export const ADMIN_ROUTES: Routes = [
           import('./locations/location-list.component').then((m) => m.LocationListComponent),
       },
       {
+        path: 'schedules',
+        loadComponent: () =>
+          import('./schedules/schedule-list.component').then((m) => m.ScheduleListComponent),
+      },
+      {
         path: 'services',
         loadComponent: () =>
           import('./services/services-list.component').then((m) => m.ServiceListComponent),

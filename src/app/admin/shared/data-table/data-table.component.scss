@@ -13,7 +13,7 @@ $info-color: #2196f3;
   border-radius: 8px;
   box-shadow: 0 2px 10px $shadow-color;
   overflow: hidden;
-  
+
   &__header {
     padding: 16px;
     border-bottom: 1px solid $border-color;
@@ -21,12 +21,12 @@ $info-color: #2196f3;
     justify-content: space-between;
     align-items: center;
   }
-  
+
   &__search {
     position: relative;
     width: 100%;
     max-width: 300px;
-    
+
     .material-icons {
       position: absolute;
       right: 10px;
@@ -35,7 +35,7 @@ $info-color: #2196f3;
       color: #999;
     }
   }
-  
+
   &__search-input {
     width: 100%;
     padding: 10px 40px 10px 12px;
@@ -43,31 +43,32 @@ $info-color: #2196f3;
     border-radius: 4px;
     font-size: 14px;
     transition: border-color 0.3s;
-    
+
     &:focus {
       outline: none;
       border-color: $primary-color;
     }
   }
-  
+
   &__content {
     overflow-x: auto;
-    
+
     &.loading {
       opacity: 0.7;
     }
-    
+
     table {
       width: 100%;
       border-collapse: collapse;
       table-layout: auto;
-      
-      th, td {
+
+      th,
+      td {
         padding: 16px;
         text-align: left;
         border-bottom: 1px solid $border-color;
       }
-      
+
       th {
         background-color: $secondary-color;
         font-weight: 500;
@@ -77,40 +78,41 @@ $info-color: #2196f3;
         z-index: 1;
         white-space: nowrap;
       }
-      
+
       .data-row {
         transition: background-color 0.2s;
-        
+
         &:hover {
           background-color: $hover-color;
         }
       }
-      
+
       .data-cell {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 300px;
       }
-      
+
       .actions-column {
         width: 150px;
         text-align: center;
         white-space: nowrap;
       }
-      
+
       .actions-cell {
         display: flex;
         justify-content: center;
         gap: 8px;
       }
-      
-      .loading-cell, .empty-cell {
+
+      .loading-cell,
+      .empty-cell {
         text-align: center;
         padding: 40px;
         color: #666;
       }
-      
+
       .loading-cell {
         display: flex;
         flex-direction: column;
@@ -119,7 +121,7 @@ $info-color: #2196f3;
       }
     }
   }
-  
+
   &__pagination {
     display: flex;
     justify-content: center;
@@ -128,7 +130,7 @@ $info-color: #2196f3;
     border-top: 1px solid $border-color;
     gap: 16px;
   }
-  
+
   .pagination-button {
     background: none;
     border: 1px solid $border-color;
@@ -139,22 +141,22 @@ $info-color: #2196f3;
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s;
-    
+
     &:hover:not(:disabled) {
       background-color: $hover-color;
     }
-    
+
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
   }
-  
+
   .pagination-info {
     font-size: 14px;
     color: #666;
   }
-  
+
   .action-button {
     background: none;
     border: none;
@@ -165,24 +167,32 @@ $info-color: #2196f3;
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s;
-    
+
     &:hover {
       background-color: rgba(0, 0, 0, 0.05);
     }
-    
+
     &.view-button {
       color: $info-color;
     }
-    
+
     &.edit-button {
       color: $primary-color;
     }
-    
+
     &.delete-button {
       color: $danger-color;
     }
+    
+    &.ban-button {
+      color: #f44336; // Color rojo para ban
+    }
+
+    &.unban-button {
+      color: #4caf50; // Color verde para unban
+    }
   }
-  
+
   .loading-spinner {
     width: 30px;
     height: 30px;
@@ -194,21 +204,24 @@ $info-color: #2196f3;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 768px) {
   .data-table {
     &__content {
       table {
-        th, td {
+        th,
+        td {
           padding: 12px 8px;
         }
-        
+
         .data-cell {
           max-width: 150px;
         }
-        
+
         .actions-column {
           width: 120px;
         }

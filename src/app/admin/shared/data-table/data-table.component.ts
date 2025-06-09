@@ -1,11 +1,17 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { ViewDialogComponent } from '../view-dialog.component';
 
 export interface TableColumn {
   key: string;
   label: string;
   format?: (value: any) => string;
+}
+
+export interface HasIsActive {
+  is_active?: boolean;
 }
 
 @Component({
@@ -15,20 +21,25 @@ export interface TableColumn {
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss'],
 })
-export class DataTableComponent<T extends Record<string, any>> {
+export class DataTableComponent<T extends Record<string, any> & HasIsActive> {
   @Input() data: T[] = [];
   @Input() columns: TableColumn[] = [];
   @Input() loading: boolean = false;
   @Input() searchEnabled: boolean = true;
   @Input() pagination: boolean = true;
+  @Input() showBanUnban: boolean = false; // Nueva propiedad para controlar ban/unban
 
   @Output() edit = new EventEmitter<T>();
   @Output() delete = new EventEmitter<T>();
   @Output() view = new EventEmitter<T>();
+  @Output() ban = new EventEmitter<T>();
+  @Output() unban = new EventEmitter<T>();
 
   searchTerm: string = '';
   currentPage: number = 1;
   itemsPerPage: number = 10;
+
+  constructor(public dialog: MatDialog) {}
 
   get filteredData(): T[] {
     if (!this.searchTerm.trim()) {
@@ -64,7 +75,18 @@ export class DataTableComponent<T extends Record<string, any>> {
   }
 
   onView(item: T): void {
-    this.view.emit(item);
+    this.dialog.open(ViewDialogComponent, {
+      width: '400px',
+      data: { item: item, columns: this.columns }
+    });
+  }
+
+  onBan(item: T): void {
+    this.ban.emit(item);
+  }
+
+  onUnban(item: T): void {
+    this.unban.emit(item);
   }
 
   changePage(page: number): void {

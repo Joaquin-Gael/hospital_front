@@ -14,7 +14,7 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, DataTableComponent, EntityFormComponent, MatDialogModule, MatIconModule],
+  imports: [CommonModule, MatDialogModule, MatIconModule, DataTableComponent, EntityFormComponent],
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss'],
 })
@@ -218,7 +218,6 @@ export class UserListComponent implements OnInit {
             console.log('User deleted:', user.id);
             this.users = this.users.filter(u => u.id !== user.id);
             this.loading = false;
- 
             this.logger.info(`Usuario "${user.username}" eliminado correctamente`);
           },
           error: (error: HttpErrorResponse) => {
@@ -259,12 +258,6 @@ export class UserListComponent implements OnInit {
       this.formLoading = false;
       return;
     }
-    
-    /*
-    if (this.formMode === 'edit' && !formData.password) {
-      delete formData.password;
-    }
-    */
 
     if (this.formMode === 'create') {
       this.userService.createUser(formData as UserCreate).subscribe({
@@ -305,6 +298,81 @@ export class UserListComponent implements OnInit {
   onFormCancel(): void {
     this.showForm = false;
     this.selectedUser = null; // Limpiar selectedUser al cancelar
+  }
+
+  // Métodos intermedios para manejar los eventos
+  onBanEvent(event: any): void {
+    const user = event as UserRead;
+    this.onBan(user);
+  }
+
+  onUnbanEvent(event: any): void {
+    const user = event as UserRead;
+    this.onUnban(user);
+  }
+
+  onBan(user: UserRead): void {
+    console.log('Ban clicked for user:', user);
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Banear Usuario',
+        message: `¿Está seguro de banear al usuario "${user.username}" (${user.first_name} ${user.last_name})?`,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loading = true;
+        this.userService.banUser(user.id.toString()).subscribe({
+          next: (bannedUser) => {
+            console.log('User banned:', bannedUser);
+            const index = this.users.findIndex(u => u.id === bannedUser.id);
+            if (index !== -1) {
+              this.users[index] = bannedUser;
+            }
+            this.loading = false;
+            this.logger.info(`Usuario "${user.username}" baneado correctamente`);
+          },
+          error: (error: HttpErrorResponse) => {
+            console.error('Ban user error:', error);
+            this.handleError(error, `Error al banear al usuario "${user.username}"`);
+            this.loading = false;
+          },
+        });
+      }
+    });
+  }
+
+  onUnban(user: UserRead): void {
+    console.log('Unban clicked for user:', user);
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Desbanear Usuario',
+        message: `¿Está seguro de desbanear al usuario "${user.username}" (${user.first_name} ${user.last_name})?`,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loading = true;
+        this.userService.unbanUser(user.id.toString()).subscribe({
+          next: (unbannedUser) => {
+            console.log('User unbanned:', unbannedUser);
+            const index = this.users.findIndex(u => u.id === unbannedUser.id);
+            if (index !== -1) {
+              this.users[index] = unbannedUser;
+            }
+            this.loading = false;
+            this.logger.info(`Usuario "${user.username}" desbaneado correctamente`);
+          },
+          error: (error: HttpErrorResponse) => {
+            console.error('Unban user error:', error);
+            this.handleError(error, `Error al desbanear al usuario "${user.username}"`);
+            this.loading = false;
+          },
+        });
+      }
+    });
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {

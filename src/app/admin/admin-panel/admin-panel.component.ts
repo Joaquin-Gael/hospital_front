@@ -27,6 +27,7 @@ export class AdminPanelComponent implements OnInit {
     { id: 'departments', label: 'Departamentos', icon: 'business' },
     { id: 'specialities', label: 'Especialidades', icon: 'local_hospital' },
     { id: 'doctors', label: 'Doctores', icon: 'person' },
+    { id: 'schedules', label: 'Horarios', icon: 'schedule' },
     { id: 'services', label: 'Servicios', icon: 'medical_services' },
     { id: 'locations', label: 'Ubicaciones', icon: 'location_on' },
     { id: 'users', label: 'Usuarios', icon: 'people' },
