@@ -1,0 +1,94 @@
+@use 'sass:color';
+
+// Variables
+$primary-color: #3f51b5;
+$secondary-color: #f5f5f5;
+$text-color: #333;
+$border-color: #e0e0e0;
+$error-color: #f44336;
+$shadow-color: rgba(0, 0, 0, 0.1);
+
+.schedule-list {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    h3 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: $text-color;
+    }
+  }
+  
+  &__content, &__form {
+    transition: opacity 0.3s, transform 0.3s;
+    
+    &.hidden {
+      display: none;
+    }
+  }
+  
+  .add-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    
+    &:hover {
+      background-color: color.adjust($primary-color, $lightness: 10%);
+    }
+    
+    .material-icons {
+      font-size: 18px;
+    }
+  }
+  
+  .error-message {
+    background-color: color.adjust($error-color, $lightness: 35%);
+    border-left: 4px solid $error-color;
+    color: color.adjust($error-color, $lightness: 20%);
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .close-button {
+      background: none;
+      border: none;
+      color: color.adjust($error-color, $lightness: 20%);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .schedule-list {
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+  }
+}
