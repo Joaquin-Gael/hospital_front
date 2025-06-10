@@ -177,7 +177,7 @@ export class DoctorListComponent implements OnInit {
         context: 'doctor',
         doctorId: doctor?.id,
         doctors: this.doctors.filter(d => d.is_active),
-        schedules: this.schedules.filter(s => !s.doctors || s.doctors.length < 2) // Ejemplo: limitar a horarios con menos de 2 doctores
+        schedules: this.schedules 
       },
       width: '500px'
     });
@@ -186,7 +186,7 @@ export class DoctorListComponent implements OnInit {
       if (result?.success) {
         this.error = null;
         this.logger.info('Horario asociado a doctor correctamente');
-        this.loadData(); // Recargar para reflejar los nuevos horarios
+        this.loadData(); 
       } else if (result?.error) {
         this.error = result.error;
       }
