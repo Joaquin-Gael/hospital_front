@@ -1,14 +1,24 @@
 <div class="schedule-list">
   <div class="schedule-list__header">
     <h3>Listado de Horarios</h3>
-    <button 
-      class="add-button" 
-      (click)="onAddNew()"
-      aria-label="Agregar nuevo horario"
-    >
-      <span class="material-icons">add</span>
-      Nuevo Horario
-    </button>
+    <div class="button-group">
+      <button 
+        class="add-button assign-button" 
+        (click)="openAssignDoctorDialog()"
+        aria-label="Asociar doctor a horario"
+      >
+        <span class="material-icons">link</span>
+        Asociar Doctor
+      </button>
+      <button 
+        class="add-button" 
+        (click)="onAddNew()"
+        aria-label="Agregar nuevo horario"
+      >
+        <span class="material-icons">add</span>
+        Nuevo Horario
+      </button>
+    </div>
   </div>
   
   <div *ngIf="error" class="error-message" role="alert">

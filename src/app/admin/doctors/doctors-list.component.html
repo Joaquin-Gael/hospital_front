@@ -1,14 +1,24 @@
 <div class="doctor-list">
   <div class="doctor-list__header">
     <h3>Listado de Doctores</h3>
-    <button 
-      class="add-button" 
-      (click)="onAddNew()"
-      aria-label="Agregar nuevo doctor"
-    >
-      <span class="material-icons">add</span>
-      Nuevo Doctor
-    </button>
+    <div class="button-group">
+      <button 
+        class="add-button assign-button" 
+        (click)="openAssignScheduleDialog()"
+        aria-label="Asociar horario a doctor"
+      >
+        <span class="material-icons">link</span>
+        Asociar Horario
+      </button>
+      <button 
+        class="add-button" 
+        (click)="onAddNew()"
+        aria-label="Agregar nuevo doctor"
+      >
+        <span class="material-icons">add</span>
+        Nuevo Doctor
+      </button>
+    </div>
   </div>
   
   <div *ngIf="error" class="error-message" role="alert">
@@ -41,7 +51,7 @@
       [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
       [loading]="formLoading"
       (formSubmit)="onFormSubmit($event)"
-      (cancel)="onFormCancel()"
+      (formCancel)="onFormCancel()"
     ></app-entity-form>
   </div>
 </div>

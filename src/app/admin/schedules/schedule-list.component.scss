@@ -31,6 +31,11 @@ $shadow-color: rgba(0, 0, 0, 0.1);
     }
   }
   
+  .button-group {
+    display: flex;
+    gap: 8px;
+  }
+  
   .add-button {
     display: flex;
     align-items: center;
@@ -51,6 +56,13 @@ $shadow-color: rgba(0, 0, 0, 0.1);
     
     .material-icons {
       font-size: 18px;
+    }
+  }
+  
+  .assign-button {
+    background-color: #4caf50;
+    &:hover {
+      background-color: color.adjust(#4caf50, $lightness: 10%);
     }
   }
   
