@@ -79,7 +79,7 @@ export class UserService {
    * @returns Observable con los datos del usuario baneado.
    */
   banUser(userId: string): Observable<UserRead> {
-    return this.apiService.put<{ user: UserRead; message: string }>(USER_ENDPOINTS.BAN(userId), {}).pipe(
+    return this.apiService.patch<{ user: UserRead; message: string }>(USER_ENDPOINTS.BAN(userId), {}).pipe(
       map(response => response.user),
       catchError(error => this.handleError('Ban user', error))
     );
@@ -91,7 +91,7 @@ export class UserService {
    * @returns Observable con los datos del usuario desbaneado.
    */
   unbanUser(userId: string): Observable<UserRead> {
-    return this.apiService.put<{ user: UserRead; message: string }>(USER_ENDPOINTS.UNBAN(userId), {}).pipe(
+    return this.apiService.patch<{ user: UserRead; message: string }>(USER_ENDPOINTS.UNBAN(userId), {}).pipe(
       map(response => response.user),
       catchError(error => this.handleError('Unban user', error))
     );
