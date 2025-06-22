@@ -24,7 +24,7 @@ export interface TokenDoctorsResponse {
 }
 
 export interface DoctorCreate {
-  id?: string; // UUID, opcional (generado por backend si no se provee)
+  id?: string; 
   username: string;
   email: string;
   password: string;
@@ -32,7 +32,7 @@ export interface DoctorCreate {
   last_name?: string;
   dni?: string;
   telephone?: string;
-  speciality_id: string; // UUID
+  speciality_id: string;
   blood_type?: string;
   address?: string;
 }
