@@ -1,123 +1,298 @@
 <div class="register-container">
   <div class="register-card">
     <div class="register-header">
-      <h1>Registro de Usuario</h1>
-      <p>Complete el formulario para crear su cuenta</p>
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+        </svg>
+      </div>
+      <h1>Registro de Paciente</h1>
+      <p>Complete sus datos para crear una cuenta</p>
+    </div>
+
+    <!-- Mensaje de feedback simple -->
+    <div 
+      class="feedback-message" 
+      [ngClass]="{
+        'feedback-message--success': feedbackType === 'success', 
+        'feedback-message--error': feedbackType === 'error'
+      }" 
+      *ngIf="feedbackMessage"
+    >
+      <span class="feedback-message__icon">
+        <svg *ngIf="feedbackType === 'success'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20,6 9,17 4,12"></polyline>
+        </svg>
+        <svg *ngIf="feedbackType === 'error'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </span>
+      <span class="feedback-message__text">{{ feedbackMessage }}</span>
+    </div>
+
+    <!-- Disclaimer legal simplificado -->
+    <div class="legal-notice">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+      </svg>
+      <p>Los datos proporcionados deben ser verídicos. La falsificación de información médica puede imposibilitar la prestación de servicios.</p>
     </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="register-form">
-      <div class="form-group">
-        <label for="first_name">Nombre</label>
-        <input 
-          type="text" 
-          id="first_name" 
-          formControlName="first_name" 
-          placeholder="Ingrese su nombre"
-          [ngClass]="{'invalid': registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched}"
-        >
-        <div class="error-message" *ngIf="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched">
-          El nombre es requerido
+      <!-- Indicador de progreso simple -->
+      <div class="form-progress" *ngIf="isSubmitting">
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
         </div>
+        <span class="progress-text">Procesando registro...</span>
       </div>
 
-      <div class="form-group">
-        <label for="last_name">Apellido</label>
-        <input 
-          type="text" 
-          id="last_name" 
-          formControlName="last_name" 
-          placeholder="Ingrese su apellido"
-          [ngClass]="{'invalid': registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched}"
-        >
-        <div class="error-message" *ngIf="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched">
-          El apellido es requerido
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="dni">DNI</label>
-        <input 
-          type="text" 
-          id="dni" 
-          name="dni"
-          formControlName="dni" 
-          placeholder="Ingrese su DNI (8 dígitos)"
-          [ngClass]="{'invalid': registerForm.get('dni')?.invalid && registerForm.get('dni')?.touched}"
-        >
-        <div class="error-message" *ngIf="registerForm.get('dni')?.invalid && registerForm.get('dni')?.touched">
-          <span *ngIf="registerForm.get('dni')?.errors?.['required']">El DNI es requerido</span>
-          <span *ngIf="registerForm.get('dni')?.errors?.['pattern']">El DNI debe tener 8 dígitos numéricos</span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="email">Correo electrónico</label>
-        <input 
-          type="email" 
-          id="email" 
-          formControlName="email" 
-          placeholder="Ingrese su correo electrónico"
-          [ngClass]="{'invalid': registerForm.get('email')?.invalid && registerForm.get('email')?.touched}"
-        >
-        <div class="error-message" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
-          <span *ngIf="registerForm.get('email')?.errors?.['required']">El correo electrónico es requerido</span>
-          <span *ngIf="registerForm.get('email')?.errors?.['email']">Ingrese un correo electrónico válido</span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="password">Contraseña</label>
-        <div class="password-input-container">
-          <input 
-            [type]="showPassword ? 'text' : 'password'" 
-            id="password" 
-            formControlName="password" 
-            placeholder="Ingrese su contraseña"
-            [ngClass]="{'invalid': registerForm.get('password')?.invalid && registerForm.get('password')?.touched}"
-            (input)="checkPasswordStrength()"
-          >
-          <button type="button" class="toggle-password" (click)="showPassword = !showPassword">
-            <i class="fas" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
-          </button>
-        </div>
-        <div class="password-strength" *ngIf="registerForm.get('password')?.value">
-          <div class="strength-meter">
-            <div class="strength-bar" [ngClass]="passwordStrengthClass" [style.width.%]="passwordStrength"></div>
+      <!-- Datos personales -->
+      <div class="form-section">
+        <h3 class="section-title">Datos personales</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="first_name" class="form-label">
+              Nombre <span class="required">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="first_name" 
+              formControlName="first_name" 
+              placeholder="Ingrese su nombre"
+              class="form-input"
+              [class.form-input--error]="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched"
+            >
+            <div class="error-message" *ngIf="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched">
+              El nombre es requerido
+            </div>
           </div>
-          <span class="strength-text" [ngClass]="passwordStrengthClass">
-            {{passwordStrengthText}}
-          </span>
-        </div>
-        <div class="error-message" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-          <span *ngIf="registerForm.get('password')?.errors?.['required']">La contraseña es requerida</span>
-          <span *ngIf="registerForm.get('password')?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</span>
-        </div>
-      </div>
 
-      <div class="form-group">
-        <label for="confirmPassword">Confirmar contraseña</label>
-        <div class="password-input-container">
+          <div class="form-group">
+            <label for="last_name" class="form-label">
+              Apellido <span class="required">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="last_name" 
+              formControlName="last_name" 
+              placeholder="Ingrese su apellido"
+              class="form-input"
+              [class.form-input--error]="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched"
+            >
+            <div class="error-message" *ngIf="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched">
+              El apellido es requerido
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dni" class="form-label">
+            DNI <span class="required">*</span>
+          </label>
           <input 
-            [type]="showConfirmPassword ? 'text' : 'password'" 
-            id="confirmPassword" 
-            formControlName="confirmPassword" 
-            placeholder="Confirme su contraseña"
-            [ngClass]="{'invalid': (registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.get('confirmPassword')?.touched}"
+            type="text" 
+            id="dni" 
+            formControlName="dni" 
+            placeholder="12345678"
+            class="form-input"
+            [class.form-input--error]="registerForm.get('dni')?.invalid && registerForm.get('dni')?.touched"
+            maxlength="8"
           >
-          <button type="button" class="toggle-password" (click)="showConfirmPassword = !showConfirmPassword">
-            <i class="fas" [ngClass]="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
-          </button>
+          <div class="error-message" *ngIf="registerForm.get('dni')?.invalid && registerForm.get('dni')?.touched">
+            <span *ngIf="registerForm.get('dni')?.errors?.['required']">El DNI es requerido</span>
+            <span *ngIf="registerForm.get('dni')?.errors?.['pattern']">El DNI debe tener 8 dígitos</span>
+          </div>
         </div>
-        <div class="error-message" *ngIf="(registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.get('confirmPassword')?.touched">
-          <span *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">Debe confirmar su contraseña</span>
-          <span *ngIf="registerForm.errors?.['passwordMismatch']">Las contraseñas no coinciden</span>
+
+        <div class="form-group">
+          <label for="email" class="form-label">
+            Correo electrónico <span class="required">*</span>
+          </label>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            placeholder="ejemplo@correo.com"
+            class="form-input"
+            [class.form-input--error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+          >
+          <div class="error-message" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+            <span *ngIf="registerForm.get('email')?.errors?.['required']">El correo electrónico es requerido</span>
+            <span *ngIf="registerForm.get('email')?.errors?.['email']">Ingrese un correo electrónico válido</span>
+          </div>
         </div>
       </div>
 
-      <button type="submit" class="submit-btn" [disabled]="registerForm.invalid">Registrarse</button>
+      <!-- Información médica -->
+      <div class="form-section">
+        <h3 class="section-title">Información médica</h3>
+        
+        <div class="form-group">
+          <label for="blood_type" class="form-label">
+            Tipo de sangre <span class="optional">(Opcional)</span>
+          </label>
+          <select 
+            id="blood_type" 
+            formControlName="blood_type" 
+            class="form-select"
+          >
+            <option value="">Seleccione su tipo de sangre</option>
+            <option *ngFor="let option of bloodTypeOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          <div class="field-help">Esta información es importante para emergencias médicas</div>
+        </div>
+      </div>
 
-      <div class="login-link">
-        ¿Ya tienes una cuenta? <a href="/login">Iniciar sesión</a>
+      <!-- Seguridad -->
+      <div class="form-section">
+        <h3 class="section-title">Seguridad</h3>
+        
+        <div class="form-group">
+          <label for="password" class="form-label">
+            Contraseña <span class="required">*</span>
+          </label>
+          <div class="password-input">
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              id="password" 
+              formControlName="password" 
+              placeholder="Mínimo 6 caracteres"
+              class="form-input"
+              [class.form-input--error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+              (input)="checkPasswordStrength()"
+            >
+            <button 
+              type="button" 
+              class="toggle-password" 
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <svg 
+                *ngIf="!showPassword"
+                xmlns="http://www.w3.org/2000/svg" 
+                width="18" 
+                height="18" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg 
+                *ngIf="showPassword"
+                xmlns="http://www.w3.org/2000/svg" 
+                width="18" 
+                height="18" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round"
+              >
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Medidor de fortaleza simplificado -->
+          <div class="password-strength" *ngIf="registerForm.get('password')?.value">
+            <div class="strength-bar">
+              <div class="strength-fill" [ngClass]="passwordStrengthClass" [style.width.%]="passwordStrength"></div>
+            </div>
+            <span class="strength-text" [ngClass]="passwordStrengthClass">
+              {{ passwordStrengthText }}
+            </span>
+          </div>
+          
+          <div class="error-message" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+            <span *ngIf="registerForm.get('password')?.errors?.['required']">La contraseña es requerida</span>
+            <span *ngIf="registerForm.get('password')?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword" class="form-label">
+            Confirmar contraseña <span class="required">*</span>
+          </label>
+          <div class="password-input">
+            <input 
+              [type]="showConfirmPassword ? 'text' : 'password'" 
+              id="confirmPassword" 
+              formControlName="confirmPassword" 
+              placeholder="Repita su contraseña"
+              class="form-input"
+              [class.form-input--error]="(registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.get('confirmPassword')?.touched"
+            >
+            <button 
+              type="button" 
+              class="toggle-password" 
+              (click)="showConfirmPassword = !showConfirmPassword"
+              [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <svg 
+                *ngIf="!showConfirmPassword"
+                xmlns="http://www.w3.org/2000/svg" 
+                width="18" 
+                height="18" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg 
+                *ngIf="showConfirmPassword"
+                xmlns="http://www.w3.org/2000/svg" 
+                width="18" 
+                height="18" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round"
+              >
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="error-message" *ngIf="(registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.get('confirmPassword')?.touched">
+            <span *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">Debe confirmar su contraseña</span>
+            <span *ngIf="registerForm.errors?.['passwordMismatch']">Las contraseñas no coinciden</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn-primary" 
+          [disabled]="registerForm.invalid || isSubmitting"
+        >
+          <span *ngIf="isSubmitting" class="loading-spinner"></span>
+          {{ isSubmitting ? 'Creando cuenta...' : 'Crear cuenta' }}
+        </button>
+
+        <div class="auth-footer">
+          <p>¿Ya tienes una cuenta? <a href="/login">Iniciar sesión</a></p>
+        </div>
       </div>
     </form>
   </div>

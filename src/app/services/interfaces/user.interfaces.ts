@@ -23,6 +23,7 @@ export interface UserCreate {
   dni: string;
   password: string;
   address?: string;
+  blood_type: string;
   is_superuser?: boolean;
   is_admin?: boolean; 
 }

@@ -24,7 +24,36 @@
   <main class="admin-panel__content">
     <header class="admin-panel__header">
       <h2>{{ activeSectionLabel }}</h2>
+      
+      <div class="admin-panel__user-menu">
+        <button 
+          #userButton
+          class="admin-panel__user-button"
+          (click)="toggleUserMenu()"
+          [attr.aria-expanded]="isUserMenuOpen"
+          aria-haspopup="true"
+          aria-label="Menú de usuario"
+        >
+          <span class="material-icons">account_circle</span>
+          <span class="material-icons admin-panel__dropdown-icon">keyboard_arrow_down</span>
+        </button>
+        
+        <div 
+          #dropdownMenu
+          class="admin-panel__dropdown"
+          [class.admin-panel__dropdown--open]="isUserMenuOpen"
+        >
+          <button 
+            class="admin-panel__dropdown-item"
+            (click)="onLogout()"
+          >
+            <span class="material-icons">logout</span>
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
+      </div>
     </header>
+    
     <div class="admin-panel__container">
       <router-outlet></router-outlet>
     </div>

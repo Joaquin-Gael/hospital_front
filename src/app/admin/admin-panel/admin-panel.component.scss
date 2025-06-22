@@ -1,4 +1,6 @@
-// Variables
+@use 'sass:color';
+
+// Variables existentes
 $primary-color: #3f51b5;
 $secondary-color: #f5f5f5;
 $text-color: #333;
@@ -9,6 +11,11 @@ $transition-speed: 0.3s;
 $sidebar-width: 250px;
 $sidebar-collapsed-width: 70px;
 $header-height: 64px;
+
+// Nuevas variables para el menú de usuario
+$dropdown-bg: #fff;
+$dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+$hover-bg: #f5f5f5;
 
 .admin-panel {
   display: flex;
@@ -105,6 +112,7 @@ $header-height: 64px;
     border-bottom: 1px solid $border-color;
     display: flex;
     align-items: center;
+    justify-content: space-between; // Cambiado para distribuir el espacio
     padding: 0 20px;
     box-shadow: 0 2px 4px $shadow-color;
     z-index: 5;
@@ -113,6 +121,100 @@ $header-height: 64px;
       margin: 0;
       font-weight: 500;
       color: $text-color;
+    }
+  }
+  
+  // Estilos del menú de usuario
+  &__user-menu {
+    position: relative;
+  }
+  
+  &__user-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background: transparent;
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    color: $text-color;
+    cursor: pointer;
+    transition: all $transition-speed ease;
+    
+    &:hover {
+      background-color: $hover-bg;
+      border-color: color.adjust($border-color, $lightness: 10%);
+    }
+    
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+    }
+  }
+  
+  &__dropdown-icon {
+    font-size: 18px;
+    transition: transform $transition-speed ease;
+    
+    .admin-panel__dropdown--open & {
+      transform: rotate(180deg);
+    }
+  }
+  
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    background: $dropdown-bg;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    box-shadow: $dropdown-shadow;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all $transition-speed ease;
+    z-index: 1000;
+    
+    &--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+  
+  &__dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    color: $text-color;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color $transition-speed ease;
+    border-radius: 6px;
+    margin: 4px;
+    
+    &:hover {
+      background-color: $hover-bg;
+    }
+    
+    &:focus {
+      outline: none;
+      background-color: $hover-bg;
+    }
+    
+    .material-icons {
+      font-size: 20px;
+      color: #ef4444;
+    }
+    
+    span:not(.material-icons) {
+      font-size: 14px;
+      font-weight: 500;
     }
   }
   
@@ -132,4 +234,12 @@ $header-height: 64px;
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+// Cerrar dropdown al hacer click fuera (opcional para el CSS)
+@media (max-width: 768px) {
+  .admin-panel__dropdown {
+    right: -10px;
+    min-width: 160px;
+  }
 }

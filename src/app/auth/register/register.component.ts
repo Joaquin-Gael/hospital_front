@@ -1,8 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../services/user/user.service';
+import { AuthService } from '../../services/auth/auth.service';
 import { UserCreate } from '../../services/interfaces/user.interfaces';
 
 @Component({
@@ -10,27 +12,44 @@ import { UserCreate } from '../../services/interfaces/user.interfaces';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, RouterModule],
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+  styleUrls: ['./register.component.scss'],
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly userService = inject(UserService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly destroy$ = new Subject<void>();
 
   showPassword = false;
   showConfirmPassword = false;
   passwordStrength = 0;
   passwordStrengthText = '';
   passwordStrengthClass = '';
+  isSubmitting = false;
+  feedbackMessage: string | null = null;
+  feedbackType: 'success' | 'error' | 'warning' | 'info' | null = null; 
 
-  registerForm: FormGroup = this.fb.group(
+  readonly bloodTypeOptions = [
+    { value: 'A+', label: 'A+' },
+    { value: 'A-', label: 'A-' },
+    { value: 'B+', label: 'B+' },
+    { value: 'B-', label: 'B-' },
+    { value: 'AB+', label: 'AB+' },
+    { value: 'AB-', label: 'AB-' },
+    { value: 'O+', label: 'O+' },
+    { value: 'O-', label: 'O-' },
+  ];
+
+  readonly registerForm: FormGroup = this.fb.group(
     {
       email: ['', [Validators.required, Validators.email]],
       first_name: ['', [Validators.required]],
       last_name: ['', [Validators.required]],
       dni: ['', [Validators.required, Validators.pattern(/^[0-9]{8}$/)]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required]],
+      blood_type: [''],
     },
     { validators: [RegisterComponent.passwordMatchValidator] }
   );
@@ -41,9 +60,21 @@ export class RegisterComponent {
     return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/home']);
+    }
+  }
+
   generateUsername(firstName: string, lastName: string): string {
-    const cleanFirst = firstName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const cleanLast = lastName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const cleanFirst = firstName
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+    const cleanLast = lastName
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
     return `${cleanFirst.charAt(0)}${cleanLast}`;
   }
 
@@ -59,15 +90,12 @@ export class RegisterComponent {
 
     let strength = 0;
 
-    // Longitud mínima
     if (password.length >= 6) strength += 20;
     if (password.length >= 8) strength += 10;
-
-    // Complejidad
-    if (/[A-Z]/.test(password)) strength += 20; // Mayúsculas
-    if (/[a-z]/.test(password)) strength += 10; // Minúsculas
-    if (/[0-9]/.test(password)) strength += 20; // Números
-    if (/[^A-Za-z0-9]/.test(password)) strength += 20; // Caracteres especiales
+    if (/[A-Z]/.test(password)) strength += 20;
+    if (/[a-z]/.test(password)) strength += 10;
+    if (/[0-9]/.test(password)) strength += 20;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 20;
 
     this.passwordStrength = strength;
 
@@ -86,25 +114,53 @@ export class RegisterComponent {
   onRegister() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
-      alert('Por favor completá correctamente todos los campos.');
+      this.feedbackMessage = 'Por favor completá correctamente todos los campos.';
+      this.feedbackType = 'error';
       return;
     }
 
-    const { email, first_name, last_name, dni, password } = this.registerForm.value;
+    this.isSubmitting = true;
+    this.feedbackMessage = null;
+
+    const { email, first_name, last_name, dni, password, blood_type } = this.registerForm.value;
     const username = this.generateUsername(first_name, last_name);
 
-    const payload: UserCreate = { email, username, first_name, last_name, dni, password };
+    const payload: UserCreate = {
+      email,
+      username,
+      first_name,
+      last_name,
+      dni,
+      password,
+      blood_type: blood_type || undefined,
+    };
 
-    this.userService.createUser(payload).subscribe({
-      next: () => {
-        console.log('¡Registro exitoso!');
-        alert('Te registraste con éxito. Iniciá sesión.');
-        this.router.navigateByUrl('/login');
-      },
-      error: (err) => {
-        console.error('Error en el registro:', err.message);
-        alert('Algo salió mal: ' + (err.message || 'verificá tus datos.'));
-      }
-    });
+    this.userService
+      .createUser(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.feedbackMessage = 'Te registraste con éxito. Iniciá sesión.';
+          this.feedbackType = 'success';
+          setTimeout(() => this.router.navigateByUrl('/login'), 2000);
+        },
+        error: (err) => {
+          this.isSubmitting = false;
+          const msg = err?.error?.message || err?.message || 'Ocurrió un error inesperado.';
+          this.feedbackMessage = `Algo salió mal: ${msg}`;
+          this.feedbackType = 'error';
+        },
+      });
+  }
+
+  closeFeedback(): void {
+    this.feedbackMessage = null;
+    this.feedbackType = null;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

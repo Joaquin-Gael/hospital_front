@@ -2,42 +2,75 @@
   <div class="auth-card">
     <div class="auth-header">
       <div class="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
         </svg>
       </div>
-      <h1>Ingresa a tu cuenta</h1>
+      <h1>Acceso al Sistema</h1>
+      <p>Ingrese sus credenciales para continuar</p>
+    </div>
+
+    <!-- Mensaje de feedback simple -->
+    <div 
+      class="feedback-message" 
+      [ngClass]="{
+        'feedback-message--success': feedbackType === 'success', 
+        'feedback-message--error': feedbackType === 'error'
+      }" 
+      *ngIf="feedbackMessage"
+    >
+      <span class="feedback-message__icon">
+        <svg *ngIf="feedbackType === 'success'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20,6 9,17 4,12"></polyline>
+        </svg>
+        <svg *ngIf="feedbackType === 'error'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </span>
+      <span class="feedback-message__text">{{ feedbackMessage }}</span>
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
       <div class="form-group">
-        <label for="email">Correo electrónico</label>
-        <input type="email" id="email" formControlName="email" placeholder="Ingresa tu correo">
-        <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid" class="error-message">
-          <span *ngIf="loginForm.get('email')?.errors?.['required']">El email es requerido.</span>
-          <span *ngIf="loginForm.get('email')?.errors?.['email']">Ingresa un email válido.</span>
+        <label for="email" class="form-label">Correo electrónico</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email" 
+          placeholder="ejemplo@correo.com"
+          class="form-input"
+          [class.form-input--error]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
+        >
+        <div class="error-message" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
+          <span *ngIf="loginForm.get('email')?.errors?.['required']">El email es requerido</span>
+          <span *ngIf="loginForm.get('email')?.errors?.['email']">Ingrese un email válido</span>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="password">Contraseña</label>
+        <label for="password" class="form-label">Contraseña</label>
         <div class="password-input">
           <input 
             [type]="showPassword ? 'text' : 'password'" 
             id="password" 
             formControlName="password" 
-            placeholder="Ingresa tu contraseña"
+            placeholder="Ingrese su contraseña"
+            class="form-input"
+            [class.form-input--error]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
           >
           <button 
             type="button" 
             class="toggle-password" 
             (click)="togglePassword()"
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
           >
             <svg 
               *ngIf="!showPassword"
               xmlns="http://www.w3.org/2000/svg" 
-              width="20" 
-              height="20" 
+              width="18" 
+              height="18" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
@@ -51,8 +84,8 @@
             <svg 
               *ngIf="showPassword"
               xmlns="http://www.w3.org/2000/svg" 
-              width="20" 
-              height="20" 
+              width="18" 
+              height="18" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
@@ -65,27 +98,30 @@
             </svg>
           </button>
         </div>
-        <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['required']" class="error-message">
-          La contraseña es requerida.
+        <div class="error-message" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['required']">
+          La contraseña es requerida
         </div>
       </div>
 
       <div class="form-options">
-        <div class="form-group checkbox-group">
-          <input type="checkbox" id="remember" formControlName="remember">
-          <label for="remember">Recordarme</label>
-        </div>
+        <label class="checkbox-wrapper">
+          <input type="checkbox" formControlName="remember">
+          <span class="checkbox-text">Recordarme</span>
+        </label>
         <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
       </div>
 
-      <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">Iniciar sesión</button>
-
-      <div class="divider">
-        <span>o</span>
-      </div>
+      <button 
+        type="submit" 
+        class="btn-primary" 
+        [disabled]="loginForm.invalid || isSubmitting"
+      >
+        <span *ngIf="isSubmitting" class="loading-spinner"></span>
+        {{ isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión' }}
+      </button>
 
       <div class="auth-footer">
-        <p>¿No tienes una cuenta? <a href="/register">Regístrate ahora</a></p>
+        <p>¿No tienes una cuenta? <a href="/register">Regístrate aquí</a></p>
       </div>
     </form>
   </div>

@@ -297,10 +297,9 @@ export class UserListComponent implements OnInit {
 
   onFormCancel(): void {
     this.showForm = false;
-    this.selectedUser = null; // Limpiar selectedUser al cancelar
+    this.selectedUser = null; 
   }
 
-  // Métodos intermedios para manejar los eventos
   onBanEvent(event: any): void {
     const user = event as UserRead;
     this.onBan(user);

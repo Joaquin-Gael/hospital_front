@@ -1,215 +1,469 @@
 @use 'sass:color';
+@use '../_variables.scss' as *;
 
-$primary-color: #2c7be5;
-$secondary-color: #6c757d;
-$success-color: #00b894;
-$warning-color: #fdcb6e;
-$danger-color: #e74c3c;
-$light-color: #f8f9fa;
-$dark-color: #343a40;
-$border-radius: 8px;
-$box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-$transition: all 0.3s ease;
-
-// Mixins
-@mixin flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-@mixin form-control {
-  width: 100%;
-  padding: 12px 16px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: $border-radius;
-  transition: $transition;
-  outline: none;
-  
-  &:focus {
-    border-color: $primary-color;
-    box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
-  }
-  
-  &.invalid {
-    border-color: $danger-color;
-    box-shadow: 0 0 0 3px rgba($danger-color, 0.2);
-  }
-}
-
-
-// Main Styles
 .register-container {
   min-height: 100vh;
-  @include flex-center;
-  padding: 20px;
-  margin-top: 80px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg;
+  background-color: $gray-50;
+  font-family: $font-family;
+  margin-top: 80px;
 }
-
 
 .register-card {
   width: 100%;
-  max-width: 500px;
-  background-color: rgba(2, 20, 28, 0.5);
-  backdrop-filter: blur(11px) saturate(157%);
-  -webkit-backdrop-filter: blur(11px) saturate(157%);
+  max-width: 600px;
+  background-color: $white;
   border-radius: $border-radius;
-  box-shadow: $box-shadow;
-  overflow: hidden;
+  box-shadow: $box-shadow-lg;
+  border: $border-width solid $gray-200;
 }
 
+// Header limpio
 .register-header {
-  padding: 30px;
+  padding: $spacing-xl $spacing-xl $spacing-lg;
   text-align: center;
-  background-color: rgba(2, 20, 28, 0.5);
-  -webkit-backdrop-filter: blur(11px) saturate(157%);
-  backdrop-filter: blur(11px) saturate(157%);
-  border-bottom: 1px solid #eee;
+  border-bottom: $border-width solid $gray-100;
+  
+  .logo {
+    margin-bottom: $spacing-lg;
+    
+    svg {
+      color: $primary-color;
+      width: 32px;
+      height: 32px;
+    }
+  }
   
   h1 {
-    margin: 0 0 10px;
-    color: $dark-color;
-    font-size: 24px;
+    margin: 0 0 $spacing-sm;
+    font-size: $font-size-xl;
     font-weight: 600;
+    color: $gray-800;
+    line-height: 1.2;
   }
   
   p {
     margin: 0;
-    color: $secondary-color;
-    font-size: 16px;
+    font-size: $font-size-sm;
+    color: $gray-600;
+    line-height: 1.4;
   }
 }
 
+// Feedback simple y claro
+.feedback-message {
+  margin: $spacing-lg $spacing-xl 0;
+  padding: $spacing-md;
+  border-radius: $border-radius;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  
+  &--success {
+    background-color: rgba($success-color, 0.1);
+    color: $success-color;
+    border: $border-width solid rgba($success-color, 0.2);
+  }
+  
+  &--error {
+    background-color: rgba($danger-color, 0.1);
+    color: $danger-color;
+    border: $border-width solid rgba($danger-color, 0.2);
+  }
+  
+  &__icon {
+    flex-shrink: 0;
+  }
+}
+
+// Aviso legal simplificado
+.legal-notice {
+  margin: $spacing-lg $spacing-xl 0;
+  padding: $spacing-md;
+  background-color: rgba($warning-color, 0.1);
+  border: $border-width solid rgba($warning-color, 0.2);
+  border-radius: $border-radius;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  
+  svg {
+    color: $warning-color;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: color.adjust($warning-color, $lightness: -30%);
+  }
+}
+
+// Formulario profesional
 .register-form {
-  padding: 30px;
+  padding: $spacing-xl;
+}
+
+// Indicador de progreso simple
+.form-progress {
+  margin-bottom: $spacing-xl;
+  
+  .progress-bar {
+    height: 4px;
+    background-color: $gray-200;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: $spacing-sm;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background-color: $primary-color;
+    border-radius: 2px;
+    animation: progress 2s ease-in-out infinite;
+  }
+  
+  .progress-text {
+    font-size: $font-size-sm;
+    color: $primary-color;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    
+    &::before {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border: 2px solid $primary-color;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+// Secciones del formulario
+.form-section {
+  margin-bottom: $spacing-xl;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-title {
+  margin: 0 0 $spacing-lg;
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $gray-800;
+  padding-bottom: $spacing-sm;
+  border-bottom: $border-width solid $gray-200;
+}
+
+// Layout de filas
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-lg;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: $spacing-lg;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: $spacing-sm;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $gray-700;
+}
+
+.required {
+  color: $danger-color;
+  font-weight: 600;
+}
+
+.optional {
+  color: $gray-500;
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.form-input, .form-select {
+  width: 100%;
+  padding: 12px $spacing-md;
+  font-size: $font-size-base;
+  border: $border-width solid $gray-300;
+  border-radius: $border-radius;
+  background-color: $white;
+  color: $gray-800;
+  transition: $transition;
   
-  label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: $dark-color;
+  &::placeholder {
+    color: $gray-400;
   }
   
-  input {
-    @include form-control;
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+  }
+  
+  &:hover:not(:focus) {
+    border-color: $gray-400;
+  }
+  
+  &--error {
+    border-color: $danger-color;
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($danger-color, 0.1);
+    }
   }
 }
 
-.password-input-container {
+.password-input {
   position: relative;
   
-  input {
-    padding-right: 45px;
+  .form-input {
+    padding-right: 48px;
   }
   
   .toggle-password {
     position: absolute;
-    right: 10px;
+    right: $spacing-md;
     top: 50%;
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: $secondary-color;
+    color: $gray-400;
     cursor: pointer;
-    padding: 5px;
+    padding: $spacing-xs;
+    border-radius: 4px;
+    transition: $transition;
     
     &:hover {
-      color: $dark-color;
+      color: $gray-600;
+      background-color: $gray-100;
+    }
+    
+    &:focus {
+      outline: none;
+      color: $gray-600;
+      background-color: $gray-100;
     }
   }
 }
 
+// Medidor de fortaleza simplificado
 .password-strength {
-  margin-top: 10px;
+  margin-top: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
   
-  .strength-meter {
-    height: 5px;
-    background-color: #eee;
-    border-radius: 3px;
-    margin-bottom: 5px;
+  .strength-bar {
+    flex: 1;
+    height: 4px;
+    background-color: $gray-200;
+    border-radius: 2px;
     overflow: hidden;
+  }
+  
+  .strength-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: $transition;
     
-    .strength-bar {
-      height: 100%;
-      transition: $transition;
-      
-      &.weak {
-        background-color: $danger-color;
-      }
-      
-      &.medium {
-        background-color: $warning-color;
-      }
-      
-      &.strong {
-        background-color: $success-color;
-      }
+    &.weak {
+      background-color: $danger-color;
+    }
+    
+    &.medium {
+      background-color: $warning-color;
+    }
+    
+    &.strong {
+      background-color: $success-color;
     }
   }
   
   .strength-text {
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 60px;
     
-    &.weak {
-      color: $danger-color;
-    }
-    
-    &.medium {
-      color: $warning-color;
-    }
-    
-    &.strong {
-      color: $success-color;
-    }
+    &.weak { color: $danger-color; }
+    &.medium { color: $warning-color; }
+    &.strong { color: $success-color; }
   }
+}
+
+.field-help {
+  margin-top: $spacing-xs;
+  font-size: 13px;
+  color: $gray-500;
+  line-height: 1.4;
 }
 
 .error-message {
-  margin-top: 5px;
+  margin-top: $spacing-sm;
+  font-size: $font-size-sm;
   color: $danger-color;
-  font-size: 14px;
+  font-weight: 500;
 }
 
-.submit-btn {
+// Acciones del formulario
+.form-actions {
+  margin-top: $spacing-xl;
+  padding-top: $spacing-lg;
+  border-top: $border-width solid $gray-100;
+}
+
+.btn-primary {
   width: 100%;
-  padding: 14px;
+  padding: 14px $spacing-lg;
   background-color: $primary-color;
-  color: white;
+  color: $white;
   border: none;
   border-radius: $border-radius;
-  font-size: 16px;
+  font-size: $font-size-base;
   font-weight: 500;
   cursor: pointer;
   transition: $transition;
-  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
   
-  &:hover {
-    background-color: color.adjust($primary-color, $lightness: 10%);
+  &:hover:not(:disabled) {
+    background-color: $primary-hover;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
   }
   
   &:disabled {
-    background-color: color.adjust($primary-color, $lightness: 20%);
+    background-color: $gray-400;
     cursor: not-allowed;
   }
 }
 
-.login-link {
-  margin-top: 20px;
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba($white, 0.3);
+  border-top-color: $white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+// Footer simple
+.auth-footer {
   text-align: center;
-  color: $secondary-color;
+  margin-top: $spacing-xl;
   
-  a {
-    color: $primary-color;
-    text-decoration: none;
-    font-weight: 500;
+  p {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $gray-600;
     
-    &:hover {
-      text-decoration: underline;
+    a {
+      color: $primary-color;
+      text-decoration: none;
+      font-weight: 500;
+      transition: $transition;
+      
+      &:hover {
+        color: $primary-hover;
+        text-decoration: underline;
+      }
+      
+      &:focus {
+        outline: none;
+        color: $primary-hover;
+        text-decoration: underline;
+      }
     }
+  }
+}
+
+// Animaciones mínimas
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 100%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+// Responsive limpio
+@media (max-width: 768px) {
+  .register-container {
+    padding: $spacing-md;
+    margin-top: 60px;
+  }
+  
+  .register-header {
+    padding: $spacing-lg $spacing-lg $spacing-md;
+  }
+  
+  .register-form {
+    padding: $spacing-lg;
+  }
+  
+  .feedback-message, .legal-notice {
+    margin: $spacing-md $spacing-lg 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-card {
+    max-width: 100%;
+  }
+  
+  .register-header {
+    padding: $spacing-md;
+    
+    h1 {
+      font-size: 20px;
+    }
+  }
+  
+  .register-form {
+    padding: $spacing-md;
+  }
+  
+  .form-input, .form-select {
+    font-size: 16px; // Evita zoom en iOS
+  }
+  
+  .feedback-message, .legal-notice {
+    margin: $spacing-md;
   }
 }

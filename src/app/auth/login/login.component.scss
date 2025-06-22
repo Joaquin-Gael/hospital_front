@@ -1,249 +1,341 @@
-@use 'sass:color';
+@use '../_variables.scss' as *;
 
-$primary-color: #2c7be5;
-$secondary-color: #6c757d;
-$success-color: #00b894;
-$warning-color: #fdcb6e;
-$danger-color: #e74c3c;
-$light-color: #f8f9fa;
-$dark-color: #343a40;
-$border-radius: 8px;
-$box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-$transition: all 0.3s ease;
-
-// Mixins
-@mixin flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-@mixin form-control {
-  width: 100%;
-  padding: 12px 16px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: $border-radius;
-  transition: $transition;
-  outline: none;
-  
-  &:focus {
-    border-color: $primary-color;
-    box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
-  }
-}
-
-// Estilos principales
 .hospital-auth-container {
   min-height: 100vh;
-  @include flex-center;
-  padding: 20px;
-  background-color: #f5f7fb;
-  margin-top: 80px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg;
+  background-color: $gray-50;
+  font-family: $font-family;
+  margin-top: 80px;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 450px;
-  background-color: white;
+  max-width: 400px;
+  background-color: $white;
   border-radius: $border-radius;
-  box-shadow: $box-shadow;
-  overflow: hidden;
+  box-shadow: $box-shadow-lg;
+  border: $border-width solid $gray-200;
 }
 
+// Header limpio
 .auth-header {
-  padding: 30px;
+  padding: $spacing-xl $spacing-xl $spacing-lg;
   text-align: center;
-  background-color: $light-color;
-  border-bottom: 1px solid #eee;
+  border-bottom: $border-width solid $gray-100;
   
   .logo {
-    margin-bottom: 20px;
+    margin-bottom: $spacing-lg;
     
     svg {
       color: $primary-color;
-      width: 50px;
-      height: 50px;
+      width: 32px;
+      height: 32px;
     }
   }
   
   h1 {
-    margin: 0 0 10px;
-    color: $dark-color;
-    font-size: 24px;
+    margin: 0 0 $spacing-sm;
+    font-size: $font-size-xl;
     font-weight: 600;
+    color: $gray-800;
+    line-height: 1.2;
   }
   
   p {
     margin: 0;
-    color: $secondary-color;
-    font-size: 16px;
+    font-size: $font-size-sm;
+    color: $gray-600;
+    line-height: 1.4;
+  }
+}
+
+// Feedback simple y claro
+.feedback-message {
+  margin: $spacing-lg $spacing-xl 0;
+  padding: $spacing-md;
+  border-radius: $border-radius;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  
+  &--success {
+    background-color: rgba($success-color, 0.1);
+    color: $success-color;
+    border: $border-width solid rgba($success-color, 0.2);
+  }
+  
+  &--error {
+    background-color: rgba($danger-color, 0.1);
+    color: $danger-color;
+    border: $border-width solid rgba($danger-color, 0.2);
+  }
+  
+  &__icon {
+    flex-shrink: 0;
   }
 }
 
 .auth-form {
-  padding: 30px;
+  padding: $spacing-xl;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: $spacing-lg;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: $spacing-sm;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $gray-700;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px $spacing-md;
+  font-size: $font-size-base;
+  border: $border-width solid $gray-300;
+  border-radius: $border-radius;
+  background-color: $white;
+  color: $gray-800;
+  transition: $transition;
   
-  label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: $dark-color;
+  &::placeholder {
+    color: $gray-400;
   }
   
-  input[type="email"],
-  input[type="password"],
-  input[type="text"] {
-    @include form-control;
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+  }
+  
+  &:hover:not(:focus) {
+    border-color: $gray-400;
+  }
+  
+  &--error {
+    border-color: $danger-color;
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($danger-color, 0.1);
+    }
   }
 }
 
 .password-input {
   position: relative;
   
-  input {
-    padding-right: 45px;
+  .form-input {
+    padding-right: 48px;
   }
   
   .toggle-password {
     position: absolute;
-    right: 10px;
+    right: $spacing-md;
     top: 50%;
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: $secondary-color;
+    color: $gray-400;
     cursor: pointer;
-    padding: 5px;
+    padding: $spacing-xs;
+    border-radius: 4px;
+    transition: $transition;
     
     &:hover {
-      color: $dark-color;
+      color: $gray-600;
+      background-color: $gray-100;
     }
     
-    svg {
-      vertical-align: middle;
+    &:focus {
+      outline: none;
+      color: $gray-600;
+      background-color: $gray-100;
     }
   }
 }
 
+.error-message {
+  margin-top: $spacing-sm;
+  font-size: $font-size-sm;
+  color: $danger-color;
+  font-weight: 500;
+}
+
+// Opciones del formulario
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: $spacing-xl;
   
-  .checkbox-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0;
-    
-    input[type="checkbox"] {
-      margin-right: 8px;
-      cursor: pointer;
-      width: 18px;
-      height: 18px;
-      accent-color: $primary-color;
-    }
-    
-    label {
-      margin-bottom: 0;
-      cursor: pointer;
-      font-size: 14px;
-    }
-  }
-  
-  .forgot-password {
-    color: $primary-color;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    
-    &:hover {
-      text-decoration: underline;
-    }
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-md;
   }
 }
 
-.btn-primary {
-  width: 100%;
-  padding: 14px;
-  background-color: $primary-color;
-  color: white;
-  border: none;
-  border-radius: $border-radius;
-  font-size: 16px;
-  font-weight: 500;
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
   cursor: pointer;
+  font-size: $font-size-sm;
+  color: $gray-700;
+  
+  input[type="checkbox"] {
+    margin-right: $spacing-sm;
+    width: 16px;
+    height: 16px;
+    accent-color: $primary-color;
+  }
+}
+
+.forgot-password {
+  color: $primary-color;
+  text-decoration: none;
+  font-size: $font-size-sm;
+  font-weight: 500;
   transition: $transition;
   
   &:hover {
-    background-color: color.adjust($primary-color, $lightness: 10%);
+    color: $primary-hover;
+    text-decoration: underline;
+  }
+  
+  &:focus {
+    outline: none;
+    color: $primary-hover;
+    text-decoration: underline;
+  }
+}
+
+// Botón principal profesional
+.btn-primary {
+  width: 100%;
+  padding: 14px $spacing-lg;
+  background-color: $primary-color;
+  color: $white;
+  border: none;
+  border-radius: $border-radius;
+  font-size: $font-size-base;
+  font-weight: 500;
+  cursor: pointer;
+  transition: $transition;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  
+  &:hover:not(:disabled) {
+    background-color: $primary-hover;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
   }
   
   &:disabled {
-    background-color: color.adjust($primary-color, $lightness: 20%);
+    background-color: $gray-400;
     cursor: not-allowed;
   }
 }
 
-.divider {
-  position: relative;
-  text-align: center;
-  margin: 25px 0;
-  
-  &::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background-color: #eee;
-  }
-  
-  span {
-    position: relative;
-    display: inline-block;
-    padding: 0 15px;
-    background-color: white;
-    color: $secondary-color;
-    font-size: 14px;
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba($white, 0.3);
+  border-top-color: $white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
 .auth-footer {
   text-align: center;
-  margin-top: 10px;
+  margin-top: $spacing-xl;
+  padding-top: $spacing-lg;
+  border-top: $border-width solid $gray-100;
   
   p {
-    color: $secondary-color;
-    font-size: 15px;
     margin: 0;
+    font-size: $font-size-sm;
+    color: $gray-600;
     
     a {
       color: $primary-color;
       text-decoration: none;
       font-weight: 500;
+      transition: $transition;
       
       &:hover {
+        color: $primary-hover;
+        text-decoration: underline;
+      }
+      
+      &:focus {
+        outline: none;
+        color: $primary-hover;
         text-decoration: underline;
       }
     }
   }
 }
 
-// Responsive
+@media (max-width: 768px) {
+  .hospital-auth-container {
+    padding: $spacing-md;
+    margin-top: 60px;
+  }
+  
+  .auth-header {
+    padding: $spacing-lg $spacing-lg $spacing-md;
+  }
+  
+  .auth-form {
+    padding: $spacing-lg;
+  }
+  
+  .feedback-message {
+    margin: $spacing-md $spacing-lg 0;
+  }
+}
+
 @media (max-width: 480px) {
-  .form-options {
-    flex-direction: column;
-    align-items: flex-start;
+  .auth-card {
+    max-width: 100%;
+  }
+  
+  .auth-header {
+    padding: $spacing-md;
     
-    .forgot-password {
-      margin-top: 10px;
+    h1 {
+      font-size: 20px;
     }
+  }
+  
+  .auth-form {
+    padding: $spacing-md;
+  }
+  
+  .form-input {
+    font-size: 16px; 
+  }
+  
+  .feedback-message {
+    margin: $spacing-md;
   }
 }
