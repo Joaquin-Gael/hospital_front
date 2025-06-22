@@ -22,7 +22,6 @@ interface AssignData {
   imports: [CommonModule, EntityFormComponent, MatDialogModule, MatButtonModule],
   template: `
     <div class="assign-dialog">
-      <h2 mat-dialog-title>{{ title }}</h2>
       <mat-dialog-content>
         <div *ngIf="error" class="error-message" role="alert">
           {{ error }}
