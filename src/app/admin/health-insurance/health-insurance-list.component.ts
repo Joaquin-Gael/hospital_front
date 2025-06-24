@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { HealthInsuranceService } from '../../services/health_insarunce/health-insarunce.service';
+import { HealthInsuranceService } from '../../services/health_insarunce/health-insurance.service';
 import {
   HealthInsuranceRead,
   HealthInsuranceCreate,
