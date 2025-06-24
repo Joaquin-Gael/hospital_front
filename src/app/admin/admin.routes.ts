@@ -22,6 +22,11 @@ export const ADMIN_ROUTES: Routes = [
           import('./doctors/doctors-list.component').then((m) => m.DoctorListComponent),
       },
       {
+        path: 'health-insurances',
+        loadComponent: () =>
+          import('./health-insurance/health-insurance-list.component').then((m) => m.HealthInsuranceListComponent),
+      },
+      {
         path: 'locations',
         loadComponent: () =>
           import('./locations/location-list.component').then((m) => m.LocationListComponent),

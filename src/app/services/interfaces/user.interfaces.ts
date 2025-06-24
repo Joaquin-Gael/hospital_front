@@ -49,6 +49,7 @@ export interface UserDelete {
 export interface TokenUserResponse {
   token_type: string;
   user: UserRead;
+  access_token: string;
   refresh_token: string;
 }
 

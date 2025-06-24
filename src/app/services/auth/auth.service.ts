@@ -34,8 +34,8 @@ export class AuthService {
   login(credentials: Auth): Observable<TokenUserResponse> {
     return this.apiService.post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, credentials).pipe(
       tap(response => {
-        if (response.refresh_token) {
-          this.storage.setToken(response.refresh_token);
+        if (response.access_token) {
+          this.storage.setToken(response.access_token);
         }
       }),
       catchError(error => this.handleError('User Login', error))
@@ -50,8 +50,8 @@ export class AuthService {
   doctorLogin(credentials: Auth): Observable<TokenDoctorsResponse> {
     return this.apiService.post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, credentials).pipe(
       tap(response => {
-        if (response.refresh_token) {
-          this.storage.setToken(response.refresh_token);
+        if (response.access_token) {
+          this.storage.setToken(response.access_token);
         }
       }),
       catchError(error => this.handleError('Doctor Login', error))

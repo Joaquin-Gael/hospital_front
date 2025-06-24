@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class StorageService {
-  private readonly STORAGE_KEY_TOKEN = 'refresh_token';
+  private readonly STORAGE_KEY_TOKEN = 'acess_token';
   private readonly STORAGE_KEY_EMAIL = 'rememberEmail';
 
   getToken(): string | null {

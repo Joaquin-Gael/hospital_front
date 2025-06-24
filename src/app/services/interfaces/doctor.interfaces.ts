@@ -19,7 +19,7 @@ export interface Doctor {
 
 export interface TokenDoctorsResponse {
   token_type: string;
-  refresh_token: string;
+  access_token: string;
   doc: Doctor;
 }
 

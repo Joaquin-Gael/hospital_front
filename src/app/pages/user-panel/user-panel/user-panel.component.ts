@@ -73,7 +73,7 @@ export class UserPanelComponent implements OnInit, OnDestroy {
 
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe({
       next: (userRead) => {
-        this.user = userRead ? { ...userRead } : null; // Mapear UserRead a User
+        this.user = userRead ? { ...userRead } : null; 
         this.loading = false;
         if (!this.user) {
           this.error = 'No se encontraron datos del usuario';

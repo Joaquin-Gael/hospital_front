@@ -35,6 +35,7 @@ export class AdminPanelComponent implements OnInit {
 
   readonly sections: ReadonlyArray<Section> = [
     { id: 'departments', label: 'Departamentos', icon: 'business' },
+    { id: 'health-insurances', label: 'Seguros de Salud', icon: 'health_and_safety' },
     { id: 'specialities', label: 'Especialidades', icon: 'local_hospital' },
     { id: 'doctors', label: 'Doctores', icon: 'person' },
     { id: 'schedules', label: 'Horarios', icon: 'schedule' },

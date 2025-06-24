@@ -14,7 +14,7 @@ const PUBLIC_ENDPOINTS = [
 ];
 
 export const customInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('refresh_token');
+  const token = localStorage.getItem('access_token');
   const router = inject(Router);
   const injector = inject(Injector);
   const isPublic = PUBLIC_ENDPOINTS.some(endpoint => req.url.includes(endpoint));
@@ -37,7 +37,7 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
           switchMap((response: TokenUserResponse) => {
             const newClonedReq = req.clone({
               setHeaders: {
-                Authorization: `Bearer ${response.refresh_token}` 
+                Authorization: `Bearer ${response.access_token}` 
               }
             });
             return next(newClonedReq);
