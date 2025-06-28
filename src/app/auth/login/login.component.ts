@@ -33,9 +33,14 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const savedEmail = localStorage.getItem('rememberEmail');
-    if (savedEmail) {
-      this.loginForm.patchValue({ email: savedEmail, remember: true });
+    if (!this.authService.isLoggedIn()) {
+      if (savedEmail) {
+        this.loginForm.patchValue({ email: savedEmail, remember: true });
+      }
+    } else{
+      this.router.navigateByUrl('/home');
     }
+      
   }
 
   togglePassword(): void {
