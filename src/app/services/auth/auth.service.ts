@@ -5,7 +5,11 @@ import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
 import { AUTH_ENDPOINTS } from './auth-endpoints';
-import { TokenUserResponse, ScopesResponse, UserRead } from '../interfaces/user.interfaces';
+import {
+  TokenUserResponse,
+  ScopesResponse,
+  UserRead,
+} from '../interfaces/user.interfaces';
 import { Auth } from '../interfaces/hospital.interfaces';
 import { TokenDoctorsResponse } from '../interfaces/doctor.interfaces';
 @Injectable({
@@ -23,7 +27,7 @@ export class AuthService {
    * @returns true si hay un token válido, false en caso contrario.
    */
   isLoggedIn(): boolean {
-    return !!this.storage.getToken();
+    return !!this.storage.getAccessToken();
   }
 
   /**
@@ -32,14 +36,15 @@ export class AuthService {
    * @returns Observable con la respuesta de autenticación (tokens).
    */
   login(credentials: Auth): Observable<TokenUserResponse> {
-    return this.apiService.post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, credentials).pipe(
-      tap(response => {
-        if (response.access_token) {
-          this.storage.setToken(response.access_token);
-        }
-      }),
-      catchError(error => this.handleError('User Login', error))
-    );
+    return this.apiService
+      .post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, credentials)
+      .pipe(
+        tap((response) => {
+          this.storage.setAccessToken(response.access_token);
+          this.storage.setRefreshToken(response.refresh_token);
+        }),
+        catchError((error) => this.handleError('User Login', error))
+      );
   }
 
   /**
@@ -48,14 +53,15 @@ export class AuthService {
    * @returns Observable con la respuesta de autenticación (tokens y datos del doctor).
    */
   doctorLogin(credentials: Auth): Observable<TokenDoctorsResponse> {
-    return this.apiService.post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, credentials).pipe(
-      tap(response => {
-        if (response.access_token) {
-          this.storage.setToken(response.access_token);
-        }
-      }),
-      catchError(error => this.handleError('Doctor Login', error))
-    );
+    return this.apiService
+      .post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, credentials)
+      .pipe(
+        tap((response) => {
+          this.storage.setAccessToken(response.access_token);
+          this.storage.setRefreshToken(response.refresh_token);
+        }),
+        catchError((error) => this.handleError('Doctor Login', error))
+      );
   }
 
   /**
@@ -67,7 +73,7 @@ export class AuthService {
       return of(null);
     }
     return this.apiService.get<{ user: UserRead }>(AUTH_ENDPOINTS.ME).pipe(
-      map(response => response?.user ?? null),
+      map((response) => response?.user ?? null),
       catchError(() => of(null))
     );
   }
@@ -95,18 +101,18 @@ export class AuthService {
    * @returns Observable con los nuevos tokens.
    */
   refreshToken(): Observable<TokenUserResponse> {
-    const Token = this.storage.getToken();
-    if (!Token) {
+    const refreshToken = this.storage.getRefreshToken();
+    if (!refreshToken) {
       this.storage.clearStorage();
       return throwError(() => new Error('No refresh token available'));
     }
+
     return this.apiService.get<TokenUserResponse>(AUTH_ENDPOINTS.REFRESH).pipe(
-      tap(response => {
-        if (response.refresh_token) {
-          this.storage.setToken(response.refresh_token);
-        }
+      tap((response) => {
+        this.storage.setAccessToken(response.access_token);
+        this.storage.setRefreshToken(response.refresh_token);
       }),
-      catchError(error => this.handleError('Refresh token', error))
+      catchError((error) => this.handleError('Refresh token', error))
     );
   }
 
@@ -116,7 +122,7 @@ export class AuthService {
    */
   getScopes(): Observable<string[]> {
     return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
-      map(response => response.scopes),
+      map((response) => response.scopes),
       catchError(() => of([]))
     );
   }
@@ -133,11 +139,19 @@ export class AuthService {
     let errorMessage = 'Ocurrió un error inesperado';
     if (error instanceof Error) {
       errorMessage = error.message;
-    } else if (typeof error === 'object' && error !== null && 'status' in error) {
-      const httpError = error as { status: number; error?: { detail?: string } };
+    } else if (
+      typeof error === 'object' &&
+      error !== null &&
+      'status' in error
+    ) {
+      const httpError = error as {
+        status: number;
+        error?: { detail?: string };
+      };
       switch (httpError.status) {
         case 400:
-          errorMessage = httpError.error?.detail ?? 'Datos de solicitud inválidos';
+          errorMessage =
+            httpError.error?.detail ?? 'Datos de solicitud inválidos';
           break;
         case 401:
         case 404:

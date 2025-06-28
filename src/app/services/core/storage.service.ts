@@ -4,19 +4,29 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class StorageService {
-  private readonly STORAGE_KEY_TOKEN = 'acess_token';
+  private readonly ACCESS_TOKEN_KEY = 'access_token';
+  private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly STORAGE_KEY_EMAIL = 'rememberEmail';
 
-  getToken(): string | null {
-    return localStorage.getItem(this.STORAGE_KEY_TOKEN);
+  getAccessToken(): string | null {
+    return localStorage.getItem(this.ACCESS_TOKEN_KEY);
   }
 
-  setToken(token: string): void {
-    localStorage.setItem(this.STORAGE_KEY_TOKEN, token);
+  setAccessToken(token: string): void {
+    localStorage.setItem(this.ACCESS_TOKEN_KEY, token);
   }
 
-  removeToken(): void {
-    localStorage.removeItem(this.STORAGE_KEY_TOKEN);
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+  }
+
+  setRefreshToken(token: string): void {
+    localStorage.setItem(this.REFRESH_TOKEN_KEY, token);
+  }
+
+  removeTokens(): void {
+    localStorage.removeItem(this.ACCESS_TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
   }
 
   getRememberEmail(): string | null {
@@ -32,7 +42,7 @@ export class StorageService {
   }
 
   clearStorage(): void {
-    this.removeToken();
+    this.removeTokens();
     this.removeRememberEmail();
   }
 }
