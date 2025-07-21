@@ -30,7 +30,7 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    if (!this.storageService.getToken()) {
+    if (!this.storageService.getAccessToken()) {
       this.logger.info('No auth token found, redirecting to /login');
       this.router.navigate(['/login']);
       return;

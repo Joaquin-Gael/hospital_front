@@ -35,7 +35,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    const token = this.storageService.getToken();
+    const token = this.storageService.getAccessToken();
     if (!token) {
       this.logger.info('No auth token found, redirecting to /login');
       window.location.href = '/login';

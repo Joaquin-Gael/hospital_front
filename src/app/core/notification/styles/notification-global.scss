@@ -1,0 +1,45 @@
+@use './_notification-variables.scss' as vars;
+
+// Estilos globales para el contenedor del snackbar
+.notification-container {
+  &.notification-success {
+    .mat-mdc-snack-bar-container {
+      --mdc-snackbar-container-color: transparent;
+      --mat-snack-bar-button-color: #{vars.$success-color};
+    }
+  }
+
+  &.notification-error {
+    .mat-mdc-snack-bar-container {
+      --mdc-snackbar-container-color: transparent;
+      --mat-snack-bar-button-color: #{vars.$error-color};
+    }
+  }
+
+  &.notification-warning {
+    .mat-mdc-snack-bar-container {
+      --mdc-snackbar-container-color: transparent;
+      --mat-snack-bar-button-color: #{vars.$warning-color};
+    }
+  }
+
+  &.notification-info {
+    .mat-mdc-snack-bar-container {
+      --mdc-snackbar-container-color: transparent;
+      --mat-snack-bar-button-color: #{vars.$info-color};
+    }
+  }
+}
+
+// Animaciones personalizadas para el contenedor
+.mat-mdc-snack-bar-container {
+  border-radius: vars.$border-radius !important;
+  padding: 0 !important;
+  min-width: 300px !important;
+  max-width: 500px !important;
+
+  @media (max-width: vars.$breakpoint-sm) {
+    min-width: 280px !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+}

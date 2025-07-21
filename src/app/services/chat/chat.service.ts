@@ -43,7 +43,7 @@ export class ChatService {
       return;
     }
 
-    const token = `Bearer_${this.storageService.getToken()}`;
+    const token = `Bearer_${this.storageService.getAccessToken()}`;
     if (!token) {
       this.logger.error('No auth token found');
       throw new Error('No authentication token available');

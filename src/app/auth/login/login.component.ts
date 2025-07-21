@@ -5,6 +5,7 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
 import { Auth } from '../../services/interfaces/hospital.interfaces';
+import { NotificationService } from '../../core/notification/services/notification.service';
 
 @Component({
   selector: 'app-login',
@@ -18,12 +19,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly notificationService = inject(NotificationService); // Inyectamos el servicio
   private readonly destroy$ = new Subject<void>();
 
   showPassword = false;
   isSubmitting = false;
-  feedbackMessage: string | null = null;
-  feedbackType: 'success' | 'error' | null = null;
 
   readonly loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -37,31 +37,23 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (savedEmail) {
         this.loginForm.patchValue({ email: savedEmail, remember: true });
       }
-    } else{
+    } else {
       this.router.navigateByUrl('/home');
     }
-      
   }
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
-  closeFeedback(): void {
-    this.feedbackMessage = null;
-    this.feedbackType = null;
-  }
-
   onLogin(): void {
     if (this.loginForm.invalid || this.isSubmitting) {
       this.loginForm.markAllAsTouched();
-      this.feedbackMessage = 'Por favor completá correctamente el email y la contraseña.';
-      this.feedbackType = 'error';
+      this.notificationService.error('Por favor completá correctamente el email y la contraseña.');
       return;
     }
 
     this.isSubmitting = true;
-    this.feedbackMessage = null;
 
     const { email, password, remember } = this.loginForm.value;
     const sanitizedEmail = email.trim();
@@ -80,16 +72,26 @@ export class LoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.isSubmitting = false;
-          this.feedbackMessage = '¡Inicio de sesión exitoso! Redirigiendo...';
-          this.feedbackType = 'success';
+          this.notificationService.success('¡Inicio de sesión exitoso! Redirigiendo...', {
+            duration: 2000, // Duración en milisegundos
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          });
           const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/user_panel';
-          setTimeout(() => this.router.navigateByUrl(returnUrl), 2000);
+          setTimeout(() => this.router.navigateByUrl(returnUrl), 2000); // Redirige tras 2 segundos
         },
         error: (err) => {
           this.isSubmitting = false;
           const msg = err?.error?.message || err?.message || 'Credenciales inválidas o error inesperado.';
-          this.feedbackMessage = `Error al iniciar sesión: ${msg}`;
-          this.feedbackType = 'error';
+          this.notificationService.error(`Error al iniciar sesión: ${msg}`, {
+            duration: 5000, // Duración más larga para errores
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          });
         },
       });
   }

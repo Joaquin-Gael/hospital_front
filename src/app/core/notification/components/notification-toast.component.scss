@@ -1,0 +1,257 @@
+@use 'sass:color';
+@use '../styles/_notification-variables.scss' as vars;
+@use '../styles/_notification-mixins.scss' as mixins;
+
+.notification-toast {
+  position: relative;
+  min-width: 320px;
+  max-width: 480px;
+  border-radius: vars.$border-radius; // Sin bordes redondeados
+  overflow: hidden;
+  box-shadow: vars.$shadow-elevated-dark;
+  background-color: var(--notification-bg);
+  color: var(--notification-text);
+  border-left: var(--notification-border) solid var(--notification-accent);
+  
+  &[data-type="success"] {
+    @include mixins.notification-theme(vars.$success-color);
+  }
+  
+  &[data-type="error"] {
+    @include mixins.notification-error-theme(vars.$error-color);
+  }
+  
+  &[data-type="warning"] {
+    @include mixins.notification-theme(vars.$warning-color);
+  }
+  
+  &[data-type="info"] {
+    @include mixins.notification-theme(vars.$info-color);
+  }
+}
+
+.notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: vars.$spacing-md;
+  padding: vars.$spacing-lg vars.$spacing-xl;
+  min-height: 60px;
+  position: relative;
+}
+
+.notification-icon {
+  @include mixins.icon-circle(28px);
+  margin-top: 2px;
+  
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--notification-accent);
+    font-weight: vars.$font-weight-bold;
+  }
+}
+
+.notification-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: vars.$spacing-xs;
+  min-height: 28px;
+}
+
+.notification-title {
+  font-size: vars.$font-size-base;
+  font-weight: vars.$font-weight-semibold;
+  color: var(--notification-text);
+  line-height: vars.$line-height-normal;
+  margin: 0;
+}
+
+.notification-message {
+  font-size: vars.$font-size-sm;
+  line-height: vars.$line-height-relaxed;
+  color: var(--notification-text-secondary);
+  margin: 0;
+  
+  // Soporte para HTML en mensajes
+  ::ng-deep {
+    a {
+      color: var(--notification-accent);
+      text-decoration: underline;
+      transition: color vars.$transition-fast;
+      
+      &:hover {
+        color: var(--notification-accent-hover);
+      }
+    }
+    
+    strong, b {
+      font-weight: vars.$font-weight-semibold;
+      color: var(--notification-text);
+    }
+    
+    em, i {
+      font-style: italic;
+    }
+  }
+}
+
+.notification-dismiss-btn {
+  @include mixins.button-reset;
+  position: absolute;
+  top: vars.$spacing-md;
+  right: vars.$spacing-md;
+  width: 24px;
+  height: 24px;
+  border-radius: vars.$border-radius-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--notification-text-secondary);
+  background-color: transparent;
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--notification-text);
+  }
+  
+  &:focus-visible {
+    @include mixins.focus-ring(var(--notification-accent));
+  }
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.notification-actions {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-sm;
+  margin-top: vars.$spacing-sm;
+}
+
+.notification-action-btn {
+  @include mixins.button-reset;
+  padding: vars.$spacing-sm vars.$spacing-md;
+  border-radius: vars.$border-radius-sm;
+  font-size: vars.$font-size-xs;
+  font-weight: vars.$font-weight-medium;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--notification-accent);
+  background-color: transparent;
+  border: 1px solid var(--notification-accent);
+  
+  &:hover {
+    background-color: var(--notification-accent);
+    color: var(--notification-bg);
+    transform: translateY(-1px);
+  }
+  
+  &:focus-visible {
+    @include mixins.focus-ring(var(--notification-accent));
+  }
+}
+
+// Progress bar en la parte superior
+.notification-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 1;
+  
+  mat-progress-bar {
+    height: 2px;
+    
+    ::ng-deep {
+      .mdc-linear-progress__bar-inner {
+        border-top-width: 2px;
+      }
+    }
+  }
+}
+
+// Animaciones mejoradas
+:host {
+  display: block;
+  animation: slideInUp vars.$animation-duration-normal vars.$animation-easing;
+}
+
+:host.mat-mdc-snack-bar-container-exit {
+  animation: slideOutDown vars.$animation-duration-fast vars.$animation-easing;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutDown {
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%) scale(0.98);
+    opacity: 0;
+  }
+}
+
+// Responsive mejorado
+@media (max-width: vars.$breakpoint-sm) {
+  .notification-toast {
+    min-width: 300px;
+    max-width: calc(100vw - 24px);
+    margin: 0 vars.$spacing-md;
+  }
+  
+  .notification-content {
+    padding: vars.$spacing-md;
+    gap: vars.$spacing-sm;
+  }
+  
+  .notification-title {
+    font-size: vars.$font-size-sm;
+  }
+  
+  .notification-message {
+    font-size: vars.$font-size-xs;
+  }
+}
+
+// Modo de contraste alto
+@media (prefers-contrast: high) {
+  .notification-toast {
+    border-width: 2px;
+    border-left-width: 4px;
+  }
+}
+
+// Reducir movimiento
+@media (prefers-reduced-motion: reduce) {
+  :host,
+  :host.mat-mdc-snack-bar-container-exit {
+    animation: none;
+  }
+  
+  .notification-action-btn,
+  .notification-dismiss-btn {
+    transition: none;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+}
