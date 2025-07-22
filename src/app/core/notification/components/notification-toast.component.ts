@@ -110,7 +110,7 @@ export class NotificationToastComponent implements OnInit, OnDestroy {
   // Computed para obtener el icono correcto según el tipo
   protected readonly notificationIcon = computed(() => {
     if (this.data.icon) {
-      return this.data.icon; // Si se especifica un icono personalizado, usarlo
+      return this.data.icon; 
     }
     
     // Iconos por defecto según el tipo

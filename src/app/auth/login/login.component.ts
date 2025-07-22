@@ -72,21 +72,21 @@ export class LoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.isSubmitting = false;
-          this.notificationService.success('¡Inicio de sesión exitoso! Redirigiendo...', {
-            duration: 2000, // Duración en milisegundos
+          this.notificationService.success('¡Inicio de sesión exitoso!\n Redirigiendo...', {
+            duration: 3000, // Duración en milisegundos
             action: {
               label: 'Cerrar',
               action: () => this.notificationService.dismissAll(),
             },
           });
           const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/user_panel';
-          setTimeout(() => this.router.navigateByUrl(returnUrl), 2000); // Redirige tras 2 segundos
+          setTimeout(() => this.router.navigateByUrl(returnUrl), 2000);
         },
         error: (err) => {
           this.isSubmitting = false;
           const msg = err?.error?.message || err?.message || 'Credenciales inválidas o error inesperado.';
           this.notificationService.error(`Error al iniciar sesión: ${msg}`, {
-            duration: 5000, // Duración más larga para errores
+            duration: 5000,
             action: {
               label: 'Cerrar',
               action: () => this.notificationService.dismissAll(),

@@ -1,0 +1,71 @@
+@use '../../styles/_variables-moderns.scss' as vars;
+@use '../../styles/_glass.scss' as glass;
+@use '../../styles/_mixins.scss' as mixins;
+
+.specialties-section {
+  @include mixins.responsive-padding(2rem, 3rem, 4rem);
+  margin-bottom: 4rem;
+}
+
+.section-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  @include mixins.animation-fade-in-up(0.6s);
+  
+  h2 {
+    @include mixins.medical-heading('h2');
+  }
+}
+
+.section-description {
+  @include mixins.medical-text('lead');
+  margin-top: 1rem;
+}
+
+.specialties-grid {
+  @include mixins.medical-grid(300px, 2rem);
+}
+
+.specialty-card {
+  @include glass.glass-medical-card();
+  @include mixins.flex-column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  @include mixins.animation-scale-in(0.8s);
+  
+  &:hover {
+    .specialty-icon {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+.specialty-icon {
+  @include mixins.flex-center;
+  width: 64px;
+  height: 64px;
+  @include glass.glass-base(0.2, 8px, 0.3);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  .material-icons {
+    font-size: 32px;
+    color: vars.$primary;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+}
+
+h3 {
+  @include mixins.medical-heading('h3');
+  margin-bottom: 1rem;
+  color: vars.$text-primary;
+}
+
+p {
+  @include mixins.medical-text('body');
+  margin: 0;
+}

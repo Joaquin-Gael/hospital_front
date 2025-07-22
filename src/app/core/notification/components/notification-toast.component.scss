@@ -6,12 +6,12 @@
   position: relative;
   min-width: 320px;
   max-width: 480px;
-  border-radius: vars.$border-radius; // Sin bordes redondeados
+  border-radius: vars.$border-radius;
   overflow: hidden;
   box-shadow: vars.$shadow-elevated-dark;
   background-color: var(--notification-bg);
   color: var(--notification-text);
-  border-left: var(--notification-border) solid var(--notification-accent);
+  border: var(--notification-border) solid var(--notification-accent);
   
   &[data-type="success"] {
     @include mixins.notification-theme(vars.$success-color);
@@ -74,7 +74,6 @@
   color: var(--notification-text-secondary);
   margin: 0;
   
-  // Soporte para HTML en mensajes
   ::ng-deep {
     a {
       color: var(--notification-accent);
@@ -104,12 +103,13 @@
   right: vars.$spacing-md;
   width: 24px;
   height: 24px;
-  border-radius: vars.$border-radius-sm;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--notification-text-secondary);
   background-color: transparent;
+  transform: translateX(10px);
   
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);
@@ -137,7 +137,7 @@
 .notification-action-btn {
   @include mixins.button-reset;
   padding: vars.$spacing-sm vars.$spacing-md;
-  border-radius: vars.$border-radius-sm;
+  border-radius: 0;
   font-size: vars.$font-size-xs;
   font-weight: vars.$font-weight-medium;
   text-transform: uppercase;
@@ -160,18 +160,20 @@
 // Progress bar en la parte superior
 .notification-progress {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
   height: 2px;
   z-index: 1;
   
+  @include mixins.notification-theme(vars.$success-color);
+
   mat-progress-bar {
     height: 2px;
-    
-    ::ng-deep {
-      .mdc-linear-progress__bar-inner {
-        border-top-width: 2px;
+  
+    ::ng-deep{
+      .mdc-linear-progress__bar-inner { 
+        border-top-width: 30px;
       }
     }
   }
@@ -234,7 +236,7 @@
 // Modo de contraste alto
 @media (prefers-contrast: high) {
   .notification-toast {
-    border-width: 2px;
+    border-width: 0.5px;
     border-left-width: 4px;
   }
 }
@@ -248,8 +250,7 @@
   
   .notification-action-btn,
   .notification-dismiss-btn {
-    transition: none;
-    
+    transition: none;    
     &:hover {
       transform: none;
     }

@@ -1,0 +1,81 @@
+@use '../../styles/_variables-moderns.scss' as vars;
+@use '../../styles/_glass.scss' as glass;
+@use '../../styles/_mixins.scss' as mixins;
+
+.services-section {
+  @include mixins.responsive-padding(2rem, 3rem, 4rem);
+  margin-bottom: 4rem;
+}
+
+.section-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  @include mixins.animation-fade-in-up(0.6s);
+  
+  h2 {
+    @include mixins.medical-heading('h2');
+  }
+}
+
+.section-description {
+  @include mixins.medical-text('lead');
+  margin-top: 1rem;
+}
+
+.features-grid {
+  @include mixins.medical-grid(320px, 2rem);
+}
+
+.feature-card {
+  @include glass.glass-medical-card();
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  @include mixins.animation-scale-in(0.8s);
+}
+
+.feature-icon {
+  @include mixins.flex-center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  @include glass.glass-base(0.2, 6px, 0.3);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.1) rotate(5deg);
+    background: rgba(255, 255, 255, 0.25);
+  }
+  
+  .material-icons {
+    font-size: 24px;
+    color: vars.$primary;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+}
+
+.feature-content {
+  @include mixins.flex-column;
+  
+  h3 {
+    @include mixins.medical-heading('h3');
+    margin-bottom: 0.75rem;
+    color: vars.$text-primary;
+    font-size: 1.25rem;
+    font-weight: 700;
+    
+    @media (min-width: 768px) {
+      font-size: 1.5rem;
+    }
+  }
+  
+  p {
+    @include mixins.medical-text('body');
+    margin: 0;
+    color: vars.$text-light;
+    line-height: 1.7;
+  }
+}

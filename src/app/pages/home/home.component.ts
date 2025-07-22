@@ -1,309 +1,48 @@
-import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import { RouterModule } from "@angular/router"
-import { FormsModule } from "@angular/forms"
-import { trigger, transition, style, animate, state } from "@angular/animations"
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
-interface Department {
-  id: number
-  name: string
-  description: string
-  icon: string
-}
+// Components
+import { HeroComponent } from './components/hero/hero.component';
+import { StatsComponent } from './components/stats/stats.component';
+import { ServicesComponent } from './components/services/services.component';
+import { SpecialtiesComponent } from './components/specialties/specialties.component';
+import { ServiceTabsComponent } from './components/service-tabs/service-tabs.component';
+import { DoctorsComponent } from './components/doctors/doctors.component';
+import { NewsComponent } from './components/news/news.component';
+import { FaqComponent } from './components/faq/faq.component';
+import { CtaComponent } from './components/cta/cta.component';
+import { NewsletterComponent } from './components/newsletter/newsletter.component';
 
-interface Doctor {
-  id: number
-  name: string
-  specialty: string
-  description: string
-  rating: number
-  avatar: string
-}
-
-interface Service {
-  id: number
-  name: string
-  icon: string
-  description: string
-}
-
-interface FAQ {
-  id: number
-  question: string
-  answer: string
-  isOpen: boolean
-}
-
-interface Specialty {
-  id: number
-  name: string
-  icon: string
-  description: string
-}
-
-interface News {
-  id: number
-  title: string
-  date: string
-  summary: string
-  image: string
-}
+// Data
+import { DEPARTMENTS, DOCTORS, NEWS, FAQS, SPECIALTIES, STATS, HERO } from './data/hospital-data';
 
 @Component({
-  selector: "app-home",
-  templateUrl: "./home.component.html",
-  styleUrls: ["./home.component.scss"],
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
-  animations: [
-    trigger("fadeInOut", [
-      state(
-        "void",
-        style({
-          opacity: 0,
-        }),
-      ),
-      transition("void <=> *", animate(300)),
-    ]),
-    trigger("expandCollapse", [
-      state(
-        "collapsed",
-        style({
-          height: "0",
-          overflow: "hidden",
-          opacity: 0,
-        }),
-      ),
-      state(
-        "expanded",
-        style({
-          height: "*",
-          opacity: 1,
-        }),
-      ),
-      transition("collapsed <=> expanded", animate("300ms ease-in-out")),
-    ]),
-  ],
+  imports: [
+    CommonModule,
+    RouterModule,
+    HeroComponent,
+    StatsComponent,
+    ServicesComponent,
+    SpecialtiesComponent,
+    ServiceTabsComponent,
+    DoctorsComponent,
+    NewsComponent,
+    FaqComponent,
+    CtaComponent,
+    NewsletterComponent
+  ]
 })
-export class HomeComponent implements OnInit {
-  currentDoctorIndex = 0
-  activeTab = "emergencies"
-  email = ""
-  currentYear = new Date().getFullYear()
-
-  departments: Department[] = [
-    {
-      id: 1,
-      name: "Emergencias",
-      description: "Atención inmediata las 24 horas para situaciones críticas con equipamiento de última generación.",
-      icon: "emergency",
-    },
-    {
-      id: 2,
-      name: "Consulta Externa",
-      description: "Atención programada con especialistas en todas las áreas médicas.",
-      icon: "medical_services",
-    },
-    {
-      id: 3,
-      name: "Diagnóstico por Imágenes",
-      description: "Tecnología avanzada para diagnósticos precisos: resonancia, tomografía y ecografía.",
-      icon: "radio",
-    },
-    {
-      id: 4,
-      name: "Laboratorio Clínico",
-      description: "Análisis clínicos con resultados rápidos y precisos disponibles en nuestra plataforma digital.",
-      icon: "biotech",
-    },
-    {
-      id: 5,
-      name: "Cirugía",
-      description: "Quirófanos equipados con tecnología de vanguardia y equipo médico especializado.",
-      icon: "monitor_heart",
-    },
-    {
-      id: 6,
-      name: "Hospitalización",
-      description: "Habitaciones confortables con atención personalizada para una recuperación óptima.",
-      icon: "hotel",
-    },
-  ]
-
-  doctors: Doctor[] = [
-    {
-      id: 1,
-      name: "Dra. María Rodríguez",
-      specialty: "Cardiología",
-      description:
-        "Especialista en cardiología intervencionista con más de 15 años de experiencia. Formada en la Universidad de Barcelona y con fellowship en la Clínica Mayo.",
-      rating: 5,
-      avatar: "person",
-    },
-    {
-      id: 2,
-      name: "Dr. Carlos Méndez",
-      specialty: "Neurología",
-      description:
-        "Neurólogo especializado en trastornos del movimiento y enfermedades neurodegenerativas. Investigador principal en estudios sobre Parkinson.",
-      rating: 5,
-      avatar: "person",
-    },
-    {
-      id: 3,
-      name: "Dra. Laura Sánchez",
-      specialty: "Pediatría",
-      description:
-        "Pediatra con especialidad en neonatología. Dedicada al cuidado integral de niños desde recién nacidos hasta la adolescencia.",
-      rating: 5,
-      avatar: "person",
-    },
-  ]
-
-  news: News[] = [
-    {
-      id: 1,
-      title: "Nuevo Centro de Oncología",
-      date: "15 de abril, 2023",
-      summary:
-        "Inauguramos nuestro nuevo Centro de Oncología Integral con tecnología de vanguardia para tratamientos personalizados.",
-      image: "oncology",
-    },
-    {
-      id: 2,
-      title: "Campaña de Vacunación",
-      date: "3 de mayo, 2023",
-      summary: "Iniciamos campaña de vacunación gratuita para niños menores de 5 años en todas nuestras sedes.",
-      image: "vaccine",
-    },
-    {
-      id: 3,
-      title: "Reconocimiento Internacional",
-      date: "20 de junio, 2023",
-      summary:
-        "Hospital SDLG recibe acreditación internacional por excelencia en seguridad del paciente y calidad asistencial.",
-      image: "award",
-    },
-  ]
-
-  faqs: FAQ[] = [
-    {
-      id: 1,
-      question: "¿Cómo puedo solicitar una cita médica?",
-      answer:
-        "Puede solicitar su cita a través de nuestra plataforma web, aplicación móvil o llamando a nuestro centro de contacto al (01) 555-7890. También puede acercarse personalmente a nuestros módulos de atención.",
-      isOpen: false,
-    },
-    {
-      id: 2,
-      question: "¿Qué seguros médicos aceptan?",
-      answer:
-        "Trabajamos con las principales aseguradoras nacionales e internacionales. Entre ellas: Seguro Nacional de Salud, MediSalud, GlobalHealth, Sanitas y otras. Puede verificar la cobertura específica llamando a nuestro departamento de seguros.",
-      isOpen: false,
-    },
-    {
-      id: 3,
-      question: "¿Cuál es el horario de visitas para pacientes hospitalizados?",
-      answer:
-        "El horario general de visitas es de 11:00 a 20:00 horas. Para unidades especiales como UCI y Neonatología, los horarios son restringidos y se informan directamente a los familiares del paciente.",
-      isOpen: false,
-    },
-    {
-      id: 4,
-      question: "¿Cómo puedo acceder a mis resultados de laboratorio?",
-      answer:
-        "Los resultados están disponibles en nuestra plataforma digital. Puede acceder con su número de documento y el código proporcionado al momento de realizarse los análisis. También puede recogerlos personalmente presentando su identificación.",
-      isOpen: false,
-    },
-    {
-      id: 5,
-      question: "¿Ofrecen servicio de emergencias las 24 horas?",
-      answer:
-        "Sí, nuestro servicio de emergencias está disponible las 24 horas del día, los 365 días del año, con médicos especialistas de guardia y equipamiento completo para atender cualquier urgencia médica.",
-      isOpen: false,
-    },
-  ]
-
-  specialties: Specialty[] = [
-    {
-      id: 1,
-      name: "Cardiología",
-      icon: "favorite",
-      description: "Diagnóstico y tratamiento de enfermedades cardiovasculares con tecnología de vanguardia.",
-    },
-    {
-      id: 2,
-      name: "Pediatría",
-      icon: "child_care",
-      description: "Atención especializada para niños y adolescentes con enfoque preventivo y terapéutico.",
-    },
-    {
-      id: 3,
-      name: "Traumatología",
-      icon: "healing",
-      description: "Tratamiento de lesiones óseas, articulares y musculares con técnicas mínimamente invasivas.",
-    },
-    {
-      id: 4,
-      name: "Oncología",
-      icon: "medication",
-      description: "Tratamientos integrales y personalizados contra el cáncer con enfoque multidisciplinario.",
-    },
-    {
-      id: 5,
-      name: "Neurología",
-      icon: "psychology",
-      description: "Diagnóstico y tratamiento de trastornos del sistema nervioso central y periférico.",
-    },
-    {
-      id: 6,
-      name: "Ginecología",
-      icon: "pregnant_woman",
-      description: "Atención integral de la salud femenina en todas las etapas de la vida.",
-    },
-  ]
-
-  stats = [
-    { value: "+200", label: "Médicos Especialistas", icon: "people" },
-    { value: "+50", label: "Especialidades Médicas", icon: "medical_services" },
-    { value: "+30", label: "Años de Experiencia", icon: "history" },
-    { value: "+100K", label: "Pacientes Atendidos", icon: "groups" },
-  ]
-
-  ngOnInit() {
-    this.startDoctorRotation()
-  }
-
-  startDoctorRotation() {
-    setInterval(() => {
-      this.currentDoctorIndex = (this.currentDoctorIndex + 1) % this.doctors.length
-    }, 8000)
-  }
-
-  setActiveTab(tab: string) {
-    this.activeTab = tab
-  }
-
-  toggleFaq(faq: FAQ) {
-    faq.isOpen = !faq.isOpen
-  }
-
-  submitNewsletter() {
-    if (this.email && this.validateEmail(this.email)) {
-      console.log("Email submitted:", this.email)
-      this.email = ""
-      alert("¡Gracias por suscribirte a nuestro boletín informativo!")
-    } else {
-      alert("Por favor, introduce un email válido")
-    }
-  }
-
-  validateEmail(email: string): boolean {
-    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    return re.test(email)
-  }
-
-  getStars(rating: number): number[] {
-    return Array(rating).fill(0)
-  }
+export class HomeComponent {
+  departments = DEPARTMENTS;
+  doctors = DOCTORS;
+  news = NEWS;
+  faqs = FAQS;
+  specialties = SPECIALTIES;
+  stats = STATS;
+  hero = HERO;
 }

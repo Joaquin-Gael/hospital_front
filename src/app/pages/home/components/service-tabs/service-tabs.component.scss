@@ -1,0 +1,173 @@
+@use '../../styles/_variables-moderns.scss' as vars;
+@use '../../styles/_glass.scss' as glass;
+@use '../../styles/_mixins.scss' as mixins;
+@use '../../styles/_ripple.scss' as ripple;
+
+.platform-section {
+  @include glass.glass-base(0.08, 20px, 0.15);
+  border-radius: var(--border-radius-xl);
+  @include mixins.responsive-padding(2rem, 3rem, 4rem);
+  margin-bottom: 4rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.section-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  @include mixins.animation-fade-in-up(0.6s);
+  
+  h2 {
+    @include mixins.medical-heading('h2');
+  }
+}
+
+.section-description {
+  @include mixins.medical-text('lead');
+  margin-top: 1rem;
+}
+
+.platform-tabs {
+  @include mixins.flex-column;
+  gap: 2rem;
+}
+
+.tab-headers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.tab-header {
+  @include mixins.flex-center;
+  @include glass.glass-base(0.1, 8px, 0.2);
+  @include ripple.medical-button-ripple();
+  gap: 0.5rem;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: vars.$text-secondary;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: var(--border-radius-md);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  
+  .material-icons {
+    font-size: 1.25rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: vars.$primary;
+    transform: translateY(-2px);
+  }
+  
+  &.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: vars.$primary;
+    box-shadow: var(--shadow-medical);
+    transform: translateY(-1px);
+  }
+}
+
+.tab-content {
+  width: 100%;
+}
+
+.tab-pane {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  
+  @media (min-width: 992px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+  }
+}
+
+.tab-image {
+  width: 100%;
+  height: 300px;
+  @include mixins.animation-fade-in-up(0.8s);
+  
+  @media (min-width: 992px) {
+    height: 400px;
+  }
+  
+  .image-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-medical);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 16px 48px rgba(0, 119, 182, 0.25);
+    }
+    
+    &.hospital-image {
+      background: linear-gradient(135deg, #90e0ef, vars.$primary);
+    }
+    
+    &.clinic-image {
+      background: linear-gradient(135deg, #ade8f4, vars.$accent);
+    }
+    
+    &.doctor-image {
+      background: linear-gradient(135deg, #caf0f8, vars.$medical-green);
+    }
+  }
+}
+
+.tab-info {
+  @include mixins.flex-column;
+  justify-content: center;
+  @include mixins.animation-slide-in-left(0.8s);
+  
+  h3 {
+    @include mixins.medical-heading('h3');
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    color: vars.$text-primary;
+  }
+  
+  p {
+    @include mixins.medical-text('body');
+    margin-bottom: 2rem;
+    color: vars.$text-light;
+    line-height: 1.7;
+  }
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+    color: vars.$text-primary;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateX(4px);
+      color: vars.$primary;
+    }
+    
+    .material-icons {
+      color: vars.$medical-green;
+      font-size: 1.25rem;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    }
+  }
+}

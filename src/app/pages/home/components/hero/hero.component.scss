@@ -1,0 +1,411 @@
+@use '../../styles/_variables-moderns.scss' as vars;
+@use '../../styles/_glass.scss' as glass;
+@use '../../styles/_mixins.scss' as mixins;
+@use '../../styles/ripple' as ripple;
+
+// Hero Section
+:host {
+  --text-white: #ffffff;
+  --orange: #ff6b35;
+  --overlay-start: color-mix(in srgb, black 40%, transparent);
+  --overlay-end: color-mix(in srgb, black 20%, transparent);
+  --hero-height: 100vh;
+  --title-size: clamp(2rem, 5vw, 4rem);
+  --container-padding: clamp(1rem, 4vw, 2rem);
+  display: block;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: -1;
+}
+
+// Hero Section - Fusión de ambos componentes
+.hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: var(--hero-height);
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  @include glass.glass-hero();
+  border-radius: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  animation: fadeIn 1.2s ease-out;
+  
+  @media (min-width: 992px) {
+    flex-direction: row;
+    height: 100vh;
+    padding: 0;
+  }
+}
+
+// Background Image del segundo componente
+.hero__background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg, 
+      var(--overlay-start) 0%, 
+      var(--overlay-end) 100%
+    );
+    z-index: 1;
+    transition: opacity 0.3s ease;
+  }
+}
+
+.hero__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.8s ease-out;
+  
+  &:hover {
+    transform: scale(1.02);
+  }
+}
+
+// Overlay adicional para mayor control
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.hero-content {
+  @include mixins.flex-column;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  @include mixins.animation-fade-in-up(0.8s);
+  color: var(--text-white);
+  padding: 2rem;
+  margin-top: 10vh;
+  
+  @media (min-width: 992px) {
+    width: 50%;
+    text-align: left;
+    padding: 4rem;
+    margin-top: 0;
+  }
+}
+
+.hero-badge {
+  display: inline-block;
+  @include glass.glass-base(0.3, 8px, 0.4);
+  color: var(--text-white);
+  text-shadow: 0 1px 2px var(--text-white);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-xl);
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+h1 {
+  @include mixins.medical-heading('h1');
+  color: var(--text-white);
+  text-shadow: 
+    0 2px 4px color-mix(in srgb, black 30%, transparent),
+    0 4px 8px color-mix(in srgb, black 20%, transparent);
+  margin-bottom: 1.5rem;
+  font-size: var(--title-size);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  animation: slideUp 1s ease-out 0.3s both;
+  
+  .highlight {
+    color: var(--orange);
+    position: relative;
+    display: inline-block;
+    animation: highlightGlow 2s ease-in-out infinite alternate;
+    
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(
+        90deg, 
+        var(--orange), 
+        color-mix(in srgb, var(--orange) 70%, white)
+      );
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: underlineExpand 1.5s ease-out 1s both;
+    }
+  }
+}
+
+.hero-subtitle {
+  @include mixins.medical-text('lead');
+  color: var(--text-white);
+  text-shadow: 0 1px 2px var(--text-shadow);
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 2rem;
+  
+  @media (min-width: 992px) {
+    justify-content: flex-start;
+  }
+}
+
+.btn-primary {
+  @include mixins.flex-center;
+  @include glass.glass-button('primary');
+  @include ripple.medical-button-ripple('primary');
+  gap: 0.5rem;
+  
+  .material-icons {
+    font-size: 1.25rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  }
+}
+
+.btn-secondary {
+  @include mixins.flex-center;
+  @include glass.glass-button('emergency');
+  @include ripple.medical-button-ripple('emergency');
+  gap: 0.5rem;
+  
+  .material-icons {
+    font-size: 1.25rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  }
+}
+
+.hero-badges {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  
+  @media (min-width: 992px) {
+    justify-content: flex-start;
+  }
+  
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    @include glass.glass-base(0.3, 6px, 0.4);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-xl);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-white);
+    text-shadow: 0 1px 2px var(--text-shadow);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.4);
+    }
+    
+    .material-icons {
+      font-size: 1rem;
+      color: vars.$medical-green;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    }
+  }
+}
+
+.hero-image {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  z-index: 2;
+  
+  @media (min-width: 992px) {
+    width: 50%;
+    height: auto;
+  }
+  
+  .image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    
+    .image-placeholder {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-primary);
+      border-radius: var(--border-radius-xl);
+      box-shadow: var(--shadow-medical);
+      opacity: 0.1;
+      
+      @media (min-width: 992px) {
+        width: 90%;
+        height: 90%;
+      }
+    }
+  }
+}
+
+.floating-card {
+  @include glass.glass-floating-card('md');
+  position: absolute;
+  z-index: 3;
+  
+  .material-icons {
+    font-size: 1.25rem;
+    color: vars.$primary;
+  }
+  
+  &.card-1 {
+    top: 20%;
+    left: 10%;
+    @include mixins.animation-fade-in-up(1s);
+    
+    @media (min-width: 992px) {
+      top: 20%;
+      left: -15%;
+    }
+  }
+  
+  &.card-2 {
+    top: 50%;
+    right: 10%;
+    @include mixins.animation-fade-in-up(1.2s);
+    
+    @media (min-width: 992px) {
+      top: 50%;
+      right: -10%;
+    }
+  }
+  
+  &.card-3 {
+    bottom: 20%;
+    left: 20%;
+    @include mixins.animation-fade-in-up(1.4s);
+    
+    @media (min-width: 992px) {
+      bottom: 20%;
+      left: 0;
+    }
+  }
+}
+
+/* Animaciones del segundo componente */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes highlightGlow {
+  from {
+    text-shadow: 
+      0 0 10px color-mix(in srgb, var(--orange) 30%, transparent),
+      0 2px 4px color-mix(in srgb, black 30%, transparent);
+  }
+  to {
+    text-shadow: 
+      0 0 20px color-mix(in srgb, var(--orange) 50%, transparent),
+      0 2px 4px color-mix(in srgb, black 30%, transparent);
+  }
+}
+
+@keyframes underlineExpand {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  :host {
+    --hero-height: clamp(500px, 60vh, 700px);
+    --title-size: clamp(1.5rem, 6vw, 2.5rem);
+  }
+  
+  h1 {
+    line-height: 1.3;
+    br { display: none; }
+  }
+  
+  .hero-section {
+    padding: 2rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :host {
+    --container-padding: 1rem;
+  }
+  
+  .hero-content {
+    padding: 0;
+  }
+  
+  .hero-cta {
+    flex-direction: column;
+    align-items: center;
+    
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+      max-width: 280px;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --text-white: light-dark(#ffffff, #f8f9fa);
+    --orange: light-dark(#ff6b35, #ff8c5a);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-section,
+  h1,
+  .highlight,
+  .hero__image,
+  .floating-card {
+    animation: none;
+    transition: none;
+  }
+  
+  .hero__image:hover {
+    transform: none;
+  }
+}

@@ -45,7 +45,7 @@
 @mixin focus-ring($color: vars.$info-color, $width: 2px, $offset: 2px) {
   outline: $width solid $color;
   outline-offset: $offset;
-  border-radius: vars.$border-radius-sm;
+  border-radius: 0;
 }
 
 // Ícono circular - usando variables CSS pre-calculadas

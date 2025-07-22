@@ -1,0 +1,78 @@
+@use './_variables-moderns.scss' as vars;
+
+@mixin ripple($color: rgba(255, 255, 255, 0.3), $duration: 600ms) {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: $color;
+    transform: translate(-50%, -50%);
+    transition: width $duration cubic-bezier(0.4, 0, 0.2, 1), height $duration cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &:active::before {
+    width: vars.$ripple-size;
+    height: vars.$ripple-size;
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    border-radius: var(--border-radius-sm);
+  }
+
+  @media (hover: none) {
+    &:active::before {
+      width: vars.$ripple-size-touch;
+      height: vars.$ripple-size-touch;
+    }
+  }
+}
+
+@mixin ripple-dark($opacity: 0.15) {
+  @include ripple(rgba(0, 0, 0, $opacity));
+}
+
+@mixin ripple-light($opacity: 0.25) {
+  @include ripple(rgba(255, 255, 255, $opacity));
+}
+
+@mixin ripple-primary() {
+  @include ripple(rgba(0, 119, 182, 0.3));
+}
+
+@mixin ripple-medical() {
+  @include ripple(rgba(0, 119, 182, 0.25));
+}
+
+@mixin ripple-success() {
+  @include ripple(rgba(34, 197, 94, 0.3));
+}
+
+@mixin ripple-emergency() {
+  @include ripple(rgba(239, 68, 68, 0.3));
+}
+
+// Ripple especializado para botones médicos
+@mixin medical-button-ripple($variant: 'primary') {
+  @if $variant == 'primary' {
+    @include ripple-primary();
+  } @else if $variant == 'success' {
+    @include ripple-success();
+  } @else if $variant == 'emergency' {
+    @include ripple-emergency();
+  } @else {
+    @include ripple-light();
+  }
+}

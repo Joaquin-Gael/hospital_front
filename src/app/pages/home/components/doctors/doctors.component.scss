@@ -1,0 +1,160 @@
+@use '../../styles/_variables-moderns.scss' as vars;
+@use '../../styles/_glass.scss' as glass;
+@use '../../styles/_mixins.scss' as mixins;
+
+.testimonials-section {
+  position: relative;
+  @include mixins.responsive-padding(2rem, 3rem, 4rem);
+  margin-bottom: 4rem;
+}
+
+.section-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  @include mixins.animation-fade-in-up(0.6s);
+  
+  h2 {
+    @include mixins.medical-heading('h2');
+  }
+}
+
+.section-description {
+  @include mixins.medical-text('lead');
+  margin-top: 1rem;
+}
+
+.testimonials-container {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  height: 400px;
+  
+  @media (min-width: 768px) {
+    height: 300px;
+  }
+}
+
+.testimonial-card {
+  @include glass.glass-medical-card();
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  
+  &.active {
+    opacity: 1;
+    visibility: visible;
+    @include mixins.animation-fade-in-up(0.6s);
+  }
+}
+
+.testimonial-content {
+  flex: 1;
+  padding: 2rem;
+  position: relative;
+}
+
+blockquote {
+  margin: 0;
+  
+  p {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    font-style: italic;
+    color: vars.$text-primary;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.testimonial-rating {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.25rem;
+  
+  .star {
+    color: #fbbf24;
+    font-size: 1.25rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  @include glass.glass-base(0.1, 8px, 0.2);
+  border-bottom-left-radius: var(--border-radius-lg);
+  border-bottom-right-radius: var(--border-radius-lg);
+}
+
+.author-avatar {
+  @include mixins.flex-center;
+  width: 48px;
+  height: 48px;
+  @include glass.glass-base(0.2, 6px, 0.3);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.25);
+  }
+  
+  .material-icons {
+    font-size: 24px;
+    color: vars.$primary;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+}
+
+.author-info {
+  @include mixins.flex-column;
+  
+  h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: vars.$text-primary;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: vars.$text-secondary;
+  }
+}
+
+.testimonial-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  @include glass.glass-base(0.15, 4px, 0.25);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &.active {
+    background: vars.$primary;
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(0, 119, 182, 0.4);
+  }
+  
+  &:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.3);
+  }
+}

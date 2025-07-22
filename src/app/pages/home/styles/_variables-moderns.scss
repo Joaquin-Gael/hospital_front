@@ -1,0 +1,101 @@
+// Variables modernas adaptadas para Hospital SDLG
+$primary-hue: 195; // Azul médico más profesional
+$primary-sat: 85%;
+$primary-light: 45%; // Mantener este valor
+
+$accent-hue: 200; // Azul complementario
+$accent-sat: 75%;
+$accent-light: 55%;
+
+$medical-green-hue: 140;
+$medical-green-sat: 60%;
+$medical-green-light: 50%;
+
+$ripple-size: 1000px;
+$ripple-size-touch: 200px;
+
+$border-radius-sm: 0.5rem;
+$border-radius-md: 1rem;
+$border-radius-lg: 1.5rem;
+$border-radius-xl: 2rem;
+
+:root {
+  --primary-hue: #{$primary-hue};
+  --primary-sat: #{$primary-sat};
+  --primary-light: #{$primary-light};
+
+  --accent-hue: #{$accent-hue};
+  --accent-sat: #{$accent-sat};
+  --accent-light: #{$accent-light};
+
+  --medical-green-hue: #{$medical-green-hue};
+  --medical-green-sat: #{$medical-green-sat};
+  --medical-green-light: #{$medical-green-light};
+
+  // Glass effects mejorados para hospital
+  --glass-bg: rgba(255, 255, 255, 0.12);
+  --glass-bg-strong: rgba(255, 255, 255, 0.18);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-border-strong: rgba(255, 255, 255, 0.3);
+  
+  // Sombras médicas profesionales
+  --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.15);
+  --shadow-glass-strong: 0 12px 40px rgba(31, 38, 135, 0.2);
+  --shadow-medical: 0 4px 20px rgba(0, 119, 182, 0.15);
+  --shadow-success: 0 4px 20px rgba(34, 197, 94, 0.15);
+
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --text-shadow: rgba(0, 0, 0, 0.3);
+  --text-shadow-strong: rgba(0, 0, 0, 0.5);
+
+  --border-radius-sm: #{$border-radius-sm};
+  --border-radius-md: #{$border-radius-md};
+  --border-radius-lg: #{$border-radius-lg};
+  --border-radius-xl: #{$border-radius-xl};
+
+  // Botones médicos
+  --shadow-btn-primary: 0 4px 15px rgba(0, 119, 182, 0.3);
+  --shadow-btn-primary-hover: 0 6px 20px rgba(0, 119, 182, 0.4);
+  --shadow-btn-success: 0 4px 15px rgba(34, 197, 94, 0.3);
+  --shadow-btn-success-hover: 0 6px 20px rgba(34, 197, 94, 0.4);
+  --shadow-btn-emergency: 0 4px 15px rgba(239, 68, 68, 0.3);
+  --shadow-btn-emergency-hover: 0 6px 20px rgba(239, 68, 68, 0.4);
+
+  // Gradientes médicos
+  --gradient-primary: linear-gradient(135deg, hsl(#{$primary-hue}, #{$primary-sat}, #{$primary-light}), hsl(#{$accent-hue}, #{$accent-sat}, #{$accent-light}));
+  --gradient-success: linear-gradient(135deg, hsl(#{$medical-green-hue}, #{$medical-green-sat}, #{$medical-green-light}), hsl(#{$medical-green-hue}, #{$medical-green-sat}, 40%));
+  --gradient-hero: linear-gradient(135deg, rgba(202, 240, 248, 0.9), rgba(173, 232, 244, 0.9));
+}
+
+// Fallbacks SCSS mejorados
+$primary: hsl($primary-hue, $primary-sat, $primary-light);
+$primary-dark: hsl($primary-hue, $primary-sat, 35%);
+$primary-lighter: hsl($primary-hue, $primary-sat, 60%); // Renombrado para evitar conflicto
+
+$accent: hsl($accent-hue, $accent-sat, $accent-light);
+$accent-dark: hsl($accent-hue, $accent-sat, 45%);
+
+$medical-green: hsl($medical-green-hue, $medical-green-sat, $medical-green-light);
+$medical-green-dark: hsl($medical-green-hue, $medical-green-sat, 40%);
+
+$success: hsl(142, 76%, 36%);
+$error: hsl(0, 84%, 60%);
+$warning: hsl(38, 92%, 50%);
+$info: hsl(221, 83%, 53%);
+
+// Espaciado médico
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+$spacing-2xl: 3rem;
+$spacing-3xl: 4rem;
+
+// Colores de texto médico
+$text-primary: #1e293b;
+$text-secondary: #64748b;
+$text-light: #94a3b8;
+$text-white: #ffffff;
+$text-medical: hsl($primary-hue, $primary-sat, $primary-light);
