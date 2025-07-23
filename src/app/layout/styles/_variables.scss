@@ -1,0 +1,111 @@
+// Colores principales mejorados
+$primary-color: #6366f1;
+$primary-dark: #4f46e5;
+$primary-light: #8b5cf6;
+$emergency-color: #ef4444;
+$emergency-hover: #dc2626;
+$text-color: #1f2937;
+$text-dark: #111827;
+$text-light: #6b7280;
+$white: #ffffff;
+$shadow-light: rgba(0, 0, 0, 0.08);
+$shadow-medium: rgba(0, 0, 0, 0.15);
+$shadow-heavy: rgba(0, 0, 0, 0.25);
+$transition-speed: 0.3s;
+
+// Variables específicas para navegación mejoradas
+$navbar-primary: #6366f1;
+$navbar-primary-hover: #8b5cf6;
+$navbar-secondary: #64748b;
+$navbar-background: #ffffff;
+$navbar-text: #374151;
+$navbar-text-dark: #111827;
+$navbar-text-light: #9ca3af;
+$navbar-border: #e5e7eb;
+$navbar-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$navbar-radius: 12px;
+$navbar-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+// Dimensiones
+$navbar-height: 85px;
+$navbar-mobile-height: 65px;
+$navbar-z-index: 1000;
+$navbar-overlay-z-index: 1500;
+$navbar-sidenav-z-index: 2000;
+$navbar-logo-size: 160px;
+$navbar-logo-size-mobile: 40px;
+$navbar-avatar-size: 42px;
+$navbar-avatar-size-mobile: 38px;
+$navbar-badge-size: 20px;
+$navbar-dropdown-width: 300px;
+
+// Estados y efectos mejorados
+$navbar-hover-bg: rgba(99, 102, 241, 0.08);
+$navbar-active-bg: rgba(99, 102, 241, 0.12);
+$navbar-focus-color: #6366f1;
+$navbar-danger-color: #ef4444;
+$navbar-danger-hover: #dc2626;
+$navbar-success-color: #10b981;
+$navbar-warning-color: #f59e0b;
+
+// Gradientes mejorados
+$navbar-user-gradient: linear-gradient(135deg, $navbar-primary 0%, $navbar-primary-hover 100%);
+$navbar-cta-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+$navbar-hover-gradient: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+
+// Tipografía mejorada
+$font-family-base: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-logo: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+$font-size-base: 1rem;
+$font-size-logo: 1.5rem;
+$font-size-nav: 0.95rem;
+$font-size-btn: 0.9rem;
+$font-weight-light: 300;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$letter-spacing: -0.025em;
+$letter-spacing-wide: 0.025em;
+$text-transform: none;
+
+// Resto de variables...
+$layout-background: #f9fafb;
+$layout-text: #1f2937;
+$layout-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+// Footer variables (mantenidas igual)
+$footer-bg: #1e1e1e;
+$footer-text: #e5e5e5;
+$footer-text-secondary: #a3a3a3;
+$footer-accent: #3b82f6;
+$footer-accent-hover: color-mix(in srgb, #3b82f6 80%, white);
+$footer-border: #374151;
+$footer-overlay: rgba(0, 0, 0, 0.8);
+$footer-radius: 0.5rem;
+$footer-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+$footer-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+$footer-padding: 3rem 0 2rem;
+$footer-padding-mobile: 2rem 0 1.5rem;
+$footer-section-gap: 2rem;
+$footer-section-gap-mobile: 1.5rem;
+$footer-link-padding: 0.5rem 0;
+$footer-social-size: 40px;
+$footer-social-size-mobile: 36px;
+$footer-logo-size: 32px;
+$footer-input-height: 48px;
+$footer-button-height: 48px;
+$footer-bg-light: #2a2a2a;
+$footer-bg-dark: #1a1a1a;
+$footer-success: #10b981;
+$footer-error: #ef4444;
+$footer-warning: #f59e0b;
+$footer-info: #3b82f6;
+$footer-gradient: linear-gradient(135deg, $footer-bg 0%, $footer-bg-light 100%);
+$footer-social-gradient: linear-gradient(135deg, $footer-accent, $footer-accent-hover);
+$footer-newsletter-gradient: linear-gradient(135deg, $footer-accent 0%, #1d4ed8 100%);
+$footer-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$footer-input-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+$footer-button-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$footer-z-index: 100;
+$footer-overlay-z-index: 150;

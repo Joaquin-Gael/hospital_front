@@ -1,0 +1,192 @@
+@use './_variables.scss' as nav;
+
+// Breakpoints
+$mobile: 480px;
+$tablet: 768px;
+$desktop: 1024px;
+$large-desktop: 1200px;
+
+// Mobile First Media Queries
+@mixin mobile-only {
+  @media (max-width: #{$mobile - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: $mobile) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media (min-width: $mobile) and (max-width: #{$tablet - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: $tablet) {
+    @content;
+  }
+}
+
+@mixin desktop-only {
+  @media (min-width: $tablet) and (max-width: #{$desktop - 1px}) {
+    @content;
+  }
+}
+
+@mixin large-desktop-up {
+  @media (min-width: $desktop) {
+    @content;
+  }
+}
+
+@mixin large-desktop-only {
+  @media (min-width: $desktop) and (max-width: #{$large-desktop - 1px}) {
+    @content;
+  }
+}
+
+@mixin xl-desktop-up {
+  @media (min-width: $large-desktop) {
+    @content;
+  }
+}
+
+// Navegación específica
+@mixin nav-mobile {
+  @media (max-width: #{$tablet - 1px}) {
+    @content;
+  }
+}
+
+@mixin nav-desktop {
+  @media (min-width: $tablet) {
+    @content;
+  }
+}
+
+// Altura específica para navegación
+@mixin nav-height-mobile {
+  & {
+    height: nav.$navbar-mobile-height;
+    min-height: nav.$navbar-mobile-height;
+  }
+}
+
+@mixin nav-height-desktop {
+  & {
+    height: nav.$navbar-height;
+    min-height: nav.$navbar-height;
+  }
+}
+
+// Container responsive
+@mixin nav-container {
+  & {
+    max-width: $large-desktop;
+    margin: 0 auto;
+    padding: 0.6rem;
+  }
+
+  @include mobile-only {
+    padding: 0.6rem;
+  }
+
+  @include xl-desktop-up {
+    padding: 0.6rem;
+  }
+}
+
+// Logo responsive
+@mixin nav-logo-responsive {
+  & {
+    width: nav.$navbar-logo-size;
+    height: nav.$navbar-logo-size;
+  }
+
+  @include mobile-only {
+    width: nav.$navbar-logo-size-mobile;
+    height: nav.$navbar-logo-size-mobile;
+  }
+}
+
+// Avatar responsive
+@mixin nav-avatar-responsive {
+  & {
+    width: nav.$navbar-avatar-size;
+    height: nav.$navbar-avatar-size;
+  }
+
+  @include mobile-only {
+    width: nav.$navbar-avatar-size-mobile;
+    height: nav.$navbar-avatar-size-mobile;
+  }
+}
+
+// Ocultar elementos en mobile
+@mixin hide-on-mobile {
+  @include nav-mobile {
+    display: none !important;
+  }
+}
+
+// Mostrar solo en mobile
+@mixin show-on-mobile-only {
+  & {
+    display: none;
+  }
+
+  @include nav-mobile {
+    display: block;
+  }
+}
+
+// Espaciado responsive
+@mixin nav-spacing-responsive {
+  & {
+    gap: 1.5rem;
+  }
+
+  @include tablet-only {
+    gap: 1rem;
+  }
+
+  @include mobile-only {
+    gap: 0.75rem;
+  }
+}
+
+// Texto responsive
+@mixin nav-text-responsive {
+  & {
+    font-size: nav.$font-size-nav;
+  }
+
+  @include mobile-only {
+    font-size: calc(nav.$font-size-nav * 0.9);
+  }
+}
+
+// Reducir motion para accesibilidad
+@mixin reduce-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+// Dark mode support
+@mixin dark-mode {
+  @media (prefers-color-scheme: dark) {
+    @content;
+  }
+}
+
+// High contrast mode
+@mixin high-contrast {
+  @media (prefers-contrast: high) {
+    @content;
+  }
+}

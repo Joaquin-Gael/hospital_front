@@ -22,7 +22,7 @@
   }
   
   border-radius: $radius;
-  color: var(--text-primary);
+  color: vars.$text-primary;
   text-shadow: 0 1px 2px var(--text-shadow);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
@@ -42,7 +42,7 @@
   &{
     border-radius: $radius;
     box-shadow: var(--shadow-medical);
-    color: var(--text-primary);
+    color: vars.$text-primary;
     text-shadow: 0 1px 3px var(--text-shadow);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -74,7 +74,10 @@
 }
 
 @mixin glass-hero($blur: 24px) {
-  background: var(--gradient-hero);
+  background-image: url("https://pbs.twimg.com/media/GwlDc71XoAAmRhg?format=jpg&name=large");
+  background-size: cover;
+  background-position: center;
+  justify-content: center;
   backdrop-filter: blur($blur);
   -webkit-backdrop-filter: blur($blur);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -112,7 +115,7 @@
   }
   
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
-  color: var(--text-primary);
+  color: #000000;
   text-shadow: 0 1px 2px var(--text-shadow);
   font-weight: 500;
   animation: float 6s ease-in-out infinite;
@@ -133,7 +136,7 @@
   overflow: hidden;
   
   @if $variant == 'primary' {
-    color: var(--text-primary);
+    color: vars.$text-primary;
     text-shadow: 0 1px 2px var(--text-shadow);
     box-shadow: var(--shadow-btn-primary);
     
@@ -143,7 +146,7 @@
       background: rgba(255, 255, 255, 0.2);
     }
   } @else if $variant == 'success' {
-    color: var(--text-primary);
+    color: vars.$text-primary;
     text-shadow: 0 1px 2px var(--text-shadow);
     box-shadow: var(--shadow-btn-success);
     
@@ -153,7 +156,7 @@
       background: rgba(255, 255, 255, 0.2);
     }
   } @else if $variant == 'emergency' {
-    color: var(--text-primary);
+    color: vars.$text-primary;
     text-shadow: 0 1px 2px var(--text-shadow-strong);
     box-shadow: var(--shadow-btn-emergency);
 

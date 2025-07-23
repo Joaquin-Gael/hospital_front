@@ -1,6 +1,34 @@
-.layout-wrapper, .main-content {
+@use '../styles/_variables.scss' as v;
+
+.layout-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  color: v.$layout-text;
+  width: 100%;
+}
+
+.main-content {
+  flex: 1 0 auto;
+  width: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden; // ← evita scroll horizontal raro
+  overflow: visible;
+
+  router-outlet + * {
+    display: block;
+    margin-top: 0; /* Elimina cualquier margen superior */
+    padding-top: 0; /* Elimina padding superior */
+    width: 100vw; /* Asegura que ocupe el ancho completo */
+    position: relative; /* Asegura un contexto de posicionamiento */
+    top: 0; /* Elimina cualquier desplazamiento superior */
+  }
+
+  /* Compensar la altura de la navbar sticky */
+  //margin-top: 4rem; /* Igual a la altura de la navbar (4rem) */
+
+  @media (max-width: 768px) {
+    padding: 0; /* Mantén padding en 0 para móviles */
+    //margin-top: 4rem; /* Mantiene el ajuste para móviles */
+  }
 }
-  

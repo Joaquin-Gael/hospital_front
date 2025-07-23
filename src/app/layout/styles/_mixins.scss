@@ -1,0 +1,477 @@
+@use './_variables.scss' as var;
+
+// Mixin para centrar elementos con flexbox
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Mixin para espaciado entre elementos
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-inline($gap: 1rem, $align: center, $justify: flex-start) {
+  & {
+    display: flex;
+    align-items: $align;
+    justify-content: $justify;
+    gap: $gap;
+  }
+}
+
+// Mixin para focus ring personalizado
+@mixin focus-ring($color: var.$navbar-focus-color, $width: 2px, $offset: 2px) {
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 $width $color;
+    border-radius: var.$navbar-radius;
+  }
+
+  &:focus-visible {
+    outline: $width solid $color;
+    outline-offset: $offset;
+  }
+}
+
+// Mixin para focus ring en navegación
+@mixin focus-ring-nav {
+  @include focus-ring(var.$navbar-focus-color, 2px, 1px);
+}
+
+// Mixin para reset de botones
+@mixin button-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+// Mixin para botones base
+@mixin button-base {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var.$navbar-radius;
+  font-size: var.$font-size-nav;
+  font-weight: 500;
+  text-decoration: none;
+  transition: var.$navbar-transition;
+  cursor: pointer;
+  @include focus-ring-nav;
+}
+
+// Mixin para hover effects
+@mixin hover-effect($bg-color: var.$navbar-hover-bg, $text-color: null) {
+  transition: var.$navbar-transition;
+  
+  &:hover {
+    background-color: $bg-color;
+    @if $text-color {
+      color: $text-color;
+    }
+  }
+}
+
+// Mixin para active states
+@mixin active-state($bg-color: var.$navbar-active-bg, $text-color: null) {
+  background-color: $bg-color;
+  @if $text-color {
+    color: $text-color;
+  }
+}
+
+// Mixin para badges/counters
+@mixin badge($bg-color: var.$navbar-primary, $text-color: white, $size: var.$navbar-badge-size) {
+  background-color: $bg-color;
+  color: $text-color;
+  font-size: calc($size * 0.7);
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: calc($size * 0.5);
+  min-width: $size;
+  height: $size;
+  @include flex-center;
+  line-height: 1;
+}
+
+// Mixin para dropdowns
+@mixin dropdown-panel($width: var.$navbar-dropdown-width) {
+  .mat-menu-panel {
+    min-width: $width;
+    border-radius: var.$navbar-radius;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border: 1px solid var.$navbar-border;
+    overflow: hidden;
+    background: white;
+  }
+}
+
+// Mixin para avatares circulares
+@mixin avatar($size: var.$navbar-avatar-size, $bg: var.$navbar-user-gradient) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  background: $bg;
+  @include flex-center;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  mat-icon {
+    color: white;
+    font-size: calc($size * 0.6);
+    width: calc($size * 0.6);
+    height: calc($size * 0.6);
+  }
+}
+
+// Mixin para mobile overlay
+@mixin mobile-overlay($top: var.$navbar-height) {
+  position: fixed;
+  top: $top;
+  left: 0;
+  width: 100vw;
+  height: calc(100vh - $top);
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+
+  &--visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+// Mixin para animaciones de entrada
+@mixin slide-in-from-right($duration: 0.3s) {
+  transform: translateX(100%);
+  transition: transform $duration cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  &.open {
+    transform: translateX(0);
+  }
+}
+
+// Mixin para texto truncado
+@mixin text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Mixin para links de navegación
+@mixin nav-link {
+  text-decoration: none;
+  color: var.$navbar-text;
+  font-weight: 500;
+  font-size: var.$font-size-nav;
+  padding: 0.5rem 0.75rem;
+  border-radius: var.$navbar-radius;
+  transition: var.$navbar-transition;
+  position: relative;
+  @include focus-ring-nav;
+
+  &:hover {
+    background-color: var.$navbar-hover-bg;
+  }
+
+  &--active {
+    @include active-state;
+    font-weight: 600;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 2px;
+      background: var.$navbar-text;
+      border-radius: 1px;
+    }
+  }
+}
+
+// Mixin para secciones del footer
+@mixin footer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// Mixin para títulos de sección
+@mixin footer-section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var.$footer-text;
+  margin-bottom: 1rem;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 2rem;
+    height: 2px;
+    background: var.$footer-accent;
+    border-radius: 1px;
+  }
+}
+
+// Mixin para links del footer
+@mixin footer-link {
+  color: var.$footer-text-secondary;
+  text-decoration: none;
+  padding: var.$footer-link-padding;
+  transition: var.$footer-transition;
+  display: inline-block;
+
+  &:hover {
+    color: var.$footer-text;
+    transform: translateX(4px);
+  }
+
+  &:focus {
+    outline: 2px solid var.$footer-accent;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+// Mixin para iconos sociales
+@mixin social-icon($size: var.$footer-social-size) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  background: var.$footer-social-gradient;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: var.$footer-transition;
+  box-shadow: var.$footer-button-shadow;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  }
+
+  &:focus {
+    outline: 2px solid var.$footer-accent;
+    outline-offset: 2px;
+  }
+
+  mat-icon {
+    font-size: calc($size * 0.5);
+    width: calc($size * 0.5);
+    height: calc($size * 0.5);
+  }
+}
+
+// Mixin para formulario de newsletter
+@mixin newsletter-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
+}
+
+// Mixin para input del newsletter
+@mixin newsletter-input {
+  flex: 1;
+  padding: 0 1rem;
+  height: var.$footer-input-height;
+  border: 1px solid var.$footer-border;
+  border-radius: var.$footer-radius;
+  background: rgba(255, 255, 255, 0.05);
+  color: var.$footer-text;
+  font-size: 0.875rem;
+  transition: var.$footer-transition;
+  box-shadow: var.$footer-input-shadow;
+
+  &::placeholder {
+    color: var.$footer-text-secondary;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var.$footer-accent;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &:invalid {
+    border-color: var.$footer-error;
+  }
+}
+
+// Mixin para botón del newsletter
+@mixin newsletter-button {
+  padding: 0 1.5rem;
+  height: var.$footer-button-height;
+  background: var.$footer-newsletter-gradient;
+  color: white;
+  border: none;
+  border-radius: var.$footer-radius;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var.$footer-transition;
+  white-space: nowrap;
+  box-shadow: var.$footer-button-shadow;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  &:focus {
+    outline: 2px solid var.$footer-accent;
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// Mixin para grid responsive del footer
+@mixin footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var.$footer-section-gap;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var.$footer-section-gap-mobile;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+// Mixin para copyright section
+@mixin footer-copyright {
+  border-top: 1px solid var.$footer-border;
+  padding-top: 2rem;
+  margin-top: 2rem;
+  text-align: center;
+  color: var.$footer-text-secondary;
+  font-size: 0.875rem;
+
+  @media (max-width: 768px) {
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+  }
+}
+
+// Mixin para métodos de pago
+@mixin payment-methods {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+
+  img {
+    height: 24px;
+    width: auto;
+    opacity: 0.8;
+    transition: var.$footer-transition;
+
+    &:hover {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Mixin para logo del footer
+@mixin footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  svg {
+    width: var.$footer-logo-size;
+    height: var.$footer-logo-size;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var.$footer-text;
+    margin: 0;
+  }
+}
+
+// Mixin para animaciones del footer
+@mixin footer-animations {
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  animation: fadeInUp 0.6s ease-out;
+}
+
+// Mixin para estados de loading
+@mixin loading-state {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+}
