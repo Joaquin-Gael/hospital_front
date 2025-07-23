@@ -3,18 +3,7 @@
   position: relative;
 }
 
-.content-spacer {
-  height: 100vh;
-  width: 100%;
-  position: relative;
-  z-index: 1;
-  background: transparent;
-  pointer-events: none;
-}
-
 .home-container {
-  display: flex;
-  flex-direction: column;
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;

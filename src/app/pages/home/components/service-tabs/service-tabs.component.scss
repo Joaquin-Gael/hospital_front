@@ -4,12 +4,12 @@
 @use '../../styles/_ripple.scss' as ripple;
 
 .platform-section {
-  @include glass.glass-base(0.08, 20px, 0.15);
   border-radius: var(--border-radius-xl);
-  @include mixins.responsive-padding(2rem, 3rem, 4rem);
   margin-bottom: 4rem;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  @include glass.glass-base(0.08, 20px, 0.15);
+  @include mixins.responsive-padding(2rem, 3rem, 4rem);
 }
 
 .section-header {
@@ -24,13 +24,13 @@
 }
 
 .section-description {
-  @include mixins.medical-text('lead');
   margin-top: 1rem;
+  @include mixins.medical-text('lead');  
 }
 
 .platform-tabs {
-  @include mixins.flex-column;
   gap: 2rem;
+  @include mixins.flex-column;
 }
 
 .tab-headers {
@@ -42,9 +42,6 @@
 }
 
 .tab-header {
-  @include mixins.flex-center;
-  @include glass.glass-base(0.1, 8px, 0.2);
-  @include ripple.medical-button-ripple();
   gap: 0.5rem;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -55,7 +52,10 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: var(--border-radius-md);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  
+  @include mixins.flex-center;
+  @include glass.glass-base(0.1, 8px, 0.2);
+  @include ripple.medical-button-ripple();
+   
   .material-icons {
     font-size: 1.25rem;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
@@ -126,22 +126,21 @@
 }
 
 .tab-info {
-  @include mixins.flex-column;
   justify-content: center;
   @include mixins.animation-slide-in-left(0.8s);
-  
+  @include mixins.flex-column;
   h3 {
-    @include mixins.medical-heading('h3');
     font-size: 1.75rem;
     margin-bottom: 1.5rem;
     color: vars.$text-primary;
+    @include mixins.medical-heading('h3');
   }
   
   p {
-    @include mixins.medical-text('body');
     margin-bottom: 2rem;
     color: vars.$text-light;
     line-height: 1.7;
+    @include mixins.medical-text('body');
   }
 }
 

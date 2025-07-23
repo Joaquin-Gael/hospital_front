@@ -4,12 +4,12 @@
 @use '../../styles/_ripple.scss' as ripple;
 
 .newsletter-section {
-  @include glass.glass-base(0.08, 20px, 0.15);
   border-radius: var(--border-radius-xl);
   margin-bottom: 2rem;
-  @include mixins.responsive-padding(2rem, 3rem, 4rem);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  @include glass.glass-base(0.08, 20px, 0.15);
+  @include mixins.responsive-padding(2rem, 3rem, 4rem);
 }
 
 .newsletter-content {
@@ -28,31 +28,31 @@
   @include mixins.animation-fade-in-up(0.6s);
   
   h2 {
-    @include mixins.medical-heading('h2');
     text-align: left;
     margin-bottom: 1.5rem;
     color: vars.$text-primary;
     font-size: 2rem;
     font-weight: 700;
     line-height: 1.2;
-    
+    @include mixins.medical-heading('h2');
+
     @media (min-width: 768px) {
       font-size: 2.5rem;
     }
   }
   
   p {
-    @include mixins.medical-text('body');
     margin: 0;
     color: vars.$text-light;
     line-height: 1.7;
+    @include mixins.medical-text('body');  
   }
 }
 
 .newsletter-form {
-  @include mixins.flex-column;
   gap: 0.5rem;
   @include mixins.animation-slide-in-left(0.8s);
+  @include mixins.flex-column;
 }
 
 .form-group {
@@ -63,14 +63,14 @@
     width: 100%;
     padding: 1rem 1.5rem;
     padding-right: 4rem;
-    @include glass.glass-base(0.1, 6px, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--border-radius-md);
     font-size: 1rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box;
     color: vars.$text-primary;
-    
+    @include glass.glass-base(0.1, 6px, 0.2);
+
     &::placeholder {
       color: vars.$text-light;
     }
@@ -84,7 +84,6 @@
   }
   
   button {
-    @include ripple.medical-button-ripple('primary');
     position: absolute;
     right: 0.5rem;
     top: 50%;
@@ -101,6 +100,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    @include ripple.medical-button-ripple('primary');
     
     &:hover {
       background: vars.$primary-dark;

@@ -1,11 +1,12 @@
 @use './_variables-moderns.scss' as vars;
 
 @mixin glass-base($opacity: 0.12, $blur: 16px, $border-opacity: 0.2) {
-  background: rgba(255, 255, 255, $opacity);
-  backdrop-filter: blur($blur);
-  -webkit-backdrop-filter: blur($blur);
-  border: 1px solid rgba(255, 255, 255, $border-opacity);
-
+  &{
+    background: rgba(255, 255, 255, $opacity);
+    backdrop-filter: blur($blur);
+    -webkit-backdrop-filter: blur($blur);
+    border: 1px solid rgba(255, 255, 255, $border-opacity);
+  }
   @supports not (backdrop-filter: blur($blur)) {
     background: rgba(255, 255, 255, $opacity + 0.08);
   }
@@ -38,14 +39,16 @@
 }
 
 @mixin glass-medical-card($radius: var(--border-radius-lg)) {
-  @include glass-base(0.15, 18px, 0.25);
-  border-radius: $radius;
-  box-shadow: var(--shadow-medical);
-  color: var(--text-primary);
-  text-shadow: 0 1px 3px var(--text-shadow);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  &{
+    border-radius: $radius;
+    box-shadow: var(--shadow-medical);
+    color: var(--text-primary);
+    text-shadow: 0 1px 3px var(--text-shadow);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }  
+  @include glass-base(0.15, 18px, 0.25); 
   
   &::before {
     content: '';
@@ -96,9 +99,7 @@
   }
 }
 
-@mixin glass-floating-card($size: 'md') {
-  @include glass-base(0.2, 12px, 0.3);
-  
+@mixin glass-floating-card($size: 'md') {  
   @if $size == 'sm' {
     padding: 0.75rem 1rem;
     border-radius: var(--border-radius-sm);
@@ -114,8 +115,8 @@
   color: var(--text-primary);
   text-shadow: 0 1px 2px var(--text-shadow);
   font-weight: 500;
-  
   animation: float 6s ease-in-out infinite;
+  @include glass-base(0.2, 12px, 0.3);
   
   .material-icons {
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
@@ -123,7 +124,6 @@
 }
 
 @mixin glass-button($variant: 'primary') {
-  @include glass-base(0.15, 10px, 0.25);
   border-radius: var(--border-radius-md);
   padding: 0.75rem 1.5rem;
   font-weight: 600;
@@ -156,7 +156,9 @@
     color: var(--text-primary);
     text-shadow: 0 1px 2px var(--text-shadow-strong);
     box-shadow: var(--shadow-btn-emergency);
-    
+
+  @include glass-base(0.15, 10px, 0.25);
+
     &:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-btn-emergency-hover);

@@ -4,8 +4,8 @@
 
 .testimonials-section {
   position: relative;
-  @include mixins.responsive-padding(2rem, 3rem, 4rem);
   margin-bottom: 4rem;
+  @include mixins.responsive-padding(2rem, 3rem, 4rem);
 }
 
 .section-header {
@@ -36,7 +36,6 @@
 }
 
 .testimonial-card {
-  @include glass.glass-medical-card();
   position: absolute;
   top: 0;
   left: 0;
@@ -47,6 +46,7 @@
   transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
+  @include glass.glass-medical-card();
   
   &.active {
     opacity: 1;
@@ -90,19 +90,20 @@ blockquote {
   align-items: center;
   gap: 1rem;
   padding: 1.5rem 2rem;
-  @include glass.glass-base(0.1, 8px, 0.2);
   border-bottom-left-radius: var(--border-radius-lg);
   border-bottom-right-radius: var(--border-radius-lg);
+  @include glass.glass-base(0.1, 8px, 0.2);
 }
 
 .author-avatar {
-  @include mixins.flex-center;
   width: 48px;
   height: 48px;
-  @include glass.glass-base(0.2, 6px, 0.3);
+
   border-radius: 50%;
   transition: all 0.3s ease;
-  
+  @include mixins.flex-center;  
+  @include glass.glass-base(0.2, 6px, 0.3);
+
   &:hover {
     transform: scale(1.1);
     background: rgba(255, 255, 255, 0.25);
@@ -143,10 +144,10 @@ blockquote {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  @include glass.glass-base(0.15, 4px, 0.25);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
+  @include glass.glass-base(0.15, 4px, 0.25);
+    
   &.active {
     background: vars.$primary;
     transform: scale(1.2);

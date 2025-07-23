@@ -3,8 +3,8 @@
 @use '../../styles/_mixins.scss' as mixins;
 
 .news-section {
-  @include mixins.responsive-padding(2rem, 3rem, 4rem);
   margin-bottom: 4rem;
+  @include mixins.responsive-padding(2rem, 3rem, 4rem);
 }
 
 .section-header {
@@ -34,9 +34,9 @@
 }
 
 .news-card {
-  @include glass.glass-medical-card();
   overflow: hidden;
   @include mixins.animation-scale-in(0.8s);
+  @include glass.glass-medical-card();
 }
 
 .news-image {

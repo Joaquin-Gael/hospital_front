@@ -1,11 +1,13 @@
 @use './_variables-moderns.scss' as vars;
 
 @mixin ripple($color: rgba(255, 255, 255, 0.3), $duration: 600ms) {
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  z-index: 0;
-
+  &{
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 0;
+  }
+  
   &::before {
     content: '';
     position: absolute;

@@ -13,10 +13,13 @@
   --title-size: clamp(2rem, 5vw, 4rem);
   --container-padding: clamp(1rem, 4vw, 2rem);
   display: block;
-  margin: 0;
+  width: 100vw;
+  max-width: 100vw;
   padding: 0;
   position: relative;
   z-index: -1;
+  overflow-x: hidden;
+  padding-top: 80px;
 }
 
 // Hero Section - Fusión de ambos componentes
@@ -26,23 +29,23 @@
   align-items: center;
   min-height: var(--hero-height);
   height: 100vh;
-  width: 100vw;
-  position: fixed;
+  width: 100%;
+  padding-top: 80px; // mismo alto que la navbar
+  position: relative; // ← CAMBIO: antes estaba en fixed
   top: 0;
   left: 0;
-  z-index: -1;
-  @include glass.glass-hero();
+  z-index: 0;
   border-radius: 0;
-  overflow: hidden;
+  overflow: visible; // ← CAMBIO: permite que los floating-cards no se corten
   padding: 0;
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   animation: fadeIn 1.2s ease-out;
-  
+  @include glass.glass-hero();
+
   @media (min-width: 992px) {
     flex-direction: row;
     height: 100vh;
-    padding: 0;
   }
 }
 
@@ -92,15 +95,15 @@
 }
 
 .hero-content {
-  @include mixins.flex-column;
   position: relative;
   z-index: 2;
   text-align: center;
-  @include mixins.animation-fade-in-up(0.8s);
   color: var(--text-white);
   padding: 2rem;
   margin-top: 10vh;
-  
+  @include mixins.flex-column;  
+  @include mixins.animation-fade-in-up(0.8s);
+
   @media (min-width: 992px) {
     width: 50%;
     text-align: left;
@@ -111,7 +114,6 @@
 
 .hero-badge {
   display: inline-block;
-  @include glass.glass-base(0.3, 8px, 0.4);
   color: var(--text-white);
   text-shadow: 0 1px 2px var(--text-white);
   font-weight: 600;
@@ -121,10 +123,10 @@
   margin-bottom: 1.5rem;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  @include glass.glass-base(0.3, 8px, 0.4);
 }
 
 h1 {
-  @include mixins.medical-heading('h1');
   color: var(--text-white);
   text-shadow: 
     0 2px 4px color-mix(in srgb, black 30%, transparent),
@@ -135,7 +137,8 @@ h1 {
   line-height: 1.2;
   letter-spacing: -0.02em;
   animation: slideUp 1s ease-out 0.3s both;
-  
+  @include mixins.medical-heading('h1');
+
   .highlight {
     color: var(--orange);
     position: relative;
@@ -163,11 +166,11 @@ h1 {
 }
 
 .hero-subtitle {
-  @include mixins.medical-text('lead');
   color: var(--text-white);
   text-shadow: 0 1px 2px var(--text-shadow);
   margin-bottom: 2rem;
   opacity: 0.9;
+  @include mixins.medical-text('lead');
 }
 
 .hero-cta {
@@ -183,11 +186,11 @@ h1 {
 }
 
 .btn-primary {
+  gap: 0.5rem;
   @include mixins.flex-center;
   @include glass.glass-button('primary');
   @include ripple.medical-button-ripple('primary');
-  gap: 0.5rem;
-  
+
   .material-icons {
     font-size: 1.25rem;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
@@ -195,11 +198,11 @@ h1 {
 }
 
 .btn-secondary {
+  gap: 0.5rem;
   @include mixins.flex-center;
   @include glass.glass-button('emergency');
   @include ripple.medical-button-ripple('emergency');
-  gap: 0.5rem;
-  
+
   .material-icons {
     font-size: 1.25rem;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
@@ -220,7 +223,6 @@ h1 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    @include glass.glass-base(0.3, 6px, 0.4);
     padding: 0.5rem 1rem;
     border-radius: var(--border-radius-xl);
     font-size: 0.875rem;
@@ -228,7 +230,8 @@ h1 {
     color: var(--text-white);
     text-shadow: 0 1px 2px var(--text-shadow);
     transition: all 0.3s ease;
-    
+    @include glass.glass-base(0.3, 6px, 0.4);
+
     &:hover {
       transform: translateY(-1px);
       background: rgba(255, 255, 255, 0.4);
@@ -278,46 +281,31 @@ h1 {
 }
 
 .floating-card {
-  @include glass.glass-floating-card('md');
   position: absolute;
   z-index: 3;
-  
+  @include glass.glass-floating-card('md');
+
   .material-icons {
     font-size: 1.25rem;
     color: vars.$primary;
   }
-  
+
   &.card-1 {
     top: 20%;
-    left: 10%;
+    left: 5%; // ← ANTES -15%, estaba fuera de viewport
     @include mixins.animation-fade-in-up(1s);
-    
-    @media (min-width: 992px) {
-      top: 20%;
-      left: -15%;
-    }
   }
-  
+
   &.card-2 {
-    top: 50%;
-    right: 10%;
+    top: 100%;
+    right: 5%; // ← ANTES -10%
     @include mixins.animation-fade-in-up(1.2s);
-    
-    @media (min-width: 992px) {
-      top: 50%;
-      right: -10%;
-    }
   }
-  
+
   &.card-3 {
     bottom: 20%;
-    left: 20%;
+    left: 20%; // está OK
     @include mixins.animation-fade-in-up(1.4s);
-    
-    @media (min-width: 992px) {
-      bottom: 20%;
-      left: 0;
-    }
   }
 }
 

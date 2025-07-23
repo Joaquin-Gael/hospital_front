@@ -6,8 +6,9 @@
 .faq-section {
   max-width: 900px;
   margin: 0 auto;
-  @include mixins.responsive-padding(2rem, 3rem, 4rem);
   margin-bottom: 4rem;
+  @include mixins.responsive-padding(2rem, 3rem, 4rem);
+
 }
 
 .section-header {
@@ -22,27 +23,27 @@
 }
 
 .section-description {
-  @include mixins.medical-text('lead');
   margin-top: 1rem;
+  @include mixins.medical-text('lead');
 }
 
 .faq-container {
-  @include mixins.flex-column;
   gap: 1rem;
+  @include mixins.flex-column;
 }
 
 .faq-item {
-  @include glass.glass-medical-card();
   overflow: hidden;
   @include mixins.animation-scale-in(0.8s);
+  @include glass.glass-medical-card();
 }
 
 .faq-question {
-  @include mixins.flex-between;
-  @include ripple.medical-button-ripple();
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  @include mixins.flex-between;
+  @include ripple.medical-button-ripple();  
   
   &:hover {
     background: rgba(255, 255, 255, 0.1);

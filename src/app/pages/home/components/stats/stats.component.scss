@@ -3,13 +3,13 @@
 @use '../../styles/mixins' as mixins;
 
 .stats-section {
-  @include glass.glass-base(0.08, 20px, 0.15);
   border-radius: var(--border-radius-xl);
-  @include mixins.responsive-padding(2rem, 3rem, 4rem);
   margin-bottom: 4rem;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.15);
+  @include glass.glass-base(0.08, 20px, 0.15);
+  @include mixins.responsive-padding(2rem, 3rem, 4rem);
 }
 
 .stats-container {
@@ -26,22 +26,22 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  @include mixins.animation-scale-in(0.6s);
   transition: all 0.3s ease;
-  
+  @include mixins.animation-scale-in(0.6s);
+    
   &:hover {
     transform: translateY(-2px);
   }
 }
 
 .stat-icon {
-  @include mixins.flex-center;
   width: 56px;
   height: 56px;
-  @include glass.glass-base(0.2, 8px, 0.3);
   border-radius: 50%;
   transition: all 0.3s ease;
-  
+  @include mixins.flex-center;
+  @include glass.glass-base(0.2, 8px, 0.3);
+    
   &:hover {
     transform: scale(1.1);
     background: rgba(255, 255, 255, 0.25);

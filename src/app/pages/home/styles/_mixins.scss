@@ -13,8 +13,10 @@
 }
 
 @mixin flex-column {
-  display: flex;
-  flex-direction: column;
+  &{
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 @mixin flex-inline($gap: 1rem, $align: center, $justify: center) {
@@ -50,20 +52,28 @@
 }
 
 @mixin animation-fade-in-up($duration: 0.6s, $easing: cubic-bezier(0.4, 0, 0.2, 1)) {
-  animation: fadeInUp $duration $easing both;
+  &{
+    animation: fadeInUp $duration $easing both;
+  }
 }
 
 @mixin animation-slide-in-left($duration: 0.8s, $easing: cubic-bezier(0.4, 0, 0.2, 1)) {
-  animation: slideInLeft $duration $easing both;
+  &{
+    animation: slideInLeft $duration $easing both;
+  }
 }
 
 @mixin animation-scale-in($duration: 0.5s, $easing: cubic-bezier(0.4, 0, 0.2, 1)) {
-  animation: scaleIn $duration $easing both;
+  &{
+    animation: scaleIn $duration $easing both;
+  }
 }
 
 // Responsive mixins mejorados
 @mixin responsive-padding($mobile: 1rem, $tablet: 2rem, $desktop: 3rem) {
-  padding: $mobile;
+  &{
+    padding: $mobile;
+  }
   
   @media (min-width: 768px) {
     padding: $tablet;
