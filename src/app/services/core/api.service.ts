@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, ReplaySubject, throwError } from 'rxjs';
 import { catchError, switchMap, tap, shareReplay, map } from 'rxjs/operators';
+import { LoggerService } from './logger.service';
 
 /**
  * Service to handle HTTP requests to the backend API, encapsulating URL construction
@@ -16,7 +17,7 @@ export class ApiService {
   private uuidSubject = new ReplaySubject<string>(1);
   private uuid$ = this.uuidSubject.asObservable();
   private uuidLoaded$!: Observable<string>;
-
+  private readonly logger = inject(LoggerService);
   constructor(private http: HttpClient) {
     this.fetchUuid();
   }
@@ -30,7 +31,7 @@ export class ApiService {
       .get<{ id_prefix_api_secret: string }>(`${this.baseUrl}/id_prefix_api_secret/`)
       .pipe(
         tap((response) => {
-          console.log('UUID fetched:', response.id_prefix_api_secret);
+          this.logger.debug('UUID fetched:', response.id_prefix_api_secret);
           this.uuidSubject.next(response.id_prefix_api_secret);
         }),
         map((response) => response.id_prefix_api_secret),

@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable, of, throwError, from } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
@@ -18,10 +18,9 @@ import { TokenDoctorsResponse } from '../interfaces/doctor.interfaces';
 export class AuthService {
   constructor(
     private readonly apiService: ApiService,
-    private readonly logger: LoggerService,
     private readonly storage: StorageService
   ) {}
-
+  private readonly logger = inject(LoggerService);
   /**
    * Verifica si el usuario o doctor está autenticado.
    * @returns true si hay un token válido, false en caso contrario.
@@ -46,6 +45,54 @@ export class AuthService {
         catchError((error) => this.handleError('User Login', error))
       );
   }
+
+  /**
+   * Inicia el flujo de OAuth redirigiendo al endpoint de autorización.
+   * @param service Nombre del servicio (ej. 'google').
+   */
+  oauthLogin(service: string): void {
+    const url = `http://127.0.0.1:8000${AUTH_ENDPOINTS.OAUTH_LOGIN(service)}`;
+    this.logger.debug(`Redirigiendo a OAuth para ${service}: ${url}`);
+    window.location.href = url;
+  }
+
+  /**
+   * Intercambia el código de autorización por un access_token.
+   * @param code Código de autorización recibido en el callback.
+   * @returns Observable con la respuesta de autenticación (tokens).
+   */
+  exchangeCodeForToken(code: string): Observable<TokenUserResponse> {
+    const url = 'http://127.0.0.1:8000/api/oauth/google';
+    this.logger.debug(`Intercambiando código en: ${url}`);
+    return this.apiService.post<TokenUserResponse>(url, { code }).pipe(
+      tap((response) => {
+        this.logger.debug('Token recibido:', response.access_token);
+        this.storage.setAccessToken(response.access_token);
+        if (response.refresh_token) {
+          this.storage.setRefreshToken(response.refresh_token);
+        }
+      }),
+      catchError((error) => this.handleError('OAuth Code Exchange', error))
+    );
+  }
+
+  /**
+   * Almacena el access_token recibido en la URL.
+   * @param accessToken Token de acceso recibido.
+   * @returns Observable que completa si el token se almacena correctamente.
+   */
+  storeAccessToken(accessToken: string): Observable<void> {
+    this.logger.debug('Almacenando access_token:', accessToken);
+    this.storage.setAccessToken(accessToken);
+    const storedToken = this.storage.getAccessToken();
+    if (!storedToken) {
+      this.logger.error('No se pudo almacenar el access_token');
+      return throwError(() => new Error('No se pudo almacenar el access_token'));
+    }
+    this.logger.debug('Token almacenado correctamente:', storedToken);
+    return of(undefined);
+  }
+
 
   /**
    * Inicia sesión con las credenciales de un doctor.

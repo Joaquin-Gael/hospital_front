@@ -13,6 +13,7 @@ export interface UserRead {
   address?: string;
   telephone?: string;
   blood_type?: string;
+  img_profile?: string;
 }
 
 export interface UserCreate {
@@ -26,6 +27,7 @@ export interface UserCreate {
   blood_type: string;
   is_superuser?: boolean;
   is_admin?: boolean; 
+  img_profile?: string;
 }
 
 export interface UserUpdate {
@@ -35,15 +37,11 @@ export interface UserUpdate {
   address?: string;
   telephone?: string;
   password?: string;
+  img_profile?: string;
 }
 
 export interface UserDelete {
   id: string;
-  username: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  dni: string;
 }
 
 export interface TokenUserResponse {
@@ -51,6 +49,17 @@ export interface TokenUserResponse {
   user: UserRead;
   access_token: string;
   refresh_token: string;
+}
+
+export interface OAuthUserResponse extends TokenUserResponse {
+  id: number,
+  email: string,
+  verified_email: boolean,
+  name: string,
+  given_name: string,
+  family_name: string,
+  picture: string,
+  access_token: string,
 }
 
 export interface ScopesResponse {
