@@ -15,7 +15,7 @@ const LOG_LEVEL_PRIORITIES: Record<LogLevel, number> = {
   providedIn: 'root',
 })
 export class LoggerService {
-  private readonly APP_PREFIX = '[JifTubeApp]';
+  private readonly APP_PREFIX = '[HOSPITALSDLGAPP]';
   private readonly minLogLevel: LogLevel;
 
   constructor() {

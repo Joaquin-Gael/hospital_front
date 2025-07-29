@@ -1,6 +1,6 @@
 <div class="panel-ui" [ngClass]="{'panel-ui--sidebar-collapsed': isSidebarCollapsed, 'panel-ui--sidebar-mobile-open': isSidebarMobileOpen}">
   <div class="panel-ui__overlay" *ngIf="isSidebarMobileOpen" (click)="closeMobileSidebar()"></div>
-  
+
   <aside class="panel-ui__sidebar">
     <div class="panel-ui__sidebar-header">
       <div class="panel-ui__logo">
@@ -8,60 +8,63 @@
         <span class="panel-ui__logo-text">Hospital SDLG</span>
       </div>
       <button class="btn btn--icon panel-ui__sidebar-toggle" (click)="toggleSidebar()">
-        <span class="icon-menu-fold"></span>
+        <mat-icon>menu</mat-icon>
       </button>
     </div>
-    
+
     <nav class="panel-ui__nav">
       <ul class="panel-ui__menu">
         <li *ngFor="let item of menuItems" class="panel-ui__menu-item">
           <a 
-            [routerLink]="item.route" 
+            [routerLink]="item.route"
             routerLinkActive="panel-ui__menu-link--active"
             class="panel-ui__menu-link"
             (click)="navigateTo(item.route)"
           >
-            <span class="panel-ui__menu-icon" [ngClass]="item.icon"></span>
+            <mat-icon class="panel-ui__menu-icon" [ngClass]="item.icon"></mat-icon>
             <span class="panel-ui__menu-label">{{ item.label }}</span>
           </a>
         </li>
       </ul>
     </nav>
-    
+
     <div class="panel-ui__sidebar-footer">
       <div class="panel-ui__user">
         <div class="panel-ui__user-info">
           <button class="btn btn--text btn--sm panel-ui__logout" (click)="onLogout()">
-            <span class="icon-log-out"></span>
+            <mat-icon>logout</mat-icon>
             <span>Cerrar sesión</span>
           </button>
         </div>
       </div>
     </div>
   </aside>
-  
+
   <div class="panel-ui__main">
     <header class="panel-ui__header">
       <div class="panel-ui__header-left">
+        <button class="btn btn--icon panel-ui__mobile-menu" (click)="toggleMobileSidebar()">
+          <mat-icon>menu</mat-icon>
+        </button>
         <h1 class="panel-ui__title">Panel Médico</h1>
       </div>
-      
+
       <div class="panel-ui__header-right">
         <div class="panel-ui__search">
           <input type="text" placeholder="Buscar..." class="panel-ui__search-input">
-          <span class="panel-ui__search-icon icon-search"></span>
+          <mat-icon class="panel-ui__search-icon">search</mat-icon>
         </div>
         
         <button class="btn btn--icon">
-          <span class="icon-bell"></span>
+          <mat-icon>notifications</mat-icon>
         </button>
         
         <button class="btn btn--icon">
-          <span class="icon-help-circle"></span>
+          <mat-icon>help</mat-icon>
         </button>
       </div>
     </header>
-    
+
     <main class="panel-ui__content">
       <ng-content></ng-content>
     </main>

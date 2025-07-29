@@ -1,14 +1,19 @@
 @use '../styles/_variables.scss' as vars;
+@use '../../../layout/styles/_mixins.scss' as mixins;
+@use '../../../layout/styles/_media-queries.scss' as media;
 
 .medic-panel {
   height: 100vh;
   width: 100%;
+  background-color: vars.$background-color;
+  position: relative;
+  overflow: hidden;
 
   &__content {
-    display: flex;
-    flex-direction: column;
     height: 100%;
     width: 100%;
+    position: relative;
+    @include mixins.flex-column;  
   }
 
   &__dashboard {
@@ -16,55 +21,263 @@
     height: 100%;
     width: 100%;
 
-    @media (max-width: vars.$breakpoint-lg) {
+    @include media.desktop-only {
+      flex-direction: column;
+    }
+
+    @include media.tablet-only {
+      flex-direction: column;
+    }
+
+    @include media.mobile-only {
       flex-direction: column;
     }
   }
 
   &__main {
     flex: 1;
-    padding: vars.$spacing-6;
     overflow-y: auto;
+    background-color: vars.$background-color;
+    position: relative;
+    @include vars.scrollbar;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        vars.$primary-color, 
+        vars.$secondary-color, 
+        vars.$primary-color
+      );
+      z-index: 1;
+    }
   }
 
   &__sidebar {
     width: 320px;
     background-color: vars.$card-background;
     border-left: 1px solid vars.$border-color;
-    padding: vars.$spacing-6;
     overflow-y: auto;
+    @include vars.scrollbar;
 
-    @media (max-width: vars.$breakpoint-lg) {
+    @include media.desktop-only {
       width: 100%;
       border-left: none;
       border-top: 1px solid vars.$border-color;
+      max-height: 400px;
+    }
+
+    @include media.tablet-only {
+      width: 100%;
+      border-left: none;
+      border-top: 1px solid vars.$border-color;
+      max-height: 350px;
+    }
+
+    @include media.mobile-only {
+      width: 100%;
+      border-left: none;
+      border-top: 1px solid vars.$border-color;
+      max-height: 300px;
     }
   }
 
   &__section {
-    background-color: vars.$card-background;
-    border-radius: vars.$border-radius-lg;
-    box-shadow: vars.$shadow-sm;
-    padding: vars.$spacing-6;
     margin-bottom: vars.$spacing-6;
+    animation: slideInUp 0.6s ease-out;
+    @include vars.card;
+    @include vars.responsive-padding;
+    
+    @include media.mobile-only {
+      margin-bottom: vars.$spacing-4;
+    }
   }
 
   &__section-container {
     flex: 1;
-    padding: vars.$spacing-6;
     overflow-y: auto;
     height: 100%;
     width: 100%;
+    @include vars.scrollbar;
   }
 
   &__actions {
     margin-top: vars.$spacing-6;
+    flex-wrap: wrap;
+    @include mixins.flex-inline(vars.$spacing-3);
+
+    @include media.mobile-only {
+      gap: vars.$spacing-2;
+      margin-top: vars.$spacing-4;
+      @include mixins.flex-column;   
+    }
+  }
+}
+
+// Loading states
+.loading-spinner {
+  height: 100vh;
+  background-color: vars.$background-color;
+  @include mixins.flex-center;
+  @include mixins.flex-column;
+
+  &::before {
+    content: '';
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(vars.$primary-color, 0.3);
+    border-top-color: vars.$primary-color;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: vars.$spacing-4;
+
+    @include media.mobile-only {
+      width: 50px;
+      height: 50px;
+      border-width: 3px;
+    }
+  }
+
+  p {
+    color: vars.$text-secondary;
+    font-size: vars.$font-size-md;
+    font-weight: 500;
+    margin: 0;
+
+    @include media.mobile-only {
+      font-size: vars.$font-size-sm;
+    }
+  }
+}
+
+// Error states
+.error-message {
+  height: 100vh;
+  background-color: vars.$background-color;
+  padding: vars.$spacing-8;
+  text-align: center;
+  @include mixins.flex-center;
+  @include mixins.flex-column;
+
+  @include media.mobile-only {
+    padding: vars.$spacing-6;
+  }
+
+  &::before {
+    content: '⚠️';
+    font-size: 4rem;
+    margin-bottom: vars.$spacing-4;
+    opacity: 0.7;
+
+    @include media.mobile-only {
+      font-size: 3rem;
+      margin-bottom: vars.$spacing-3;
+    }
+  }
+
+  &::after {
+    content: attr(data-error);
+    color: vars.$danger-color;
+    font-size: vars.$font-size-lg;
+    font-weight: 600;
+    background-color: rgba(vars.$danger-color, 0.1);
+    padding: vars.$spacing-4;
+    border-radius: vars.$border-radius-lg;
+    border: 1px solid rgba(vars.$danger-color, 0.2);
+    max-width: 500px;
+
+    @include media.mobile-only {
+      font-size: vars.$font-size-md;
+      padding: vars.$spacing-3;
+    }
   }
 }
 
 .section-title {
-  font-size: vars.$font-size-xl;
-  font-weight: 600;
+  font-size: vars.$font-size-2xl;
+  font-weight: 700;
   color: vars.$text-primary;
-  margin-bottom: vars.$spacing-4;
+  margin-bottom: vars.$spacing-6;
+  position: relative;
+  padding-bottom: vars.$spacing-3;
+
+  @include media.mobile-only {
+    font-size: vars.$font-size-xl;
+    margin-bottom: vars.$spacing-4;
+    padding-bottom: vars.$spacing-2;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, vars.$primary-color, vars.$secondary-color);
+    border-radius: vars.$border-radius-full;
+
+    @include media.mobile-only {
+      width: 40px;
+      height: 2px;
+    }
+  }
+}
+
+// Animations
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive utilities
+@include media.mobile-only {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@include media.tablet-up {
+  .show-mobile-only {
+    display: none !important;
+  }
+}
+
+// Accessibility improvements
+@include media.reduce-motion {
+  .medic-panel {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@include media.high-contrast {
+  .medic-panel {
+    &__section {
+      border: 2px solid vars.$text-primary;
+    }
+    
+    .section-title {
+      border-bottom: 2px solid vars.$text-primary;
+    }
+  }
 }

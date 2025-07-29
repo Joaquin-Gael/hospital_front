@@ -1,75 +1,277 @@
 <div class="doctor-profile">
   <!-- Error message -->
-  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <div *ngIf="state.error" class="error-message">{{ state.error }}</div>
 
-  <!-- Profile content -->
-  <div class="doctor-profile__content" *ngIf="doctor">
-    <div class="doctor-profile__avatar">
-      <span class="doctor-profile__avatar-initials">{{ getInitials() }}</span>
-      <div
-        class="doctor-profile__status-indicator"
-        [ngClass]="getStatusClass()">
-      </div>
-    </div>
-
-    <div class="doctor-profile__info">
-      <h1 class="doctor-profile__name">
-        Dr. {{ doctor.first_name }} {{ doctor.last_name }}
-      </h1>
-      <!--
-      <p class="doctor-profile__specialty">
-        {{ doctor.speciality_id || 'Especialidad no disponible' }}
-      </p>
-      -->
-      <p class="doctor-profile__license">
-        DNI: {{ doctor.dni || 'No disponible' }}
-      </p>
-
-      <div class="doctor-profile__status">
-        <span class="status-badge" [ngClass]="getStatusClass()">
-          {{ getStatusLabel() }}
-        </span>
-      </div>
-    </div>
-
-    <div class="doctor-profile__actions">
-      <button
-        class="btn btn--outline"
-        (click)="updateStatus('available')"
-        [disabled]="getStatusClass() === 'status-badge--available'">
-        Disponible
-      </button>
-      <button
-        class="btn btn--outline"
-        (click)="updateStatus('busy')"
-        [disabled]="getStatusClass() === 'status-badge--available'">
-        En consulta
-      </button>
-      <button
-        class="btn btn--outline"
-        (click)="updateStatus('offline')"
-        [disabled]="getStatusClass() === 'status-badge--offline'">
-        Fuera de servicio
-      </button>
-    </div>
-
-    <!--
-    <div class="doctor-profile__schedules" *ngIf="schedules?.length">
-      <h2 class="section-title">Horarios</h2>
-      <ul class="schedule-list">
-        <li *ngFor="let schedule of schedules" class="schedule-item">
-          {{ schedule.day }}: {{ schedule.start_time }} - {{ schedule.end_time }}
-        </li>
-      </ul>
-    </div>
-    <div *ngIf="!schedules?.length" class="no-schedules">
-      No hay horarios asignados.
-    </div>
+  <!-- Loading state -->
+  <div *ngIf="!doctor && !state.error && state.isLoading" class="doctor-profile__loading">
+    <div class="loading-spinner"></div>
+    <p>Cargando información del doctor...</p>
   </div>
-  -->
+
+  <!-- Dashboard content -->
+  <div class="doctor-profile__dashboard" *ngIf="doctor && !state.error">
+    
+    <!-- Welcome Section -->
+    <section class="doctor-profile__welcome">
+      <div class="welcome-card">
+        <div class="welcome-card__content">
+          <div class="welcome-card__header">
+            <h1 class="welcome-card__title">¡Bienvenido de vuelta!</h1>
+            <p class="welcome-card__subtitle">Dr. {{ doctor.first_name }} {{ doctor.last_name }}</p>
+            <p class="welcome-card__date">{{ getCurrentDate() }}</p>
+          </div>
+          
+          <div class="welcome-card__status">
+            <div class="status-indicator" [ngClass]="getStatusClass()"></div>
+            <span class="status-text">{{ getStatusLabel() }}</span>
+          </div>
+        </div>
+
+        <div class="welcome-card__avatar">
+          <div class="doctor-profile__avatar">
+            <span class="doctor-profile__avatar-initials">{{ getInitials() }}</span>
+            <div class="doctor-profile__status-indicator" [ngClass]="getStatusClass()"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Stats -->
+    <section class="doctor-profile__stats">
+      <div class="stats-grid">
+        <div class="stat-card stat-card--patients">
+          <div class="stat-card__icon">
+            <mat-icon>people</mat-icon>
+          </div>
+          <div class="stat-card__content">
+            <h3 class="stat-card__number">{{ todayStats.patients }}</h3>
+            <p class="stat-card__label">Pacientes hoy</p>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--appointments">
+          <div class="stat-card__icon">
+            <mat-icon>calendar_today</mat-icon>
+          </div>
+          <div class="stat-card__content">
+            <h3 class="stat-card__number">{{ todayStats.appointments }}</h3>
+            <p class="stat-card__label">Citas programadas</p>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--completed">
+          <div class="stat-card__icon">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <div class="stat-card__content">
+            <h3 class="stat-card__number">{{ todayStats.completed }}</h3>
+            <p class="stat-card__label">Completadas</p>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--pending">
+          <div class="stat-card__icon">
+            <mat-icon>schedule</mat-icon>
+          </div>
+          <div class="stat-card__content">
+            <h3 class="stat-card__number">{{ todayStats.pending }}</h3>
+            <p class="stat-card__label">Pendientes</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Dashboard Grid -->
+    <section class="doctor-profile__main">
+      <div class="dashboard-grid">
+        
+        <!-- Doctor Info Card -->
+        <div class="dashboard-card dashboard-card--info">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title">Mi Información</h2>
+            <button class="btn btn--text btn--sm" (click)="onEditProfile()">
+              <mat-icon>edit</mat-icon>
+              Editar
+            </button>
+          </div>
+          <div class="dashboard-card__content">
+            <div class="doctor-info">
+              <div class="doctor-info__item">
+                <span class="doctor-info__label">Especialidad:</span>
+                <span class="doctor-info__value">{{ doctor.speciality_id || 'No especificada' }}</span>
+              </div>
+              <div class="doctor-info__item">
+                <span class="doctor-info__label">DNI:</span>
+                <span class="doctor-info__value">{{ doctor.dni || 'No disponible' }}</span>
+              </div>
+              <div class="doctor-info__item">
+                <span class="doctor-info__label">Teléfono:</span>
+                <span class="doctor-info__value">{{ doctor.telephone || 'No disponible' }}</span>
+              </div>
+              <div class="doctor-info__item">
+                <span class="doctor-info__label">Email:</span>
+                <span class="doctor-info__value">{{ doctor.email }}</span>
+              </div>
+              <div class="doctor-info__item">
+                <span class="doctor-info__label">Estado:</span>
+                <span class="status-badge" [ngClass]="getStatusClass()">
+                  {{ getStatusLabel() }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Control -->
+        <div class="dashboard-card dashboard-card--status">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title">Control de Estado</h2>
+          </div>
+          <div class="dashboard-card__content">
+            <div class="status-controls">
+              <p class="status-controls__description">
+                Cambia tu estado de disponibilidad para que los pacientes sepan cuándo pueden contactarte.
+              </p>
+              
+              <div class="status-buttons">
+                <button
+                  class="status-btn status-btn--available"
+                  [class.status-btn--active]="getStatusClass() === 'status-badge--available'"
+                  (click)="updateStatus(DoctorStatus.AVAILABLE)"
+                  [disabled]="getStatusClass() === 'status-badge--available'">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Disponible</span>
+                </button>
+                
+                <button
+                  class="status-btn status-btn--busy"
+                  [class.status-btn--active]="getStatusClass() === 'status-badge--busy'"
+                  (click)="updateStatus(DoctorStatus.BUSY)"
+                  [disabled]="getStatusClass() === 'status-badge--busy'">
+                  <mat-icon>schedule</mat-icon>
+                  <span>En consulta</span>
+                </button>
+                
+                <button
+                  class="status-btn status-btn--offline"
+                  [class.status-btn--active]="getStatusClass() === 'status-badge--offline'"
+                  (click)="updateStatus(DoctorStatus.OFFLINE)"
+                  [disabled]="getStatusClass() === 'status-badge--offline'">
+                  <mat-icon>remove_circle</mat-icon>
+                  <span>Fuera de servicio</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Today's Schedule -->
+        <div class="dashboard-card dashboard-card--schedule">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title">Horarios de Hoy</h2>
+            <button class="btn btn--text btn--sm">
+              <mat-icon>calendar_today</mat-icon>
+              Ver agenda
+            </button>
+          </div>
+          <div class="dashboard-card__content">
+            <div class="schedule-list" *ngIf="schedules && schedules.length > 0; else noSchedule">
+              <div *ngFor="let schedule of schedules" class="schedule-item">
+                <div class="schedule-item__day">
+                  <span class="day-text">{{ schedule.day }}</span>
+                </div>
+                <div class="schedule-item__time">
+                  <span class="time-text">{{ schedule.start_time }} - {{ schedule.end_time }}</span>
+                </div>
+                <div class="schedule-item__status">
+                  <span class="schedule-badge schedule-badge--active">Activo</span>
+                </div>
+              </div>
+            </div>
+            <ng-template #noSchedule>
+              <div class="empty-state">
+                <mat-icon>event_busy</mat-icon>
+                <p>No hay horarios asignados</p>
+                <button class="btn btn--outline btn--sm">Solicitar horarios</button>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-card dashboard-card--actions">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title">Acciones Rápidas</h2>
+          </div>
+          <div class="dashboard-card__content">
+            <div class="quick-actions">
+              <button class="quick-action-btn quick-action-btn--primary">
+                <mat-icon>person_add</mat-icon>
+                <span>Nuevo Paciente</span>
+              </button>
+              <button class="quick-action-btn quick-action-btn--secondary">
+                <mat-icon>event</mat-icon>
+                <span>Agendar Cita</span>
+              </button>
+              <button class="quick-action-btn quick-action-btn--tertiary">
+                <mat-icon>note_add</mat-icon>
+                <span>Crear Historial</span>
+              </button>
+              <button class="quick-action-btn quick-action-btn--quaternary">
+                <mat-icon>chat</mat-icon>
+                <span>Mensajes</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-card dashboard-card--activity">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title">Actividad Reciente</h2>
+            <button class="btn btn--text btn--sm">Ver todo</button>
+          </div>
+          <div class="dashboard-card__content">
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-item__icon activity-item__icon--success">
+                  <mat-icon>check</mat-icon>
+                </div>
+                <div class="activity-item__content">
+                  <p class="activity-item__text">Consulta completada con María González</p>
+                  <span class="activity-item__time">Hace 30 minutos</span>
+                </div>
+              </div>
+              
+              <div class="activity-item">
+                <div class="activity-item__icon activity-item__icon--info">
+                  <mat-icon>event</mat-icon>
+                </div>
+                <div class="activity-item__content">
+                  <p class="activity-item__text">Nueva cita programada para mañana</p>
+                  <span class="activity-item__time">Hace 1 hora</span>
+                </div>
+              </div>
+              
+              <div class="activity-item">
+                <div class="activity-item__icon activity-item__icon--warning">
+                  <mat-icon>description</mat-icon>
+                </div>
+                <div class="activity-item__content">
+                  <p class="activity-item__text">Historial médico actualizado</p>
+                  <span class="activity-item__time">Hace 2 horas</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <!-- No doctor data -->
-  <div *ngIf="!doctor" class="no-data">
-    No se encontraron datos del doctor.
+  <div *ngIf="!doctor && !state.error && !state.isLoading" class="no-data">
+    <span class="no-data__icon">👨‍⚕️</span>
+    <p>No se encontraron datos del doctor.</p>
   </div>
 </div>

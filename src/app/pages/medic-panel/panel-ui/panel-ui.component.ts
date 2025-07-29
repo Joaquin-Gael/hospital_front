@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 
 interface MenuItem {
   label: string;
@@ -14,7 +15,7 @@ interface MenuItem {
   templateUrl: './panel-ui.component.html',
   styleUrls: ['./panel-ui.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MatIconModule],
 })
 export class PanelUiComponent implements OnInit {
   private readonly router = inject(Router);
@@ -24,13 +25,21 @@ export class PanelUiComponent implements OnInit {
   screenWidth = window.innerWidth;
 
   menuItems: MenuItem[] = [
-    { label: 'Panel', icon: 'icon-dashboard', route: 'medic_panel/home' },
-    { label: 'Pacientes', icon: 'icon-users', route: 'medic_panel/patients' },
-    { label: 'Agenda', icon: 'icon-calendar', route: 'medic_panel/appointments' },
-    { label: 'Historiales', icon: 'icon-file-text', route: 'medic_panel/history' },
-    { label: 'Mensajes', icon: 'icon-message-circle', route: 'medic_panel/messages' },
-    { label: 'Estadísticas', icon: 'icon-bar-chart', route: 'medic_panel/statistics' },
-    { label: 'Configuración', icon: 'icon-settings', route: 'medic_panel/settings' },
+    { label: 'Panel', icon: 'dashboard', route: 'medic_panel/home' },
+    { label: 'Pacientes', icon: 'people', route: 'medic_panel/patients' },
+    {
+      label: 'Agenda',
+      icon: 'calendar_today',
+      route: 'medic_panel/appointments',
+    },
+    { label: 'Historiales', icon: 'description', route: 'medic_panel/history' },
+    { label: 'Mensajes', icon: 'chat', route: 'medic_panel/messages' },
+    {
+      label: 'Estadísticas',
+      icon: 'bar_chart',
+      route: 'medic_panel/statistics',
+    },
+    { label: 'Configuración', icon: 'settings', route: 'medic_panel/settings' },
   ];
 
   @HostListener('window:resize', ['$event'])

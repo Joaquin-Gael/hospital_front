@@ -9,6 +9,7 @@ import { StorageService } from '../../../services/core/storage.service';
 import { AuthService } from '../../../services/auth/auth.service';
 import { DoctorMeResponse } from '../../../services/interfaces/doctor.interfaces';
 import { PanelUiComponent } from '../panel-ui/panel-ui.component';
+import { DoctorDataService } from './doctor-data.service'; 
 
 @Component({
   selector: 'app-medic-panel',
@@ -23,6 +24,7 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
   private readonly logger = inject(LoggerService);
   private readonly storageService = inject(StorageService);
   private readonly router = inject(Router);
+  private readonly doctorDataService = inject(DoctorDataService); 
 
   error: string | null = null;
   loading = true;
@@ -45,6 +47,8 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
           this.router.navigate(['/home']);
           return;
         }
+        this.doctorDataService.setDoctor(response.doc);
+        this.doctorDataService.setSchedules(response.schedules || []); 
         this.logger.info('Doctor data loaded', { doctorId: response.doc.id });
       },
       error: (err) => {

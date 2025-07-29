@@ -14,8 +14,8 @@ $shadow-heavy: rgba(0, 0, 0, 0.25);
 $transition-speed: 0.3s;
 
 // Variables específicas para navegación mejoradas
-$navbar-primary: #6366f1;
-$navbar-primary-hover: #8b5cf6;
+$navbar-primary: hsl(195, 85%, 45%);   
+$navbar-primary-hover: hsl(195, 85%, 55%);  
 $navbar-secondary: #64748b;
 $navbar-background: #ffffff;
 $navbar-text: #374151;
@@ -40,9 +40,9 @@ $navbar-badge-size: 20px;
 $navbar-dropdown-width: 300px;
 
 // Estados y efectos mejorados
-$navbar-hover-bg: rgba(99, 102, 241, 0.08);
-$navbar-active-bg: rgba(99, 102, 241, 0.12);
-$navbar-focus-color: #6366f1;
+$navbar-hover-bg: hsla(195, 85%, 45%, 0.08);
+$navbar-active-bg: hsla(195, 85%, 45%, 0.12);
+$navbar-focus-color: hsl(195, 85%, 45%);
 $navbar-danger-color: #ef4444;
 $navbar-danger-hover: #dc2626;
 $navbar-success-color: #10b981;

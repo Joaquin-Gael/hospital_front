@@ -84,6 +84,78 @@
   padding: $spacing-xl;
 }
 
+// Botón de Google con diseño oficial
+.google-btn {
+  width: 100%;
+  height: 48px;
+  background-color: $white;
+  border: $border-width solid $gray-300;
+  border-radius: $border-radius;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: $transition;
+  font-family: $font-family;
+  font-size: $font-size-base;
+  font-weight: 500;
+  color: $gray-700;
+  margin-bottom: $spacing-lg;
+  position: relative;
+  overflow: hidden;
+  
+  &:hover {
+    background-color: $gray-50;
+    border-color: $gray-400;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+  }
+  
+  &:active {
+    background-color: $gray-100;
+    transform: translateY(1px);
+  }
+  
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  &__text {
+    font-weight: 500;
+    letter-spacing: 0.25px;
+  }
+}
+
+// Separador elegante
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: $spacing-lg 0;
+  
+  &__line {
+    flex: 1;
+    height: 1px;
+    background-color: $gray-200;
+  }
+  
+  &__text {
+    padding: 0 $spacing-md;
+    font-size: $font-size-sm;
+    color: $gray-500;
+    font-weight: 500;
+    background-color: $white;
+  }
+}
+
 .form-group {
   margin-bottom: $spacing-lg;
 }

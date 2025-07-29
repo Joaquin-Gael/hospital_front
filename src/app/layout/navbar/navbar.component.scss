@@ -19,7 +19,7 @@
   &.scrolled {
     height: var.$navbar-mobile-height;
     background: rgba(255, 255, 255, 0.98);
-    border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+    border-bottom: 1px solid hsla(195, 85%, 45%, 0.15);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
     
     .navbar-links {
@@ -112,7 +112,7 @@
           left: 0;
           right: 0;
           bottom: 0;
-          background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+          background: linear-gradient(135deg, hsla(195, 85%, 45%, 0.1) 0%, hsla(195, 85%, 55%, 0.1) 100%);
           border-radius: var.$navbar-radius;
           z-index: -1;
           animation: pulse-border 0.6s ease-out;
@@ -123,7 +123,7 @@
         color: var.$navbar-primary;
         font-weight: var.$font-weight-semibold;
         background: var.$navbar-active-bg;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        box-shadow: 0 4px 12px hsla(195, 85%, 45%, 0.2);
         
         &::after {
           content: '';
@@ -135,7 +135,7 @@
           height: 3px;
           background: linear-gradient(90deg, var.$navbar-primary 0%, var.$navbar-primary-hover 100%);
           border-radius: 2px;
-          box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+          box-shadow: 0 2px 8px hsla(195, 85%, 45%, 0.3);
         }
       }
     }
