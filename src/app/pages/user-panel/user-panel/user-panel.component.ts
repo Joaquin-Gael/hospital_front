@@ -143,7 +143,7 @@ export class UserPanelComponent implements OnInit, OnDestroy {
     });
   }
 
-  onCancelAppointment(turnId: number): void {
+  onCancelAppointment(turnId: string): void {
     if (!this.user) {
       this.logger.error('No user data for cancel appointment');
       return;
@@ -157,7 +157,7 @@ export class UserPanelComponent implements OnInit, OnDestroy {
     });
   }
 
-  onRescheduleAppointment(appointmentId: number): void {
+  onRescheduleAppointment(appointmentId: string): void {
     this.logger.info('Reschedule requested', { appointmentId });
     // TODO: Implementar reprogramación (ej. eliminar turno actual y crear uno nuevo)
   }

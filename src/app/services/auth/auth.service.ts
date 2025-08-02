@@ -8,10 +8,11 @@ import { AUTH_ENDPOINTS } from './auth-endpoints';
 import {
   TokenUserResponse,
   ScopesResponse,
-  UserRead,
+  UserRead, DecodeResponse
 } from '../interfaces/user.interfaces';
 import { Auth } from '../interfaces/hospital.interfaces';
 import { TokenDoctorsResponse } from '../interfaces/doctor.interfaces';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly storage: StorageService
   ) {}
   private readonly logger = inject(LoggerService);
+
   /**
    * Verifica si el usuario o doctor está autenticado.
    * @returns true si hay un token válido, false en caso contrario.
@@ -77,6 +79,22 @@ export class AuthService {
   }
 
   /**
+   * Decodifica el código secreto para obtener el access_token.
+   * @param code Código secreto recibido en el query param 'a'.
+   * @returns Observable con la respuesta de autenticación (access_token).
+   */
+  decode(code: string): Observable<DecodeResponse> {
+    this.logger.debug('Decodificando código secreto');
+    return this.apiService.post<DecodeResponse>(AUTH_ENDPOINTS.DECODE, { code }).pipe(
+      tap((response) => {
+        this.logger.debug('Access token recibido:', response.access_token);
+        this.storage.setAccessToken(response.access_token);
+      }),
+      catchError((error) => this.handleError('Decode Code', error))
+    );
+  }
+
+  /**
    * Almacena el access_token recibido en la URL.
    * @param accessToken Token de acceso recibido.
    * @returns Observable que completa si el token se almacena correctamente.
@@ -92,7 +110,6 @@ export class AuthService {
     this.logger.debug('Token almacenado correctamente:', storedToken);
     return of(undefined);
   }
-
 
   /**
    * Inicia sesión con las credenciales de un doctor.

@@ -51,15 +51,8 @@ export interface TokenUserResponse {
   refresh_token: string;
 }
 
-export interface OAuthUserResponse extends TokenUserResponse {
-  id: number,
-  email: string,
-  verified_email: boolean,
-  name: string,
-  given_name: string,
-  family_name: string,
-  picture: string,
-  access_token: string,
+export interface DecodeResponse {
+  access_token: string;
 }
 
 export interface ScopesResponse {

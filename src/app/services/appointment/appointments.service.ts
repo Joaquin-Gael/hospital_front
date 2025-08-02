@@ -31,22 +31,61 @@ export class AppointmentService {
   }
 
   /**
-   * Crea un nuevo turno (y cita asociada).
-   * @param turn Datos del turno a crear.
-   * @returns Observable con el turno creado.
+   * Obtiene la lista de turnos.
+   * @returns Observable con la lista de turnos.
    */
-  createTurn(turn: TurnCreate): Observable<Turn> {
-    return this.apiService.post<Turn>(APPOINTMENT_ENDPOINTS.CREATE_TURN, turn).pipe(
+  getTurns(): Observable<Turn[]> {
+    this.logger.debug('Obteniendo lista de turnos');
+    return this.apiService.get<Turn[]>(APPOINTMENT_ENDPOINTS.GET_TURNS).pipe(
+      map((response) => response || []),
+      catchError((error) => this.handleError('Error fetching turns', error))
+    );
+  }
+
+  /**
+   * Obtiene los turnos de un usuario específico.
+   * @param userId ID del usuario.
+   * @returns Observable con la lista de turnos del usuario.
+   */
+  getTurnsByUserId(userId: string): Observable<Turn[]> {
+    this.logger.debug(`Obteniendo turnos para el usuario: ${userId}`);
+    return this.apiService.get<Turn[]>(APPOINTMENT_ENDPOINTS.GET_BY_ID(userId)).pipe(
+      map((response) => response || []),
+      catchError((error) => this.handleError(`Error fetching turns for user ${userId}`, error))
+    );
+  }
+
+  /**
+   * Obtiene un turno específico por su ID.
+   * @param turnId ID del turno.
+   * @returns Observable con los datos del turno.
+   */
+  getTurnById(turnId: string): Observable<Turn> {
+    this.logger.debug(`Obteniendo turno con ID: ${turnId}`);
+    return this.apiService.get<Turn>(APPOINTMENT_ENDPOINTS.GET_TURN(turnId)).pipe(
+      catchError((error) => this.handleError(`Error fetching turn ${turnId}`, error))
+    );
+  }
+
+  /**
+   * Crea un nuevo turno.
+   * @param turnData Datos del turno a crear.
+   * @returns Observable con los datos del turno creado.
+   */
+  createTurn(turnData: TurnCreate): Observable<Turn> {
+    this.logger.debug('Creando nuevo turno', turnData);
+    return this.apiService.post<Turn>(APPOINTMENT_ENDPOINTS.CREATE_TURN, turnData).pipe(
       catchError((error) => this.handleError('Error creating turn', error))
     );
   }
 
   /**
-   * Elimina un turno existente.
+   * Elimina un turno específico.
    * @param turnId ID del turno a eliminar.
-   * @returns Observable con la respuesta de eliminación.
+   * @returns Observable que completa al eliminar el turno.
    */
-  deleteTurn(turnId: number): Observable<TurnDelete> {
+  deleteTurn(turnId: string): Observable<TurnDelete> {
+    this.logger.debug(`Eliminando turno con ID: ${turnId}`);
     return this.apiService.delete<TurnDelete>(APPOINTMENT_ENDPOINTS.DELETE_TURN(turnId)).pipe(
       catchError((error) => this.handleError(`Error deleting turn ${turnId}`, error))
     );

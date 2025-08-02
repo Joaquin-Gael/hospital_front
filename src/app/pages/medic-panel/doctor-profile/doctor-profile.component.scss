@@ -15,10 +15,10 @@
   }
 
   &__loading {
-    @include mixins.flex-center;
-    @include mixins.flex-column;
     height: 60vh;
     gap: vars.$spacing-4;
+    @include mixins.flex-center;
+    @include mixins.flex-column;
 
     p {
       color: vars.$text-secondary;
@@ -51,10 +51,10 @@
 
   &__avatar {
     position: relative;
-    @include mixins.avatar(100px);
     background: linear-gradient(135deg, vars.$primary-color, vars.$secondary-color);
     flex-shrink: 0;
     transition: transform vars.$transition-normal;
+    @include mixins.avatar(100px);
 
     @include media.tablet-only {
       @include mixins.avatar(80px);
@@ -117,13 +117,13 @@
 
 // Welcome Card
 .welcome-card {
-  @include vars.card;
-  @include mixins.flex-between;
   padding: vars.$spacing-8;
   background: linear-gradient(135deg, vars.$primary-color 0%, vars.$secondary-color 100%);
   color: white;
   position: relative;
   overflow: hidden;
+  @include vars.card;
+  @include mixins.flex-between;
 
   @include media.tablet-only {
     padding: vars.$spacing-6;
@@ -203,9 +203,9 @@
   }
 
   &__status {
-    @include mixins.flex-inline(vars.$spacing-2);
     font-size: vars.$font-size-md;
     font-weight: 500;
+    @include mixins.flex-inline(vars.$spacing-2);
   }
 
   &__avatar {
@@ -260,10 +260,10 @@
 }
 
 .stat-card {
-  @include vars.card;
-  @include mixins.flex-inline(vars.$spacing-4);
   padding: vars.$spacing-6;
   transition: all vars.$transition-normal;
+  @include vars.card;
+  @include mixins.flex-inline(vars.$spacing-4);
 
   @include media.mobile-only {
     padding: vars.$spacing-4;
@@ -278,8 +278,8 @@
     width: 60px;
     height: 60px;
     border-radius: vars.$border-radius-lg;
-    @include mixins.flex-center;
     flex-shrink: 0;
+    @include mixins.flex-center;
 
     @include media.mobile-only {
       width: 50px;
@@ -368,9 +368,9 @@
 }
 
 .dashboard-card {
-  @include vars.card;
   padding: 0;
   overflow: hidden;
+  @include vars.card;
 
   &--info {
     grid-area: info;
@@ -393,10 +393,10 @@
   }
 
   &__header {
-    @include mixins.flex-between;
     padding: vars.$spacing-6;
     border-bottom: 1px solid vars.$border-color;
     background-color: rgba(vars.$background-color, 0.5);
+    @include mixins.flex-between;
 
     @include media.mobile-only {
       padding: vars.$spacing-4;
@@ -430,15 +430,15 @@
   gap: vars.$spacing-4;
 
   &__item {
-    @include mixins.flex-between;
     padding: vars.$spacing-3;
     border-radius: vars.$border-radius-md;
     background-color: rgba(vars.$background-color, 0.5);
+    @include mixins.flex-between;
 
     @include media.mobile-only {
-      @include mixins.flex-column;
       align-items: flex-start;
       gap: vars.$spacing-1;
+      @include mixins.flex-column;
     }
   }
 
@@ -472,7 +472,6 @@
 }
 
 .status-btn {
-  @include mixins.flex-inline(vars.$spacing-3);
   padding: vars.$spacing-4;
   border-radius: vars.$border-radius-lg;
   border: 2px solid vars.$border-color;
@@ -481,6 +480,7 @@
   cursor: pointer;
   transition: all vars.$transition-normal;
   font-weight: 500;
+  @include mixins.flex-inline(vars.$spacing-3);
 
   @include media.mobile-only {
     padding: vars.$spacing-3;
@@ -536,16 +536,16 @@
 }
 
 .schedule-item {
-  @include mixins.flex-inline(vars.$spacing-4);
   padding: vars.$spacing-4;
   border-radius: vars.$border-radius-md;
   border: 1px solid vars.$border-color;
   transition: all vars.$transition-fast;
+  @include mixins.flex-inline(vars.$spacing-4);
 
   @include media.mobile-only {
-    @include mixins.flex-column;
     gap: vars.$spacing-2;
     padding: vars.$spacing-3;
+    @include mixins.flex-column;
   }
 
   &:hover {
@@ -617,8 +617,6 @@
 }
 
 .quick-action-btn {
-  @include mixins.flex-inline(vars.$spacing-2, center, center);
-  @include mixins.flex-column;
   padding: vars.$spacing-5;
   border-radius: vars.$border-radius-lg;
   border: none;
@@ -626,6 +624,8 @@
   transition: all vars.$transition-normal;
   text-decoration: none;
   font-weight: 500;
+  @include mixins.flex-inline(vars.$spacing-2, center, center);
+  @include mixins.flex-column;
 
   @include media.mobile-only {
     padding: vars.$spacing-4;
@@ -674,21 +674,21 @@
 }
 
 .activity-item {
-  @include mixins.flex-inline(vars.$spacing-3);
   padding: vars.$spacing-3;
   border-radius: vars.$border-radius-md;
   transition: all vars.$transition-fast;
+  @include mixins.flex-inline(vars.$spacing-3);
 
   &:hover {
     background-color: rgba(vars.$background-color, 0.5);
   }
 
   &__icon {
-    @include mixins.flex-center;
     width: 32px;
     height: 32px;
     border-radius: 50%;
     flex-shrink: 0;
+    @include mixins.flex-center;
 
     span {
       font-size: 0.875rem;
@@ -757,11 +757,11 @@
 
 // Empty States
 .empty-state {
-  @include mixins.flex-center;
-  @include mixins.flex-column;
   padding: vars.$spacing-8;
   color: vars.$text-secondary;
   text-align: center;
+  @include mixins.flex-center;
+  @include mixins.flex-column;
 
   @include media.mobile-only {
     padding: vars.$spacing-6;
@@ -785,11 +785,11 @@
 }
 
 .no-data {
-  @include mixins.flex-center;
-  @include mixins.flex-column;
   padding: vars.$spacing-8;
   color: vars.$text-secondary;
   text-align: center;
+  @include mixins.flex-center;
+  @include mixins.flex-column;
 
   @include media.mobile-only {
     padding: vars.$spacing-6;
@@ -814,9 +814,9 @@
 
 // Button Styles
 .btn {
-  @include mixins.button-base;
   transition: all vars.$transition-normal;
-
+  @include mixins.button-base;
+  
   &--text {
     color: vars.$primary-color;
     background: none;

@@ -1,8 +1,8 @@
 export interface Appointment {
-  id: number;
-  user_id: number;
+  id: string;
+  user_id: string;
   doctor_id: string; // UUID
-  turn_id: number;
+  turn_id: string;
   service_id: string; // UUID
   date: string; // ISO 8601, e.g., "2025-04-22T10:00:00"
   date_created: string; // ISO 8601
@@ -11,15 +11,15 @@ export interface Appointment {
 }
 
 export interface Turn {
-  id: number;
+  id: string;
   reason: string;
   state: TurnState;
   date: string; // ISO 8601
   date_limit: string; // ISO 8601
   date_created: string; // ISO 8601
-  user_id: number;
+  user_id: string;
   doctor_id: string; // UUID
-  appointment_id: number;
+  appointment_id: string;
   service_id: string; // UUID
 }
 
@@ -29,12 +29,12 @@ export interface TurnCreate {
   date: string; // ISO 8601
   date_limit: string; // ISO 8601
   doctor_id: string; // UUID
-  appointment_id?: number;
+  appointment_id?: string;
   service_id: string; // UUID
 }
 
 export interface TurnDelete {
-  id: number;
+  id: string;
   message: string;
 }
 
@@ -45,8 +45,8 @@ export enum TurnState {
 }
 
 export interface AppointmentViewModel {
-  id: number;
-  turnId: number;
+  id: string;
+  turnId: string;
   date: string;
   time: string;
   specialty: string;

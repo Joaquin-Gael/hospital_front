@@ -5,6 +5,8 @@ $mobile: 480px;
 $tablet: 768px;
 $desktop: 1024px;
 $large-desktop: 1200px;
+$extra-large: 1440px;
+$ultra-wide: 1920px;
 
 // Mobile First Media Queries
 @mixin mobile-only {
@@ -55,6 +57,51 @@ $large-desktop: 1200px;
   }
 }
 
+@mixin extra-large-up {
+  @media (min-width: $extra-large) {
+    @content;
+  }
+}
+
+@mixin ultra-wide-up {
+  @media (min-width: $ultra-wide) {
+    @content;
+  }
+}
+
+// Touch device detection
+@mixin touch-device {
+  @media (hover: none) and (pointer: coarse) {
+    @content;
+  }
+}
+
+// Landscape orientation
+@mixin landscape {
+  @media (orientation: landscape) {
+    @content;
+  }
+}
+
+// Portrait orientation
+@mixin portrait {
+  @media (orientation: portrait) {
+    @content;
+  }
+}
+
+// Specific device breakpoints
+@mixin mobile-landscape {
+  @media (max-width: #{$tablet - 1px}) and (orientation: landscape) {
+    @content;
+  }
+}
+
+@mixin tablet-portrait {
+  @media (min-width: $mobile) and (max-width: #{$desktop - 1px}) and (orientation: portrait) {
+    @content;
+  }
+}
 // Navegación específica
 @mixin nav-mobile {
   @media (max-width: #{$tablet - 1px}) {
@@ -68,6 +115,29 @@ $large-desktop: 1200px;
   }
 }
 
+// Container responsive mejorado
+@mixin container-responsive {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+  
+  @include tablet-up {
+    padding: 0 1.5rem;
+  }
+  
+  @include desktop-up {
+    padding: 0 2rem;
+    max-width: 1200px;
+  }
+  
+  @include extra-large-up {
+    max-width: 1400px;
+  }
+  
+  @include ultra-wide-up {
+    max-width: 1600px;
+  }
+}
 // Altura específica para navegación
 @mixin nav-height-mobile {
   & {
@@ -100,6 +170,48 @@ $large-desktop: 1200px;
   }
 }
 
+// Grid responsive mejorado
+@mixin responsive-grid($min-width: 280px, $gap: 1rem) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax($min-width, 1fr));
+  gap: $gap;
+  
+  @include mobile-only {
+    grid-template-columns: 1fr;
+    gap: calc($gap * 0.75);
+  }
+  
+  @include tablet-only {
+    grid-template-columns: repeat(auto-fill, minmax(calc($min-width * 0.8), 1fr));
+  }
+}
+
+// Sidebar responsive
+@mixin sidebar-responsive($width: 280px, $collapsed-width: 80px) {
+  width: $width;
+  transition: width 0.3s ease, transform 0.3s ease;
+  
+  @include nav-mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    
+    &.open {
+      transform: translateX(0);
+    }
+  }
+  
+  &.collapsed {
+    width: $collapsed-width;
+    
+    @include nav-mobile {
+      transform: translateX(-100%);
+    }
+  }
+}
 // Logo responsive
 @mixin nav-logo-responsive {
   & {

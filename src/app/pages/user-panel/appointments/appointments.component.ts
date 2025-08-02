@@ -11,8 +11,8 @@ import { AppointmentViewModel } from '../../../services/interfaces/appointment.i
 })
 export class AppointmentsComponent {
   @Input() appointments: AppointmentViewModel[] = [];
-  @Output() reschedule = new EventEmitter<number>();
-  @Output() cancel = new EventEmitter<number>();
+  @Output() reschedule = new EventEmitter<string>();
+  @Output() cancel = new EventEmitter<string>();
   @Output() newAppointment = new EventEmitter<void>();
 
   getDayName(dateStr: string): string {
@@ -30,11 +30,11 @@ export class AppointmentsComponent {
     return date.toLocaleDateString('es-AR', { month: 'long' }).toLowerCase();
   }
 
-  onReschedule(appointmentId: number): void {
+  onReschedule(appointmentId: string): void {
     this.reschedule.emit(appointmentId);
   }
 
-  onCancel(turnId: number): void {
+  onCancel(turnId: string): void {
     this.cancel.emit(turnId);
   }
 }
