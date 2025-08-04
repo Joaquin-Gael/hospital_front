@@ -1,5 +1,5 @@
 export interface UserRead {
-  id: number;
+  id: string;
   is_active: boolean;
   is_admin: boolean;
   is_superuser: boolean;

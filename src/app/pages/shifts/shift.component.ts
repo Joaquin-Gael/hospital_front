@@ -19,8 +19,21 @@ import {
   state
 } from '@angular/animations';
 
+interface Service {
+  id: number;
+  name: string;
+  icon: string;
+  price: number;
+  description: string;
+}
+
+interface ReasonOption {
+  id: number;
+  name: string;
+}
+
 @Component({
-  selector: 'app-shifts',
+  selector: 'app-appointment-scheduler',
   standalone: true,
   imports: [
     CommonModule,
@@ -69,6 +82,17 @@ import {
         animate('400ms cubic-bezier(0.35, 0, 0.25, 1)', 
           style({ transform: 'rotate(0)', opacity: 1 }))
       ])
+    ]),
+    trigger('slideIn', [
+      transition(':enter', [
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('500ms cubic-bezier(0.35, 0, 0.25, 1)', 
+          style({ transform: 'translateX(0)', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('300ms cubic-bezier(0.35, 0, 0.25, 1)', 
+          style({ transform: 'translateX(-100%)', opacity: 0 }))
+      ])
     ])
   ]
 })
@@ -78,28 +102,58 @@ export class ShiftsComponent implements OnInit {
   appointmentForm!: FormGroup;
   minDate = new Date();
   availableTimeSlots: string[] = [];
-  formSubmitted = false;
   buttonState = 'inactive';
+  showCustomReason = false;
+  isLoading = false;
   
-  services = [
-    { id: 1, name: 'Consulta médica', icon: 'medical_services' },
-    { id: 2, name: 'Tratamiento dental', icon: 'favorite' },
-    { id: 3, name: 'Terapia física', icon: 'fitness_center' },
-    { id: 4, name: 'Asesoría nutricional', icon: 'restaurant' },
-    { id: 5, name: 'Consulta psicológica', icon: 'psychology' }
+  currentStep = 1;
+  totalSteps = 4;
+  
+  services: Service[] = [
+    { 
+      id: 1, 
+      name: 'Consulta médica', 
+      icon: 'medical_services', 
+      price: 80000, 
+      description: 'Consulta general con médico especialista'
+    },
+    { 
+      id: 2, 
+      name: 'Tratamiento dental', 
+      icon: 'sentiment_satisfied', 
+      price: 120000, 
+      description: 'Limpieza, revisión y tratamientos dentales'
+    },
+    { 
+      id: 3, 
+      name: 'Terapia física', 
+      icon: 'fitness_center', 
+      price: 95000, 
+      description: 'Rehabilitación y terapia especializada'
+    },
+    { 
+      id: 4, 
+      name: 'Asesoría nutricional', 
+      icon: 'restaurant', 
+      price: 70000, 
+      description: 'Plan alimentario personalizado'
+    },
+    { 
+      id: 5, 
+      name: 'Consulta psicológica', 
+      icon: 'psychology', 
+      price: 110000, 
+      description: 'Apoyo psicológico y terapia emocional'
+    }
   ];
   
-  reasonOptions = [
+  reasonOptions: ReasonOption[] = [
     { id: 1, name: 'Primera consulta' },
     { id: 2, name: 'Seguimiento' },
     { id: 3, name: 'Urgencia' },
     { id: 4, name: 'Control rutinario' },
     { id: 5, name: 'Otro (especificar)' }
   ];
-  
-  showCustomReason = false;
-  currentStep = 1;
-  totalSteps = 4;
   
   ngOnInit(): void {
     this.initForm();
@@ -108,11 +162,12 @@ export class ShiftsComponent implements OnInit {
   
   initForm(): void {
     this.appointmentForm = this.fb.group({
+      service: [null, Validators.required],
       appointmentDate: [null, Validators.required],
       appointmentTime: [null, Validators.required],
-      service: [null, Validators.required],
       reasonOption: [null, Validators.required],
-      customReason: ['']
+      customReason: [''],
+      termsAccepted: [false, Validators.requiredTrue]
     });
   }
   
@@ -127,7 +182,7 @@ export class ShiftsComponent implements OnInit {
       this.showCustomReason = option === 5;
       
       if (this.showCustomReason) {
-        this.appointmentForm.get('customReason')?.setValidators(Validators.required);
+        this.appointmentForm.get('customReason')?.setValidators([Validators.required, Validators.minLength(10)]);
       } else {
         this.appointmentForm.get('customReason')?.clearValidators();
       }
@@ -137,20 +192,22 @@ export class ShiftsComponent implements OnInit {
   }
   
   generateTimeSlots(date: Date): void {
-    const slots = [];
+    const slots: string[] = [];
     const selectedDate = new Date(date);
     const today = new Date();
     
-    let startHour = 9;
+    let startHour = 8;
     if (this.isSameDay(selectedDate, today) && today.getHours() >= 8) {
       startHour = today.getHours() + 1;
     }
     
-    const endHour = 17;
+    const endHour = 18;
     
     for (let hour = startHour; hour < endHour; hour++) {
-      slots.push(`${hour}:00`);
-      slots.push(`${hour}:30`);
+      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+      if (hour < endHour - 1) {
+        slots.push(`${hour.toString().padStart(2, '0')}:30`);
+      }
     }
     
     this.availableTimeSlots = slots;
@@ -163,29 +220,30 @@ export class ShiftsComponent implements OnInit {
            date1.getFullYear() === date2.getFullYear();
   }
   
-  onSubmit(): void {
+  proceedToPayment(): void {
     if (this.appointmentForm.invalid) {
       this.markFormGroupTouched(this.appointmentForm);
       return;
     }
     
-    const formData = {...this.appointmentForm.value};
+    this.isLoading = true;
     
-    formData.serviceName = this.getServiceName(formData.service);
-    formData.reason = this.getReasonText(formData.reasonOption, formData.customReason);
+    const appointmentData = {
+      service: this.getSelectedService(),
+      date: this.appointmentForm.get('appointmentDate')?.value,
+      time: this.appointmentForm.get('appointmentTime')?.value,
+      reason: this.getReasonText(),
+      total: this.getSelectedServicePrice()
+    };
     
-    delete formData.reasonOption;
-    delete formData.customReason;
+    console.log('Proceeding to payment with data:', appointmentData);
     
-    console.log('Appointment data:', formData);
-    
-    this.formSubmitted = true;
-    
+    // Aquí iría la lógica para redirigir a la pasarela de pago
     setTimeout(() => {
-      this.appointmentForm.reset();
-      this.formSubmitted = false;
-      this.currentStep = 1;
-    }, 3000);
+      this.isLoading = false;
+      // Simular redirección a pasarela de pago
+      alert('Redirigiendo a la pasarela de pago...');
+    }, 2000);
   }
   
   markFormGroupTouched(formGroup: FormGroup): void {
@@ -203,6 +261,10 @@ export class ShiftsComponent implements OnInit {
     
     if (control?.hasError('required')) {
       return 'Este campo es obligatorio';
+    }
+    
+    if (control?.hasError('minlength')) {
+      return 'Debe tener al menos 10 caracteres';
     }
     
     return '';
@@ -224,22 +286,32 @@ export class ShiftsComponent implements OnInit {
     }
   }
   
+  goToStep(step: number): void {
+    if (step <= this.currentStep || this.isStepValid(step - 1)) {
+      this.currentStep = step;
+    }
+  }
+  
   isStepValid(step: number): boolean {
     switch (step) {
       case 1: {
+        const serviceControl = this.appointmentForm.get('service');
+        return !!serviceControl?.valid;
+      }
+      case 2: {
         const dateControl = this.appointmentForm.get('appointmentDate');
         const timeControl = this.appointmentForm.get('appointmentTime');
         return !!dateControl?.valid && !!timeControl?.valid;
-      }
-      case 2: {
-        const serviceControl = this.appointmentForm.get('service');
-        return !!serviceControl?.valid;
       }
       case 3: {
         const reasonControl = this.appointmentForm.get('reasonOption');
         const customReasonControl = this.appointmentForm.get('customReason');
         return !!reasonControl?.valid && 
                (!this.showCustomReason || !!customReasonControl?.valid);
+      }
+      case 4: {
+        const termsControl = this.appointmentForm.get('termsAccepted');
+        return !!termsControl?.valid;
       }
       default:
         return true;
@@ -248,6 +320,16 @@ export class ShiftsComponent implements OnInit {
   
   onButtonHover(isHovering: boolean): void {
     this.buttonState = isHovering ? 'active' : 'inactive';
+  }
+  
+  getSelectedService(): Service | null {
+    const serviceId = this.appointmentForm.get('service')?.value;
+    return this.services.find(s => s.id === serviceId) || null;
+  }
+  
+  getSelectedServicePrice(): number {
+    const service = this.getSelectedService();
+    return service?.price || 0;
   }
   
   getServiceIcon(serviceId: number): string {
@@ -260,7 +342,10 @@ export class ShiftsComponent implements OnInit {
     return service?.name || '';
   }
   
-  getReasonText(reasonOptionId: number | null, customReason: string): string {
+  getReasonText(): string {
+    const reasonOptionId = this.appointmentForm.get('reasonOption')?.value;
+    const customReason = this.appointmentForm.get('customReason')?.value;
+    
     if (reasonOptionId === 5) {
       return customReason || '';
     }
@@ -279,5 +364,13 @@ export class ShiftsComponent implements OnInit {
     };
     
     return date.toLocaleDateString('es-ES', options);
+  }
+  
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0
+    }).format(price);
   }
 }

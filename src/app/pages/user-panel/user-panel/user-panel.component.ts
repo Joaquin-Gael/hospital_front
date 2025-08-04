@@ -8,7 +8,7 @@ import { StorageService } from '../../../services/core/storage.service';
 import { LoggerService } from '../../../services/core/logger.service';
 import { Notification, Document } from '../interfaces/user-panel.interfaces';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
-import { AppointmentViewModel, Appointment, TurnState, TurnCreate } from '../../../services/interfaces/appointment.interfaces';
+import { AppointmentViewModel, Appointment, TurnState, TurnCreate, Turn } from '../../../services/interfaces/appointment.interfaces';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HeaderComponent } from '../header/header.component';
 import { AppointmentsComponent } from '../appointments/appointments.component';
@@ -73,7 +73,7 @@ export class UserPanelComponent implements OnInit, OnDestroy {
 
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe({
       next: (userRead) => {
-        this.user = userRead ? { ...userRead } : null; 
+        this.user = userRead ? { ...userRead } : null;
         this.loading = false;
         if (!this.user) {
           this.error = 'No se encontraron datos del usuario';
@@ -92,32 +92,32 @@ export class UserPanelComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadAppointments(userId: number): void {
-    this.appointmentService.getAppointments(userId).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (appointments) => {
-        const viewModels = appointments.map(this.mapToViewModel);
-        this.appointments = viewModels.filter(a => a.state === TurnState.PENDING);
-        this.appointmentHistory = viewModels.filter(a => a.state !== TurnState.PENDING);
+  private loadAppointments(userId: string): void {
+    this.appointmentService.getTurnsByUserId(userId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (turns) => {
+        const viewModels = turns.map(this.mapToViewModel);
+        this.appointments = viewModels.filter(a => a.state === TurnState.PENDING || a.state === TurnState.WAITING);
+        this.appointmentHistory = viewModels.filter(a => a.state === TurnState.COMPLETED || a.state === TurnState.CANCELLED);
       },
       error: (err) => {
-        this.logger.error('Failed to load appointments', err);
+        this.logger.error('Failed to load turns', err);
         this.appointments = [];
         this.appointmentHistory = [];
       },
     });
   }
 
-  private mapToViewModel(appointment: Appointment): AppointmentViewModel {
-    const date = new Date(appointment.date);
+  private mapToViewModel(turn: Turn): AppointmentViewModel {
+    const date = new Date(turn.date);
     return {
-      id: appointment.id,
-      turnId: appointment.turn_id,
-      date: appointment.date,
+      id: turn.appointment_id,
+      turnId: turn.id,
+      date: turn.date,
       time: date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
-      specialty: 'Cardiología', // TODO: Obtener desde service_id (ServiceService)
-      doctorName: 'Dr. Juan Pérez', // TODO: Obtener desde doctor_id (DoctorService)
-      location: 'Clínica Central', // TODO: Obtener desde service_id o doctor_id
-      state: appointment.state,
+      specialty: turn.service?.name || 'Sin especialidad', // Usamos el nombre del servicio como especialidad
+      doctorName: turn.doctor ? `${turn.doctor.first_name} ${turn.doctor.last_name}` : 'Sin doctor asignado',
+      location: 'Clínica Central', // TODO: Obtener ubicación real desde service o doctor
+      state: turn.state,
     };
   }
 

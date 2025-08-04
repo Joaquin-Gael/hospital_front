@@ -1,6 +1,8 @@
 @use '../shared.scss' as *;
 
 .appointments {
+  padding: 20px;
+
   &__grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -11,86 +13,201 @@
 .appointment-card {
   @include card;
   overflow: hidden;
-  
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: $box-shadow-lg;
   }
-  
+
   &__header {
     @include flex-between;
     padding: 16px;
     background-color: $primary-bg;
+    border-bottom: 1px solid $border-color;
   }
-  
+
   &__date {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-  
+
   &__day-name {
     font-size: 12px;
     font-weight: 500;
     color: $primary-color;
     text-transform: uppercase;
   }
-  
+
   &__day {
     font-size: 24px;
     font-weight: 700;
     color: $primary-color;
     line-height: 1;
   }
-  
+
   &__month {
     font-size: 14px;
     font-weight: 500;
     color: $primary-color;
     text-transform: capitalize;
   }
-  
+
   &__time {
     display: flex;
     align-items: center;
     gap: 8px;
     color: $primary-color;
     font-weight: 500;
-    
+
     .icon {
       color: $primary-color;
+      width: 20px;
+      height: 20px;
     }
   }
-  
+
   &__body {
     padding: 16px;
   }
-  
+
   &__specialty {
     font-size: 18px;
     font-weight: 600;
     margin: 0 0 16px;
     color: $text-color;
   }
-  
-  &__doctor, &__location {
+
+  &__doctor,
+  &__location {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 12px;
     color: $text-light;
     font-size: 14px;
-    
+
     .icon {
       color: $text-lighter;
+      width: 18px;
+      height: 18px;
     }
   }
-  
+
+  &__status {
+    margin-top: 12px;
+  }
+
   &__footer {
     padding: 16px;
     border-top: 1px solid $border-color;
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: $border-radius-sm;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+
+    &.status-pending {
+      background-color: $primary-bg;
+      color: $primary-color;
+    }
+
+    &.status-waiting {
+      background-color: rgba($warning-color, 0.1);
+      color: $warning-color;
+    }
+
+    &.status-completed {
+      background-color: rgba($success-color, 0.1);
+      color: $success-color;
+    }
+
+    &.status-cancelled {
+      background-color: rgba($danger-color, 0.1);
+      color: $danger-color;
+    }
+  }
+
+  .btn {
+    &--outline {
+      color: $primary-color;
+      border-color: $primary-color;
+
+      &:hover {
+        background-color: $primary-bg;
+      }
+
+      &[disabled] {
+        color: $text-lighter;
+        border-color: $border-color;
+        cursor: not-allowed;
+      }
+    }
+
+    &--danger {
+      color: $danger-color;
+      border-color: $danger-color;
+
+      &:hover {
+        background-color: rgba($danger-color, 0.1);
+      }
+
+      &[disabled] {
+        color: $text-lighter;
+        border-color: $border-color;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+.empty-state {
+  @include flex-center;
+  flex-direction: column;
+  padding: 60px 20px;
+  text-align: center;
+  background-color: $background-color;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+
+  &__icon {
+    @include flex-center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: $primary-bg;
+    color: $primary-color;
+    margin-bottom: 24px;
+
+    .icon {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: $text-color;
+  }
+
+  p {
+    font-size: 14px;
+    color: $text-light;
+    margin: 0 0 24px;
+  }
+
+  .btn--primary {
+    &:hover {
+      background-color: $primary-dark;
+    }
   }
 }

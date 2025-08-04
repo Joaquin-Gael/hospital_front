@@ -8,7 +8,7 @@
       </div>
       <h2>No hay turnos agendados</h2>
       <p>Agenda un nuevo turno para comenzar.</p>
-      <button class="btn btn--primary" href="/shifts">Agendar turno</button>
+      <button class="btn btn--primary" (click)="newAppointment.emit()">Agendar turno</button>
     </div>
   } @else {
     <div class="appointments__grid">
@@ -42,10 +42,20 @@
               </svg>
               {{ appointment.location }}
             </div>
+            <div class="appointment-card__status">
+              <span class="status-badge" [ngClass]="{
+                'status-pending': appointment.state === 'pending',
+                'status-waiting': appointment.state === 'waiting',
+                'status-completed': appointment.state === 'completed',
+                'status-cancelled': appointment.state === 'cancelled'
+              }">
+                {{ appointment.state | titlecase }}
+              </span>
+            </div>
           </div>
           <div class="appointment-card__footer">
-            <button class="btn btn--outline btn--sm" (click)="onReschedule(appointment.id)">Reprogramar</button>
-            <button class="btn btn--danger btn--sm" (click)="onCancel(appointment.turnId)">Cancelar</button>
+            <button class="btn btn--outline btn--sm" (click)="onReschedule(appointment.id)" [disabled]="appointment.state !== 'pending' && appointment.state !== 'waiting'">Reprogramar</button>
+            <button class="btn btn--danger btn--sm" (click)="onCancel(appointment.turnId)" [disabled]="appointment.state !== 'pending' && appointment.state !== 'waiting'">Cancelar</button>
           </div>
         </div>
       }

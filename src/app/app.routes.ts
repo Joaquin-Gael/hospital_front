@@ -21,6 +21,7 @@ export const routes: Routes = [
           import('./pages/contact/contact.component').then((m) => m.ContactComponent),
       },
       {
+        canActivate: [authGuard],
         path: 'shifts',
         loadComponent: () =>
           import('./pages/shifts/shift.component').then((m) => m.ShiftsComponent),
