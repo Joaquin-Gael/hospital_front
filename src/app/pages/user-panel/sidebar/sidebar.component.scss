@@ -54,6 +54,20 @@
       font-weight: 600;
     }
   }
+
+    &__avatar-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: $primary-color;
+    @include flex-center;
+    
+    &-initials {
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+    }
+  }
   
   &__user-info {
     overflow: hidden;

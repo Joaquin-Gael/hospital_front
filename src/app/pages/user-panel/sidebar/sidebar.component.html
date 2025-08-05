@@ -1,7 +1,7 @@
 <aside class="sidebar">
   <div class="sidebar__header">
     <div class="sidebar__logo">
-      <img src="assets/logo-siglas-blanco.png" alt="Logo">
+      <img src="assets/logo-siglas-blanco.png" alt="Logo" />
       <span>Hospital SDLG</span>
     </div>
   </div>
@@ -14,7 +14,19 @@
     <!-- Información del usuario -->
     <div *ngIf="user" class="sidebar__user-content">
       <div class="sidebar__avatar">
-        <span class="sidebar__avatar-initials">{{ getInitials(user.username) }}</span>
+        <img
+          *ngIf="user.img_profile; else avatarPlaceholder"
+          [src]="user.img_profile"
+          alt="Avatar"
+          class="sidebar__avatar-img"
+        />
+        <ng-template #avatarPlaceholder>
+          <div class="sidebar__avatar-placeholder">
+            <span class="sidebar__avatar-initials">{{
+              getInitials(user.username)
+            }}</span>
+          </div>
+        </ng-template>
       </div>
       <div class="sidebar__user-info">
         <h3 class="sidebar__user-name">{{ user.username }}</h3>
@@ -31,7 +43,13 @@
           class="sidebar__nav-item"
         >
           <span class="sidebar__nav-icon">
-            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <svg
+              class="icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
               <path
                 *ngIf="item.icon === 'calendar'"
                 stroke-linecap="round"
@@ -69,7 +87,11 @@
                 d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
               />
             </svg>
-            <span *ngIf="item.badge && item.badge() > 0" class="sidebar__nav-badge">{{ item.badge() }}</span>
+            <span
+              *ngIf="item.badge && item.badge() > 0"
+              class="sidebar__nav-badge"
+              >{{ item.badge() }}</span
+            >
           </span>
           <span>{{ item.label }}</span>
         </a>
@@ -78,8 +100,18 @@
   </nav>
   <div class="sidebar__footer">
     <button class="sidebar__footer-btn" (click)="onLogout()">
-      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+      <svg
+        class="icon"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+        />
       </svg>
       <span>Cerrar Sesión</span>
     </button>

@@ -13,6 +13,7 @@ import {
 } from '../interfaces/user.interfaces';
 import { Auth } from '../interfaces/hospital.interfaces';
 import { TokenDoctorsResponse } from '../interfaces/doctor.interfaces';
+import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -30,8 +31,13 @@ export class AuthService {
   }
 
   login(credentials: Auth): Observable<TokenUserResponse> {
+    let params = new HttpParams()
+    .set('email', credentials.email)
+    .set('password', credentials.password)
     return this.apiService
-      .post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, credentials)
+      .post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, params.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      })
       .pipe(
         tap((response) => {
           this.storage.setAccessToken(response.access_token);
@@ -90,8 +96,13 @@ export class AuthService {
   }
 
   doctorLogin(credentials: Auth): Observable<TokenDoctorsResponse> {
+    let params = new HttpParams()
+    .set('email', credentials.email)
+    .set('password', credentials.password)
     return this.apiService
-      .post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, credentials)
+      .post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, params.toString(),  {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      })
       .pipe(
         tap((response) => {
           this.storage.setAccessToken(response.access_token);

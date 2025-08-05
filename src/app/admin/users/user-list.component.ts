@@ -338,18 +338,14 @@ export class UserListComponent implements OnInit, OnDestroy {
         username: this.isSuperuser ? formData.username : undefined,
         first_name: this.isSuperuser ? formData.first_name : undefined,
         last_name: this.isSuperuser ? formData.last_name : undefined,
-        email: formData.email || undefined,
+
         telephone: formData.telephone || undefined,
         address: formData.address || undefined,
-        blood_type: formData.blood_type || undefined,
         health_insurance_id: formData.health_insurance_id || undefined,
-        password: formData.password || undefined,
-        is_active: this.isSuperuser ? formData.is_active : undefined,
-        is_admin: this.isSuperuser ? formData.is_admin : undefined,
-        is_superuser: this.isSuperuser ? formData.is_superuser : undefined,
+
       };
 
-      this.userService.updateUser(this.selectedUser.id.toString(), payload, this.imgProfile).pipe(takeUntil(this.destroy$)).subscribe({
+      this.userService.updateUser(this.selectedUser.id.toString(), payload).pipe(takeUntil(this.destroy$)).subscribe({
         next: (updatedUser) => {
           console.log('User updated:', updatedUser);
           const index = this.users.findIndex(u => u.id === updatedUser.id);

@@ -70,6 +70,18 @@
           </label>
         </div>
         
+        <!-- Input de archivo (imagen) -->
+        <input 
+          *ngIf="field.type === 'file' && enableImageUpload"
+          type="file"
+          [id]="field.key"
+          (change)="onImageSelected($event)"
+          accept="image/*"
+          class="entity-form__file"
+          [required]="field.required ?? false"
+          [attr.aria-required]="field.required ?? false"
+        />
+        
         <!-- Mensajes de error -->
         <div *ngIf="hasError(field.key, 'required')" class="entity-form__error">
           Este campo es obligatorio

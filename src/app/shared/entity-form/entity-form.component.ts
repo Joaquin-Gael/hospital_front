@@ -28,7 +28,8 @@ export interface FormField {
     | 'textarea'
     | 'select'
     | 'checkbox'
-    | 'date';
+    | 'date'
+    | 'file'; 
   required?: boolean;
   options?: { value: any; label: string }[];
   validators?: any[];
@@ -51,10 +52,13 @@ export class EntityFormComponent implements OnInit, OnChanges {
   @Input() title: string = 'Formulario';
   @Input() submitLabel: string = 'Guardar';
   @Input() loading: boolean = false;
+  @Input() enableImageUpload: boolean = false;
   @Output() formSubmit = new EventEmitter<any>();
   @Output() formCancel = new EventEmitter<void>();
+  @Output() imageSelected = new EventEmitter<File>();
 
-  form!: FormGroup;
+form!: FormGroup;
+  selectedImage: File | null = null;
 
   constructor(private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
 
@@ -83,8 +87,8 @@ export class EntityFormComponent implements OnInit, OnChanges {
   logFocus(fieldKey: string): void {
     const control = this.form.get(fieldKey);
     console.log(
-      `Focus en ${fieldKey}`, 
-      'valor:', control?.value, 
+      `Focus en ${fieldKey}`,
+      'valor:', control?.value,
       'válido:', control?.valid
     );
   }
@@ -128,11 +132,23 @@ export class EntityFormComponent implements OnInit, OnChanges {
       this.markFormGroupTouched(this.form);
       return;
     }
-    this.formSubmit.emit(this.form.value);
+    const formValue = this.form.value;
+    if (this.selectedImage) {
+      this.imageSelected.emit(this.selectedImage); // Emitir el archivo seleccionado
+    }
+    this.formSubmit.emit(formValue);
   }
 
   onCancel(): void {
     this.formCancel.emit();
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedImage = input.files[0];
+      this.imageSelected.emit(this.selectedImage); // Emitir el archivo al seleccionarlo
+    }
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {

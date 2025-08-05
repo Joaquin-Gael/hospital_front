@@ -6,4 +6,5 @@ export const USER_ENDPOINTS = {
   DELETE: (userId: string) => `users/delete/${userId}`,
   BAN: (userId: string) => `users/ban/${userId}`,
   UNBAN: (userId: string) => `users/unban/${userId}`,
+  RECOVER_PASSWORD: 'users/update/petition/password'
 } as const;

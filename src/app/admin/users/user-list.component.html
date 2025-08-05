@@ -2,7 +2,9 @@
   <div class="user-list__card">
     <div class="user-list__header">
       <h2 class="user-list__title">Gestión de Usuarios</h2>
-      <button class="btn btn--primary" (click)="onAddNew()">Agregar Usuario</button>
+      <button class="btn btn--primary" (click)="onAddNew()">
+        Agregar Usuario
+      </button>
     </div>
     <div class="user-list__body">
       <div *ngIf="error" class="user-list__alert alert alert--danger">
@@ -11,24 +13,27 @@
       <div *ngIf="loading" class="user-list__loading">
         <span>Cargando usuarios...</span>
       </div>
-      <app-data-table
-        *ngIf="!loading && users.length"
-        [data]="users"
-        [columns]="tableColumns"
-        [actions]="[
-          { label: 'Ver', icon: 'visibility', callback: onView },
-          { label: 'Editar', icon: 'edit', callback: onEdit },
-          { label: 'Eliminar', icon: 'delete', callback: onDelete },
-          { label: 'Banear', icon: 'block', callback: onBanEvent, condition: (user: UserRead) => user.is_active },
-          { label: 'Desbanear', icon: 'check_circle', callback: onUnbanEvent, condition: (user: UserRead) => !user.is_active }
-        ]"
-      ></app-data-table>
+      <div class="user-list__content" [class.hidden]="showForm">
+        <app-data-table
+          [data]="users"
+          [columns]="tableColumns"
+          [loading]="loading"
+          [showBanUnban]="true"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)"
+          (view)="onView($event)"
+          (ban)="onBanEvent($event)"
+          (unban)="onUnbanEvent($event)"
+        ></app-data-table>
+      </div>
       <div *ngIf="!loading && !users.length" class="user-list__empty">
         No se encontraron usuarios.
       </div>
       <div *ngIf="showForm" class="user-list__form">
         <div class="user-list__form-field">
-          <label for="img_profile" class="user-list__label">Imagen de Perfil</label>
+          <label for="img_profile" class="user-list__label"
+            >Imagen de Perfil</label
+          >
           <input
             id="img_profile"
             type="file"
@@ -41,7 +46,9 @@
           [fields]="formFields"
           [loading]="formLoading"
           [initialData]="selectedUser"
-          [submitLabel]="formMode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario'"
+          [submitLabel]="
+            formMode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario'
+          "
           (formSubmit)="onFormSubmit($event)"
           (formCancel)="onFormCancel()"
         ></app-entity-form>

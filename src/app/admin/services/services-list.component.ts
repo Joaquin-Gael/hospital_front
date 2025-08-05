@@ -59,12 +59,23 @@ export class ServiceListComponent implements OnInit {
   error: string | null = null;
 
   tableColumns = [
+    { key: 'id', label: 'ID' },
     { key: 'name', label: 'Nombre' },
     { key: 'description', label: 'Descripción' },
     {
       key: 'price',
       label: 'Precio',
       format: (value: number) => `$${value.toFixed(2)}`,
+    },
+    {
+      key: 'icon_code',
+      label: 'Icono',
+      format: (value: string) => `${value}`,
+    },
+    {
+      key: 'specialty_id',
+      label: 'ID de Especialidad',
+      format: (value: string) => (`${value} ? ${value} : 'No asignado'`),
     },
     {
       key: 'isActive',

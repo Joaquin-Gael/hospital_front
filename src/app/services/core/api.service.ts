@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, ReplaySubject, throwError } from 'rxjs';
 import { catchError, switchMap, tap, shareReplay, map } from 'rxjs/operators';
 import { LoggerService } from './logger.service';
@@ -108,7 +108,7 @@ export class ApiService {
    * @param options Optional HTTP options (e.g., query parameters).
    * @returns Observable of the response data.
    */
-  post<T>(endpoint: string, payload: any, options?: { params?: HttpParams }): Observable<T> {
+  post<T>(endpoint: string, payload: any, options?: { headers?: HttpHeaders | { [header: string]: string | string[] }, params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.post<T>(url, payload, options)),
       catchError((err) => {
@@ -158,7 +158,7 @@ export class ApiService {
    * @param options Optional HTTP options (e.g., query parameters).
    * @returns Observable of the response data.
    */
-  patch<T>(endpoint: string, payload: any, options?: { params?: HttpParams }): Observable<T> {
+  patch<T>(endpoint: string, payload: any, options?: { headers?: HttpHeaders | { [header: string]: string | string[] }, params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.patch<T>(url, payload, options)),
       catchError((err) => {

@@ -63,13 +63,17 @@ export class UserService {
    * @param imgProfile Archivo de imagen de perfil (opcional).
    * @returns Observable con los datos del usuario actualizado.
    */
-  updateUser(userId: string, user: UserUpdate, imgProfile?: File): Observable<UserRead> {
+  updateUser(userId: string, user: UserUpdate): Observable<UserRead> {
     const formData = new FormData();
-    formData.append('user_form', JSON.stringify(user));
-    if (imgProfile) {
-      formData.append('img_profile', imgProfile);
+    formData.append('username', user.username || '');
+    formData.append('first_name', user.first_name || '');
+    formData.append('last_name', user.last_name || '');
+    formData.append('telephone', user.telephone || '');
+    formData.append('address', user.address || '');
+    formData.append('health_insurance_id', user.health_insurance_id || '');
+    if (user.img_profile instanceof File) {
+      formData.append('img_profile', user.img_profile, user.img_profile.name);
     }
-
     return this.apiService.patch<UserRead>(USER_ENDPOINTS.UPDATE(userId), formData).pipe(
       catchError(error => this.handleError(`Update user ${userId}`, error))
     );

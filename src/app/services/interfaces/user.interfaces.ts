@@ -35,15 +35,10 @@ export interface UserUpdate {
   username?: string;
   first_name?: string;
   last_name?: string;
-  email?: string;
   telephone?: string;
   address?: string;
-  blood_type?: string;
   health_insurance_id?: string;
-  password?: string;
-  is_active?: boolean;
-  is_admin?: boolean;
-  is_superuser?: boolean;
+  img_profile?: File;
 }
 
 export interface UserDelete {
