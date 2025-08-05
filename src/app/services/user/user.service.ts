@@ -44,8 +44,14 @@ export class UserService {
    * @param user Datos del usuario a crear.
    * @returns Observable con los datos del usuario creado.
    */
-  createUser(user: UserCreate): Observable<UserRead> {
-    return this.apiService.post<UserRead>(USER_ENDPOINTS.ADD, user).pipe(
+  createUser(user: UserCreate, imgProfile?: File): Observable<UserRead> {
+    const formData = new FormData();
+    formData.append('user_form', JSON.stringify(user));
+    if (imgProfile) {
+      formData.append('img_profile', imgProfile);
+    }
+
+    return this.apiService.post<UserRead>(USER_ENDPOINTS.ADD, formData).pipe(
       catchError(error => this.handleError('Create user', error))
     );
   }
@@ -54,11 +60,18 @@ export class UserService {
    * Actualiza un usuario existente.
    * @param userId ID del usuario.
    * @param user Datos actualizados del usuario.
+   * @param imgProfile Archivo de imagen de perfil (opcional).
    * @returns Observable con los datos del usuario actualizado.
    */
-  updateUser(userId: string, user: UserUpdate): Observable<UserRead> {
-    return this.apiService.patch<UserRead>(USER_ENDPOINTS.UPDATE(userId), user).pipe(
-      catchError(error => this.handleError('Update user', error))
+  updateUser(userId: string, user: UserUpdate, imgProfile?: File): Observable<UserRead> {
+    const formData = new FormData();
+    formData.append('user_form', JSON.stringify(user));
+    if (imgProfile) {
+      formData.append('img_profile', imgProfile);
+    }
+
+    return this.apiService.patch<UserRead>(USER_ENDPOINTS.UPDATE(userId), formData).pipe(
+      catchError(error => this.handleError(`Update user ${userId}`, error))
     );
   }
 
@@ -110,26 +123,38 @@ export class UserService {
     if (error instanceof Error) {
       errorMessage = error.message;
     } else if (typeof error === 'object' && error !== null && 'status' in error) {
-      const httpError = error as { status: number; error?: { detail?: string } };
+      const httpError = error as { status: number; error?: { detail?: string | { loc: string[]; type: string; msg: string }[] } };
       switch (httpError.status) {
         case 400:
-          errorMessage = httpError.error?.detail ?? 'Invalid request data';
+          errorMessage = this.formatErrorDetail(httpError.error?.detail) ?? 'Invalid request data';
           break;
         case 401:
-          errorMessage = httpError.error?.detail ?? 'Unauthorized access';
+          errorMessage = this.formatErrorDetail(httpError.error?.detail) ?? 'Unauthorized access';
           this.storage.clearStorage();
           break;
         case 403:
-          errorMessage = httpError.error?.detail ?? 'Forbidden action';
+          errorMessage = this.formatErrorDetail(httpError.error?.detail) ?? 'Forbidden action';
           break;
         case 404:
-          errorMessage = httpError.error?.detail ?? 'Resource not found';
+          errorMessage = this.formatErrorDetail(httpError.error?.detail) ?? 'Resource not found';
+          break;
+        case 422:
+          errorMessage = this.formatErrorDetail(httpError.error?.detail) ?? 'Invalid data format';
           break;
         default:
-          errorMessage = httpError.error?.detail ?? 'Server error';
+          errorMessage = this.formatErrorDetail(httpError.error?.detail) ?? 'Server error';
       }
     }
 
     return throwError(() => new Error(errorMessage));
+  }
+
+  private formatErrorDetail(detail: string | { loc: string[]; type: string; msg: string }[] | undefined): string | undefined {
+    if (typeof detail === 'string') {
+      return detail;
+    } else if (Array.isArray(detail)) {
+      return detail.map(err => `${err.loc.join('.')} (${err.type}): ${err.msg}`).join('; ');
+    }
+    return undefined;
   }
 }

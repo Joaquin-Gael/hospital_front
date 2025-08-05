@@ -1,22 +1,19 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Notification } from '../interfaces/user-panel.interfaces';
+import { RouterModule } from '@angular/router';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
+import { Notification } from '../interfaces/user-panel.interfaces';
 
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, RouterModule],
 })
 export class SidebarComponent {
   @Input() user: UserRead | null = null;
-  @Input() activeSection: string = 'appointments';
-  @Output() sectionChange = new EventEmitter<string>();
   @Output() logout = new EventEmitter<void>();
-
-  isEditing = false;
 
   notifications: Notification[] = [
     {
@@ -24,22 +21,30 @@ export class SidebarComponent {
       message: 'Recordatorio: Tienes una cita de Cardiología mañana a las 09:30',
       type: 'info',
       read: false,
-      createdAt: new Date(2025, 3, 14)
+      createdAt: new Date(2025, 3, 14),
     },
     {
       id: '2',
       message: 'Tu resultado de análisis de sangre está disponible',
       type: 'success',
       read: false,
-      createdAt: new Date(2025, 3, 12)
+      createdAt: new Date(2025, 3, 12),
     },
     {
       id: '3',
       message: 'Se ha cancelado tu cita de Dermatología del 05/04/2025',
       type: 'warning',
       read: true,
-      createdAt: new Date(2025, 3, 2)
-    }
+      createdAt: new Date(2025, 3, 2),
+    },
+  ];
+
+  menuItems = [
+    { label: 'Turnos Agendados', route: '/user_panel/appointments', icon: 'calendar' },
+    { label: 'Historial', route: '/user_panel/history', icon: 'history' },
+    { label: 'Notificaciones', route: '/user_panel/notifications', icon: 'bell', badge: () => this.getUnreadNotificationsCount() },
+    { label: 'Documentos', route: '/user_panel/documents', icon: 'file' },
+    { label: 'Perfil', route: '/user_panel/profile', icon: 'user' },
   ];
 
   get fullName(): string {
@@ -58,10 +63,6 @@ export class SidebarComponent {
 
   getUnreadNotificationsCount(): number {
     return this.notifications.filter(n => !n.read).length;
-  }
-
-  setActiveSection(section: string): void {
-    this.sectionChange.emit(section);
   }
 
   onLogout(): void {

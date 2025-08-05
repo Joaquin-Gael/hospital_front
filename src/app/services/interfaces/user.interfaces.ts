@@ -7,13 +7,14 @@ export interface UserRead {
   date_joined: string;
   username: string;
   email: string;
-  first_name: string;
-  last_name: string;
-  dni: string;
-  address?: string;
-  telephone?: string;
-  blood_type?: string;
-  img_profile?: string;
+  first_name: string | null;
+  last_name: string | null;
+  dni: string | null;
+  address: string | null;
+  telephone: string | null;
+  blood_type: string | null;
+  health_insurance_id: string | null;
+  img_profile: string | null;
 }
 
 export interface UserCreate {
@@ -24,9 +25,9 @@ export interface UserCreate {
   dni: string;
   password: string;
   address?: string;
-  blood_type: string;
+  blood_type?: string;
   is_superuser?: boolean;
-  is_admin?: boolean; 
+  is_admin?: boolean;
   img_profile?: string;
 }
 
@@ -34,10 +35,15 @@ export interface UserUpdate {
   username?: string;
   first_name?: string;
   last_name?: string;
-  address?: string;
+  email?: string;
   telephone?: string;
+  address?: string;
+  blood_type?: string;
+  health_insurance_id?: string;
   password?: string;
-  img_profile?: string;
+  is_active?: boolean;
+  is_admin?: boolean;
+  is_superuser?: boolean;
 }
 
 export interface UserDelete {

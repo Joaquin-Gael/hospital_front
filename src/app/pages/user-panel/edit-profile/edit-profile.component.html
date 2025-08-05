@@ -1,0 +1,10 @@
+
+      <app-entity-form
+        [fields]="formFields"
+        [initialData]="initialData"
+        [loading]="isSubmitting"
+        [submitLabel]="isSubmitting ? 'Guardando...' : 'Finalizar'"
+        (formSubmit)="onFormSubmit($event)"
+        (formCancel)="onFormCancel()"
+      ></app-entity-form>
+

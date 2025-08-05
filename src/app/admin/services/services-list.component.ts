@@ -1,11 +1,11 @@
-import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataTableComponent } from '../shared/data-table/data-table.component';
+import { DataTableComponent } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
   FormField,
-} from '../shared/entity-form/entity-form.component';
+} from '../../shared/entity-form/entity-form.component';
 import { ServiceService } from '../../services/service/service.service';
 import {
   Service,
@@ -27,6 +27,7 @@ interface ServiceFormData {
   description: string;
   price: number;
   specialty_id: string;
+  icon_code: string;
   duration?: number;
   isActive?: boolean;
 }
@@ -86,6 +87,12 @@ export class ServiceListComponent implements OnInit {
       type: 'number',
       required: true,
       validators: [Validators.min(0)],
+    },
+    {
+      key: 'icon_code',
+      label: 'Icono',
+      type: 'text',
+      required: true,
     },
     {
       key: 'specialty_id',

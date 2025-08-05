@@ -1,15 +1,17 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataTableComponent } from '../shared/data-table/data-table.component';
-import { EntityFormComponent, FormField } from '../shared/entity-form/entity-form.component';
+import { DataTableComponent } from '../../shared/data-table/data-table.component';
+import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
 import { UserService } from '../../services/user/user.service';
+import { AuthService } from '../../services/auth/auth.service';
 import { LoggerService } from '../../services/core/logger.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Validators } from '@angular/forms';
 import { UserRead, UserCreate, UserUpdate } from '../../services/interfaces/user.interfaces';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-user-list',
@@ -18,10 +20,12 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss'],
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
+  private authService = inject(AuthService);
   private logger = inject(LoggerService);
   private dialog = inject(MatDialog);
+  private readonly destroy$ = new Subject<void>();
 
   users: UserRead[] = [];
   loading: boolean = false;
@@ -30,10 +34,11 @@ export class UserListComponent implements OnInit {
   selectedUser: UserRead | null = null;
   formLoading: boolean = false;
   error: string | null = null;
-
-  private readonly passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+  isSuperuser: boolean = false;
+  imgProfile: File | undefined = undefined;
 
   tableColumns = [
+    { key: 'img_profile', label: 'Imagen', format: (value: string | null) => value ? `<img src="${value}" alt="Profile" class="table__image" />` : 'Sin imagen' },
     { key: 'username', label: 'Usuario' },
     { key: 'email', label: 'Email' },
     { key: 'first_name', label: 'Nombre' },
@@ -53,7 +58,7 @@ export class UserListComponent implements OnInit {
       label: 'Usuario',
       type: 'text',
       required: true,
-      validators: [Validators.required],
+      validators: [Validators.required, Validators.minLength(3)],
     },
     {
       key: 'email',
@@ -88,10 +93,7 @@ export class UserListComponent implements OnInit {
       label: 'Contraseña',
       type: 'password',
       required: false,
-      validators: [
-        Validators.minLength(8),
-        Validators.pattern(this.passwordPattern)
-      ],
+      validators: [], // Sin validaciones
     },
     {
       key: 'address',
@@ -112,6 +114,7 @@ export class UserListComponent implements OnInit {
       type: 'select',
       required: false,
       options: [
+        { value: '', label: 'Seleccionar' },
         { value: 'A+', label: 'A+' },
         { value: 'A-', label: 'A-' },
         { value: 'B+', label: 'B+' },
@@ -121,6 +124,13 @@ export class UserListComponent implements OnInit {
         { value: 'O+', label: 'O+' },
         { value: 'O-', label: 'O-' },
       ],
+    },
+    {
+      key: 'health_insurance_id',
+      label: 'Obra Social',
+      type: 'select',
+      required: false,
+      options: [{ value: '', label: 'Sin obra social' }],
     },
     {
       key: 'is_active',
@@ -146,14 +156,52 @@ export class UserListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.loadUsers();
+    this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (user) => {
+        this.isSuperuser = user?.is_superuser || false;
+        this.updateFormFields();
+        this.loadUsers();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.handleError(err, 'Error al verificar permisos de superusuario');
+      },
+    });
+  }
+
+  private updateFormFields(): void {
+    if (this.formMode === 'create') {
+      // Para creación, excluir campos no soportados por UserCreate
+      this.formFields = this.formFields.filter(
+        field => !['telephone', 'health_insurance_id', 'is_active', 'is_admin', 'is_superuser'].includes(field.key)
+      );
+      // Hacer contraseña requerida en creación
+      const passwordField = this.formFields.find(f => f.key === 'password');
+      if (passwordField) {
+        passwordField.required = true;
+        passwordField.validators = [Validators.required];
+      }
+    } else if (!this.isSuperuser) {
+      // Para edición, restringir campos si no es superusuario
+      const restrictedFields = ['username', 'first_name', 'last_name', 'is_active', 'is_admin', 'is_superuser'];
+      this.formFields.forEach(field => {
+        if (restrictedFields.includes(field.key)) {
+          field.readonly = true;
+        }
+      });
+      // Contraseña no requerida y sin validaciones en edición
+      const passwordField = this.formFields.find(f => f.key === 'password');
+      if (passwordField) {
+        passwordField.required = false;
+        passwordField.validators = [];
+      }
+    }
   }
 
   loadUsers(): void {
     this.loading = true;
     this.error = null;
 
-    this.userService.getUsers().subscribe({
+    this.userService.getUsers().pipe(takeUntil(this.destroy$)).subscribe({
       next: (users) => {
         console.log('Users loaded:', users);
         this.users = users;
@@ -167,37 +215,29 @@ export class UserListComponent implements OnInit {
     });
   }
 
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.imgProfile = input.files[0];
+    } else {
+      this.imgProfile = undefined;
+    }
+  }
+
   onAddNew(): void {
     this.formMode = 'create';
     this.selectedUser = null;
-
-    const passwordField = this.formFields.find(f => f.key === 'password');
-    if (passwordField) {
-      passwordField.required = true;
-      passwordField.validators = [
-        Validators.required,
-        Validators.minLength(8),
-        Validators.pattern(this.passwordPattern)
-      ];
-    }
-
+    this.imgProfile = undefined;
+    this.updateFormFields();
     this.showForm = true;
   }
 
   onEdit(user: UserRead): void {
     this.formMode = 'edit';
     this.selectedUser = user;
-    console.log('Selected user for edit:', user); // Log para depuración
-
-    const passwordField = this.formFields.find(f => f.key === 'password');
-    if (passwordField) {
-      passwordField.required = false;
-      passwordField.validators = [
-        Validators.minLength(8),
-        Validators.pattern(this.passwordPattern)
-      ];
-    }
-
+    this.imgProfile = undefined;
+    console.log('Selected user for edit:', user);
+    this.updateFormFields();
     this.showForm = true;
   }
 
@@ -213,7 +253,7 @@ export class UserListComponent implements OnInit {
       if (result) {
         this.loading = true;
 
-        this.userService.deleteUser(user.id.toString()).subscribe({
+        this.userService.deleteUser(user.id.toString()).pipe(takeUntil(this.destroy$)).subscribe({
           next: () => {
             console.log('User deleted:', user.id);
             this.users = this.users.filter(u => u.id !== user.id);
@@ -231,17 +271,30 @@ export class UserListComponent implements OnInit {
   }
 
   onView(user: UserRead): void {
-    alert(
-      `Detalles del usuario:\nUsuario: ${user.username}\nNombre: ${user.first_name} ${user.last_name}\nEmail: ${user.email}\nDNI: ${user.dni}\nActivo: ${
-        user.is_active ? 'Sí' : 'No'
-      }${user.address ? `\nDirección: ${user.address}` : ''}${user.telephone ? `\nTeléfono: ${user.telephone}` : ''}${
-        user.blood_type ? `\nTipo de sangre: ${user.blood_type}` : ''}${user.is_admin ? `\nAdmin: ${user.is_admin ? 'Sí' : 'No'}` : ''}${user.is_superuser ? `\nSuperusuario: ${user.is_superuser ? 'Sí' : 'No'}` : ''}${
-        user.last_login ? `\nÚltimo inicio de sesión: ${new Date(user.last_login).toLocaleString()}` : ''
-      }`
-    );
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: `Detalles de ${user.username}`,
+        message: `
+          Usuario: ${user.username}
+          Nombre: ${user.first_name || 'No disponible'} ${user.last_name || ''}
+          Email: ${user.email || 'No disponible'}
+          DNI: ${user.dni || 'No disponible'}
+          Activo: ${user.is_active ? 'Sí' : 'No'}
+          Admin: ${user.is_admin ? 'Sí' : 'No'}
+          Superusuario: ${user.is_superuser ? 'Sí' : 'No'}
+          Dirección: ${user.address || 'No disponible'}
+          Teléfono: ${user.telephone || 'No disponible'}
+          Tipo de sangre: ${user.blood_type || 'No disponible'}
+          Último inicio de sesión: ${user.last_login ? new Date(user.last_login).toLocaleString('es-AR') : 'No registrado'}
+          Fecha de registro: ${user.date_joined ? new Date(user.date_joined).toLocaleString('es-AR') : 'No disponible'}
+        `,
+        confirmText: 'Cerrar',
+        showCancel: false,
+      },
+    });
   }
 
-  onFormSubmit(formData: UserCreate | UserUpdate): void {
+  onFormSubmit(formData: any): void {
     this.formLoading = true;
     this.error = null;
 
@@ -253,41 +306,63 @@ export class UserListComponent implements OnInit {
       return;
     }
 
-    if (formData.password && !this.passwordPattern.test(formData.password)) {
-      this.error = 'La contraseña debe tener al menos 8 caracteres, incluyendo una letra minúscula, una mayúscula, un número y un carácter especial (@$!%*?&#).';
-      this.formLoading = false;
-      return;
-    }
-
     if (this.formMode === 'create') {
-      this.userService.createUser(formData as UserCreate).subscribe({
+      const payload: UserCreate = {
+        username: formData.username,
+        email: formData.email,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        dni: formData.dni,
+        password: formData.password,
+        address: formData.address || undefined,
+        blood_type: formData.blood_type || undefined,
+      };
+
+      this.userService.createUser(payload, this.imgProfile).pipe(takeUntil(this.destroy$)).subscribe({
         next: (newUser) => {
-          console.log('User created (full response):', newUser);
+          console.log('User created:', newUser);
           this.users.push(newUser);
           this.formLoading = false;
           this.showForm = false;
+          this.imgProfile = undefined;
           this.logger.info(`Usuario "${newUser.username}" creado correctamente`);
         },
         error: (error: HttpErrorResponse) => {
-          console.error('Create user error (full response):', error);
+          console.error('Create user error:', error);
           this.handleError(error, 'Error al crear el usuario');
           this.formLoading = false;
         },
       });
     } else if (this.selectedUser) {
-      this.userService.updateUser(this.selectedUser.id.toString(), formData as UserUpdate).subscribe({
+      const payload: UserUpdate = {
+        username: this.isSuperuser ? formData.username : undefined,
+        first_name: this.isSuperuser ? formData.first_name : undefined,
+        last_name: this.isSuperuser ? formData.last_name : undefined,
+        email: formData.email || undefined,
+        telephone: formData.telephone || undefined,
+        address: formData.address || undefined,
+        blood_type: formData.blood_type || undefined,
+        health_insurance_id: formData.health_insurance_id || undefined,
+        password: formData.password || undefined,
+        is_active: this.isSuperuser ? formData.is_active : undefined,
+        is_admin: this.isSuperuser ? formData.is_admin : undefined,
+        is_superuser: this.isSuperuser ? formData.is_superuser : undefined,
+      };
+
+      this.userService.updateUser(this.selectedUser.id.toString(), payload, this.imgProfile).pipe(takeUntil(this.destroy$)).subscribe({
         next: (updatedUser) => {
-          console.log('User updated (full response):', updatedUser);
+          console.log('User updated:', updatedUser);
           const index = this.users.findIndex(u => u.id === updatedUser.id);
           if (index !== -1) {
             this.users[index] = updatedUser;
           }
           this.formLoading = false;
           this.showForm = false;
+          this.imgProfile = undefined;
           this.logger.info(`Usuario "${updatedUser.username}" actualizado correctamente`);
         },
         error: (error: HttpErrorResponse) => {
-          console.error('Update user error (full response):', error);
+          console.error('Update user error:', error);
           this.handleError(error, 'Error al actualizar el usuario');
           this.formLoading = false;
         },
@@ -297,7 +372,8 @@ export class UserListComponent implements OnInit {
 
   onFormCancel(): void {
     this.showForm = false;
-    this.selectedUser = null; 
+    this.selectedUser = null;
+    this.imgProfile = undefined;
   }
 
   onBanEvent(event: any): void {
@@ -322,7 +398,7 @@ export class UserListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loading = true;
-        this.userService.banUser(user.id.toString()).subscribe({
+        this.userService.banUser(user.id.toString()).pipe(takeUntil(this.destroy$)).subscribe({
           next: (bannedUser) => {
             console.log('User banned:', bannedUser);
             const index = this.users.findIndex(u => u.id === bannedUser.id);
@@ -354,7 +430,7 @@ export class UserListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loading = true;
-        this.userService.unbanUser(user.id.toString()).subscribe({
+        this.userService.unbanUser(user.id.toString()).pipe(takeUntil(this.destroy$)).subscribe({
           next: (unbannedUser) => {
             console.log('User unbanned:', unbannedUser);
             const index = this.users.findIndex(u => u.id === unbannedUser.id);
@@ -393,5 +469,10 @@ export class UserListComponent implements OnInit {
     }
     this.error = errorMessage;
     console.log('Error completo:', error);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

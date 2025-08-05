@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataTableComponent } from '../shared/data-table/data-table.component';
-import { EntityFormComponent, FormField } from '../shared/entity-form/entity-form.component';
-import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
+import { DataTableComponent } from '../../shared/data-table/data-table.component';
+import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { Validators } from '@angular/forms';

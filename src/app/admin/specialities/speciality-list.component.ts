@@ -1,8 +1,8 @@
-import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataTableComponent } from '../shared/data-table/data-table.component';
-import { EntityFormComponent, FormField } from '../shared/entity-form/entity-form.component';
+import { DataTableComponent } from '../../shared/data-table/data-table.component';
+import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
 import { SpecialityService } from '../../services/speciality/speciality.service';
 import { Specialty, SpecialtyCreate, SpecialtyUpdate } from '../../services/interfaces/hospital.interfaces';
 import { LoggerService } from '../../services/core/logger.service';

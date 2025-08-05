@@ -1,19 +1,25 @@
 <section class="profile">
   <div class="profile__card">
     <!-- Mensaje de carga -->
-    <div *ngIf="!user" class="loading">
+    <div *ngIf="loading" class="loading">
       <span>Cargando datos...</span>
     </div>
 
+    <!-- Mensaje de error -->
+    <div *ngIf="error && !loading" class="error">
+      <span>{{ error }}</span>
+    </div>
+
     <!-- Contenido del perfil -->
-    <div *ngIf="user">
+    <div *ngIf="user && !loading && !error">
       <div class="profile__header">
         <div class="profile__avatar">
           <span class="profile__avatar-initials">{{ getInitials() }}</span>
         </div>
         <div>
-          <h2 class="profile__name">{{ user.first_name }} {{ user.last_name }}</h2>
-          <p class="profile__id">DNI: {{ user.dni }}</p>
+          <h2 class="profile__name">{{ user.first_name || 'No disponible' }} {{ user.last_name || '' }}</h2>
+          <p class="profile__id">DNI: {{ user.dni || 'No disponible' }}</p>
+          <p class="profile__username">Usuario: {{ user.username || 'No disponible' }}</p>
         </div>
       </div>
       <div class="profile__body">
@@ -22,7 +28,7 @@
           <div class="profile__grid">
             <div class="profile__field">
               <span class="profile__label">Nombre Completo</span>
-              <p class="profile__value">{{ user.first_name }} {{ user.last_name }}</p>
+              <p class="profile__value">{{ user.first_name || 'No disponible' }} {{ user.last_name || '' }}</p>
             </div>
             <div class="profile__field">
               <span class="profile__label">Tipo de Sangre</span>
@@ -30,7 +36,7 @@
             </div>
             <div class="profile__field">
               <span class="profile__label">Correo Electrónico</span>
-              <p class="profile__value">{{ user.email }}</p>
+              <p class="profile__value">{{ user.email || 'No disponible' }}</p>
             </div>
             <div class="profile__field">
               <span class="profile__label">Teléfono</span>
@@ -47,7 +53,7 @@
             </div>
             <div class="profile__field">
               <span class="profile__label">Obra Social</span>
-              <p class="profile__value">{{ insurance }}</p>
+              <p class="profile__value">{{ healthInsurance }}</p>
             </div>
             <div class="profile__field">
               <span class="profile__label">Última Visita</span>
@@ -57,8 +63,8 @@
         </div>
       </div>
       <div class="profile__footer">
-        <button class="btn btn--outline" (click)="onChangePassword()">Cambiar Contraseña</button>
-        <button class="btn btn--primary" (click)="onEditProfile()">Editar Perfil</button>
+        <button class="btn btn--outline" [routerLink]="['/user_panel/change-password']">Cambiar Contraseña</button>
+        <button class="btn btn--primary" [routerLink]="['/user_panel/edit-profile']">Editar Perfil</button>
       </div>
     </div>
   </div>

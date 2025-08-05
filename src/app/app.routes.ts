@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout/layout.component';
 import { MedicPanelComponent } from './pages/medic-panel/medic-panel/medic-panel.component';
+import { UserPanelComponent } from './pages/user-panel/user-panel/user-panel.component';
 import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
@@ -50,10 +51,10 @@ export const routes: Routes = [
         path: 'login',
         loadComponent: () =>
           import('./auth/login/login.component').then((m) => m.LoginComponent),
-      }
-      ],
+      },
+    ],
   },
-   
+
   {
     path: 'admin_panel',
     canActivate: [authGuard],
@@ -63,9 +64,45 @@ export const routes: Routes = [
 
   {
     path: 'user_panel',
+    component: UserPanelComponent,
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/user-panel/user-panel/user-panel.component').then((m) => m.UserPanelComponent),
+    children: [
+      {
+        path: 'appointments',
+        loadComponent: () =>
+          import('./pages/user-panel/appointments/appointments.component').then((m) => m.AppointmentsComponent),
+      },
+      {
+        path: 'history',
+        loadComponent: () =>
+          import('./pages/user-panel/history/history.component').then((m) => m.HistoryComponent),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./pages/user-panel/notifications/notifications.component').then((m) => m.NotificationsComponent),
+      },
+      {
+        path: 'documents',
+        loadComponent: () =>
+          import('./pages/user-panel/documents/documents.component').then((m) => m.DocumentsComponent),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/user-panel/profile/profile.component').then((m) => m.ProfileComponent),
+      },
+      {
+        path: 'edit-profile',
+        loadComponent: () =>
+          import('./pages/user-panel/edit-profile/edit-profile.component').then((m) => m.EditProfileComponent),
+      },
+      {
+        path: '',
+        redirectTo: 'appointments',
+        pathMatch: 'full',
+      },
+    ],
   },
 
   {
@@ -75,31 +112,38 @@ export const routes: Routes = [
     children: [
       {
         path: 'home',
-        loadComponent: () => import('./pages/medic-panel/doctor-profile/doctor-profile.component').then((m) => m.DoctorProfileComponent),
+        loadComponent: () =>
+          import('./pages/medic-panel/doctor-profile/doctor-profile.component').then((m) => m.DoctorProfileComponent),
       },
       {
         path: 'patients',
-        loadComponent: () => import('./pages/medic-panel/patients/patients.component').then((m) => m.PatientsComponent),
+        loadComponent: () =>
+          import('./pages/medic-panel/patients/patients.component').then((m) => m.PatientsComponent),
       },
       {
         path: 'appointments',
-        loadComponent: () => import('./pages/medic-panel/appointment-schedule/appointment-schedule.component').then((m) => m.AppointmentScheduleComponent),
+        loadComponent: () =>
+          import('./pages/medic-panel/appointment-schedule/appointment-schedule.component').then((m) => m.AppointmentScheduleComponent),
       },
       {
         path: 'history',
-        loadComponent: () => import('./pages/medic-panel/medical-history/medical-history.component').then((m) => m.MedicalHistoryComponent),
+        loadComponent: () =>
+          import('./pages/medic-panel/medical-history/medical-history.component').then((m) => m.MedicalHistoryComponent),
       },
       {
         path: 'messages',
-        loadComponent: () => import('./pages/medic-panel/messages/messages.component').then((m) => m.MessagesComponent),
+        loadComponent: () =>
+          import('./pages/medic-panel/messages/messages.component').then((m) => m.MessagesComponent),
       },
       {
         path: 'statistics',
-        loadComponent: () => import('./pages/medic-panel/statistics/statistics.component').then((m) => m.StatisticsComponent),
+        loadComponent: () =>
+          import('./pages/medic-panel/statistics/statistics.component').then((m) => m.StatisticsComponent),
       },
       {
         path: 'settings',
-        loadComponent: () => import('./pages/medic-panel/settings/settings.component').then((m) => m.SettingsComponent),
+        loadComponent: () =>
+          import('./pages/medic-panel/settings/settings.component').then((m) => m.SettingsComponent),
       },
       {
         path: '',

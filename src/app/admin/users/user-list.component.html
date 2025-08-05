@@ -1,51 +1,51 @@
-<div class="user-list">
-  <div class="user-list__header">
-    <h3>Listado de Usuarios</h3>
-    <button
-      class="add-button"
-      (click)="onAddNew()"
-      aria-label="Agregar nuevo usuario"
-    >
-      <span class="material-icons">add</span>
-      Nuevo Usuario
-    </button>
+<section class="user-list">
+  <div class="user-list__card">
+    <div class="user-list__header">
+      <h2 class="user-list__title">Gestión de Usuarios</h2>
+      <button class="btn btn--primary" (click)="onAddNew()">Agregar Usuario</button>
+    </div>
+    <div class="user-list__body">
+      <div *ngIf="error" class="user-list__alert alert alert--danger">
+        {{ error }}
+      </div>
+      <div *ngIf="loading" class="user-list__loading">
+        <span>Cargando usuarios...</span>
+      </div>
+      <app-data-table
+        *ngIf="!loading && users.length"
+        [data]="users"
+        [columns]="tableColumns"
+        [actions]="[
+          { label: 'Ver', icon: 'visibility', callback: onView },
+          { label: 'Editar', icon: 'edit', callback: onEdit },
+          { label: 'Eliminar', icon: 'delete', callback: onDelete },
+          { label: 'Banear', icon: 'block', callback: onBanEvent, condition: (user: UserRead) => user.is_active },
+          { label: 'Desbanear', icon: 'check_circle', callback: onUnbanEvent, condition: (user: UserRead) => !user.is_active }
+        ]"
+      ></app-data-table>
+      <div *ngIf="!loading && !users.length" class="user-list__empty">
+        No se encontraron usuarios.
+      </div>
+      <div *ngIf="showForm" class="user-list__form">
+        <div class="user-list__form-field">
+          <label for="img_profile" class="user-list__label">Imagen de Perfil</label>
+          <input
+            id="img_profile"
+            type="file"
+            accept="image/*"
+            (change)="onFileSelected($event)"
+            class="user-list__input-file"
+          />
+        </div>
+        <app-entity-form
+          [fields]="formFields"
+          [loading]="formLoading"
+          [initialData]="selectedUser"
+          [submitLabel]="formMode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario'"
+          (formSubmit)="onFormSubmit($event)"
+          (formCancel)="onFormCancel()"
+        ></app-entity-form>
+      </div>
+    </div>
   </div>
-
-  <div *ngIf="error" class="error-message" role="alert" aria-live="assertive">
-    {{ error }}
-    <button
-      class="close-button"
-      (click)="error = null"
-      aria-label="Cerrar mensaje de error"
-    >
-      <span class="material-icons">close</span>
-    </button>
-  </div>
-
-  <div class="user-list__content" [class.hidden]="showForm">
-    <app-data-table
-      [data]="users"
-      [columns]="tableColumns"
-      [loading]="loading"
-      [showBanUnban]="true"  
-      (edit)="onEdit($event)"
-      (delete)="onDelete($event)"
-      (view)="onView($event)"
-      (ban)="onBanEvent($event)"  
-      (unban)="onUnbanEvent($event)"  
-    ></app-data-table>
-  </div>
-
-  <div class="user-list__form" [class.hidden]="!showForm">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="formMode === 'edit' ? selectedUser : null"
-      [mode]="formMode"
-      [title]="formMode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario'"
-      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
-      [loading]="formLoading"
-      (formSubmit)="onFormSubmit($event)"
-      (formCancel)="onFormCancel()"
-    ></app-entity-form>
-  </div>
-</div>
+</section>

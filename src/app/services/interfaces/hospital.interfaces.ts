@@ -8,6 +8,7 @@ export interface Service {
   name: string;
   description: string;
   price: number;
+  icon_code: string;
   specialty_id: string; // UUID
 }
 

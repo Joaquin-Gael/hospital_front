@@ -23,49 +23,58 @@
     </div>
   </div>
   <nav class="sidebar__nav">
-    <button class="sidebar__nav-item" [class.sidebar__nav-item--active]="activeSection === 'appointments'" (click)="setActiveSection('appointments')">
-      <span class="sidebar__nav-icon">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </span>
-      <span>Turnos Agendados</span>
-    </button>
-    <button class="sidebar__nav-item" [class.sidebar__nav-item--active]="activeSection === 'history'" (click)="setActiveSection('history')">
-      <span class="sidebar__nav-icon">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </span>
-      <span>Historial</span>
-    </button>
-    <button class="sidebar__nav-item" [class.sidebar__nav-item--active]="activeSection === 'notifications'" (click)="setActiveSection('notifications')">
-      <span class="sidebar__nav-icon">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-        @if (getUnreadNotificationsCount() > 0) {
-          <span class="sidebar__nav-badge">{{ getUnreadNotificationsCount() }}</span>
-        }
-      </span>
-      <span>Notificaciones</span>
-    </button>
-    <button class="sidebar__nav-item" [class.sidebar__nav-item--active]="activeSection === 'documents'" (click)="setActiveSection('documents')">
-      <span class="sidebar__nav-icon">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </span>
-      <span>Documentos</span>
-    </button>
-    <button class="sidebar__nav-item" [class.sidebar__nav-item--active]="activeSection === 'profile'" (click)="setActiveSection('profile')">
-      <span class="sidebar__nav-icon">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      </span>
-      <span>Perfil</span>
-    </button>
+    <ul class="sidebar__menu">
+      <li *ngFor="let item of menuItems" class="sidebar__item">
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="sidebar__nav-item--active"
+          class="sidebar__nav-item"
+        >
+          <span class="sidebar__nav-icon">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path
+                *ngIf="item.icon === 'calendar'"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+              <path
+                *ngIf="item.icon === 'history'"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+              <path
+                *ngIf="item.icon === 'bell'"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+              <path
+                *ngIf="item.icon === 'file'"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+              <path
+                *ngIf="item.icon === 'user'"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+              <path
+                *ngIf="item.icon === 'edit'"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
+            </svg>
+            <span *ngIf="item.badge && item.badge() > 0" class="sidebar__nav-badge">{{ item.badge() }}</span>
+          </span>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
   </nav>
   <div class="sidebar__footer">
     <button class="sidebar__footer-btn" (click)="onLogout()">

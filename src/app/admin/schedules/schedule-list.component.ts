@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataTableComponent } from '../shared/data-table/data-table.component';
-import { EntityFormComponent, FormField } from '../shared/entity-form/entity-form.component';
+import { DataTableComponent } from '../../shared/data-table/data-table.component';
+import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
 import { ScheduleService } from '../../services/schedule/schedule.service';
 import { DoctorService } from '../../services/doctor/doctor.service';
 import { LoggerService } from '../../services/core/logger.service';
@@ -9,7 +9,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { AssignDoctorScheduleComponent } from './assign-doctor-schedule.component';
 import { MedicalScheduleCreate, MedicalScheduleUpdate } from '../../services/interfaces/hospital.interfaces';
 import { MedicalSchedule, Doctor } from '../../services/interfaces/doctor.interfaces';
