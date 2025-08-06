@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest, of } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
@@ -12,37 +12,53 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  private loginStatusSubscription!: Subscription
+  private subscriptions: Subscription = new Subscription();
   isMenuOpen = false;
   scrolled = false;
   navItems: any[] = [];
 
-  constructor(
-    private authService: AuthService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit() {
-    this.loginStatusSubscription = this.authService.loginStatus$.subscribe((isLoggedIn) => {
-      this.navItems = this.getNavItems(isLoggedIn);
-    });
+    this.subscriptions.add(
+      combineLatest([this.authService.loginStatus$, of(this.authService.getStoredScopes())]).subscribe(
+        ([isLoggedIn, scopes]) => {
+          this.navItems = this.getNavItems(isLoggedIn, scopes);
+        }
+      )
+    );
   }
 
   ngOnDestroy() {
-    if (this.loginStatusSubscription) {
-      this.loginStatusSubscription.unsubscribe();
-    }
+    this.subscriptions.unsubscribe();
   }
 
-  getNavItems(isLoggedIn: boolean): any[] {
+  getNavItems(isLoggedIn: boolean, scopes: string[]): any[] {
     const baseItems = [
       { label: 'Inicio', route: '/' },
       { label: 'Contacto', route: '/contact' },
     ];
 
     if (isLoggedIn) {
-      return [...baseItems, { label: 'Mi Cuenta', route: '/user_panel' }, { label: 'Solicitar Turno', route: '/shifts' }];
+      let accountRoute = '/user_panel'; 
+      if (scopes.includes('doc')) {
+        accountRoute = '/medic_panel';
+      } else if (scopes.includes('admin')) {
+        accountRoute = '/admin_panel';
+      } else if (scopes.includes('user') || scopes.includes('superuser') || scopes.includes('google')) {
+        accountRoute = '/user_panel';
+      }
+      return [
+        ...baseItems,
+        { label: 'Mi Cuenta', route: accountRoute },
+        { label: 'Solicitar Turno', route: '/shifts' },
+      ];
     } else {
-      return [...baseItems, { label: 'Iniciar Sesión', route: '/login' }, { label: 'Registrarse', route: '/register' }];
+      return [
+        ...baseItems,
+        { label: 'Iniciar Sesión', route: '/login' },
+        { label: 'Registrarse', route: '/register' },
+      ];
     }
   }
 

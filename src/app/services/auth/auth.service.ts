@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, tap, switchMap } from 'rxjs/operators';
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
@@ -32,17 +32,28 @@ export class AuthService {
 
   login(credentials: Auth): Observable<TokenUserResponse> {
     let params = new HttpParams()
-    .set('email', credentials.email)
-    .set('password', credentials.password)
+      .set('email', credentials.email)
+      .set('password', credentials.password);
     return this.apiService
       .post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, params.toString(), {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       })
       .pipe(
-        tap((response) => {
+        switchMap((response) => {
           this.storage.setAccessToken(response.access_token);
           this.storage.setRefreshToken(response.refresh_token);
           this.loginStatusSubject.next(true);
+          // Obtener y guardar scopes después del login
+          return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
+            tap((scopesResponse) => {
+              this.setScopes(scopesResponse.scopes);
+            }),
+            map(() => response), // Devolvemos la respuesta original
+            catchError(() => {
+              this.setScopes([]);
+              return of(response);
+            })
+          );
         }),
         catchError((error) => this.handleError('User Login', error))
       );
@@ -58,13 +69,24 @@ export class AuthService {
     const url = 'http://127.0.0.1:8000/api/oauth/google';
     this.logger.debug(`Intercambiando código en: ${url}`);
     return this.apiService.post<TokenUserResponse>(url, { code }).pipe(
-      tap((response) => {
+      switchMap((response) => {
         this.logger.debug('Token recibido:', response.access_token);
         this.storage.setAccessToken(response.access_token);
         if (response.refresh_token) {
           this.storage.setRefreshToken(response.refresh_token);
         }
         this.loginStatusSubject.next(true);
+        // Obtener y guardar scopes después del login
+        return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
+          tap((scopesResponse) => {
+            this.setScopes(scopesResponse.scopes);
+          }),
+          map(() => response),
+          catchError(() => {
+            this.setScopes([]);
+            return of(response);
+          })
+        );
       }),
       catchError((error) => this.handleError('OAuth Code Exchange', error))
     );
@@ -73,10 +95,21 @@ export class AuthService {
   decode(code: string): Observable<DecodeResponse> {
     this.logger.debug('Decodificando código secreto');
     return this.apiService.post<DecodeResponse>(AUTH_ENDPOINTS.DECODE, { code }).pipe(
-      tap((response) => {
+      switchMap((response) => {
         this.logger.debug('Access token recibido:', response.access_token);
         this.storage.setAccessToken(response.access_token);
         this.loginStatusSubject.next(true);
+        // Obtener y guardar scopes después del login
+        return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
+          tap((scopesResponse) => {
+            this.setScopes(scopesResponse.scopes);
+          }),
+          map(() => response),
+          catchError(() => {
+            this.setScopes([]);
+            return of(response);
+          })
+        );
       }),
       catchError((error) => this.handleError('Decode Code', error))
     );
@@ -97,17 +130,28 @@ export class AuthService {
 
   doctorLogin(credentials: Auth): Observable<TokenDoctorsResponse> {
     let params = new HttpParams()
-    .set('email', credentials.email)
-    .set('password', credentials.password)
+      .set('email', credentials.email)
+      .set('password', credentials.password);
     return this.apiService
-      .post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, params.toString(),  {
+      .post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, params.toString(), {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       })
       .pipe(
-        tap((response) => {
+        switchMap((response) => {
           this.storage.setAccessToken(response.access_token);
           this.storage.setRefreshToken(response.refresh_token);
           this.loginStatusSubject.next(true);
+          // Obtener y guardar scopes después del login
+          return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
+            tap((scopesResponse) => {
+              this.setScopes(scopesResponse.scopes);
+            }),
+            map(() => response),
+            catchError(() => {
+              this.setScopes([]);
+              return of(response);
+            })
+          );
         }),
         catchError((error) => this.handleError('Doctor Login', error))
       );
@@ -165,6 +209,15 @@ export class AuthService {
       map((response) => response.scopes),
       catchError(() => of([]))
     );
+  }
+
+  setScopes(scopes: string[]): void {
+    this.storage.setItem('scopes', JSON.stringify(scopes));
+  }
+
+  getStoredScopes(): string[] {
+    const scopes = this.storage.getItem('scopes');
+    return scopes ? JSON.parse(scopes) : [];
   }
 
   private handleError(operation: string, error: unknown): Observable<never> {

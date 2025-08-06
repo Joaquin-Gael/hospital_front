@@ -7,6 +7,7 @@ export class StorageService {
   private readonly ACCESS_TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly STORAGE_KEY_EMAIL = 'rememberEmail';
+  private readonly SCOPES_KEY = 'scopes';
 
   getAccessToken(): string | null {
     return localStorage.getItem(this.ACCESS_TOKEN_KEY);
@@ -41,8 +42,21 @@ export class StorageService {
     localStorage.removeItem(this.STORAGE_KEY_EMAIL);
   }
 
+  setItem(key: string, value: string): void {
+    localStorage.setItem(key, value);
+  }
+
+  getItem(key: string): string | null {
+    return localStorage.getItem(key);
+  }
+
+  removeItem(key: string): void {
+    localStorage.removeItem(key);
+  }
+
   clearStorage(): void {
     this.removeTokens();
     this.removeRememberEmail();
+    this.removeItem(this.SCOPES_KEY);
   }
 }

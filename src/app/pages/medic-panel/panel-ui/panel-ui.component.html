@@ -1,14 +1,26 @@
-<div class="panel-ui" [ngClass]="{'panel-ui--sidebar-collapsed': isSidebarCollapsed, 'panel-ui--sidebar-mobile-open': isSidebarMobileOpen}">
-  <div class="panel-ui__overlay" *ngIf="isSidebarMobileOpen" (click)="closeMobileSidebar()"></div>
+<div class="panel-ui" [ngClass]="{
+  'panel-ui--sidebar-collapsed': isSidebarCollapsed,
+  'panel-ui--sidebar-mobile-open': isSidebarMobileOpen
+}">
+  <div 
+    class="panel-ui__overlay" 
+    *ngIf="isSidebarMobileOpen" 
+    (click)="closeMobileSidebar()"
+    [@fadeInOut]>
+  </div>
 
-  <aside class="panel-ui__sidebar">
+  <aside class="panel-ui__sidebar" [@slideInOut]>
     <div class="panel-ui__sidebar-header">
-      <div class="panel-ui__logo">
-        <img src="assets/logo-siglas-blanco.png" alt="Logo" class="panel-ui__logo-image">
-        <span class="panel-ui__logo-text">Hospital SDLG</span>
+      <div class="panel-ui__logo" [class.panel-ui__logo--collapsed]="isSidebarCollapsed">
+        <span class="panel-ui__logo-text" *ngIf="!isSidebarCollapsed">Hospital SDLG</span>
       </div>
-      <button class="btn btn--icon panel-ui__sidebar-toggle" (click)="toggleSidebar()">
-        <mat-icon>menu</mat-icon>
+      
+      <button 
+        class="panel-ui__sidebar-toggle" 
+        (click)="toggleSidebar()"
+        [class.panel-ui__sidebar-toggle--collapsed]="isSidebarCollapsed"
+        *ngIf="!isMobileView">
+        <mat-icon>{{ isSidebarCollapsed ? 'menu_open' : 'menu' }}</mat-icon>
       </button>
     </div>
 
@@ -20,9 +32,12 @@
             routerLinkActive="panel-ui__menu-link--active"
             class="panel-ui__menu-link"
             (click)="navigateTo(item.route)"
-          >
-            <mat-icon class="panel-ui__menu-icon" [ngClass]="item.icon"></mat-icon>
-            <span class="panel-ui__menu-label">{{ item.label }}</span>
+            [class.panel-ui__menu-link--collapsed]="isSidebarCollapsed"
+            [attr.aria-label]="item.label">
+            <div class="panel-ui__menu-icon">
+              <mat-icon>{{ item.icon }}</mat-icon>
+            </div>
+            <span class="panel-ui__menu-label" *ngIf="!isSidebarCollapsed">{{ item.label }}</span>
           </a>
         </li>
       </ul>
@@ -30,38 +45,34 @@
 
     <div class="panel-ui__sidebar-footer">
       <div class="panel-ui__user">
-        <div class="panel-ui__user-info">
-          <button class="btn btn--text btn--sm panel-ui__logout" (click)="onLogout()">
-            <mat-icon>logout</mat-icon>
-            <span>Cerrar sesión</span>
-          </button>
-        </div>
+        <button 
+          class="panel-ui__logout" 
+          (click)="onLogout()"
+          [class.panel-ui__logout--collapsed]="isSidebarCollapsed"
+          [attr.aria-label]="isSidebarCollapsed ? 'Cerrar sesión' : ''">
+          <div class="panel-ui__user-avatar">
+            <mat-icon>account_circle</mat-icon>
+          </div>
+          <div class="panel-ui__user-info" *ngIf="!isSidebarCollapsed">
+            <span class="panel-ui__user-name">Dr. Usuario</span>
+            <span class="panel-ui__logout-text">Cerrar sesión</span>
+          </div>
+          <mat-icon>logout</mat-icon>
+        </button>
       </div>
     </div>
   </aside>
 
-  <div class="panel-ui__main">
-    <header class="panel-ui__header">
+  <div class="panel-ui__main" [class.panel-ui__main--sidebar-collapsed]="isSidebarCollapsed">
+    <header class="panel-ui__header" *ngIf="isMobileView">
       <div class="panel-ui__header-left">
-        <button class="btn btn--icon panel-ui__mobile-menu" (click)="toggleMobileSidebar()">
+        <button 
+          class="panel-ui__mobile-menu" 
+          (click)="toggleMobileSidebar()"
+          [attr.aria-label]="'Abrir menú'">
           <mat-icon>menu</mat-icon>
         </button>
         <h1 class="panel-ui__title">Panel Médico</h1>
-      </div>
-
-      <div class="panel-ui__header-right">
-        <div class="panel-ui__search">
-          <input type="text" placeholder="Buscar..." class="panel-ui__search-input">
-          <mat-icon class="panel-ui__search-icon">search</mat-icon>
-        </div>
-        
-        <button class="btn btn--icon">
-          <mat-icon>notifications</mat-icon>
-        </button>
-        
-        <button class="btn btn--icon">
-          <mat-icon>help</mat-icon>
-        </button>
       </div>
     </header>
 
