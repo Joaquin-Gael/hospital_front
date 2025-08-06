@@ -15,6 +15,7 @@ import {
   DoctorDelete,
   DoctorMeResponse,
   MedicalSchedule,
+  DoctorUpdatePassword
 } from '../interfaces/doctor.interfaces';
 import { ServiceService } from '../service/service.service';
 import { Service } from '../interfaces/hospital.interfaces';
@@ -253,9 +254,11 @@ export class DoctorService {
    * @param password The new password.
    * @returns Observable of the updated Doctor object.
    */
-  updateDoctorPassword(doctorId: string, password: string): Observable<Doctor> {
+  updateDoctorPassword(doctorId: string, doc_password: DoctorUpdatePassword): Observable<Doctor> {
+    const formData = new FormData();
+    formData.append('password', doc_password.password);
     return this.apiService
-      .patch<Doctor>(DOCTOR_ENDPOINTS.UPDATE_PASSWORD(doctorId), { password })
+      .patch<Doctor>(DOCTOR_ENDPOINTS.UPDATE_PASSWORD(doctorId), formData )
       .pipe(
         catchError((error) =>
           this.handleError(

@@ -1,12 +1,14 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, Observable, combineLatest } from 'rxjs';
 import { Router } from '@angular/router';
 import { DoctorService } from '../../../services/doctor/doctor.service';
 import { LoggerService } from '../../../services/core/logger.service';
 import { StorageService } from '../../../services/core/storage.service';
-import { DoctorMeResponse, Doctor, DoctorUpdate, DoctorUpdateResponse } from '../../../services/interfaces/doctor.interfaces';
+import { Doctor, DoctorUpdatePassword, DoctorUpdate, DoctorUpdateResponse } from '../../../services/interfaces/doctor.interfaces';
+import { Specialty } from '../../../services/interfaces/hospital.interfaces';
+import { DoctorDataService } from '../medic-panel/doctor-data.service';
 
 interface NotificationSetting {
   id: string;
@@ -28,6 +30,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
   securityForm!: FormGroup;
   notificationSettings: NotificationSetting[] = [];
   doctor: Doctor | null = null;
+  specialities: Specialty[] = [];
+  doctorSpecialty$: Observable<string> = new Observable<string>();
   loading = true;
   error: string | null = null;
 
@@ -35,6 +39,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   private readonly doctorService = inject(DoctorService);
   private readonly logger = inject(LoggerService);
   private readonly storageService = inject(StorageService);
+  private readonly doctorDataService = inject(DoctorDataService);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
@@ -56,6 +61,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
       email: ['', [Validators.required, Validators.email]],
       telephone: ['', [Validators.required]],
       address: ['', [Validators.required]],
+      specialty_id: [''],
     });
 
     this.securityForm = this.fb.group(
@@ -75,31 +81,36 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   loadDoctorData(): void {
-    this.loading = true;
-    this.doctorService.getMe().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response: DoctorMeResponse) => {
-        this.doctor = response.doc ? { ...response.doc } : null;
-        this.loading = false;
-        if (!this.doctor) {
-          this.error = 'No se encontraron datos del doctor';
-          this.logger.error('No doctor data found');
-          this.router.navigate(['/login']);
-          return;
-        }
-        this.logger.info('Doctor data loaded', { doctorId: this.doctor.id });
-        this.profileForm.patchValue({
-          email: this.doctor.email || '',
-          telephone: this.doctor.telephone || '',
-          address: this.doctor.address || '',
-        });
-      },
-      error: (err) => {
-        this.error = 'Error al cargar los datos del doctor';
-        this.loading = false;
-        this.logger.error('Failed to load doctor', err);
-        setTimeout(() => this.router.navigate(['/login']), 3000);
-      },
-    });
+    combineLatest([
+      this.doctorDataService.getDoctor(),
+      this.doctorDataService.getSpecialities(),
+    ])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ([doctor, specialities]) => {
+          this.doctor = doctor;
+          this.specialities = specialities;
+          this.doctorSpecialty$ = this.doctorDataService.getSpecialityName(doctor?.speciality_id || '');
+          if (doctor) {
+            this.profileForm.patchValue({
+              email: doctor.email || '',
+              telephone: doctor.telephone || '',
+              address: doctor.address || '',
+            });
+          }
+          this.loading = false;
+          this.error = doctor ? null : 'No se encontraron datos del doctor';
+          this.logger.info('Doctor and specialities loaded', {
+            doctorId: doctor?.id,
+            specialitiesCount: specialities.length,
+          });
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = 'Error al cargar los datos';
+          this.logger.error('Failed to load data in SettingsComponent', err);
+        },
+      });
   }
 
   loadNotificationSettings(): void {
@@ -149,64 +160,84 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   saveProfileSettings(): void {
-    if (this.profileForm.valid && this.doctor) {
-      const updateData: DoctorUpdate = {
-        email: this.profileForm.get('email')?.value,
-        telephone: this.profileForm.get('telephone')?.value,
-        address: this.profileForm.get('address')?.value,
-      };
-      this.doctorService.updateDoctor(this.doctor.id, updateData).subscribe({
-        next: (updatedFields: DoctorUpdateResponse) => {
-          this.logger.info('Perfil actualizado', { doctorId: this.doctor!.id });
-          // Actualizar solo los campos devueltos por la API (email, telephone)
-          this.doctor = {
-            ...this.doctor!,
-            ...updatedFields,
-          };
-          alert('Configuración de perfil guardada correctamente');
-        },
-        error: (err) => {
-          this.error = 'Error al guardar los cambios';
-          this.logger.error('Failed to update profile', err);
-        },
-      });
-    } else {
+    if (this.profileForm.invalid || !this.doctor) {
       this.profileForm.markAllAsTouched();
       this.error = 'Por favor, completa todos los campos requeridos';
+      this.logger.warn('Form invalid or no doctor data');
+      return;
     }
-  }
 
+    const updateData: DoctorUpdate = {
+      email: this.profileForm.get('email')?.value,
+      telephone: this.profileForm.get('telephone')?.value,
+      address: this.profileForm.get('address')?.value,
+      speciality_id: this.profileForm.get('specialty_id')?.value || this.doctor.speciality_id,
+    };
+
+    this.loading = true;
+    this.doctorService.updateDoctor(this.doctor.id, updateData).subscribe({
+      next: (updatedFields: DoctorUpdateResponse) => {
+        const updatedDoctor = { ...this.doctor!, ...updatedFields };
+        this.doctorDataService.setDoctor(updatedDoctor); // Actualizar el servicio
+        this.loading = false;
+        this.error = null;
+        this.logger.info('Profile updated', { doctorId: this.doctor!.id });
+        alert('Configuración de perfil guardada correctamente');
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = 'Error al guardar los cambios';
+        this.logger.error('Failed to update profile', err);
+      },
+    });
+  }
+  
+
+  /*
   saveSecuritySettings(): void {
-    if (this.securityForm.valid && this.doctor) {
-      const updateData: DoctorUpdate = {
-        password: this.securityForm.get('newPassword')?.value,
-      };
-      this.doctorService.updateDoctor(this.doctor.id, updateData).subscribe({
-        next: (updatedFields: DoctorUpdateResponse) => {
-          this.logger.info('Contraseña actualizada', { doctorId: this.doctor!.id });
-          alert('Contraseña actualizada correctamente');
-          this.securityForm.reset();
-          // No actualizamos this.doctor, ya que la API no devuelve datos útiles
-        },
-        error: (err) => {
-          this.error = 'Error al actualizar la contraseña';
-          this.logger.error('Failed to update password', err);
-        },
-      });
-    } else {
+    if (this.securityForm.invalid || !this.doctor) {
       this.securityForm.markAllAsTouched();
       this.error = 'Por favor, completa todos los campos requeridos';
+      this.logger.warn('Security form invalid or no doctor data');
+      return;
     }
-  }
 
+    const updateData: DoctorUpdatePassword = {
+      password: this.securityForm.get('newPassword')?.value,
+    };
+
+    this.loading = true;
+    this.doctorService.updateDoctorPassword(this.doctor.id, updateData).subscribe({
+      next: (updatedFields: DoctorUpdateResponse) => {
+        this.loading = false;
+        this.error = null;
+        this.logger.info('Password updated', { doctorId: this.doctor!.id });
+        alert('Contraseña actualizada correctamente');
+        this.securityForm.reset();
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = 'Error al actualizar la contraseña';
+        this.logger.error('Failed to update password', err);
+      },
+    });
+  }
+  */
   toggleNotification(setting: NotificationSetting): void {
     setting.enabled = !setting.enabled;
     this.logger.info(`Notificación ${setting.id} ${setting.enabled ? 'activada' : 'desactivada'}`);
   }
 
   saveNotificationSettings(): void {
+    this.loading = true;
     this.logger.info('Guardando configuración de notificaciones', this.notificationSettings);
-    alert('Configuración de notificaciones guardada correctamente');
+    // Aquí deberías hacer una llamada al backend para guardar las notificaciones, si es necesario
+    setTimeout(() => {
+      // Simulación de guardado
+      this.loading = false;
+      this.error = null;
+      alert('Configuración de notificaciones guardada correctamente');
+    }, 1000);
   }
 
   ngOnDestroy(): void {

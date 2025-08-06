@@ -79,12 +79,11 @@
                 La dirección es obligatoria
               </div>
             </div>
-            <!--
+            
             <div class="settings__form-group">
               <label class="settings__form-label">Especialidad</label>
-              <p class="settings__form-static">{{ doctor.speciality_id || 'No disponible' }}</p>
+              <p class="settings__form-static">{{ doctorSpecialty$ | async }}</p>
             </div>
-            -->
 
             <div class="settings__form-group">
               <label class="settings__form-label">DNI</label>
@@ -97,8 +96,8 @@
             </div>
 
             <div class="settings__form-group">
-              <label class="settings__form-label">Estado</label>
-              <p class="settings__form-static">{{ doctor.is_active ? 'Activo' : 'Inactivo' }}</p>
+              <label class="settings__form-label">Especialidad</label>
+              <p class="settings__form-static">{{ doctor.blood_type || 'No disponible' }}</p>
             </div>
 
             <div class="settings__form-actions">
@@ -118,7 +117,7 @@
 
         <div class="settings__card">
           <h3 class="settings__card-title">Cambiar contraseña</h3>
-          <form [formGroup]="securityForm" (ngSubmit)="saveSecuritySettings()" class="settings__form">
+          <form [formGroup]="securityForm" class="settings__form">
             <div class="settings__form-group">
               <label class="settings__form-label">Contraseña actual</label>
               <input type="password" formControlName="currentPassword" class="settings__form-input">

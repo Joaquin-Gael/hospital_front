@@ -8,6 +8,7 @@ export interface Doctor {
   telephone?: string;
   speciality_id: string; // UUID
   blood_type?: string;
+  doctor_state: string,
   is_active: boolean;
   is_admin?: boolean;
   is_superuser?: boolean;
@@ -35,30 +36,32 @@ export interface DoctorCreate {
   telephone?: string;
   speciality_id: string;
   blood_type?: string;
+  doctor_state?: string;
   address?: string;
+}
+
+export interface DoctorUpdatePassword {
+  password: string;
 }
 
 export interface DoctorUpdate {
   username?: string;
-  email?: string;
-  password?: string;
   first_name?: string;
   last_name?: string;
-  dni?: string;
   telephone?: string;
+  email?: string;
   speciality_id?: string; // UUID
-  blood_type?: string;
   address?: string;
-  is_active?: boolean;
-  is_admin?: boolean;
-  is_superuser?: boolean;
+  doctor_state?: string;
 }
 export interface DoctorUpdateResponse {
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-  telephone?: string;
-  email?: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  telephone: string;
+  email: string;
+  speciality_id: string;
+  address: string;
 }
 
 export interface DoctorDelete {

@@ -97,8 +97,8 @@
           <div class="dashboard-card__content">
             <div class="doctor-info">
               <div class="doctor-info__item">
-                <span class="doctor-info__label">Especialidad:</span>
-                <span class="doctor-info__value">{{ doctor.speciality_id || 'No especificada' }}</span>
+                <span class="doctor-info__label">Campo: </span>
+                <span class="doctor-info__value">{{ doctorSpecialty$ | async }}</span>
               </div>
               <div class="doctor-info__item">
                 <span class="doctor-info__label">DNI:</span>
@@ -219,7 +219,7 @@
               </button>
               <button class="quick-action-btn quick-action-btn--quaternary">
                 <mat-icon>chat</mat-icon>
-                <span>Mensajes</span>
+                <a href="medic_panel/messages"><span>Mensajes</span></a>
               </button>
             </div>
           </div>
