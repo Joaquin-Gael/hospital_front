@@ -19,6 +19,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
+import { NotificationService } from '../../../core/notification';
 
 @Component({
   selector: 'app-edit-profile',
@@ -31,6 +32,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly healthInsuranceService = inject(HealthInsuranceService);
+  private readonly notificationService = inject(NotificationService)
   private readonly logger = inject(LoggerService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
@@ -111,7 +113,16 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (userRead) => {
           if (!userRead) {
-            this.error = 'No se encontraron datos del usuario.';
+            this.notificationService.error(
+              'Ocurrió un error inesperado. Por favor, inicia sesión nuevamente.',
+                {
+                  duration: 5000,
+                  action: {
+                    label: 'Cerrar',
+                    action: () => this.notificationService.dismissAll(),
+                },
+              }
+            ), 
             this.logger.error('No se encontraron datos del usuario');
             this.router.navigate(['/login']);
             return;
@@ -130,7 +141,16 @@ export class EditProfileComponent implements OnInit, OnDestroy {
           };
         },
         error: (err: HttpErrorResponse) => {
-          this.handleError(err, 'Error al cargar los datos del usuario');
+            this.notificationService.error(
+              'Ocurrió un error al cargar los datos del usuario.',
+                {
+                  duration: 5000,
+                  action: {
+                    label: 'Cerrar',
+                    action: () => this.notificationService.dismissAll(),
+                },
+              }
+            ), 
           this.router.navigate(['/login']);
         },
       });
@@ -189,20 +209,36 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       if (result) {
         this.isSubmitting = true;
         this.error = null;
-
-        this.logger.debug('DATOS', payload)
-
         this.userService.updateUser(userId, payload).pipe(takeUntil(this.destroy$)).subscribe({
           next: (updatedUser) => {
             this.isSubmitting = false;
             this.error = null;
-            this.logger.info(`Usuario ${updatedUser.id} actualizado exitosamente`);
+            this.notificationService.success(
+              '¡Datos actualizados con éxito!',
+              {
+                duration: 5000,
+                action: {
+                  label: 'Cerrar',
+                  action: () => this.notificationService.dismissAll(),
+                },
+              }
+            );
             setTimeout(() => {
               this.router.navigate(['/user_panel/profile']);
             }, 2000);
           },
           error: (err: HttpErrorResponse) => {
             this.isSubmitting = false;
+            this.notificationService.error(
+              '¡Ocurrió un error al actualizar el perfil!',
+              {
+                duration: 5000,
+                action: {
+                  label: 'Cerrar',
+                  action: () => this.notificationService.dismissAll(),
+                },
+              }
+            );
             this.handleError(err, 'Error al actualizar el perfil');
           },
         });

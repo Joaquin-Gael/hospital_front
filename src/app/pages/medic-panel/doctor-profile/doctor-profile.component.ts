@@ -34,7 +34,7 @@ export class DoctorProfileComponent implements OnInit, OnDestroy {
   protected DoctorStatus = DoctorStatus;
 
   doctor: Doctor | null = null;
-  doctorSpecialty$: Observable<string> = new Observable<string>(); // Renombrado para indicar que es un observable
+  doctorSpecialty$: Observable<string> = new Observable<string>();
   schedules: MedicalSchedule[] = [];
   state: DashboardState = {
     error: null,

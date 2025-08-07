@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { trigger, transition, style, animate, state } from '@angular/animations';
+import { NotificationService } from '../../core/notification/services/notification.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { LoggerService } from '../../services/core/logger.service';
 import { StorageService } from '../../services/core/storage.service';
@@ -37,6 +38,7 @@ export class DoctorLoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly notificationService = inject(NotificationService);
   private readonly logger = inject(LoggerService);
   private readonly storage = inject(StorageService);
 
@@ -83,7 +85,16 @@ export class DoctorLoginComponent implements OnInit {
 
     this.authService.doctorLogin(credentials).subscribe({
       next: () => {
-        this.logger.info('Doctor login successful');
+          this.notificationService.success(
+            '¡Inicio de sesión exitoso!\n Redirigiendo...',
+            {
+              duration: 5000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            }
+          );
         this.isLoading = false;
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/medic_panel/home';
         this.router.navigateByUrl(returnUrl);

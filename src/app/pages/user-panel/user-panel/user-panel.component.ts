@@ -9,6 +9,9 @@ import { UserRead } from '../../../services/interfaces/user.interfaces';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HeaderComponent } from '../header/header.component';
 import { RouterOutlet } from '@angular/router';
+import { NotificationService } from '../../../core/notification';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
 
 @Component({
   selector: 'app-user-panel',
@@ -20,6 +23,7 @@ import { RouterOutlet } from '@angular/router';
     HeaderComponent,
     RouterOutlet,
     CommonModule,
+    MatDialogModule,
   ],
 })
 export class UserPanelComponent implements OnInit, OnDestroy {
@@ -27,6 +31,8 @@ export class UserPanelComponent implements OnInit, OnDestroy {
   private readonly storageService = inject(StorageService);
   private readonly logger = inject(LoggerService);
   private readonly router = inject(Router);
+  private readonly notificationService = inject(NotificationService)
+  private readonly dialog = inject(MatDialog);
 
   user: UserRead | null = null;
   error: string | null = null;
@@ -62,18 +68,36 @@ export class UserPanelComponent implements OnInit, OnDestroy {
   }
 
   onLogout(): void {
-    this.authService.logout().pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        this.storageService.clearStorage();
-        this.logger.info('Logout successful, redirecting to /login');
-        this.router.navigate(['/login']);
-      },
-      error: (err) => {
-        this.storageService.clearStorage();
-        this.logger.error('Failed to logout', err);
-        this.router.navigate(['/login']);
+    
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Cerrar sesión',
+        message: '¿Estás seguro de que deseas cerrar sesión?',
       },
     });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result){
+        this.authService.logout().pipe(takeUntil(this.destroy$)).subscribe({
+          next: () => {
+            this.storageService.clearStorage();
+            this.notificationService.success('Sesión cerrada correctamente', {
+              duration: 4000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
+            this.router.navigate(['/login']);
+          },
+          error: (err) => {
+            this.storageService.clearStorage();
+            this.logger.error('Failed to logout', err);
+            this.router.navigate(['/login']);
+          },
+        });
+      }
+    })
   }
 
   ngOnDestroy(): void {

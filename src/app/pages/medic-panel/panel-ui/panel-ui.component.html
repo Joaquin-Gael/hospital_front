@@ -54,7 +54,7 @@
             <mat-icon>account_circle</mat-icon>
           </div>
           <div class="panel-ui__user-info" *ngIf="!isSidebarCollapsed">
-            <span class="panel-ui__user-name">Dr. </span>
+            <span class="panel-ui__user-name">Dr. {{ doctor.name}} {{doctor.last_name}} </span>
             <span class="panel-ui__logout-text">Cerrar sesión</span>
           </div>
           <mat-icon>logout</mat-icon>
