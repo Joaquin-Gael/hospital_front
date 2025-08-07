@@ -25,17 +25,20 @@ $spacing-lg: 1rem;      // 16px
 $spacing-xl: 1.5rem;    // 24px
 
 // Tipografía mejorada
-$font-size-xs: 0.75rem;   // 12px
-$font-size-sm: 0.875rem;  // 14px
-$font-size-base: 1rem;    // 16px
-$font-size-lg: 1.125rem;  // 18px
+$font-size-xs: 0.8125rem;   // 13px (slightly larger)
+$font-size-sm: 0.9375rem;   // 15px
+$font-size-base: 1.125rem;  // 18px (larger for titles)
+$font-size-lg: 1.25rem;     // 20px
 $font-weight-normal: 400;
 $font-weight-medium: 500;
 $font-weight-semibold: 600;
-$font-weight-bold: 700;
-$line-height-normal: 1.5;
-$line-height-relaxed: 1.625;
+$font-weight-bold: 800;     // Bolder for emphasis
+$line-height-normal: 1.6;   // Slightly more spacing
+$line-height-relaxed: 1.75; // More relaxed spacing
 
+// Ícono mejorado
+$icon-size: 32px;           // Larger icon size
+$icon-font-size: 20px;
 // Bordes 
 $border-radius: 2.5px;        // Sin bordes redondeados
 $border-width: 3px;       // Borde izquierdo

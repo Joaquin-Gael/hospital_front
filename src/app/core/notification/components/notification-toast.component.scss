@@ -2,6 +2,14 @@
 @use '../styles/_notification-variables.scss' as vars;
 @use '../styles/_notification-mixins.scss' as mixins;
 
+
+::ng-deep{
+  .mdc-linear-progress__bar-inner {
+    background-color: var(--notification-accent); 
+    color: var(--notification-accent);
+  }
+}
+
 .notification-toast {
   position: relative;
   min-width: 320px;
@@ -157,7 +165,6 @@
   }
 }
 
-// Progress bar en la parte superior
 .notification-progress {
   position: absolute;
   bottom: 0;
@@ -165,19 +172,12 @@
   right: 0;
   height: 2px;
   z-index: 1;
-  
-  @include mixins.notification-theme(vars.$success-color);
 
   mat-progress-bar {
     height: 2px;
-  
-    ::ng-deep{
-      .mdc-linear-progress__bar-inner { 
-        border-top-width: 30px;
-      }
     }
   }
-}
+
 
 // Animaciones mejoradas
 :host {

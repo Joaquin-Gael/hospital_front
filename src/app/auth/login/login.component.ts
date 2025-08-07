@@ -124,7 +124,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.notificationService.success(
             '¡Inicio de sesión exitoso!\n Redirigiendo...',
             {
-              duration: 3000,
+              duration: 5000,
               action: {
                 label: 'Cerrar',
                 action: () => this.notificationService.dismissAll(),

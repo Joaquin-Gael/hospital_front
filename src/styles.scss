@@ -1,4 +1,5 @@
 @use './_variables.scss' as vars;
+@use './app/core/notification/components/notification-toast.component.scss';
 @use 'sass:color';
 @use 'sass:map';
 @use 'tailwindcss' as *;
