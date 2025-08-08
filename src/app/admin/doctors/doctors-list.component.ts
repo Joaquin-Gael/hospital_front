@@ -13,12 +13,12 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { AssignDoctorScheduleComponent } from '../schedules/assign-doctor-schedule.component';
-import { Doctor, DoctorCreate, DoctorUpdateResponse, MedicalSchedule } from '../../services/interfaces/doctor.interfaces';
+import { Doctor, DoctorCreate, DoctorUpdateResponse, MedicalSchedule, DoctorStatus } from '../../services/interfaces/doctor.interfaces';
 import { Specialty } from '../../services/interfaces/hospital.interfaces';
 
 interface ExtendedDoctor extends Doctor {
   specialityName?: string;
-  scheduleNames: string; // Añadido para mostrar horarios en la tabla
+  scheduleNames: string;
 }
 
 interface DoctorFormData {
@@ -32,6 +32,7 @@ interface DoctorFormData {
   specialityId: string;
   address: string;
   bloodType: string;
+  doctor_status: DoctorStatus;
 }
 
 @Component({
@@ -82,9 +83,13 @@ export class DoctorListComponent implements OnInit {
       { value: 'B-', label: 'B-' }, { value: 'AB+', label: 'AB+' }, { value: 'AB-', label: 'AB-' },
       { value: 'O+', label: 'O+' }, { value: 'O-', label: 'O-' },
     ] },
+    { key: 'doctor_status', label: 'Estado', type: 'select', required: true, options: [
+      { value: DoctorStatus.AVAILABLE, label: 'Disponible' },
+      { value: DoctorStatus.BUSY, label: 'En consulta' },
+      { value: DoctorStatus.OFFLINE, label: 'Fuera de servicio' },
+    ] },
   ];
 
-  private _formFields: FormField[] = [];
   get formFields(): FormField[] {
     if (this._formFields.length === 0 || this.formMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
@@ -96,6 +101,8 @@ export class DoctorListComponent implements OnInit {
     return this._formFields;
   }
 
+  private _formFields: FormField[] = [];
+
   tableColumns = [
     { key: 'first_name', label: 'Nombre', format: (value?: string) => value || 'N/A' },
     { key: 'last_name', label: 'Apellido', format: (value?: string) => value || 'N/A' },
@@ -105,7 +112,14 @@ export class DoctorListComponent implements OnInit {
     { key: 'email', label: 'Email' },
     { key: 'telephone', label: 'Teléfono', format: (value?: string) => value || 'N/A' },
     { key: 'specialityName', label: 'Especialidad' },
-    //{ key: 'scheduleNames', label: 'Horarios', format: (value: string) => value || 'N/A' }, 
+    { key: 'doctor_status', label: 'Estado', format: (value?: DoctorStatus) => {
+      switch (value) {
+        case DoctorStatus.AVAILABLE: return 'Disponible';
+        case DoctorStatus.BUSY: return 'En consulta';
+        case DoctorStatus.OFFLINE: return 'Fuera de servicio';
+        default: return 'N/A';
+      }
+    }},
     { key: 'is_active', label: 'Activo', format: (value: boolean) => (value ? 'Sí' : 'No') },
     { key: 'is_admin', label: 'Admin', format: (value: boolean) => (value ? 'Sí' : 'No') },
     { key: 'is_superuser', label: 'Superusuario', format: (value: boolean) => (value ? 'Sí' : 'No') },
@@ -212,6 +226,7 @@ export class DoctorListComponent implements OnInit {
       speciality_id: doctor.speciality_id ? doctor.speciality_id.toString() : '',
       address: doctor.address || '',
       blood_type: doctor.blood_type || '',
+      doctor_status: doctor.doctor_status || DoctorStatus.OFFLINE,
       scheduleNames: doctor.scheduleNames
     };
     this.showForm = true;
@@ -241,7 +256,16 @@ export class DoctorListComponent implements OnInit {
   }
 
   onView(doctor: ExtendedDoctor): void {
-    alert(`Detalles del doctor:\nNombre: ${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}\nEmail: ${doctor.email}\nTeléfono: ${doctor.telephone || 'N/A'}\nEspecialidad: ${doctor.specialityName || 'N/A'}\nHorarios: ${doctor.scheduleNames}\nActivo: ${doctor.is_active ? 'Sí' : 'No'}`);
+    alert(`Detalles del doctor:\nNombre: ${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}\nEmail: ${doctor.email}\nTeléfono: ${doctor.telephone || 'N/A'}\nEspecialidad: ${doctor.specialityName || 'N/A'}\nEstado: ${this.formatDoctorStatus(doctor.doctor_status)}\nHorarios: ${doctor.scheduleNames}\nActivo: ${doctor.is_active ? 'Sí' : 'No'}`);
+  }
+
+  private formatDoctorStatus(status?: DoctorStatus): string {
+    switch (status) {
+      case DoctorStatus.AVAILABLE: return 'Disponible';
+      case DoctorStatus.BUSY: return 'En consulta';
+      case DoctorStatus.OFFLINE: return 'Fuera de servicio';
+      default: return 'N/A';
+    }
   }
 
   onFormSubmit(formData: DoctorFormData): void {
@@ -270,6 +294,11 @@ export class DoctorListComponent implements OnInit {
       this.formLoading = false;
       return;
     }
+    if (!formData.doctor_status || !Object.values(DoctorStatus).includes(formData.doctor_status)) {
+      this.error = 'Por favor, selecciona un estado válido (Disponible, En consulta, Fuera de servicio).';
+      this.formLoading = false;
+      return;
+    }
 
     const action = this.formMode === 'create' ? 'crear' : 'editar';
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -294,13 +323,14 @@ export class DoctorListComponent implements OnInit {
           speciality_id: formData.specialityId,
           address: formData.address || '',
           blood_type: formData.bloodType || '',
+          doctor_status: formData.doctor_status,
         };
         this.doctorService.createDoctor(doctorData).subscribe({
           next: (newDoctor: Doctor) => {
             const doctorWithSpeciality: ExtendedDoctor = {
               ...newDoctor,
               specialityName: this.specialities.find((s) => s.id === newDoctor.speciality_id)?.name || 'N/A',
-              scheduleNames: 'N/A'
+              scheduleNames: 'N/A',
             };
             this.doctors.push(doctorWithSpeciality);
             this.formLoading = false;
@@ -314,11 +344,12 @@ export class DoctorListComponent implements OnInit {
         });
       } else if (this.selectedDoctor) {
         const updateData: Partial<DoctorCreate> = {
-          username:	formData.username || undefined,
+          username: formData.username || undefined,
           first_name: formData.first_name || undefined,
-          last_name: formData.last_name || undefined,
+          last_name: formData.first_name || undefined,
           telephone: formData.telephone || undefined,
           email: formData.email || undefined,
+          doctor_status: formData.doctor_status,
         };
 
         const currentDoctor = this.selectedDoctor;
@@ -331,7 +362,7 @@ export class DoctorListComponent implements OnInit {
               id: currentDoctor.id,
               speciality_id: currentDoctor.speciality_id,
               specialityName: currentDoctor.specialityName,
-              scheduleNames: currentDoctor.scheduleNames
+              scheduleNames: currentDoctor.scheduleNames,
             };
 
             const index = this.doctors.findIndex((d) => d.id === currentDoctor.id);

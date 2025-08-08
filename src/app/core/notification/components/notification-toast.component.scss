@@ -7,6 +7,7 @@
   .mdc-linear-progress__bar-inner {
     background-color: var(--notification-accent); 
     color: var(--notification-accent);
+
   }
 }
 
@@ -50,12 +51,12 @@
 
 .notification-icon {
   @include mixins.icon-circle(28px);
-  margin-top: 2px;
+  margin-top: 0px;
   
   mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
     color: var(--notification-accent);
     font-weight: vars.$font-weight-bold;
   }
@@ -107,11 +108,10 @@
 
 .notification-dismiss-btn {
   @include mixins.button-reset;
-  position: absolute;
   top: vars.$spacing-md;
   right: vars.$spacing-md;
   width: 24px;
-  height: 24px;
+  height: 0px;
   border-radius: 0;
   display: flex;
   align-items: center;

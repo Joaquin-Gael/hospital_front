@@ -88,7 +88,7 @@ export class DoctorLoginComponent implements OnInit {
           this.notificationService.success(
             '¡Inicio de sesión exitoso!\n Redirigiendo...',
             {
-              duration: 5000,
+              duration: 600000,
               action: {
                 label: 'Cerrar',
                 action: () => this.notificationService.dismissAll(),
