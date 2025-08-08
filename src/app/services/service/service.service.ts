@@ -6,7 +6,7 @@ import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
 import { SERVICE_ENDPOINTS } from './service-endpoints';
 import { Service, ServiceCreate, ServiceUpdate, ServiceDelete } from '../interfaces/hospital.interfaces';
-
+//
 @Injectable({
   providedIn: 'root',
 })
@@ -19,6 +19,13 @@ export class ServiceService {
     return this.apiService.get<Service[]>(SERVICE_ENDPOINTS.GET_ALL).pipe(
       map((response) => response || []),
       catchError((error) => this.handleError('Failed to fetch services', error))
+    );
+  }
+
+  getServiceById(serviceId: string): Observable<Service> {
+    return this.apiService.get<Service>(SERVICE_ENDPOINTS.GET_BY_ID(serviceId)).pipe(
+      map((response) => response),
+      catchError((error) => this.handleError(`Failed to fetch service ${serviceId}`, error))
     );
   }
 

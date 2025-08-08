@@ -1,3 +1,5 @@
+import { Doctor } from './doctor.interfaces'
+
 export interface Auth {
   email: string;
   password: string;
@@ -5,10 +7,10 @@ export interface Auth {
 
 export interface Service {
   id: number;
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
   price: number;
-  icon_code: string;
+  icon_code?: string;
   specialty_id: string; // UUID
 }
 
@@ -115,6 +117,7 @@ export interface MedicalScheduleUpdate {
   day?: string;
   start_time?: string; // HH:mm
   end_time?: string; // HH:mm
+  doctors?: Doctor[];
 }
 
 export interface MedicalScheduleDelete {

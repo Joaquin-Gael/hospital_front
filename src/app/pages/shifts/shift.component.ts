@@ -1,6 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { debounce, debounceTime } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -18,14 +20,11 @@ import {
   stagger, 
   state
 } from '@angular/animations';
-
-interface Service {
-  id: number;
-  name: string;
-  icon: string;
-  price: number;
-  description: string;
-}
+import { Service } from '../../services/interfaces/hospital.interfaces';
+import { MedicalSchedule } from '../../services/interfaces/doctor.interfaces';
+import { ServiceService } from '../../services/service/service.service';
+import { DoctorService } from '../../services/doctor/doctor.service'; 
+import { LoggerService } from '../../services/core/logger.service';
 
 interface ReasonOption {
   id: number;
@@ -98,68 +97,32 @@ interface ReasonOption {
 })
 export class ShiftsComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private serviceService = inject(ServiceService);
+  private doctorService = inject(DoctorService);
+  private logger = inject(LoggerService);
+
+  services: Service[] = [];
+  schedules: MedicalSchedule[] = [];
+  availableDays: string[] = [];
+  availableTimeSlots: string[] = [];
   
+  error: string | null = null;
   appointmentForm!: FormGroup;
   minDate = new Date();
-  availableTimeSlots: string[] = [];
   buttonState = 'inactive';
   showCustomReason = false;
   isLoading = false;
   
   currentStep = 1;
   totalSteps = 4;
-  
-  services: Service[] = [
-    { 
-      id: 1, 
-      name: 'Consulta médica', 
-      icon: 'medical_services', 
-      price: 80000, 
-      description: 'Consulta general con médico especialista'
-    },
-    { 
-      id: 2, 
-      name: 'Tratamiento dental', 
-      icon: 'sentiment_satisfied', 
-      price: 120000, 
-      description: 'Limpieza, revisión y tratamientos dentales'
-    },
-    { 
-      id: 3, 
-      name: 'Terapia física', 
-      icon: 'fitness_center', 
-      price: 95000, 
-      description: 'Rehabilitación y terapia especializada'
-    },
-    { 
-      id: 4, 
-      name: 'Asesoría nutricional', 
-      icon: 'restaurant', 
-      price: 70000, 
-      description: 'Plan alimentario personalizado'
-    },
-    { 
-      id: 5, 
-      name: 'Consulta psicológica', 
-      icon: 'psychology', 
-      price: 110000, 
-      description: 'Apoyo psicológico y terapia emocional'
-    }
-  ];
-  
-  reasonOptions: ReasonOption[] = [
-    { id: 1, name: 'Primera consulta' },
-    { id: 2, name: 'Seguimiento' },
-    { id: 3, name: 'Urgencia' },
-    { id: 4, name: 'Control rutinario' },
-    { id: 5, name: 'Otro (especificar)' }
-  ];
+
   
   ngOnInit(): void {
+    this.loadServices();
     this.initForm();
     this.watchFormChanges();
   }
-  
+
   initForm(): void {
     this.appointmentForm = this.fb.group({
       service: [null, Validators.required],
@@ -170,8 +133,57 @@ export class ShiftsComponent implements OnInit {
       termsAccepted: [false, Validators.requiredTrue]
     });
   }
+
+  loadServices(): void {
+    this.serviceService.getServices().subscribe({
+      next: (services) => {
+        this.services = services.map((s) => ({
+          ...s,
+          duration: undefined,
+          isActive: true,
+        }));
+
+      },
+      error: (error: HttpErrorResponse) => {
+        this.logger.error('Error al cargar los servicios:', error);
+      },
+    });
+  }
+
+  reasonOptions: ReasonOption[] = [
+    { id: 1, name: 'Primera consulta' },
+    { id: 2, name: 'Seguimiento' },
+    { id: 3, name: 'Urgencia' },
+    { id: 4, name: 'Control rutinario' },
+    { id: 5, name: 'Otro (especificar)' }
+  ];
   
+  loadSchedules(serviceId: string): void{
+    this.doctorService.getAvailableSchedules(serviceId).subscribe({
+      next: (schedules) => {
+        this.schedules = schedules;
+        this.availableDays = [... new Set(schedules.map(schedule => schedule.day))];
+        this.appointmentForm.get('appointmentDate')?.setValue(null);
+        this.appointmentForm.get('appointmentTime')?.setValue(null);
+        this.availableTimeSlots = [];
+      },
+      error: (error: HttpErrorResponse) => {
+        this.logger.error('Error al cargar los horarios disponibles:', error);
+      }
+    })
+  }
+
   watchFormChanges(): void {
+    this.appointmentForm.get('service')?.valueChanges.pipe(
+      debounceTime(300)
+    ).subscribe(serviceId => {
+      if (serviceId) {
+        this.loadSchedules(serviceId);
+      } else { 
+
+      }
+    })
+
     this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
       if (date) {
         this.generateTimeSlots(date);
@@ -192,28 +204,46 @@ export class ShiftsComponent implements OnInit {
   }
   
   generateTimeSlots(date: Date): void {
-    const slots: string[] = [];
-    const selectedDate = new Date(date);
-    const today = new Date();
-    
-    let startHour = 8;
-    if (this.isSameDay(selectedDate, today) && today.getHours() >= 8) {
-      startHour = today.getHours() + 1;
-    }
-    
-    const endHour = 18;
-    
-    for (let hour = startHour; hour < endHour; hour++) {
-      slots.push(`${hour.toString().padStart(2, '0')}:00`);
-      if (hour < endHour - 1) {
-        slots.push(`${hour.toString().padStart(2, '0')}:30`);
+      const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+      const matchingSchedules = this.schedules.filter(
+        s => s.day.toLowerCase() === dayOfWeek.toLowerCase()
+      );
+
+      if (!matchingSchedules.length) {
+        this.availableTimeSlots = [];
+        return;
       }
-    }
-    
-    this.availableTimeSlots = slots;
-    this.appointmentForm.get('appointmentTime')?.setValue(null);
+
+      // Combinar intervalos de todos los horarios disponibles para el día
+      const allSlots = matchingSchedules.flatMap(schedule =>
+        this.generateTimeIntervals(schedule.start_time, schedule.end_time)
+      );
+      // Eliminar duplicados y ordenar
+      this.availableTimeSlots = [...new Set(allSlots)].sort((a, b) => a.localeCompare(b));
+      this.appointmentForm.get('appointmentTime')?.setValue(null);
   }
-  
+
+  generateTimeIntervals(startTime: string, endTime: string, intervalMinutes = 30): string[] {
+      const slots: string[] = [];
+      const start = this.parseTime(startTime);
+      const end = this.parseTime(endTime);
+      const today = new Date();
+      const isToday = this.isSameDay(this.appointmentForm.get('appointmentDate')?.value, today);
+
+      let current = start;
+      if (isToday && today.getHours() >= start.getHours()) {
+        // Ajustar la hora de inicio al próximo intervalo disponible
+        const minutes = today.getMinutes();
+        const nextInterval = Math.ceil((minutes + 1) / intervalMinutes) * intervalMinutes;
+        current.setHours(today.getHours(), nextInterval, 0, 0);
+      }
+
+      while (current < end) {
+        slots.push(this.formatTime(current));
+        current = new Date(current.getTime() + intervalMinutes * 60 * 1000);
+      }
+      return slots;
+  }  
   isSameDay(date1: Date, date2: Date): boolean {
     return date1.getDate() === date2.getDate() &&
            date1.getMonth() === date2.getMonth() &&
@@ -229,11 +259,11 @@ export class ShiftsComponent implements OnInit {
     this.isLoading = true;
     
     const appointmentData = {
-      service: this.getSelectedService(),
+      //service: this.getSelectedService(),
       date: this.appointmentForm.get('appointmentDate')?.value,
       time: this.appointmentForm.get('appointmentTime')?.value,
       reason: this.getReasonText(),
-      total: this.getSelectedServicePrice()
+      //total: this.getSelectedServicePrice()
     };
     
     console.log('Proceeding to payment with data:', appointmentData);
@@ -334,7 +364,7 @@ export class ShiftsComponent implements OnInit {
   
   getServiceIcon(serviceId: number): string {
     const service = this.services.find(s => s.id === serviceId);
-    return service?.icon || 'help_outline';
+    return service?.icon_code || 'question_mark';
   }
   
   getServiceName(serviceId: number | null): string {
@@ -364,6 +394,17 @@ export class ShiftsComponent implements OnInit {
     };
     
     return date.toLocaleDateString('es-ES', options);
+  }
+
+  parseTime(time: string): Date {
+    const [hours, minutes] = time.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  }
+  
+  formatTime(date: Date): string {
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   }
   
   formatPrice(price: number): string {

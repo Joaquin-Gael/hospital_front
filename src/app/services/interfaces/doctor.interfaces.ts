@@ -14,7 +14,7 @@ export interface Doctor {
   telephone?: string;
   speciality_id: string;
   blood_type?: string;
-  doctor_status?: DoctorStatus; 
+  doctor_state?: DoctorStatus; 
   is_active: boolean;
   is_admin?: boolean;
   is_superuser?: boolean;
@@ -35,7 +35,7 @@ export interface DoctorCreate {
   telephone?: string;
   speciality_id: string;
   blood_type?: string;
-  doctor_status?: DoctorStatus; 
+  doctor_state?: DoctorStatus; 
   address?: string;
 }
 
@@ -47,7 +47,7 @@ export interface DoctorUpdate {
   email?: string;
   speciality_id?: string; 
   address?: string;
-  doctor_status?: DoctorStatus;
+  doctor_state?: DoctorStatus;
 }
 
 export interface DoctorUpdateResponse {
@@ -58,7 +58,7 @@ export interface DoctorUpdateResponse {
   email: string;
   speciality_id: string;
   address: string;
-  doctor_status?: DoctorStatus; 
+  doctor_state?: DoctorStatus; 
 }
 
 // Resto de las interfaces sin cambios
@@ -84,7 +84,7 @@ export interface MedicalSchedule {
   day: string;
   start_time: string; // HH:mm
   end_time: string; // HH:mm
-  doctors?: string[]; // IDs de doctores
+  doctors: string[]; // IDs de doctores
 }
 
 export interface DoctorMeResponse {

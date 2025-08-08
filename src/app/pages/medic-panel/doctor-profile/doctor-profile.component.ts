@@ -83,7 +83,7 @@ export class DoctorProfileComponent implements OnInit, OnDestroy {
   }
 
   private calculateStatus(doctor: Doctor | null): DoctorStatus {
-    if (!doctor || doctor.is_banned || !doctor.doctor_status) {
+    if (!doctor || doctor.is_banned || !doctor.doctor_state) {
       return DoctorStatus.OFFLINE;
     }
     return DoctorStatus.AVAILABLE;
@@ -135,14 +135,14 @@ export class DoctorProfileComponent implements OnInit, OnDestroy {
     }
 
     const updateData: DoctorUpdate = {
-      doctor_status: newStatus,
+      doctor_state: newStatus,
     };
 
     this.state = { ...this.state, isLoading: true };
 
     this.doctorService.updateDoctor(this.doctor.id, updateData).subscribe({
       next: (updatedFields: DoctorUpdateResponse) => {
-        const updatedDoctor = { ...this.doctor!, doctor_state: updateData.doctor_status! };
+        const updatedDoctor = { ...this.doctor!, doctor_state: updateData.doctor_state! };
         this.doctorDataService.setDoctor(updatedDoctor);
         this.state = { ...this.state, status: newStatus, isLoading: false, error: null };
         this.updateStatusEvent.emit({ doctor: updatedDoctor, status: newStatus });

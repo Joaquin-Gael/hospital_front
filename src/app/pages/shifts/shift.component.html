@@ -49,7 +49,7 @@
             [class.selected]="appointmentForm.get('service')?.value === service.id"
             (click)="appointmentForm.get('service')?.setValue(service.id)">
             <div class="service-icon">
-              <i class="material-icons">{{service.icon}}</i>
+              <i class="material-icons">{{service.icon_code}}</i>
             </div>
             <div class="service-info">
               <div class="service-name">{{service.name}}</div>

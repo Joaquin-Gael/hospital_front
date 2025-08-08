@@ -32,7 +32,7 @@ interface DoctorFormData {
   specialityId: string;
   address: string;
   bloodType: string;
-  doctor_status: DoctorStatus;
+  doctor_state: DoctorStatus;
 }
 
 @Component({
@@ -83,7 +83,7 @@ export class DoctorListComponent implements OnInit {
       { value: 'B-', label: 'B-' }, { value: 'AB+', label: 'AB+' }, { value: 'AB-', label: 'AB-' },
       { value: 'O+', label: 'O+' }, { value: 'O-', label: 'O-' },
     ] },
-    { key: 'doctor_status', label: 'Estado', type: 'select', required: true, options: [
+    { key: 'doctor_state', label: 'Estado', type: 'select', required: true, options: [
       { value: DoctorStatus.AVAILABLE, label: 'Disponible' },
       { value: DoctorStatus.BUSY, label: 'En consulta' },
       { value: DoctorStatus.OFFLINE, label: 'Fuera de servicio' },
@@ -112,7 +112,7 @@ export class DoctorListComponent implements OnInit {
     { key: 'email', label: 'Email' },
     { key: 'telephone', label: 'Teléfono', format: (value?: string) => value || 'N/A' },
     { key: 'specialityName', label: 'Especialidad' },
-    { key: 'doctor_status', label: 'Estado', format: (value?: DoctorStatus) => {
+    { key: 'doctor_state', label: 'Estado', format: (value?: DoctorStatus) => {
       switch (value) {
         case DoctorStatus.AVAILABLE: return 'Disponible';
         case DoctorStatus.BUSY: return 'En consulta';
@@ -226,7 +226,7 @@ export class DoctorListComponent implements OnInit {
       speciality_id: doctor.speciality_id ? doctor.speciality_id.toString() : '',
       address: doctor.address || '',
       blood_type: doctor.blood_type || '',
-      doctor_status: doctor.doctor_status || DoctorStatus.OFFLINE,
+      doctor_state: doctor.doctor_state || DoctorStatus.AVAILABLE,
       scheduleNames: doctor.scheduleNames
     };
     this.showForm = true;
@@ -256,7 +256,7 @@ export class DoctorListComponent implements OnInit {
   }
 
   onView(doctor: ExtendedDoctor): void {
-    alert(`Detalles del doctor:\nNombre: ${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}\nEmail: ${doctor.email}\nTeléfono: ${doctor.telephone || 'N/A'}\nEspecialidad: ${doctor.specialityName || 'N/A'}\nEstado: ${this.formatDoctorStatus(doctor.doctor_status)}\nHorarios: ${doctor.scheduleNames}\nActivo: ${doctor.is_active ? 'Sí' : 'No'}`);
+    alert(`Detalles del doctor:\nNombre: ${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}\nEmail: ${doctor.email}\nTeléfono: ${doctor.telephone || 'N/A'}\nEspecialidad: ${doctor.specialityName || 'N/A'}\nEstado: ${this.formatDoctorStatus(doctor.doctor_state)}\nHorarios: ${doctor.scheduleNames}\nActivo: ${doctor.is_active ? 'Sí' : 'No'}`);
   }
 
   private formatDoctorStatus(status?: DoctorStatus): string {
@@ -294,7 +294,7 @@ export class DoctorListComponent implements OnInit {
       this.formLoading = false;
       return;
     }
-    if (!formData.doctor_status || !Object.values(DoctorStatus).includes(formData.doctor_status)) {
+    if (!formData.doctor_state || !Object.values(DoctorStatus).includes(formData.doctor_state)) {
       this.error = 'Por favor, selecciona un estado válido (Disponible, En consulta, Fuera de servicio).';
       this.formLoading = false;
       return;
@@ -323,8 +323,9 @@ export class DoctorListComponent implements OnInit {
           speciality_id: formData.specialityId,
           address: formData.address || '',
           blood_type: formData.bloodType || '',
-          doctor_status: formData.doctor_status,
+          doctor_state: formData.doctor_state,
         };
+        this.logger.debug('doctor:', doctorData)
         this.doctorService.createDoctor(doctorData).subscribe({
           next: (newDoctor: Doctor) => {
             const doctorWithSpeciality: ExtendedDoctor = {
@@ -349,11 +350,12 @@ export class DoctorListComponent implements OnInit {
           last_name: formData.first_name || undefined,
           telephone: formData.telephone || undefined,
           email: formData.email || undefined,
-          doctor_status: formData.doctor_status,
+          doctor_state: formData.doctor_state,
         };
 
         const currentDoctor = this.selectedDoctor;
-
+        
+        this.logger.debug('doctor actual data:', currentDoctor)
         this.doctorService.updateDoctor(currentDoctor.id, updateData).subscribe({
           next: (updatedFields: DoctorUpdateResponse) => {
             const doctorWithSpeciality: ExtendedDoctor = {

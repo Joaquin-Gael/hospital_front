@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
@@ -34,6 +34,7 @@ export class DoctorService {
   private readonly logger = inject(LoggerService);
   private readonly storage = inject(StorageService);
   private readonly serviceService = inject(ServiceService);
+  private scheduleCache: { [key: string]: MedicalSchedule[] } = {};
 
   /**
    * Retrieves the list of all doctors.
@@ -67,49 +68,38 @@ export class DoctorService {
   }
 
   /**
-   * Retrieves available schedules for a service and optional date.
-   * @param serviceId The ID of the service.
-   * @param date Optional date to filter schedules (ISO format, e.g., '2025-05-15').
-   * @returns Observable of an array of MedicalSchedule objects.
-   */
-  getAvailableSchedules(
-    serviceId: number,
-    date?: string
-  ): Observable<MedicalSchedule[]> {
-    return this.serviceService.getServices().pipe(
-      map((services) => {
-        const service = services.find((s) => s.id === serviceId);
-        if (!service) {
-          throw new Error(`Service ${serviceId} not found`);
-        }
-        return service;
-      }),
-      switchMap((service: Service) =>
-        this.apiService.get<MedicalSchedule[]>(SCHEDULE_ENDPOINTS.GET_ALL).pipe(
-          map((schedules) =>
-            schedules.filter((schedule) => {
-              const hasMatchingDoctor = schedule.doctors?.some((doctorId) =>
-                this.getDoctorsBySpeciality(service.specialty_id).pipe(
-                  map((doctors) => doctors.some((doc) => doc.id === doctorId))
-                )
-              );
-              const matchesDate = date
-                ? schedule.day === this.getDayOfWeek(date)
-                : true;
-              return hasMatchingDoctor && matchesDate;
-            })
-          ),
-          map((response) => response || []),
-          catchError((error) =>
-            this.handleError(
-              error,
-              `Failed to fetch schedules for service ${serviceId}`
+     * Retrieves available schedules for a service, filtered by specialty and optional date.
+     * @param serviceId The ID of the service.
+     * @param date Optional date to filter schedules (ISO format, e.g., '2025-08-08').
+     * @returns Observable of an array of MedicalSchedule objects.
+     */
+    getAvailableSchedules(serviceId: string, date?: string): Observable<MedicalSchedule[]> {
+      const cacheKey = date ? `${serviceId}_${date}` : `${serviceId}`;
+      if (this.scheduleCache[cacheKey]) {
+        return of(this.scheduleCache[cacheKey]);
+      }
+
+      return this.serviceService.getServiceById(serviceId).pipe(
+        switchMap((service: Service) => {
+          if (!service) {
+            return throwError(() => new Error(`Service ${serviceId} not found`));
+          }
+          const params = new HttpParams()
+            .set('specialty_id', service.specialty_id)
+            .set('date', date || '');
+          return this.apiService.get<MedicalSchedule[]>(SCHEDULE_ENDPOINTS.GET_ALL, { params }).pipe(
+            map((schedules) => schedules.filter(schedule => schedule.doctors?.length > 0)), // Solo horarios con doctores
+            map((response) => {
+              this.scheduleCache[cacheKey] = response || [];
+              return response;
+            }),
+            catchError((error) =>
+              this.handleError(error, `Failed to fetch schedules for service ${serviceId}`)
             )
-          )
-        )
-      )
-    );
-  }
+          );
+        })
+      );
+    }
 
   /**
    * Retrieves a doctor by their ID.
