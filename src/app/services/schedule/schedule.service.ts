@@ -10,6 +10,7 @@ import {
   MedicalScheduleCreate,
   MedicalScheduleUpdate,
   MedicalScheduleDelete,
+  MedicalScheduleDaysResponse
 } from '../interfaces/hospital.interfaces';
 import { MedicalSchedule } from '../../services/interfaces/doctor.interfaces';
 
@@ -46,6 +47,13 @@ export class ScheduleService {
     );
   }
 
+  getAvailableDays(specialtyId: string): Observable<MedicalScheduleDaysResponse> {
+    return this.apiService.get<MedicalScheduleDaysResponse>(SCHEDULE_ENDPOINTS.GET_DAYS(specialtyId)).pipe(
+      map((response) => response || { available_days: [] }),
+      catchError((error) => this.handleError(`Failed to fetch available days for specialty ${specialtyId}`, error)
+    ))
+  }
+  
   /**
    * Deletes a medical schedule by ID (superuser only).
    * @param scheduleId The ID of the schedule to delete.

@@ -17,6 +17,7 @@ import {
   MedicalSchedule,
   DoctorUpdatePassword
 } from '../interfaces/doctor.interfaces';
+import { UserRead } from '../interfaces/user.interfaces';
 import { ServiceService } from '../service/service.service';
 import { Service } from '../interfaces/hospital.interfaces';
 
@@ -44,6 +45,16 @@ export class DoctorService {
     return this.apiService.get<Doctor[]>(DOCTOR_ENDPOINTS.GET_ALL).pipe(
       map((response) => response || []),
       catchError((error) => this.handleError(error, 'Failed to fetch doctors'))
+    );
+  }
+
+  getDoctorPatients(doctorId: string): Observable<UserRead> {
+    return this.apiService
+      .get<UserRead>(DOCTOR_ENDPOINTS.GET_PATIENTS(doctorId))
+      .pipe(
+        catchError((error) =>
+        this.handleError(error, `Failed to fetch doctor ${doctorId}`)
+      )
     );
   }
 
