@@ -124,3 +124,7 @@ export interface MedicalScheduleDelete {
   id: string; // UUID
   message: string;
 }
+
+export interface MedicalScheduleDaysResponse{
+  available_days: MedicalScheduleCreate[];
+}
