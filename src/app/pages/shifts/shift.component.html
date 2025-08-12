@@ -26,12 +26,8 @@
             (click)="goToStep(step)"
             [attr.aria-label]="'Ir al paso ' + step"
           >
-            <span class="step-number" *ngIf="currentStep <= step">{{
-              step
-            }}</span>
-            <i *ngIf="currentStep > step" class="material-icons step-check"
-              >check</i
-            >
+            <span class="step-number" *ngIf="currentStep <= step">{{ step }}</span>
+            <i *ngIf="currentStep > step" class="material-icons step-check">check</i>
           </div>
         </div>
         <div class="steps-labels">
@@ -48,24 +44,18 @@
       <!-- Paso 1: Selección de Servicio -->
       <div *ngIf="currentStep === 1" class="form-step" @slideIn>
         <h3 class="step-title">¿Qué servicio necesitas?</h3>
-        <p class="step-subtitle">
-          Selecciona el tipo de consulta que deseas agendar
-        </p>
+        <p class="step-subtitle">Selecciona el tipo de consulta que deseas agendar</p>
 
         <div class="service-options" *ngIf="!isLoading; else loadingSpinner">
           <div
             *ngFor="let service of services"
             class="service-card"
-            [class.selected]="
-              appointmentForm.get('service')?.value === service.id
-            "
+            [class.selected]="appointmentForm.get('service')?.value === service.id"
             (click)="appointmentForm.get('service')?.setValue(service.id)"
             [attr.aria-label]="'Seleccionar servicio ' + service.name"
           >
             <div class="service-icon">
-              <i class="material-icons">{{
-                service.icon_code || "question_mark"
-              }}</i>
+              <i class="material-icons">{{ service.icon_code || "question_mark" }}</i>
             </div>
             <div class="service-info">
               <div class="service-name">{{ service.name }}</div>
@@ -83,10 +73,7 @@
         </ng-template>
 
         <div
-          *ngIf="
-            appointmentForm.get('service')?.invalid &&
-            appointmentForm.get('service')?.touched
-          "
+          *ngIf="appointmentForm.get('service')?.invalid && appointmentForm.get('service')?.touched"
           class="error-message centered-error"
           role="alert"
         >
@@ -122,10 +109,7 @@
           </div>
           <mat-datepicker #picker></mat-datepicker>
           <div
-            *ngIf="
-              appointmentForm.get('appointmentDate')?.invalid &&
-              appointmentForm.get('appointmentDate')?.touched
-            "
+            *ngIf="appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched"
             class="error-message"
             role="alert"
           >
@@ -148,9 +132,7 @@
       <!-- Paso 3: Selección de Hora -->
       <div *ngIf="currentStep === 3" class="form-step" @slideIn>
         <h3 class="step-title">Selecciona un horario</h3>
-        <p class="step-subtitle">
-          Elige un horario disponible para tu consulta
-        </p>
+        <p class="step-subtitle">Elige un horario disponible para tu consulta</p>
 
         <div class="custom-form-field" *ngIf="!isLoading; else loadingSpinner">
           <label class="field-label">
@@ -161,12 +143,8 @@
             <div
               *ngFor="let timeSlot of availableTimeSlots"
               class="time-slot"
-              [class.selected]="
-                appointmentForm.get('appointmentTime')?.value === timeSlot
-              "
-              (click)="
-                appointmentForm.get('appointmentTime')?.setValue(timeSlot)
-              "
+              [class.selected]="appointmentForm.get('appointmentTime')?.value === timeSlot"
+              (click)="appointmentForm.get('appointmentTime')?.setValue(timeSlot)"
               [attr.aria-label]="'Seleccionar horario ' + timeSlot"
             >
               {{ timeSlot }}
@@ -180,10 +158,7 @@
             No hay horarios disponibles para la fecha seleccionada.
           </div>
           <div
-            *ngIf="
-              appointmentForm.get('appointmentTime')?.invalid &&
-              appointmentForm.get('appointmentTime')?.touched
-            "
+            *ngIf="appointmentForm.get('appointmentTime')?.invalid && appointmentForm.get('appointmentTime')?.touched"
             class="error-message"
             role="alert"
           >
@@ -206,9 +181,7 @@
       <!-- Paso 4: Motivo y Pago -->
       <div *ngIf="currentStep === 4" class="form-step" @slideIn>
         <h3 class="step-title">Resumen de tu cita</h3>
-        <p class="step-subtitle">
-          Verifica la información antes de proceder al pago
-        </p>
+        <p class="step-subtitle">Verifica la información antes de proceder</p>
 
         <div class="summary-card">
           <div class="summary-header">
@@ -219,18 +192,12 @@
           <div class="summary-content">
             <div class="summary-item">
               <div class="summary-label">
-                <i class="material-icons">{{
-                  getServiceIcon(appointmentForm.get("service")?.value)
-                }}</i>
+                <i class="material-icons">{{ getServiceIcon(appointmentForm.get("service")?.value) }}</i>
                 Servicio:
               </div>
               <div class="summary-value">
-                <span class="service-name">{{
-                  getServiceName(appointmentForm.get("service")?.value)
-                }}</span>
-                <span class="service-price">{{
-                  formatPrice(getSelectedServicePrice())
-                }}</span>
+                <span class="service-name">{{ getServiceName(appointmentForm.get("service")?.value) }}</span>
+                <span class="service-price">{{ formatPrice(getSelectedServicePrice()) }}</span>
               </div>
             </div>
 
@@ -240,12 +207,8 @@
                 Fecha y Hora:
               </div>
               <div class="summary-value">
-                <span>{{
-                  formatDate(appointmentForm.get("appointmentDate")?.value)
-                }}</span>
-                <span class="time-highlight">{{
-                  appointmentForm.get("appointmentTime")?.value
-                }}</span>
+                <span>{{ formatDate(appointmentForm.get("appointmentDate")?.value) }}</span>
+                <span class="time-highlight">{{ appointmentForm.get("appointmentTime")?.value }}</span>
               </div>
             </div>
 
@@ -263,9 +226,7 @@
           <div class="summary-footer">
             <div class="total-amount">
               <span class="total-label">Total a pagar:</span>
-              <span class="total-price">{{
-                formatPrice(getSelectedServicePrice())
-              }}</span>
+              <span class="total-price">{{ formatPrice(getSelectedServicePrice()) }}</span>
             </div>
           </div>
         </div>
@@ -276,9 +237,7 @@
             <div
               *ngFor="let reason of reasonOptions"
               class="reason-card"
-              [class.selected]="
-                appointmentForm.get('reasonOption')?.value === reason.id
-              "
+              [class.selected]="appointmentForm.get('reasonOption')?.value === reason.id"
               (click)="appointmentForm.get('reasonOption')?.setValue(reason.id)"
               [attr.aria-label]="'Seleccionar motivo ' + reason.name"
             >
@@ -286,10 +245,7 @@
             </div>
           </div>
           <div
-            *ngIf="
-              appointmentForm.get('reasonOption')?.invalid &&
-              appointmentForm.get('reasonOption')?.touched
-            "
+            *ngIf="appointmentForm.get('reasonOption')?.invalid && appointmentForm.get('reasonOption')?.touched"
             class="error-message"
             role="alert"
           >
@@ -316,10 +272,7 @@
             ></textarea>
           </div>
           <div
-            *ngIf="
-              appointmentForm.get('customReason')?.invalid &&
-              appointmentForm.get('customReason')?.touched
-            "
+            *ngIf="appointmentForm.get('customReason')?.invalid && appointmentForm.get('customReason')?.touched"
             class="error-message"
             role="alert"
           >
@@ -343,10 +296,7 @@
             </span>
           </label>
           <div
-            *ngIf="
-              appointmentForm.get('termsAccepted')?.invalid &&
-              appointmentForm.get('termsAccepted')?.touched
-            "
+            *ngIf="appointmentForm.get('termsAccepted')?.invalid && appointmentForm.get('termsAccepted')?.touched"
             class="error-message"
             role="alert"
           >
@@ -389,14 +339,14 @@
           type="submit"
           class="nav-button payment-button"
           [disabled]="appointmentForm.invalid || isLoading"
-          aria-label="Proceder al pago"
+          aria-label="Confirmar turno"
           [@pulse]="buttonState"
           (mouseenter)="onButtonHover(true)"
           (mouseleave)="onButtonHover(false)"
         >
           <span *ngIf="!isLoading" class="button-content">
-            <i class="material-icons">payment</i>
-            Proceder al pago
+            <i class="material-icons">check_circle</i>
+            Confirmar turno
           </span>
           <span *ngIf="isLoading" class="button-loading">
             <i class="material-icons loading-spinner">hourglass_empty</i>

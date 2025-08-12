@@ -18,6 +18,13 @@ import { DoctorService } from '../../services/doctor/doctor.service';
 import { ScheduleService } from '../../services/schedule/schedule.service';
 import { LoggerService } from '../../services/core/logger.service';
 import { debounceTime } from 'rxjs/operators';
+import { UserService } from '../../services/user/user.service';
+import { HealthInsuranceService } from '../../services/health_insarunce/health-insurance.service';
+import { AppointmentService } from '../../services/appointment/appointments.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth/auth.service';
+import { TurnCreate, TurnState } from '../../services/interfaces/appointment.interfaces';
+import { UserRead } from '../../services/interfaces/user.interfaces';
 
 interface ReasonOption {
   id: number;
@@ -40,7 +47,7 @@ interface ReasonOption {
     MatTooltipModule
   ],
   providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'es-ES' } // Para calendario en español
+    { provide: MAT_DATE_LOCALE, useValue: 'es-ES' }
   ],
   templateUrl: './shift.component.html',
   styleUrls: ['./shift.component.scss'],
@@ -59,8 +66,7 @@ interface ReasonOption {
         query(':enter', [
           style({ opacity: 0, transform: 'translateY(30px)' }),
           stagger('100ms', [
-            animate('500ms cubic-bezier(0.35, 0, 0.25, 1)', 
-              style({ opacity: 1, transform: 'translateY(0)' }))
+            animate('500ms cubic-bezier(0.35, 0, 0.25, 1)', style({ opacity: 1, transform: 'translateY(0)' }))
           ])
         ], { optional: true })
       ])
@@ -74,19 +80,16 @@ interface ReasonOption {
     trigger('rotateIcon', [
       transition(':enter', [
         style({ transform: 'rotate(-90deg)', opacity: 0 }),
-        animate('400ms cubic-bezier(0.35, 0, 0.25, 1)', 
-          style({ transform: 'rotate(0)', opacity: 1 }))
+        animate('400ms cubic-bezier(0.35, 0, 0.25, 1)', style({ transform: 'rotate(0)', opacity: 1 }))
       ])
     ]),
     trigger('slideIn', [
       transition(':enter', [
         style({ transform: 'translateX(100%)', opacity: 0 }),
-        animate('500ms cubic-bezier(0.35, 0, 0.25, 1)', 
-          style({ transform: 'translateX(0)', opacity: 1 }))
+        animate('500ms cubic-bezier(0.35, 0, 0.25, 1)', style({ transform: 'translateX(0)', opacity: 1 }))
       ]),
       transition(':leave', [
-        animate('300ms cubic-bezier(0.35, 0, 0.25, 1)', 
-          style({ transform: 'translateX(-100%)', opacity: 0 }))
+        animate('300ms cubic-bezier(0.35, 0, 0.25, 1)', style({ transform: 'translateX(-100%)', opacity: 0 }))
       ])
     ])
   ]
@@ -99,22 +102,24 @@ export class ShiftsComponent implements OnInit {
   private logger = inject(LoggerService);
   private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
+  private userService = inject(UserService);
+  private healthInsuranceService = inject(HealthInsuranceService);
+  private appointmentService = inject(AppointmentService);
+  private router = inject(Router);
+  private authService = inject(AuthService);
 
   services: Service[] = [];
-  schedules: MedicalScheduleCreate[] = []; // Cambiado a MedicalScheduleCreate
+  schedules: MedicalScheduleCreate[] = [];
   availableDays: string[] = [];
   availableTimeSlots: string[] = [];
-  
   error: string | null = null;
   appointmentForm!: FormGroup;
   minDate = new Date();
   buttonState = 'inactive';
   showCustomReason = false;
   isLoading = false;
-  
   currentStep = 1;
   totalSteps = 4;
-
   reasonOptions: ReasonOption[] = [
     { id: 1, name: 'Primera consulta' },
     { id: 2, name: 'Seguimiento' },
@@ -122,11 +127,30 @@ export class ShiftsComponent implements OnInit {
     { id: 4, name: 'Control rutinario' },
     { id: 5, name: 'Otro (especificar)' }
   ];
-  
-ngOnInit(): void {
+
+  currentUser: UserRead | null = null;
+
+  ngOnInit(): void {
     this.loadServices();
     this.initForm();
     this.watchFormChanges();
+    this.loadCurrentUser();
+  }
+
+  private loadCurrentUser(): void {
+    this.authService.getUser().subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        if (!user) {
+          this.snackBar.open('Debes iniciar sesión para reservar un turno', 'Cerrar', { duration: 5000 });
+          this.router.navigate(['/login']);
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.handleError(error, 'Error al cargar datos del usuario');
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
   initForm(): void {
@@ -141,9 +165,7 @@ ngOnInit(): void {
   }
 
   watchFormChanges(): void {
-    this.appointmentForm.get('service')?.valueChanges.pipe(
-      debounceTime(300)
-    ).subscribe(serviceId => {
+    this.appointmentForm.get('service')?.valueChanges.pipe(debounceTime(300)).subscribe(serviceId => {
       if (serviceId) {
         const selectedService = this.services.find(s => s.id === serviceId);
         if (selectedService && selectedService.specialty_id) {
@@ -164,7 +186,7 @@ ngOnInit(): void {
         this.appointmentForm.get('appointmentTime')?.setValue(null);
       }
     });
-    
+
     this.appointmentForm.get('reasonOption')?.valueChanges.subscribe(option => {
       this.showCustomReason = option === 5;
       const customReasonControl = this.appointmentForm.get('customReason');
@@ -217,11 +239,11 @@ ngOnInit(): void {
           sunday: 'domingo'
         };
         this.schedules = response.available_days.map(day => ({
-          day: day.day, // Mantener en inglés
+          day: day.day,
           start_time: day.start_time,
           end_time: day.end_time
         }));
-        this.availableDays = [...new Set(this.schedules.map(s => s.day))]; // Guardar en inglés
+        this.availableDays = [...new Set(this.schedules.map(s => s.day))];
         this.appointmentForm.get('appointmentDate')?.setValue(null);
         this.appointmentForm.get('appointmentTime')?.setValue(null);
         this.availableTimeSlots = [];
@@ -247,9 +269,7 @@ ngOnInit(): void {
       'domingo': 'sunday'
     };
     const englishDay = dayMap[dayOfWeek] || '';
-    const matchingSchedules = this.schedules.filter(
-      s => s.day.toLowerCase() === englishDay.toLowerCase()
-    );
+    const matchingSchedules = this.schedules.filter(s => s.day.toLowerCase() === englishDay.toLowerCase());
 
     if (!matchingSchedules.length) {
       this.availableTimeSlots = [];
@@ -365,6 +385,8 @@ ngOnInit(): void {
     if (this.isStepValid(this.currentStep)) {
       if (this.currentStep < this.totalSteps) {
         this.currentStep++;
+      } else {
+        this.onSubmit();
       }
     } else {
       this.markFormGroupTouched(this.appointmentForm);
@@ -417,12 +439,12 @@ ngOnInit(): void {
     return service?.price || 0;
   }
 
-  getServiceIcon(serviceId: number): string {
+  getServiceIcon(serviceId: string): string {
     const service = this.services.find(s => s.id === serviceId);
     return service?.icon_code || 'question_mark';
   }
 
-  getServiceName(serviceId: number | null): string {
+  getServiceName(serviceId: string | null): string {
     const service = this.services.find(s => s.id === serviceId);
     return service?.name || '';
   }
@@ -461,5 +483,71 @@ ngOnInit(): void {
     const message = errorMessages[error.status] || error.error?.detail || defaultMessage;
     this.snackBar.open(message, 'Cerrar', { duration: 5000 });
     this.error = message;
+  }
+
+  onSubmit(): void {
+    if (this.appointmentForm.invalid || !this.currentUser) return;
+
+    this.isLoading = true;
+    const formValue = this.appointmentForm.value;
+    const service = this.getSelectedService();
+    if (!service) return;
+
+    const turnData: TurnCreate = {
+      reason: formValue.reasonOption === 5 ? formValue.customReason : this.reasonOptions.find(r => r.id === formValue.reasonOption)?.name || '',
+      state: TurnState.PENDING,
+      date: this.formatDateISO(formValue.appointmentDate),
+      date_limit: this.formatDateISO(new Date(new Date(formValue.appointmentDate).setHours(23, 59, 59))),
+      time: formValue.appointmentTime,
+      doctor_id: this.getDoctorIdFromSchedule(),
+      service_id: service.id
+    };
+
+    if (this.currentUser.health_insurance_id) {
+      this.healthInsuranceService.getById(this.currentUser.health_insurance_id).subscribe({
+        next: (healthInsurance) => {
+          if (healthInsurance.discount === 100) {
+            this.createTurnAndRedirect(turnData);
+          } else {
+            this.showPartialPayment(healthInsurance.discount, turnData);
+          }
+        },
+        error: (error: HttpErrorResponse) => {
+          this.handleError(error, 'Error al verificar la obra social');
+          this.isLoading = false;
+        }
+      });
+    } else {
+      this.showPartialPayment(0, turnData);
+    }
+  }
+
+  private getDoctorIdFromSchedule(): string {
+    // Placeholder: Deberías mapear el doctor basado en el horario seleccionado
+    // Ejemplo: Consultar ScheduleService con day y time para obtener doctor_id
+    return '1'; // Reemplazar con lógica real
+  }
+
+  private createTurnAndRedirect(turnData: TurnCreate): void {
+    this.appointmentService.createTurn(turnData).subscribe({
+      next: (turn) => {
+        this.snackBar.open('Turno creado con éxito', 'Cerrar', { duration: 5000 });
+        this.router.navigate(['/user-panel']);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.handleError(error, 'Error al crear el turno');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private showPartialPayment(discount: number, turnData: TurnCreate): void {
+    const remainingAmount = this.getSelectedServicePrice() * (1 - discount / 100);
+    this.snackBar.open(`Obra social cubre ${discount}%. Debes pagar ${this.formatPrice(remainingAmount)}. (Funcionalidad de pago pendiente)`, 'Cerrar', { duration: 10000 });
+    this.isLoading = false;
+  }
+
+  private formatDateISO(date: Date): string {
+    return date.toISOString().split('T')[0];
   }
 }

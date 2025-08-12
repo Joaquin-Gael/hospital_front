@@ -36,6 +36,7 @@ export interface TurnCreate {
   state: TurnState;
   date: string;
   date_limit: string;
+  time: string;
   doctor_id: string;
   appointment_id?: string;
   service_id: string;
@@ -55,6 +56,7 @@ export interface Appointment {
   date: string; // ISO 8601
   date_created: string; // ISO 8601
   date_limit: string; // ISO 8601
+  time: string;
   user_id: string;
   doctor_id: string;
   service_id: string;
@@ -75,12 +77,12 @@ export interface AppointmentMinimal {
   service_id: string;
 }
 
-// ViewModel para usar en el frontend (listados, tablas, etc.)
+
 export interface AppointmentViewModel {
   id: string;
   turnId: string;
-  date: string; // solo fecha
-  time: string; // solo hora si aplica
+  date: string; 
+  time: string; 
   specialty: string;
   doctorName: string;
   location: string;
