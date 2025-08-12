@@ -3,16 +3,24 @@
     <div class="user-list__header">
       <h2 class="user-list__title">Gestión de Usuarios</h2>
       <button class="btn btn--primary" (click)="onAddNew()">
+        <span class="material-icons">person_add</span>
         Agregar Usuario
       </button>
     </div>
+    
     <div class="user-list__body">
       <div *ngIf="error" class="user-list__alert alert alert--danger">
+        <span class="material-icons">error</span>
         {{ error }}
+        <button class="close-button" (click)="error = null" aria-label="Cerrar error">
+          <span class="material-icons">close</span>
+        </button>
       </div>
+      
       <div *ngIf="loading" class="user-list__loading">
-        <span>Cargando usuarios...</span>
+        Cargando usuarios...
       </div>
+      
       <div class="user-list__content" [class.hidden]="showForm">
         <app-data-table
           [data]="users"
@@ -26,14 +34,17 @@
           (unban)="onUnbanEvent($event)"
         ></app-data-table>
       </div>
-      <div *ngIf="!loading && !users.length" class="user-list__empty">
+      
+      <div *ngIf="!loading && !users.length && !showForm" class="user-list__empty">
         No se encontraron usuarios.
       </div>
+      
       <div *ngIf="showForm" class="user-list__form">
         <div class="user-list__form-field">
-          <label for="img_profile" class="user-list__label"
-            >Imagen de Perfil</label
-          >
+          <label for="img_profile" class="user-list__label">
+            <span class="material-icons">image</span>
+            Imagen de Perfil
+          </label>
           <input
             id="img_profile"
             type="file"
@@ -41,14 +52,20 @@
             (change)="onFileSelected($event)"
             class="user-list__input-file"
           />
+          <div *ngIf="imagePreview" class="user-list__image-preview">
+            <img [src]="imagePreview" alt="Vista previa" class="user-list__preview-image">
+            <button type="button" (click)="removeImage()" class="user-list__remove-image">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
         </div>
+        
         <app-entity-form
           [fields]="formFields"
           [loading]="formLoading"
           [initialData]="selectedUser"
-          [submitLabel]="
-            formMode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario'
-          "
+          [submitLabel]="formMode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario'"
+          [title]="formMode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario'"
           (formSubmit)="onFormSubmit($event)"
           (formCancel)="onFormCancel()"
         ></app-entity-form>

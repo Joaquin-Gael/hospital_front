@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -8,14 +8,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { animate, style, transition, trigger, query, stagger, state } from '@angular/animations';
-import { Service } from '../../services/interfaces/hospital.interfaces';
-import { MedicalSchedule } from '../../services/interfaces/doctor.interfaces'
+import { MedicalScheduleDaysResponse, Service, MedicalScheduleCreate } from '../../services/interfaces/hospital.interfaces';
 import { ServiceService } from '../../services/service/service.service';
 import { DoctorService } from '../../services/doctor/doctor.service';
+import { ScheduleService } from '../../services/schedule/schedule.service';
 import { LoggerService } from '../../services/core/logger.service';
 import { debounceTime } from 'rxjs/operators';
 
@@ -38,6 +38,9 @@ interface ReasonOption {
     MatIconModule,
     MatNativeDateModule,
     MatTooltipModule
+  ],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'es-ES' } // Para calendario en español
   ],
   templateUrl: './shift.component.html',
   styleUrls: ['./shift.component.scss'],
@@ -92,11 +95,13 @@ export class ShiftsComponent implements OnInit {
   private fb = inject(FormBuilder);
   private serviceService = inject(ServiceService);
   private doctorService = inject(DoctorService);
+  private scheduleService = inject(ScheduleService);
   private logger = inject(LoggerService);
   private snackBar = inject(MatSnackBar);
+  private cdr = inject(ChangeDetectorRef);
 
   services: Service[] = [];
-  schedules: MedicalSchedule[] = [];
+  schedules: MedicalScheduleCreate[] = []; // Cambiado a MedicalScheduleCreate
   availableDays: string[] = [];
   availableTimeSlots: string[] = [];
   
@@ -118,7 +123,7 @@ export class ShiftsComponent implements OnInit {
     { id: 5, name: 'Otro (especificar)' }
   ];
   
-  ngOnInit(): void {
+ngOnInit(): void {
     this.loadServices();
     this.initForm();
     this.watchFormChanges();
@@ -140,13 +145,14 @@ export class ShiftsComponent implements OnInit {
       debounceTime(300)
     ).subscribe(serviceId => {
       if (serviceId) {
-        this.loadSchedules(serviceId);
+        const selectedService = this.services.find(s => s.id === serviceId);
+        if (selectedService && selectedService.specialty_id) {
+          this.loadAvailableDays(selectedService.specialty_id);
+        } else {
+          this.resetSchedules();
+        }
       } else {
-        this.schedules = [];
-        this.availableDays = [];
-        this.availableTimeSlots = [];
-        this.appointmentForm.get('appointmentDate')?.setValue(null);
-        this.appointmentForm.get('appointmentTime')?.setValue(null);
+        this.resetSchedules();
       }
     });
 
@@ -171,6 +177,14 @@ export class ShiftsComponent implements OnInit {
     });
   }
 
+  private resetSchedules(): void {
+    this.schedules = [];
+    this.availableDays = [];
+    this.availableTimeSlots = [];
+    this.appointmentForm.get('appointmentDate')?.setValue(null);
+    this.appointmentForm.get('appointmentTime')?.setValue(null);
+  }
+
   loadServices(): void {
     this.isLoading = true;
     this.serviceService.getServices().subscribe({
@@ -189,16 +203,30 @@ export class ShiftsComponent implements OnInit {
     });
   }
 
-  loadSchedules(serviceId: string): void {
+  loadAvailableDays(specialtyId: string): void {
     this.isLoading = true;
-    this.doctorService.getAvailableSchedules(serviceId).subscribe({
-      next: (schedules) => {
-        this.schedules = schedules;
-        this.availableDays = [...new Set(schedules.map(schedule => schedule.day))];
+    this.scheduleService.getAvailableDays(specialtyId).subscribe({
+      next: (response: MedicalScheduleDaysResponse) => {
+        const dayTranslation: { [key: string]: string } = {
+          monday: 'lunes',
+          tuesday: 'martes',
+          wednesday: 'miércoles',
+          thursday: 'jueves',
+          friday: 'viernes',
+          saturday: 'sábado',
+          sunday: 'domingo'
+        };
+        this.schedules = response.available_days.map(day => ({
+          day: day.day, // Mantener en inglés
+          start_time: day.start_time,
+          end_time: day.end_time
+        }));
+        this.availableDays = [...new Set(this.schedules.map(s => s.day))]; // Guardar en inglés
         this.appointmentForm.get('appointmentDate')?.setValue(null);
         this.appointmentForm.get('appointmentTime')?.setValue(null);
         this.availableTimeSlots = [];
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (error: HttpErrorResponse) => {
         this.isLoading = false;
@@ -208,9 +236,19 @@ export class ShiftsComponent implements OnInit {
   }
 
   generateTimeSlots(date: Date): void {
-    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+    const dayOfWeek = date.toLocaleDateString('es-ES', { weekday: 'long' }).toLowerCase();
+    const dayMap: { [key: string]: string } = {
+      'lunes': 'monday',
+      'martes': 'tuesday',
+      'miércoles': 'wednesday',
+      'jueves': 'thursday',
+      'viernes': 'friday',
+      'sábado': 'saturday',
+      'domingo': 'sunday'
+    };
+    const englishDay = dayMap[dayOfWeek] || '';
     const matchingSchedules = this.schedules.filter(
-      s => s.day.toLowerCase() === dayOfWeek.toLowerCase()
+      s => s.day.toLowerCase() === englishDay.toLowerCase()
     );
 
     if (!matchingSchedules.length) {
@@ -228,15 +266,19 @@ export class ShiftsComponent implements OnInit {
 
   generateTimeIntervals(startTime: string, endTime: string, intervalMinutes = 30): string[] {
     const slots: string[] = [];
-    const start = this.parseTime(startTime);
-    const end = this.parseTime(endTime);
+    const [startHours, startMinutes] = startTime.split(':').slice(0, 2).map(Number);
+    const [endHours, endMinutes] = endTime.split(':').slice(0, 2).map(Number);
+    const start = new Date();
+    start.setHours(startHours, startMinutes, 0, 0);
+    const end = new Date();
+    end.setHours(endHours, endMinutes, 0, 0);
     const today = new Date();
     const isToday = this.isSameDay(this.appointmentForm.get('appointmentDate')?.value, today);
 
     let current = start;
     if (isToday) {
       const now = new Date();
-      if (now.getHours() > start.getHours() || (now.getHours() === start.getHours() && now.getMinutes() >= start.getMinutes())) {
+      if (now > start) {
         const minutes = now.getMinutes();
         const nextInterval = Math.ceil((minutes + 1) / intervalMinutes) * intervalMinutes;
         current.setHours(now.getHours(), nextInterval, 0, 0);
@@ -251,7 +293,7 @@ export class ShiftsComponent implements OnInit {
   }
 
   parseTime(time: string): Date {
-    const [hours, minutes] = time.split(':').map(Number);
+    const [hours, minutes] = time.split(':').slice(0, 2).map(Number);
     const date = new Date();
     date.setHours(hours, minutes, 0, 0);
     return date;
@@ -262,9 +304,34 @@ export class ShiftsComponent implements OnInit {
   }
 
   dayFilter = (date: Date | null): boolean => {
-    if (!date || !this.availableDays.length) return false;
-    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
-    return this.availableDays.includes(dayOfWeek);
+    if (!date) return false;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date < today) {
+      console.log(`Fecha pasada bloqueada: ${date}`);
+      return false;
+    }
+
+    if (!this.availableDays.length) {
+      console.log('No hay días disponibles');
+      return false;
+    }
+
+    const dayMap: { [key: string]: string } = {
+      'lunes': 'monday',
+      'martes': 'tuesday',
+      'miércoles': 'wednesday',
+      'jueves': 'thursday',
+      'viernes': 'friday',
+      'sábado': 'saturday',
+      'domingo': 'sunday'
+    };
+    const dayOfWeek = date.toLocaleDateString('es-ES', { weekday: 'long' }).toLowerCase();
+    const englishDay = dayMap[dayOfWeek] || '';
+    const isAvailable = this.availableDays.includes(englishDay);
+    console.log(`Día en español: ${dayOfWeek}, Día en inglés: ${englishDay}, Disponible: ${isAvailable}, availableDays: ${this.availableDays}`);
+    return isAvailable;
   };
 
   isSameDay(date1: Date | null, date2: Date): boolean {
@@ -273,37 +340,6 @@ export class ShiftsComponent implements OnInit {
            date1.getMonth() === date2.getMonth() &&
            date1.getFullYear() === date2.getFullYear();
   }
-  
-  /*
-  proceedToPayment(): void {
-    if (this.appointmentForm.invalid) {
-      this.markFormGroupTouched(this.appointmentForm);
-      return;
-    }
-
-    this.isLoading = true;
-
-    const formData = new FormData();
-    formData.append('service', this.appointmentForm.get('service')?.value.toString());
-    formData.append('date', this.appointmentForm.get('appointmentDate')?.value.toISOString());
-    formData.append('time', this.appointmentForm.get('appointmentTime')?.value);
-    formData.append('reason', this.getReasonText());
-
-    this.serviceService.createAppointment(formData).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.snackBar.open('Cita creada con éxito. Redirigiendo al pago...', 'Cerrar', { duration: 5000 });
-        setTimeout(() => {
-          window.location.href = '/payment-gateway'; // Reemplazar con la URL real
-        }, 2000);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.isLoading = false;
-        this.handleError(error, 'Error al crear la cita');
-      }
-    });
-  }
-  */
 
   markFormGroupTouched(formGroup: FormGroup): void {
     Object.values(formGroup.controls).forEach(control => {

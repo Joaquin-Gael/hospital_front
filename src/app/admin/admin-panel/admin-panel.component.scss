@@ -1,37 +1,38 @@
 @use 'sass:color';
-
-// Variables actualizadas
-$primary-color: #3b82f6; // Cambiado al nuevo color
-$primary-hover: #2563eb; // Añadido para estados hover
-$secondary-color: #f5f5f5;
-$text-color: #333;
-$text-light: #fff;
-$border-color: #e0e0e0;
-$shadow-color: rgba(0, 0, 0, 0.1);
-$transition-speed: 0.3s;
-$sidebar-width: 250px;
-$sidebar-collapsed-width: 70px;
-$header-height: 64px;
-
-// Nuevas variables para el menú de usuario
-$dropdown-bg: #fff;
-$dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-$hover-bg: #f5f5f5;
+@use '../styles/_vars.scss' as *;
 
 .admin-panel {
   display: flex;
   height: 100vh;
   overflow: hidden;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
   &__sidebar {
     width: $sidebar-width;
-    background-color: $primary-color;
-    color: $text-light;
-    transition: width $transition-speed ease;
-    box-shadow: 2px 0 5px $shadow-color;
+    background: $bg-glass;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: $text-primary;
+    transition: $transition-smooth;
+    box-shadow: $shadow-glass;
     display: flex;
     flex-direction: column;
-    z-index: 10;
+    z-index: 100;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: $bg-gradient;
+      opacity: 0.95;
+      z-index: -1;
+    }
     
     @media (max-width: 768px) {
       width: $sidebar-collapsed-width;
@@ -39,19 +40,38 @@ $hover-bg: #f5f5f5;
   }
   
   &__logo {
-    padding: 20px;
+    padding: 32px 24px;
     text-align: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    }
     
     h1 {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: $text-white;
+      letter-spacing: -0.025em;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       
       @media (max-width: 768px) {
         font-size: 0;
         &::before {
           content: 'A';
-          font-size: 1.5rem;
+          font-size: 1.75rem;
+          background: linear-gradient(135deg, #fbbf24, #f59e0b);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
       }
     }
@@ -59,34 +79,88 @@ $hover-bg: #f5f5f5;
   
   &__nav {
     flex: 1;
+    padding: 24px 0;
     
     ul {
       list-style: none;
       padding: 0;
       margin: 0;
-    }
-    
-    li {
-      margin: 0;
-      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0 16px;
     }
   }
   
   &__nav-link {
     display: flex;
     align-items: center;
-    padding: 15px 20px;
-    color: rgba(255, 255, 255, 0.8);
+    padding: 16px 20px;
+    color: rgba(255, 255, 255, 0.85);
     text-decoration: none;
-    transition: background-color $transition-speed ease, color $transition-speed ease;
+    transition: $transition-smooth;
+    border-radius: 16px;
+    margin: 2px 0;
+    font-weight: 500;
+    font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
     
-    &:hover, &.active {
-      background-color: $primary-hover; // Usando el nuevo primary-hover
-      color: $text-light;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.6s ease;
+    }
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: $text-white;
+      transform: translateX(8px);
+      box-shadow: $shadow-md;
+      
+      &::before {
+        left: 100%;
+      }
+      
+      .material-icons {
+        transform: scale(1.1);
+        color: $accent-color;
+      }
+    }
+    
+    &.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: $text-white;
+      box-shadow: $shadow-md;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      
+      .material-icons {
+        color: $accent-color;
+      }
+      
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 24px;
+        background: $accent-color;
+        border-radius: 0 2px 2px 0;
+      }
     }
     
     .material-icons {
-      margin-right: 15px;
+      margin-right: 16px;
+      transition: $transition-smooth;
+      font-size: 22px;
       
       @media (max-width: 768px) {
         margin-right: 0;
@@ -105,27 +179,42 @@ $hover-bg: #f5f5f5;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    background: $bg-secondary;
   }
   
   &__header {
     height: $header-height;
-    background-color: $secondary-color;
-    border-bottom: 1px solid $border-color;
+    background: $bg-glass;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid $border-light;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
-    box-shadow: 0 2px 4px $shadow-color;
-    z-index: 5;
+    padding: 0 32px;
+    box-shadow: $shadow-sm;
+    z-index: 50;
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, $border-color, transparent);
+    }
     
     h2 {
       margin: 0;
-      font-weight: 500;
-      color: $text-color;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: $text-primary;
+      letter-spacing: -0.025em;
     }
   }
   
-  // Estilos del menú de usuario
   &__user-menu {
     position: relative;
   }
@@ -133,114 +222,222 @@ $hover-bg: #f5f5f5;
   &__user-button {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 8px 12px;
-    background: transparent;
-    border: 1px solid $border-color;
-    border-radius: 6px;
-    color: $text-color;
+    gap: 12px;
+    padding: 12px 20px;
+    background: $bg-primary;
+    border: 2px solid $border-color;
+    border-radius: 50px;
+    color: $text-primary;
     cursor: pointer;
-    transition: all $transition-speed ease;
+    transition: $transition-smooth;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: $shadow-sm;
     
     &:hover {
-      background-color: $hover-bg;
-      border-color: $primary-hover; // Usando el nuevo primary-hover
+      background: $primary-light;
+      border-color: $primary-color;
+      transform: translateY(-2px);
+      box-shadow: $shadow-md;
     }
     
     &:focus {
       outline: none;
-      box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+    
+    &:active {
+      transform: translateY(0);
     }
   }
   
   &__dropdown-icon {
-    font-size: 18px;
-    transition: transform $transition-speed ease;
+    font-size: 20px;
+    transition: $transition-smooth;
+    color: $text-secondary;
     
     .admin-panel__dropdown--open & {
       transform: rotate(180deg);
+      color: $primary-color;
     }
   }
   
   &__dropdown {
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% + 12px);
     right: 0;
-    min-width: 180px;
-    background: $dropdown-bg;
-    border: 1px solid $border-color;
-    border-radius: 8px;
-    box-shadow: $dropdown-shadow;
+    min-width: 220px;
+    background: $bg-glass;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: $shadow-lg;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
-    transition: all $transition-speed ease;
+    transform: translateY(-20px) scale(0.95);
+    transition: $transition-bounce;
     z-index: 1000;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      right: 24px;
+      width: 16px;
+      height: 16px;
+      background: $bg-glass;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom: none;
+      border-right: none;
+      transform: rotate(45deg);
+      backdrop-filter: blur(20px);
+    }
     
     &--open {
       opacity: 1;
       visibility: visible;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
   }
   
   &__dropdown-item {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     width: 100%;
-    padding: 12px 16px;
+    padding: 16px 20px;
     background: transparent;
     border: none;
-    color: $text-color;
+    color: $text-primary;
     text-align: left;
     cursor: pointer;
-    transition: background-color $transition-speed ease;
-    border-radius: 6px;
-    margin: 4px;
+    transition: $transition-smooth;
+    font-weight: 500;
+    font-size: 0.95rem;
+    position: relative;
     
     &:hover {
-      background-color: $hover-bg;
+      background: rgba(102, 126, 234, 0.1);
+      
+      .material-icons {
+        transform: scale(1.1);
+      }
     }
     
     &:focus {
       outline: none;
-      background-color: $hover-bg;
+      background: rgba(102, 126, 234, 0.15);
     }
     
     .material-icons {
-      font-size: 20px;
+      font-size: 22px;
       color: #ef4444;
-    }
-    
-    span:not(.material-icons) {
-      font-size: 14px;
-      font-weight: 500;
+      transition: $transition-smooth;
     }
   }
   
   &__container {
     flex: 1;
-    padding: 20px;
+    padding: 32px;
     overflow-y: auto;
-    background-color: #f9f9f9;
+    background: $bg-secondary;
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: radial-gradient(circle at 1px 1px, rgba(102, 126, 234, 0.1) 1px, transparent 0);
+      background-size: 40px 40px;
+      pointer-events: none;
+      opacity: 0.5;
+    }
   }
 }
 
-// Animación para transiciones de ruta
+// Animaciones personalizadas
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 .route-animation-fade {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: slideInRight 0.4s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+// Estados de loading
+.loading-state {
+  .admin-panel__nav-link {
+    animation: pulse 2s infinite;
+  }
 }
 
-// Cerrar dropdown al hacer click fuera
+// Mejoras de accesibilidad
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Responsive avanzado
+@media (max-width: 1024px) {
+  .admin-panel {
+    &__container {
+      padding: 24px;
+    }
+    
+    &__header {
+      padding: 0 24px;
+    }
+  }
+}
+
 @media (max-width: 768px) {
-  .admin-panel__dropdown {
-    right: -10px;
-    min-width: 160px;
+  .admin-panel {
+    &__header {
+      padding: 0 16px;
+      
+      h2 {
+        font-size: 1.25rem;
+      }
+    }
+    
+    &__container {
+      padding: 16px;
+    }
+    
+    &__dropdown {
+      right: -10px;
+      min-width: 200px;
+    }
+  }
+}
+
+// Estados de dark mode (preparado para futuro)
+@media (prefers-color-scheme: dark) {
+  .admin-panel {
+    // Variables dark mode aquí
   }
 }

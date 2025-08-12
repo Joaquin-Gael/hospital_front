@@ -15,6 +15,7 @@ export interface Turn {
   id: string;
   reason: string;
   state: TurnState;
+  time: string;
   date: string; // ISO 8601
   date_limit: string; // ISO 8601
   date_created: string; // ISO 8601

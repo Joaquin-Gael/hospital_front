@@ -10,7 +10,7 @@ import {
   MedicalScheduleCreate,
   MedicalScheduleUpdate,
   MedicalScheduleDelete,
-  MedicalScheduleDaysResponse
+  MedicalScheduleDaysResponse,
 } from '../interfaces/hospital.interfaces';
 import { MedicalSchedule } from '../../services/interfaces/doctor.interfaces';
 
@@ -30,10 +30,14 @@ export class ScheduleService {
    * @returns Observable of an array of MedicalSchedule objects.
    */
   getSchedules(): Observable<MedicalSchedule[]> {
-    return this.apiService.get<MedicalSchedule[]>(SCHEDULE_ENDPOINTS.GET_ALL).pipe(
-      map((response) => response || []),
-      catchError((error) => this.handleError('Failed to fetch schedules', error))
-    );
+    return this.apiService
+      .get<MedicalSchedule[]>(SCHEDULE_ENDPOINTS.GET_ALL)
+      .pipe(
+        map((response) => response || []),
+        catchError((error) =>
+          this.handleError('Failed to fetch schedules', error)
+        )
+      );
   }
 
   /**
@@ -42,27 +46,60 @@ export class ScheduleService {
    * @returns Observable of the created MedicalSchedule object.
    */
   addSchedule(schedule: MedicalScheduleCreate): Observable<MedicalSchedule> {
-    return this.apiService.post<MedicalSchedule>(SCHEDULE_ENDPOINTS.ADD, schedule).pipe(
-      catchError((error) => this.handleError('Failed to create schedule', error))
-    );
+    return this.apiService
+      .post<MedicalSchedule>(SCHEDULE_ENDPOINTS.ADD, schedule)
+      .pipe(
+        catchError((error) =>
+          this.handleError('Failed to create schedule', error)
+        )
+      );
   }
 
-  getAvailableDays(specialtyId: string): Observable<MedicalScheduleDaysResponse> {
-    return this.apiService.get<MedicalScheduleDaysResponse>(SCHEDULE_ENDPOINTS.GET_DAYS(specialtyId)).pipe(
-      map((response) => response || { available_days: [] }),
-      catchError((error) => this.handleError(`Failed to fetch available days for specialty ${specialtyId}`, error)
-    ))
+  getAvailableDays(
+    specialtyId: string
+  ): Observable<MedicalScheduleDaysResponse> {
+    return this.apiService
+      .get<MedicalScheduleDaysResponse>(
+        SCHEDULE_ENDPOINTS.GET_DAYS(specialtyId)
+      )
+      .pipe(
+        map((response) => {
+          if (!response || !Array.isArray(response.available_days)) {
+            return { available_days: [] };
+          }
+          const validDays = response.available_days.filter(
+            (day) =>
+              typeof day.day === 'string' &&
+              typeof day.start_time === 'string' &&
+              typeof day.end_time === 'string' &&
+              /^[a-zA-Z]+$/.test(day.day) && 
+              /^\d{2}:\d{2}:\d{2}$/.test(day.start_time) && 
+              /^\d{2}:\d{2}:\d{2}$/.test(day.end_time)
+          );
+          return { available_days: validDays };
+        }),
+        catchError((error) =>
+          this.handleError(
+            `Failed to fetch available days for specialty ${specialtyId}`,
+            error
+          )
+        )
+      );
   }
-  
+
   /**
    * Deletes a medical schedule by ID (superuser only).
    * @param scheduleId The ID of the schedule to delete.
    * @returns Observable of the MedicalScheduleDelete response.
    */
   deleteSchedule(scheduleId: string): Observable<MedicalScheduleDelete> {
-    return this.apiService.delete<MedicalScheduleDelete>(SCHEDULE_ENDPOINTS.DELETE(scheduleId)).pipe(
-      catchError((error) => this.handleError(`Failed to delete schedule ${scheduleId}`, error))
-    );
+    return this.apiService
+      .delete<MedicalScheduleDelete>(SCHEDULE_ENDPOINTS.DELETE(scheduleId))
+      .pipe(
+        catchError((error) =>
+          this.handleError(`Failed to delete schedule ${scheduleId}`, error)
+        )
+      );
   }
 
   /**
@@ -71,13 +108,23 @@ export class ScheduleService {
    * @param scheduleId The ID of the schedule.
    * @returns Observable of the updated MedicalSchedule object.
    */
-  addDoctorToSchedule(doctorId: string, scheduleId: string): Observable<MedicalSchedule> {
-    const params = new HttpParams().set('doc_id', doctorId).set('schedule_id', scheduleId);
-    return this.apiService.put<MedicalSchedule>(SCHEDULE_ENDPOINTS.ADD_DOCTOR, {}, { params }).pipe(
-      catchError((error) =>
-        this.handleError(`Failed to add doctor ${doctorId} to schedule ${scheduleId}`, error)
-      )
-    );
+  addDoctorToSchedule(
+    doctorId: string,
+    scheduleId: string
+  ): Observable<MedicalSchedule> {
+    const params = new HttpParams()
+      .set('doc_id', doctorId)
+      .set('schedule_id', scheduleId);
+    return this.apiService
+      .put<MedicalSchedule>(SCHEDULE_ENDPOINTS.ADD_DOCTOR, {}, { params })
+      .pipe(
+        catchError((error) =>
+          this.handleError(
+            `Failed to add doctor ${doctorId} to schedule ${scheduleId}`,
+            error
+          )
+        )
+      );
   }
 
   /**
@@ -86,9 +133,13 @@ export class ScheduleService {
    * @returns Observable of the updated MedicalSchedule object.
    */
   updateSchedule(schedule: MedicalScheduleUpdate): Observable<MedicalSchedule> {
-    return this.apiService.put<MedicalSchedule>(SCHEDULE_ENDPOINTS.UPDATE, schedule).pipe(
-      catchError((error) => this.handleError(`Failed to update schedule ${schedule.id}`, error))
-    );
+    return this.apiService
+      .put<MedicalSchedule>(SCHEDULE_ENDPOINTS.UPDATE, schedule)
+      .pipe(
+        catchError((error) =>
+          this.handleError(`Failed to update schedule ${schedule.id}`, error)
+        )
+      );
   }
 
   /**
@@ -104,8 +155,15 @@ export class ScheduleService {
     let errorMessage = 'An unexpected error occurred';
     if (error instanceof Error) {
       errorMessage = error.message;
-    } else if (typeof error === 'object' && error !== null && 'status' in error) {
-      const httpError = error as { status: number; error?: { detail?: string } };
+    } else if (
+      typeof error === 'object' &&
+      error !== null &&
+      'status' in error
+    ) {
+      const httpError = error as {
+        status: number;
+        error?: { detail?: string };
+      };
       switch (httpError.status) {
         case 400:
           errorMessage = httpError.error?.detail ?? 'Invalid request data';

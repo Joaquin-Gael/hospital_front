@@ -23,9 +23,11 @@ export interface UserCreate {
   first_name: string;
   last_name: string;
   dni: string;
+  telephone?: string;
   password: string;
   address?: string;
   blood_type?: string;
+  health_insurance_id?: string;
   is_superuser?: boolean;
   is_admin?: boolean;
   img_profile?: string;
