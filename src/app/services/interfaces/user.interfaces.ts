@@ -13,24 +13,21 @@ export interface UserRead {
   address: string | null;
   telephone: string | null;
   blood_type: string | null;
-  health_insurance_id: string | null;
+  health_insurance_id: string[];
   img_profile: string | null;
 }
 
 export interface UserCreate {
-  email: string;
   username: string;
+  email: string;
   first_name: string;
   last_name: string;
   dni: string;
   telephone?: string;
-  password: string;
   address?: string;
-  blood_type?: string;
-  health_insurance_id?: string;
-  is_superuser?: boolean;
-  is_admin?: boolean;
-  img_profile?: string;
+  blood_type: string;
+  health_insurance_id: string[];
+  password: string;
 }
 
 export interface UserUpdate {
@@ -39,7 +36,7 @@ export interface UserUpdate {
   last_name?: string;
   telephone?: string;
   address?: string;
-  health_insurance_id?: string;
+  health_insurance_id?: string[];
   img_profile?: File;
 }
 

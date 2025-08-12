@@ -40,7 +40,7 @@
     </div>
 
     <!-- Contenido del formulario -->
-    <form [formGroup]="appointmentForm" class="appointment-form">
+    <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="appointment-form">
       <!-- Paso 1: Selección de Servicio -->
       <div *ngIf="currentStep === 1" class="form-step" @slideIn>
         <h3 class="step-title">¿Qué servicio necesitas?</h3>

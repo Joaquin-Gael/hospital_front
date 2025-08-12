@@ -236,6 +236,195 @@
     user-select: none;
   }
 
+  &__file-dropzone {
+    min-height: 200px;
+    border: 3px dashed $border-color;
+    border-radius: 20px;
+    background: $bg-secondary;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+
+    // Efecto de brillo sutil
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+      transition: left 0.8s ease;
+      z-index: 1;
+    }
+
+    &:hover {
+      border-color: $primary-color;
+      background: $primary-light;
+      transform: translateY(-3px);
+      box-shadow: $shadow-lg;
+      
+      &::before {
+        left: 100%;
+      }
+
+      .entity-form__dropzone-icon svg {
+        transform: scale(1.1);
+        color: $primary-color;
+      }
+    }
+
+    &.is-dragover {
+      border-color: $primary-color;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%);
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+
+      .entity-form__dropzone-icon svg {
+        animation: bounce 0.6s ease-in-out;
+        color: $primary-color;
+      }
+
+      .entity-form__dropzone-primary {
+        color: $primary-color;
+        font-weight: 700;
+      }
+    }
+
+    &.has-file {
+      border-color: $success-color;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
+
+      .entity-form__dropzone-icon svg {
+        color: $success-color;
+      }
+
+      .entity-form__dropzone-primary {
+        color: $success-color;
+      }
+    }
+
+    &:focus-within {
+      outline: 3px solid rgba(102, 126, 234, 0.3);
+      outline-offset: 2px;
+    }
+  }
+
+  &__file-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__dropzone-content {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+  }
+
+  &__dropzone-icon {
+    margin-bottom: 16px;
+    
+    svg {
+      transition: all 0.3s ease;
+      color: $text-muted;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+  }
+
+  &__dropzone-text {
+    user-select: none;
+  }
+
+  &__dropzone-primary {
+    font-size: 1.1rem;
+    color: $text-primary;
+    margin: 0 0 8px 0;
+    transition: all 0.3s ease;
+  }
+
+  &__dropzone-secondary {
+    font-size: 0.9rem;
+    color: $text-muted;
+    margin: 0;
+    transition: all 0.3s ease;
+  }
+
+  &__remove-file {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(239, 68, 68, 0.1);
+    color: $error-color;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 3;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__upload-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    background: $primary-gradient;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  &__progress-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $text-primary;
+    min-width: 40px;
+  }
+
+  // Mantener el estilo del input file original como fallback
   &__file {
     padding: 20px 24px;
     border: 3px dashed $border-color;
@@ -400,7 +589,31 @@
   }
 }
 
-// Animaciones personalizadas
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0) scale(1.1);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0) scale(1.05);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0) scale(1.02);
+  }
+}
+
+@keyframes dragPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+  }
+}
+
+// Animaciones personalizadas existentes
 @keyframes spin {
   to { 
     transform: rotate(360deg); 
@@ -479,6 +692,11 @@
       gap: 28px;
       margin-bottom: 40px;
     }
+
+    &__file-dropzone {
+      min-height: 180px;
+      padding: 28px 20px;
+    }
   }
 }
 
@@ -516,6 +734,11 @@
     &__select {
       padding: 16px 20px;
     }
+
+    &__file-dropzone {
+      min-height: 160px;
+      padding: 24px 16px;
+    }
   }
 }
 
@@ -533,6 +756,16 @@
       padding: 14px 18px;
       font-size: 16px; // Evita zoom en iOS
     }
+
+    &__file-dropzone {
+      min-height: 140px;
+      padding: 20px 12px;
+    }
+
+    &__dropzone-icon svg {
+      width: 40px;
+      height: 40px;
+    }
   }
 }
 
@@ -544,13 +777,15 @@
   .entity-form__textarea,
   .entity-form__select,
   .entity-form__button,
-  .entity-form__checkbox-wrapper {
+  .entity-form__checkbox-wrapper,
+  .entity-form__file-dropzone {
     animation: none !important;
     transition: none !important;
   }
 
   .entity-form__button::before,
-  .entity-form__checkbox-wrapper::before {
+  .entity-form__checkbox-wrapper::before,
+  .entity-form__file-dropzone::before {
     display: none;
   }
 }
@@ -560,7 +795,8 @@
 .entity-form__textarea:focus-visible,
 .entity-form__select:focus-visible,
 .entity-form__button:focus-visible,
-.entity-form__file:focus-visible {
+.entity-form__file:focus-visible,
+.entity-form__file-dropzone:focus-visible {
   outline: 3px solid $primary-color;
   outline-offset: 2px;
 }
@@ -572,7 +808,8 @@
     
     &__input,
     &__textarea,
-    &__select {
+    &__select,
+    &__file-dropzone {
       border-color: $text-primary;
     }
     

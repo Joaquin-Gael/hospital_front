@@ -63,6 +63,7 @@ export class PanelUiComponent implements OnInit, OnDestroy {
     { label: 'Mensajes', icon: 'chat', route: '/medic_panel/messages' },
     { label: 'Estadísticas', icon: 'bar_chart', route: '/medic_panel/statistics' },
     { label: 'Configuración', icon: 'settings', route: '/medic_panel/settings' },
+    { label: 'Asistente', icon: 'smart_toy', route: '/medic_panel/assistant' },
   ];
 
   @HostListener('window:resize', ['$event'])

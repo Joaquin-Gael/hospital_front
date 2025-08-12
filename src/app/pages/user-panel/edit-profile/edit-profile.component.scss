@@ -1,109 +1,306 @@
-@use 'sass:color';
-
 .edit-profile {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 24px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  min-height: 100vh;
 
-  &__header {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-
-  &__title {
-    font-size: 32px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin: 0 0 8px 0;
-  }
-
-  &__description {
-    font-size: 16px;
-    color: #666;
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  &__form {
-    margin-bottom: 48px;
-  }
-
-  &__divider {
-    display: flex;
-    align-items: center;
-    margin: 48px 0;
-    gap: 16px;
-  }
-
-  &__divider-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(to right, transparent, #e5e7eb, transparent);
-  }
-
-  &__divider-text {
-    font-size: 14px;
-    font-weight: 500;
-    color: #9ca3af;
-    padding: 0 16px;
-    background: #ffffff;
-    white-space: nowrap;
-  }
-
-  &__dni-section {
+  &__health-insurance-section {
     background: #f9fafb;
     border-radius: 12px;
     padding: 24px;
     border: 1px solid #e5e7eb;
+    margin-bottom: 48px;
   }
 }
 
-// Responsive design
-@media (max-width: 768px) {
-  .edit-profile {
-    padding: 16px;
-    border-radius: 0;
-    box-shadow: none;
+.health-insurance-drag-drop {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  min-height: 400px;
 
-    &__title {
-      font-size: 24px;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.health-insurance-column {
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 16px 0;
+    padding: 0 4px;
+  }
+
+  &__icon {
+    font-size: 20px;
+  }
+
+  &__count {
+    font-size: 14px;
+    font-weight: 500;
+    color: #059669;
+    background: #d1fae5;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: auto;
+  }
+}
+
+.health-insurance-list {
+  background: #ffffff;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 320px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow-y: auto;
+  max-height: 500px;
+
+  &--available {
+    border-color: #3b82f6;
+    
+    &:hover {
+      border-color: #2563eb;
+      background: #f8faff;
+    }
+  }
+
+  &--selected {
+    border-color: #059669;
+    
+    &:hover {
+      border-color: #047857;
+      background: #f0fdf4;
+    }
+  }
+
+  &--drag-over {
+    border-style: solid;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+  }
+
+  // Scrollbar personalizado
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #94a3b8;
+    }
+  }
+}
+
+.health-insurance-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: grab;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  user-select: none;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &--available {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-color: #e2e8f0;
+
+    &:hover {
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      border-color: #0ea5e9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+    }
+  }
+
+  &--selected {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: #bbf7d0;
+
+    &:hover {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border-color: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  &__name {
+    font-weight: 500;
+    color: #1a1a1a;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  &__discount {
+    font-size: 12px;
+    color: #059669;
+    font-weight: 500;
+    background: #d1fae5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    align-self: flex-start;
+  }
+
+  &__action {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #3b82f6;
+    color: white;
+    flex-shrink: 0;
+
+    &:hover {
+      background: #2563eb;
+      transform: scale(1.1);
     }
 
-    &__description {
+    &--remove {
+      background: #ef4444;
+      font-size: 18px;
+
+      &:hover {
+        background: #dc2626;
+      }
+    }
+  }
+}
+
+.health-insurance-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+  text-align: center;
+  color: #6b7280;
+
+  &__icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+  }
+
+  &__text {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 200px;
+  }
+}
+
+// Responsive design para drag and drop
+@media (max-width: 768px) {
+  .health-insurance-drag-drop {
+    min-height: 600px;
+  }
+
+  .health-insurance-list {
+    min-height: 250px;
+    max-height: 300px;
+  }
+
+  .health-insurance-column__title {
+    font-size: 16px;
+  }
+
+  .health-insurance-item {
+    padding: 10px 12px;
+
+    &__name {
+      font-size: 13px;
+    }
+
+    &__discount {
+      font-size: 11px;
+    }
+
+    &__action {
+      width: 24px;
+      height: 24px;
       font-size: 14px;
     }
+  }
 
-    &__divider {
-      margin: 32px 0;
-    }
-
-    &__dni-section {
-      padding: 16px;
-      border-radius: 8px;
-    }
+  .edit-profile__health-insurance-section {
+    padding: 16px;
   }
 }
 
 @media (max-width: 640px) {
-  .edit-profile {
-    &__divider-text {
-      font-size: 12px;
-      padding: 0 8px;
+  .health-insurance-item {
+    &__content {
+      gap: 1px;
     }
 
-    &__divider {
-      gap: 8px;
+    &__name {
+      font-size: 12px;
+    }
+
+    &__discount {
+      font-size: 10px;
+      padding: 1px 4px;
+    }
+  }
+
+  .health-insurance-empty {
+    min-height: 150px;
+
+    &__icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    &__text {
+      font-size: 13px;
     }
   }
 }
 
 // Estados de accesibilidad
 @media (prefers-reduced-motion: reduce) {
-  .edit-profile {
+  .health-insurance-item,
+  .health-insurance-list {
     transition: none;
+    transform: none !important;
   }
 }

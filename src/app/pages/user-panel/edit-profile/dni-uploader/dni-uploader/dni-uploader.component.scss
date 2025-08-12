@@ -47,7 +47,7 @@
   &__dropzone {
     position: relative;
     min-height: 200px;
-    border: 2px dashed #d1d5db;
+    border: 2px dashed #1a1a1a;
     border-radius: 12px;
     background: #fafafa;
     display: flex;
@@ -92,7 +92,7 @@
 
   &__dropzone-text {
     font-size: 16px;
-    color: #374151;
+    color: transparent;
     margin: 0 0 8px 0;
 
     strong {
@@ -285,7 +285,7 @@
     }
 
     &__description {
-      color: #d1d5db;
+      color: #1a1a1a;
     }
 
     &__section-title {
@@ -293,11 +293,11 @@
     }
 
     &__dropzone {
-      background: #374151;
+      background: transparent;
       border-color: #6b7280;
 
       &:hover {
-        background: #4b5563;
+        background: transparent;
         border-color: #3b82f6;
       }
 
@@ -307,7 +307,7 @@
     }
 
     &__dropzone-text {
-      color: #f3f4f6;
+      color: #1a1a1a;
     }
 
     &__dropzone-subtext {

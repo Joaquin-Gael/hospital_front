@@ -39,7 +39,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Cargar datos del usuario
+    // Cargamos datos del usuario p
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe({
       next: (userRead) => {
         if (!userRead) {
@@ -50,7 +50,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }
         this.user = userRead;
         this.loading = false;
-        this.loadHealthInsurance(userRead.health_insurance_id);
+        this.loadHealthInsurance(userRead.health_insurance_id[0]);
         this.loadLastVisit(userRead.id);
       },
       error: (err: HttpErrorResponse) => {

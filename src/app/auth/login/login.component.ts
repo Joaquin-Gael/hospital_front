@@ -137,11 +137,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.isSubmitting = false;
-          const msg =
-            err?.error?.message ||
-            err?.message ||
-            'Credenciales inválidas o error inesperado.';
-          this.notificationService.error(`Error al iniciar sesión: ${msg}`, {
+          this.logger.error('Error al iniciar sesión:', err);
+          this.notificationService.error('Error al iniciar sesión, por favor, intenta nuevamente.', {
             duration: 5000,
             action: {
               label: 'Cerrar',

@@ -52,34 +52,6 @@
   }
 }
 
-// Feedback simple y claro
-.feedback-message {
-  margin: $spacing-lg $spacing-xl 0;
-  padding: $spacing-md;
-  border-radius: $border-radius;
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  font-size: $font-size-sm;
-  font-weight: 500;
-  
-  &--success {
-    background-color: rgba($success-color, 0.1);
-    color: $success-color;
-    border: $border-width solid rgba($success-color, 0.2);
-  }
-  
-  &--error {
-    background-color: rgba($danger-color, 0.1);
-    color: $danger-color;
-    border: $border-width solid rgba($danger-color, 0.2);
-  }
-  
-  &__icon {
-    flex-shrink: 0;
-  }
-}
-
 .auth-form {
   padding: $spacing-xl;
 }

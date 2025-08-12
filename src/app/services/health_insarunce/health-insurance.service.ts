@@ -41,12 +41,14 @@ export class HealthInsuranceService {
    * Trae los datos de una obra social específica.
    * @param id UUID de la obra social.
    */
-  getById(id: string): Observable<HealthInsuranceRead> {
-    return this.apiService.get<HealthInsuranceRead>(HEALTH_INSURANCE_ENDPOINTS.getById(id)).pipe(
-      tap(() => this.logger.info(`Obra social con ID ${id} obtenida correctamente`)),
+  getById(hi_id: string): Observable<HealthInsuranceRead> {
+    const endpoint = HEALTH_INSURANCE_ENDPOINTS.getById(hi_id); // Esto debería resolver a medic/health_insurance/detail/<id>
+    this.logger.debug('Endpoint generated:', endpoint);
+    return this.apiService.get<HealthInsuranceRead>(HEALTH_INSURANCE_ENDPOINTS.getById(hi_id)).pipe(
+      tap(() => this.logger.info(`Obra social con ID ${hi_id} obtenida correctamente`)),
       catchError((err) => {
-        this.logger.error(`Error al obtener la obra social con ID ${id}`, err);
-        return throwError(() => new Error(`No se pudo obtener la obra social con ID ${id}`));
+        this.logger.error(`Error al obtener la obra social con ID ${hi_id}`, err);
+        return throwError(() => new Error(`No se pudo obtener la obra social con ID ${hi_id}`));
       })
     );
   }

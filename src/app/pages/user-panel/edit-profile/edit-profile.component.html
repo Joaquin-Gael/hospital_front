@@ -1,12 +1,3 @@
-<app-entity-form
-  [fields]="formFields"
-  [initialData]="initialData"
-  [loading]="isSubmitting"
-  [submitLabel]="isSubmitting ? 'Guardando...' : 'Finalizar'"
-  [enableImageUpload]="true"
-  (formSubmit)="onFormSubmit($event)"
-  (formCancel)="onFormCancel()"
-></app-entity-form> 
 <div class="edit-profile">
   <div class="edit-profile__header">
     <h2 class="edit-profile__title">Editar Perfil</h2>
@@ -26,6 +17,102 @@
       (formSubmit)="onFormSubmit($event)"
       (formCancel)="onFormCancel()"
     ></app-entity-form>
+  </div>
+
+  <!-- Nueva sección de drag and drop para obras sociales -->
+  <div class="edit-profile__divider">
+    <div class="edit-profile__divider-line"></div>
+    <span class="edit-profile__divider-text">Obras Sociales</span>
+    <div class="edit-profile__divider-line"></div>
+  </div>
+
+  <div class="edit-profile__health-insurance-section">
+    <div class="health-insurance-drag-drop">
+      <!-- Columna de obras sociales disponibles -->
+      <div class="health-insurance-column">
+        <h3 class="health-insurance-column__title">
+          <span class="health-insurance-column__icon">🏥</span>
+          Obras Sociales Disponibles
+        </h3>
+        <div 
+          class="health-insurance-list health-insurance-list--available"
+          (dragover)="onDragOver($event)"
+          (dragenter)="onDragEnter($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDropToAvailable($event)"
+          [class.health-insurance-list--drag-over]="isDraggingOver"
+        >
+          <div 
+            *ngFor="let insurance of availableHealthInsurances; trackBy: (index, item) => item.id"
+            class="health-insurance-item health-insurance-item--available"
+            draggable="true"
+            (dragstart)="onDragStart($event, insurance)"
+            (click)="addToSelected(insurance)"
+          >
+            <div class="health-insurance-item__content">
+              <span class="health-insurance-item__name">{{ insurance.name }}</span>
+              <span class="health-insurance-item__discount">{{ insurance.discount }}% desc.</span>
+            </div>
+            <button 
+              class="health-insurance-item__action"
+              (click)="$event.stopPropagation(); addToSelected(insurance)"
+              title="Agregar obra social"
+            >
+              +
+            </button>
+          </div>
+          
+          <div *ngIf="availableHealthInsurances.length === 0" class="health-insurance-empty">
+            <span class="health-insurance-empty__icon">✨</span>
+            <p class="health-insurance-empty__text">Todas las obras sociales están seleccionadas</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna de obras sociales seleccionadas -->
+      <div class="health-insurance-column">
+        <h3 class="health-insurance-column__title">
+          <span class="health-insurance-column__icon">✅</span>
+          Mis Obras Sociales
+          <span class="health-insurance-column__count" *ngIf="selectedHealthInsurances.length > 0">
+            ({{ selectedHealthInsurances.length }})
+          </span>
+        </h3>
+        <div 
+          class="health-insurance-list health-insurance-list--selected"
+          (dragover)="onDragOver($event)"
+          (dragenter)="onDragEnter($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDropToSelected($event)"
+          [class.health-insurance-list--drag-over]="isDraggingOver"
+        >
+          <div 
+            *ngFor="let insurance of selectedHealthInsurances; trackBy: (index, item) => item.id"
+            class="health-insurance-item health-insurance-item--selected"
+            draggable="true"
+            (dragstart)="onDragStart($event, insurance)"
+            (click)="removeFromSelected(insurance)"
+          >
+            <div class="health-insurance-item__content">
+              <span class="health-insurance-item__name">{{ insurance.name }}</span>
+              <span class="health-insurance-item__discount">{{ insurance.discount }}% desc.</span>
+            </div>
+            <button 
+              class="health-insurance-item__action health-insurance-item__action--remove"
+              (click)="$event.stopPropagation(); removeFromSelected(insurance)"
+              title="Quitar obra social"
+            >
+              ×
+            </button>
+          </div>
+          
+          <div *ngIf="selectedHealthInsurances.length === 0" class="health-insurance-empty">
+            <span class="health-insurance-empty__icon">👆</span>
+            <p class="health-insurance-empty__text">Arrastra aquí las obras sociales que desees seleccionar</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Separador visual -->

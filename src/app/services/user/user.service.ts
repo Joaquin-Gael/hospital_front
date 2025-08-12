@@ -44,13 +44,22 @@ export class UserService {
    * @param user Datos del usuario a crear.
    * @returns Observable con los datos del usuario creado.
    */
-  createUser(user: UserCreate, imgProfile?: File): Observable<UserRead> {
+  createUser(user: UserCreate): Observable<UserRead> {
     const formData = new FormData();
-    formData.append('user_form', JSON.stringify(user));
-    if (imgProfile) {
-      formData.append('img_profile', imgProfile);
+    formData.append('username', user.username);
+    formData.append('dni', user.dni);
+    formData.append('email', user.email);
+    formData.append('password', user.password);
+    if (user.health_insurance_id && user.health_insurance_id.length > 0) {
+      user.health_insurance_id.forEach(id => formData.append('health_insurance_id', id));
     }
+    formData.append('blood_type', user.blood_type);
+    formData.append('first_name', user.first_name);
+    formData.append('last_name', user.last_name);
+    formData.append('telephone', user.telephone || '');
 
+    this.logger.debug('Creating user with data:', formData);
+    
     return this.apiService.post<UserRead>(USER_ENDPOINTS.ADD, formData).pipe(
       catchError(error => this.handleError('Create user', error))
     );
@@ -70,7 +79,9 @@ export class UserService {
     formData.append('last_name', user.last_name || '');
     formData.append('telephone', user.telephone || '');
     formData.append('address', user.address || '');
-    formData.append('health_insurance_id', user.health_insurance_id || '');
+    if (user.health_insurance_id && user.health_insurance_id.length > 0) {
+      user.health_insurance_id.forEach(id => formData.append('health_insurance_id', id));
+    }
     if (user.img_profile instanceof File) {
       formData.append('img_profile', user.img_profile, user.img_profile.name);
     }

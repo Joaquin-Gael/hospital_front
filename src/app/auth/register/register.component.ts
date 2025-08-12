@@ -6,7 +6,8 @@ import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../services/user/user.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { UserCreate } from '../../services/interfaces/user.interfaces';
-
+import { NotificationService } from '../../core/notification/services/notification.service'
+import { LoggerService } from '../../services/core/logger.service';
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -18,6 +19,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly loggerService = inject(LoggerService)
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
@@ -131,6 +134,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       first_name,
       last_name,
       dni,
+      health_insurance_id: [],
       password,
       blood_type: blood_type || undefined,
     };
@@ -141,15 +145,33 @@ export class RegisterComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.isSubmitting = false;
-          this.feedbackMessage = 'Te registraste con éxito. Iniciá sesión.';
-          this.feedbackType = 'success';
+          this.notificationService.success(
+            '¡Te registraste con éxito. Iniciá sesión.',
+            {
+              duration: 5000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            }
+          );
+          this.loggerService.debug('Usuario registrad: ', payload)
           setTimeout(() => this.router.navigateByUrl('/login'), 2000);
         },
         error: (err) => {
           this.isSubmitting = false;
           const msg = err?.error?.message || err?.message || 'Ocurrió un error inesperado.';
-          this.feedbackMessage = `Algo salió mal: ${msg}`;
-          this.feedbackType = 'error';
+          this.notificationService.error(
+            '¡Error al registrar usuario, por favor intentá nuevamente!',
+            {
+              duration: 5000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            }
+          );
+          this.loggerService.error('Algo salió mal: ', msg)
         },
       });
   }

@@ -504,7 +504,7 @@ export class ShiftsComponent implements OnInit {
     };
 
     if (this.currentUser.health_insurance_id) {
-      this.healthInsuranceService.getById(this.currentUser.health_insurance_id).subscribe({
+      this.healthInsuranceService.getById(this.currentUser.health_insurance_id[0]).subscribe({
         next: (healthInsurance) => {
           if (healthInsurance.discount === 100) {
             this.createTurnAndRedirect(turnData);

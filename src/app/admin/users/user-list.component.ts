@@ -29,7 +29,6 @@ interface ExtendedUser extends UserRead {
     MatIconModule,
     DataTableComponent,
     EntityFormComponent,
-    ViewDialogComponent
   ],
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss'],
@@ -126,7 +125,7 @@ export class UserListComponent implements OnInit, OnDestroy {
         this.users = result.users.map((user) => ({
           ...user,
           health_insurance_name: user.health_insurance_id
-            ? this.healthInsurances.find(hi => hi.id === user.health_insurance_id)?.name || 'Obra social no encontrada'
+            ? this.healthInsurances.find(hi => hi.id === user.health_insurance_id[0])?.name || 'Obra social no encontrada'
             : 'Sin obra social'
         }));
         this.updateHealthInsuranceOptions();
@@ -278,12 +277,12 @@ export class UserListComponent implements OnInit, OnDestroy {
           health_insurance_id: formData.health_insurance_id || undefined,
         };
 
-        this.userService.createUser(userData, this.imgProfile).pipe(takeUntil(this.destroy$)).subscribe({
+        this.userService.createUser(userData).pipe(takeUntil(this.destroy$)).subscribe({
           next: (newUser: UserRead) => {
             const userWithHealthInsurance: ExtendedUser = {
               ...newUser,
               health_insurance_name: newUser.health_insurance_id
-                ? this.healthInsurances.find(hi => hi.id === newUser.health_insurance_id)?.name || 'Obra social no encontrada'
+                ? this.healthInsurances.find(hi => hi['id'] === newUser.health_insurance_id[0])?.name || 'Obra social no encontrada'
                 : 'Sin obra social'
             };
             this.logger.debug('user', userWithHealthInsurance)
@@ -314,7 +313,7 @@ export class UserListComponent implements OnInit, OnDestroy {
             const userWithHealthInsurance: ExtendedUser = {
               ...updatedUser,
               health_insurance_name: updatedUser.health_insurance_id
-                ? this.healthInsurances.find(hi => hi.id === updatedUser.health_insurance_id)?.name || 'Obra social no encontrada'
+                ? this.healthInsurances.find(hi => hi.id === updatedUser.health_insurance_id[0])?.name || 'Obra social no encontrada'
                 : 'Sin obra social'
             };
             const index = this.users.findIndex(u => u.id === updatedUser.id);
@@ -389,7 +388,7 @@ export class UserListComponent implements OnInit, OnDestroy {
               this.users[index] = {
                 ...bannedUser,
                 health_insurance_name: bannedUser.health_insurance_id
-                  ? this.healthInsurances.find(hi => hi.id === bannedUser.health_insurance_id)?.name || 'Obra social no encontrada'
+                  ? this.healthInsurances.find(hi => hi.id === bannedUser.health_insurance_id[0])?.name || 'Obra social no encontrada'
                   : 'Sin obra social'
               };
             }
@@ -423,7 +422,7 @@ export class UserListComponent implements OnInit, OnDestroy {
               this.users[index] = {
                 ...unbannedUser,
                 health_insurance_name: unbannedUser.health_insurance_id
-                  ? this.healthInsurances.find(hi => hi.id === unbannedUser.health_insurance_id)?.name || 'Obra social no encontrada'
+                  ? this.healthInsurances.find(hi => hi.id === unbannedUser.health_insurance_id[0])?.name || 'Obra social no encontrada'
                   : 'Sin obra social'
               };
             }
