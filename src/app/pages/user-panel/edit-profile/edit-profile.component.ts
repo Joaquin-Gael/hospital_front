@@ -15,6 +15,7 @@ import {
   EntityFormComponent,
   FormField,
 } from '../../../shared/entity-form/entity-form.component';
+import { DniUploaderComponent } from './dni-uploader/dni-uploader/dni-uploader.component';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -24,7 +25,13 @@ import { NotificationService } from '../../../core/notification';
 @Component({
   selector: 'app-edit-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, EntityFormComponent, MatDialogModule],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    EntityFormComponent, 
+    MatDialogModule, 
+    DniUploaderComponent
+  ],
   templateUrl: './edit-profile.component.html',
   styleUrls: ['./edit-profile.component.scss'],
 })
@@ -249,7 +256,14 @@ export class EditProfileComponent implements OnInit, OnDestroy {
   onFormCancel(): void {
     this.router.navigate(['/user_panel/profile']);
   }
-  
+
+  onDniUploadSuccess(response: any): void {
+    this.logger.info('DNI enviado exitosamente:', response);
+  }
+
+  onDniUploadError(error: string): void {
+    this.logger.error('Error al enviar DNI:', error);
+  }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
     this.logger.error(defaultMessage, error);

@@ -1,9 +1,36 @@
-<app-entity-form
-  [fields]="formFields"
-  [initialData]="initialData"
-  [loading]="isSubmitting"
-  [submitLabel]="isSubmitting ? 'Guardando...' : 'Finalizar'"
-  [enableImageUpload]="true"
-  (formSubmit)="onFormSubmit($event)"
-  (formCancel)="onFormCancel()"
-></app-entity-form>
+<div class="edit-profile">
+  <div class="edit-profile__header">
+    <h2 class="edit-profile__title">Editar Perfil</h2>
+    <p class="edit-profile__description">
+      Actualiza tu información personal y de contacto
+    </p>
+  </div>
+
+  <!-- Formulario de perfil existente -->
+  <div class="edit-profile__form">
+    <app-entity-form
+      [fields]="formFields"
+      [initialData]="initialData"
+      [loading]="isSubmitting"
+      [submitLabel]="isSubmitting ? 'Guardando...' : 'Finalizar'"
+      [enableImageUpload]="true"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onFormCancel()"
+    ></app-entity-form>
+  </div>
+
+  <!-- Separador visual -->
+  <div class="edit-profile__divider">
+    <div class="edit-profile__divider-line"></div>
+    <span class="edit-profile__divider-text">Verificación de identidad</span>
+    <div class="edit-profile__divider-line"></div>
+  </div>
+
+  <!-- Componente de verificación DNI -->
+  <div class="edit-profile__dni-section">
+    <app-dni-uploader
+      (uploadSuccess)="onDniUploadSuccess($event)"
+      (uploadError)="onDniUploadError($event)"
+    ></app-dni-uploader>
+  </div>
+</div>

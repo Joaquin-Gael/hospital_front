@@ -29,7 +29,7 @@ export interface FormField {
     | 'select'
     | 'checkbox'
     | 'date'
-    | 'file'; 
+    | 'file';
   required?: boolean;
   options?: { value: any; label: string }[];
   validators?: any[];
@@ -57,7 +57,7 @@ export class EntityFormComponent implements OnInit, OnChanges {
   @Output() formCancel = new EventEmitter<void>();
   @Output() imageSelected = new EventEmitter<File>();
 
-form!: FormGroup;
+  form!: FormGroup;
   selectedImage: File | null = null;
 
   constructor(private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
@@ -70,7 +70,10 @@ form!: FormGroup;
     if (
       changes['initialData'] &&
       !changes['initialData'].firstChange &&
-      !this.isEqual(changes['initialData'].previousValue, changes['initialData'].currentValue)
+      !this.isEqual(
+        changes['initialData'].previousValue,
+        changes['initialData'].currentValue
+      )
     ) {
       this.initForm();
       this.cdr.markForCheck();
@@ -88,8 +91,10 @@ form!: FormGroup;
     const control = this.form.get(fieldKey);
     console.log(
       `Focus en ${fieldKey}`,
-      'valor:', control?.value,
-      'válido:', control?.valid
+      'valor:',
+      control?.value,
+      'válido:',
+      control?.valid
     );
   }
 
@@ -98,13 +103,17 @@ form!: FormGroup;
     const data = this.initialData ? { ...this.initialData } : {};
 
     this.fields.forEach((field) => {
-      const validators = (field.required ?? false) ? [Validators.required] : [];
+      const validators = field.required ?? false ? [Validators.required] : [];
       if (field.validators) {
         validators.push(...field.validators);
       }
 
       let value = data[field.key] ?? field.defaultValue ?? '';
-      if (field.type === 'select' && (value === '' || value === null) && field.options?.length) {
+      if (
+        field.type === 'select' &&
+        (value === '' || value === null) &&
+        field.options?.length
+      ) {
         value = field.options[0].value;
       }
 
@@ -167,5 +176,44 @@ form!: FormGroup;
 
   trackByField(index: number, field: FormField): string {
     return field.key;
+  }
+
+  getPlaceholder(field: any): string {
+    return field.placeholder ?? '';
+  }
+
+  hasAnyError(key: string): boolean {
+    const control = this.form.get(key);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  getErrorId(key: string): string | null {
+    const control = this.form.get(key);
+    if (control?.errors) {
+      const firstError = Object.keys(control.errors)[0];
+      return `${key}-error-${firstError}`;
+    }
+    return null;
+  }
+
+  getErrorMessages(key: string): { id: string; message: string }[] {
+    const control = this.form.get(key);
+    if (!control?.errors) return [];
+
+    const messages: { [error: string]: string } = {
+      required: 'Este campo es obligatorio',
+      email: 'Ingrese un email válido',
+      minlength: `Mínimo ${control.errors['minlength']?.requiredLength} caracteres`,
+      maxlength: `Máximo ${control.errors['maxlength']?.requiredLength} caracteres`,
+      pattern:
+        key === 'password'
+          ? 'La contraseña debe tener al menos 8 caracteres, incluyendo una letra minúscula, una mayúscula, un número y un carácter especial (@ $ ! % * ? & #).'
+          : 'Formato no válido',
+    };
+
+    return Object.keys(control.errors).map((error) => ({
+      id: `${key}-error-${error}`,
+      message: messages[error] ?? 'Error desconocido',
+    }));
   }
 }

@@ -1,112 +1,115 @@
 <div class="entity-form">
-  <h3 class="entity-form__title">{{ title }}</h3>
-  
+  <h2 class="entity-form__title">{{ title }}</h2>
+
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="entity-form__form">
     <div class="entity-form__fields">
       <div *ngFor="let field of fields; trackBy: trackByField" class="entity-form__field">
-        <label [for]="field.key" class="entity-form__label">
+
+        <!-- Label solo si no es checkbox -->
+        <label *ngIf="field.type !== 'checkbox'"
+               [for]="field.key"
+               class="entity-form__label">
           {{ field.label }}
           <span *ngIf="field.required" class="required-mark">*</span>
         </label>
-        
-        <!-- Input de texto y variantes -->
-        <input 
-          *ngIf="field.type === 'text' || field.type === 'email' || field.type === 'password' || field.type === 'number' || field.type === 'date'"
-          [type]="field.type"
-          [id]="field.key"
-          [formControlName]="field.key"
-          class="entity-form__input"
-          [class.is-invalid]="hasError(field.key, 'required') || hasError(field.key, 'pattern')"
-          [attr.aria-invalid]="hasError(field.key, 'required') || hasError(field.key, 'pattern')"
-          [required]="field.required ?? false"
-          [attr.aria-required]="field.required ?? false"
-          [attr.readonly]="field.readonly ? true : null"
-          (focus)="logFocus(field.key)"
-        />
-        
+
+        <!-- Input de texto -->
+        <input *ngIf="['text','email','password','number','date'].includes(field.type)"
+               [type]="field.type"
+               [id]="field.key"
+               [formControlName]="field.key"
+               [placeholder]="getPlaceholder(field)"
+               class="entity-form__input"
+               [class.is-invalid]="hasAnyError(field.key)"
+               [attr.aria-invalid]="hasAnyError(field.key)"
+               [attr.aria-describedby]="getErrorId(field.key)"
+               [required]="field.required ?? false"
+               [attr.aria-required]="field.required ?? false"
+               [attr.readonly]="field.readonly ? true : null"
+               (focus)="logFocus(field.key)" />
+
         <!-- Textarea -->
-        <textarea 
-          *ngIf="field.type === 'textarea'"
-          [id]="field.key"
-          [formControlName]="field.key"
-          class="entity-form__textarea"
-          [class.is-invalid]="hasError(field.key, 'required')"
-          [attr.aria-invalid]="hasError(field.key, 'required')"
-          [required]="field.required ?? false"
-          [attr.aria-required]="field.required ?? false"
-          [attr.readonly]="field.readonly ? true : null"
-          (focus)="logFocus(field.key)"
-        ></textarea>
-        
+        <textarea *ngIf="field.type === 'textarea'"
+                  [id]="field.key"
+                  [formControlName]="field.key"
+                  [placeholder]="getPlaceholder(field)"
+                  class="entity-form__textarea"
+                  [class.is-invalid]="hasAnyError(field.key)"
+                  [attr.aria-invalid]="hasAnyError(field.key)"
+                  [attr.aria-describedby]="getErrorId(field.key)"
+                  [required]="field.required ?? false"
+                  [attr.aria-required]="field.required ?? false"
+                  [attr.readonly]="field.readonly ? true : null"
+                  (focus)="logFocus(field.key)">
+        </textarea>
+
         <!-- Select -->
-        <select 
-          *ngIf="field.type === 'select'"
-          [id]="field.key"
-          [formControlName]="field.key"
-          class="entity-form__select"
-          [class.is-invalid]="hasError(field.key, 'required')"
-          [attr.aria-invalid]="hasError(field.key, 'required')"
-          [required]="field.required ?? false"
-          [attr.aria-required]="field.required ?? false"
-          (focus)="logFocus(field.key)"
-        >
+        <select *ngIf="field.type === 'select'"
+                [id]="field.key"
+                [formControlName]="field.key"
+                class="entity-form__select"
+                [class.is-invalid]="hasAnyError(field.key)"
+                [attr.aria-invalid]="hasAnyError(field.key)"
+                [attr.aria-describedby]="getErrorId(field.key)"
+                [required]="field.required ?? false"
+                [attr.aria-required]="field.required ?? false"
+                (focus)="logFocus(field.key)">
           <option value="" disabled>Seleccione una opción</option>
           <option *ngFor="let option of field.options" [value]="option.value">
             {{ option.label }}
           </option>
         </select>
-        
+
         <!-- Checkbox -->
         <div *ngIf="field.type === 'checkbox'" class="entity-form__checkbox-wrapper">
-          <input 
-            type="checkbox"
-            [id]="field.key"
-            [formControlName]="field.key"
-            class="entity-form__checkbox"
-            (focus)="logFocus(field.key)"
-          />
+          <input type="checkbox"
+                 [id]="field.key"
+                 [formControlName]="field.key"
+                 class="entity-form__checkbox"
+                 (focus)="logFocus(field.key)" />
           <label [for]="field.key" class="entity-form__checkbox-label">
             {{ field.label }}
+            <span *ngIf="field.required" class="required-mark">*</span>
           </label>
         </div>
-        
-        <!-- Input de archivo (imagen) -->
-        <input 
-          *ngIf="field.type === 'file' && enableImageUpload"
-          type="file"
-          [id]="field.key"
-          (change)="onImageSelected($event)"
-          accept="image/*"
-          class="entity-form__file"
-          [required]="field.required ?? false"
-          [attr.aria-required]="field.required ?? false"
-        />
-        
-        <!-- Mensajes de error -->
-        <div *ngIf="hasError(field.key, 'required')" class="entity-form__error">
-          Este campo es obligatorio
-        </div>
-        <div *ngIf="field.key === 'password' && hasError(field.key, 'pattern')" class="entity-form__error">
-          La contraseña debe tener al menos 8 caracteres, incluyendo una letra minúscula, una mayúscula, un número y un carácter especial (&#64; $ ! % * ? &amp; #).
-        </div>
+
+        <!-- Archivo -->
+        <input *ngIf="field.type === 'file' && enableImageUpload"
+               type="file"
+               [id]="field.key"
+               (change)="onImageSelected($event)"
+               accept="image/*"
+               class="entity-form__file"
+               [required]="field.required ?? false"
+               [attr.aria-required]="field.required ?? false"
+               [attr.aria-describedby]="getErrorId(field.key)" />
+
+        <!-- Errores -->
+        <ng-container *ngIf="form.get(field.key)?.errors as errors">
+          <div *ngFor="let error of getErrorMessages(field.key)"
+               class="entity-form__error"
+               [id]="error.id"
+               role="alert">
+            {{ error.message }}
+          </div>
+        </ng-container>
+
       </div>
     </div>
-    
+
     <div class="entity-form__actions">
-      <button 
-        type="button" 
-        class="entity-form__button entity-form__button--cancel" 
-        (click)="onCancel()"
-        [disabled]="loading"
-      >
+      <button type="button"
+              class="entity-form__button entity-form__button--cancel"
+              (click)="onCancel()"
+              [disabled]="loading"
+              [attr.aria-label]="'Cancelar ' + title.toLowerCase()">
         Cancelar
       </button>
-      <button 
-        type="submit" 
-        class="entity-form__button entity-form__button--submit" 
-        [disabled]="loading"
-      >
-        <span *ngIf="loading" class="loading-spinner"></span>
+      <button type="submit"
+              class="entity-form__button entity-form__button--submit"
+              [disabled]="loading"
+              [attr.aria-label]="loading ? 'Enviando formulario...' : 'Enviar ' + title.toLowerCase()">
+        <span *ngIf="loading" class="loading-spinner" aria-hidden="true"></span>
         {{ submitLabel }}
       </button>
     </div>

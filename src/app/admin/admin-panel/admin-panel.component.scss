@@ -1,7 +1,8 @@
 @use 'sass:color';
 
-// Variables existentes
-$primary-color: #3f51b5;
+// Variables actualizadas
+$primary-color: #3b82f6; // Cambiado al nuevo color
+$primary-hover: #2563eb; // Añadido para estados hover
 $secondary-color: #f5f5f5;
 $text-color: #333;
 $text-light: #fff;
@@ -77,10 +78,10 @@ $hover-bg: #f5f5f5;
     padding: 15px 20px;
     color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
-    transition: background-color $transition-speed ease;
+    transition: background-color $transition-speed ease, color $transition-speed ease;
     
     &:hover, &.active {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: $primary-hover; // Usando el nuevo primary-hover
       color: $text-light;
     }
     
@@ -112,7 +113,7 @@ $hover-bg: #f5f5f5;
     border-bottom: 1px solid $border-color;
     display: flex;
     align-items: center;
-    justify-content: space-between; // Cambiado para distribuir el espacio
+    justify-content: space-between;
     padding: 0 20px;
     box-shadow: 0 2px 4px $shadow-color;
     z-index: 5;
@@ -143,7 +144,7 @@ $hover-bg: #f5f5f5;
     
     &:hover {
       background-color: $hover-bg;
-      border-color: color.adjust($border-color, $lightness: 10%);
+      border-color: $primary-hover; // Usando el nuevo primary-hover
     }
     
     &:focus {
@@ -236,7 +237,7 @@ $hover-bg: #f5f5f5;
   to { opacity: 1; }
 }
 
-// Cerrar dropdown al hacer click fuera (opcional para el CSS)
+// Cerrar dropdown al hacer click fuera
 @media (max-width: 768px) {
   .admin-panel__dropdown {
     right: -10px;

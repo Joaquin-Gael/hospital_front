@@ -1,46 +1,109 @@
-@use '../_shared.scss' as *;
+@use 'sass:color';
 
 .edit-profile {
-  &__card {
-    @include card;
-    overflow: hidden;
-  }
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-height: 100vh;
 
   &__header {
-    padding: 24px;
-    background-color: $primary-bg;
-    border-bottom: 1px solid $border-color;
+    text-align: center;
+    margin-bottom: 32px;
   }
 
   &__title {
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 8px 0;
+  }
+
+  &__description {
+    font-size: 16px;
+    color: #666;
     margin: 0;
-    color: $text-color;
+    line-height: 1.5;
   }
 
-  &__body {
-    padding: 24px;
+  &__form {
+    margin-bottom: 48px;
   }
 
-  &__alert {
-    padding: 12px 16px;
-    border-radius: $border-radius-sm;
-    margin-bottom: 24px;
+  &__divider {
+    display: flex;
+    align-items: center;
+    margin: 48px 0;
+    gap: 16px;
+  }
+
+  &__divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+  }
+
+  &__divider-text {
     font-size: 14px;
+    font-weight: 500;
+    color: #9ca3af;
+    padding: 0 16px;
+    background: #ffffff;
+    white-space: nowrap;
+  }
 
-    &.alert--danger {
-      background-color: rgba($danger-color, 0.1);
-      color: $danger-color;
-      border: 1px solid $danger-color;
+  &__dni-section {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .edit-profile {
+    padding: 16px;
+    border-radius: 0;
+    box-shadow: none;
+
+    &__title {
+      font-size: 24px;
+    }
+
+    &__description {
+      font-size: 14px;
+    }
+
+    &__divider {
+      margin: 32px 0;
+    }
+
+    &__dni-section {
+      padding: 16px;
+      border-radius: 8px;
     }
   }
+}
 
-  &__footer {
-    padding: 16px 24px;
-    border-top: 1px solid $border-color;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
+@media (max-width: 640px) {
+  .edit-profile {
+    &__divider-text {
+      font-size: 12px;
+      padding: 0 8px;
+    }
+
+    &__divider {
+      gap: 8px;
+    }
+  }
+}
+
+// Estados de accesibilidad
+@media (prefers-reduced-motion: reduce) {
+  .edit-profile {
+    transition: none;
   }
 }
