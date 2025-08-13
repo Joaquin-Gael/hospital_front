@@ -1,0 +1,83 @@
+<div class="appointment-scheduler-container" @fadeInOut>
+  <div class="appointment-card">
+    <!-- Encabezado -->
+    <div class="card-header">
+      <h2 class="appointment-title">
+        <span class="title-icon" @rotateIcon>
+          <i class="material-icons">event_available</i>
+        </span>
+        <span class="title-text">Reserva tu turno</span>
+      </h2>
+
+      <!-- Indicador de pasos -->
+      <app-step-indicator
+        [currentStep]="currentStep"
+        [totalSteps]="totalSteps"
+        (stepChange)="goToStep($event)"
+      ></app-step-indicator>
+    </div>
+
+    <!-- Contenido del formulario -->
+    <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="appointment-form">
+      <!-- Paso 1: Selección de Servicio -->
+      <app-service-selection
+        *ngIf="currentStep === 1"
+        [services]="services"
+        [serviceControl]="serviceControl"
+        [isLoading]="isLoading"
+        [error]="error"
+        (serviceChange)="onServiceChange($event)"
+      ></app-service-selection>
+
+      <!-- Paso 2: Selección de Fecha -->
+      <app-date-selection
+        *ngIf="currentStep === 2"
+        [dateControl]="dateControl"
+        [minDate]="minDate"
+        [dayFilter]="dayFilter"
+        [isLoading]="isLoading"
+        [error]="error"
+      ></app-date-selection>
+
+      <!-- Paso 3: Selección de Hora -->
+      <app-time-selection
+        *ngIf="currentStep === 3"
+        [timeControl]="timeControl"
+        [availableTimeSlots]="availableTimeSlots"
+        [isLoading]="isLoading"
+        [error]="error"
+      ></app-time-selection>
+
+      <!-- Paso 4: Resumen y Confirmación -->
+      <app-appointment-summary
+        *ngIf="currentStep === 4"
+        [reasonControl]="reasonControl"
+        [customReasonControl]="customReasonControl"
+        [termsControl]="termsControl"
+        [reasonOptions]="reasonOptions"
+        [showCustomReason]="showCustomReason"
+        [serviceIcon]="getServiceIcon(appointmentForm.get('service')?.value)"
+        [serviceName]="getServiceName(appointmentForm.get('service')?.value)"
+        [servicePrice]="getSelectedServicePrice()"
+        [formattedDate]="formatDate(appointmentForm.get('appointmentDate')?.value)"
+        [selectedTime]="appointmentForm.get('appointmentTime')?.value"
+        [reasonText]="getReasonText()"
+        (reasonChange)="onReasonChange($event)"
+      ></app-appointment-summary>
+
+      <!-- Botones de navegación -->
+      <app-navigation-buttons
+        [currentStep]="currentStep"
+        [totalSteps]="totalSteps"
+        [isStepValid]="isStepValid(currentStep)"
+        [isFormValid]="appointmentForm.valid"
+        [isLoading]="isLoading"
+        [buttonState]="buttonState"
+        (backClick)="prevStep()"
+        (nextClick)="nextStep()"
+        (submitClick)="onSubmit()"
+        (buttonHover)="onButtonHover($event)"
+      ></app-navigation-buttons>
+    </form>
+  </div>
+</div>

@@ -31,7 +31,7 @@
       <!-- Columna de obras sociales disponibles -->
       <div class="health-insurance-column">
         <h3 class="health-insurance-column__title">
-          <span class="health-insurance-column__icon">🏥</span>
+          <i class="fas fa-hospital health-insurance-column__icon"></i>
           Obras Sociales Disponibles
         </h3>
         <div 
@@ -43,7 +43,7 @@
           [class.health-insurance-list--drag-over]="isDraggingOver"
         >
           <div 
-            *ngFor="let insurance of availableHealthInsurances; trackBy: (index, item) => item.id"
+            *ngFor="let insurance of availableHealthInsurances; trackBy: trackByFn"
             class="health-insurance-item health-insurance-item--available"
             draggable="true"
             (dragstart)="onDragStart($event, insurance)"
@@ -58,12 +58,12 @@
               (click)="$event.stopPropagation(); addToSelected(insurance)"
               title="Agregar obra social"
             >
-              +
+              <i class="fas fa-plus"></i>
             </button>
           </div>
           
           <div *ngIf="availableHealthInsurances.length === 0" class="health-insurance-empty">
-            <span class="health-insurance-empty__icon">✨</span>
+            <i class="fas fa-star health-insurance-empty__icon"></i>
             <p class="health-insurance-empty__text">Todas las obras sociales están seleccionadas</p>
           </div>
         </div>
@@ -72,7 +72,7 @@
       <!-- Columna de obras sociales seleccionadas -->
       <div class="health-insurance-column">
         <h3 class="health-insurance-column__title">
-          <span class="health-insurance-column__icon">✅</span>
+          <i class="fas fa-check-circle health-insurance-column__icon"></i>
           Mis Obras Sociales
           <span class="health-insurance-column__count" *ngIf="selectedHealthInsurances.length > 0">
             ({{ selectedHealthInsurances.length }})
@@ -87,7 +87,7 @@
           [class.health-insurance-list--drag-over]="isDraggingOver"
         >
           <div 
-            *ngFor="let insurance of selectedHealthInsurances; trackBy: (index, item) => item.id"
+            *ngFor="let insurance of selectedHealthInsurances; trackBy: trackByFn"
             class="health-insurance-item health-insurance-item--selected"
             draggable="true"
             (dragstart)="onDragStart($event, insurance)"
@@ -102,12 +102,12 @@
               (click)="$event.stopPropagation(); removeFromSelected(insurance)"
               title="Quitar obra social"
             >
-              ×
+              <i class="fas fa-times"></i>
             </button>
           </div>
           
           <div *ngIf="selectedHealthInsurances.length === 0" class="health-insurance-empty">
-            <span class="health-insurance-empty__icon">👆</span>
+            <i class="fas fa-hand-point-up health-insurance-empty__icon"></i>
             <p class="health-insurance-empty__text">Arrastra aquí las obras sociales que desees seleccionar</p>
           </div>
         </div>

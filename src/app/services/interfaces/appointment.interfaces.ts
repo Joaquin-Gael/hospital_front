@@ -33,13 +33,15 @@ export interface Turn {
 // Modelo para creación de turno
 export interface TurnCreate {
   reason: string;
-  state: TurnState;
+  state: string;
   date: string;
-  date_limit: string;
-  time: string;
+  date_created: string;
+  user_id: string;
   doctor_id: string;
-  appointment_id?: string;
-  service_id: string;
+  services: string[]; 
+  time: string;
+  date_limit: string; 
+  appointment_id?: string; 
 }
 
 // Modelo para eliminación de turno

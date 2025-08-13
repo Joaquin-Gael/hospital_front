@@ -1,0 +1,94 @@
+@use '../../../layout/styles/_mixins.scss' as mix;
+@use '../../../layout/styles/_media-queries.scss' as med;
+@use '../_vars.scss' as *;
+
+.steps-indicator {
+  margin: 1.5rem 0;
+  align-items: center;
+  @include mix.flex-column;
+
+  .steps-track {
+    height: 6px;
+    background-color: $border-color;
+    border-radius: 3px;
+    position: relative;
+    margin-bottom: 20px;
+    width: 100%;
+
+    .steps-progress {
+      position: absolute;
+      height: 100%;
+      background-color: $primary-color;
+      border-radius: 3px;
+      transition: $transition;
+    }
+  }
+
+  .steps-circles {
+    margin-bottom: 8px; 
+    width: 100%;
+    @include mix.flex-between;
+
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: $background-white;
+      border: 2px solid $border-color;
+      font-weight: 600;
+      color: $text-secondary;
+      cursor: pointer;
+      transition: $transition;
+      @include mix.flex-center;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+
+      &.active {
+        border-color: $primary-color;
+        color: $primary-color;
+        box-shadow: 0 0 0 4px $primary-light;
+      }
+
+      &.completed {
+        background-color: $primary-color;
+        border-color: transparent;
+        color: $text-on-primary;
+
+        .step-check {
+          display: block;
+        }
+      }
+
+      .step-number {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .step-check {
+        font-size: 18px;
+        display: none;
+      }
+    }
+  }
+
+  .steps-labels {
+    width: 100%;
+    align-items: center; 
+    @include mix.flex-between;
+
+    .step-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: $text-secondary;
+      text-align: center;
+      flex: 1;
+      line-height: 1;
+
+      @include med.mobile-only {
+        font-size: 0.65rem;
+      }
+    }
+  }
+}

@@ -1,0 +1,194 @@
+@use '../../../layout/styles/_mixins.scss' as mix;
+@use '../../../layout/styles/_media-queries.scss' as med;
+@use '../_vars.scss' as *;
+
+.form-step {
+  min-height: 350px;
+  animation: fadeInUp 0.5s ease-out;
+
+  @include med.mobile-only {
+    min-height: 300px;
+  }
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: $text-primary;
+  text-align: center;
+
+  @include med.mobile-only {
+    font-size: 1.25rem;
+  }
+}
+
+.step-subtitle {
+  font-size: 0.9rem;
+  color: $text-secondary;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.service-options {
+  margin-bottom: 1.5rem;
+  @include med.responsive-grid(280px, 1rem);
+
+  .service-card {
+    background-color: $background-white;
+    border: 2px solid $border-color;
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: $transition;
+    align-items: center;
+    @include mix.flex-column;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: $card-shadow-hover;
+      border-color: $primary-alpha;
+
+      .service-icon i {
+        color: $primary-color;
+        transform: scale(1.1);
+      }
+    }
+
+    &.selected {
+      border-color: $primary-color;
+      box-shadow: $card-shadow-hover;
+
+      .service-icon {
+        background-color: $primary-color;
+
+        i {
+          color: $text-on-primary;
+          transform: scale(1.1);
+        }
+      }
+
+      .service-price {
+        color: $primary-color;
+        font-weight: 600;
+      }
+    }
+
+    .service-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      background-color: $background-light;
+      margin-bottom: 1rem;
+      transition: $transition;
+      @include mix.flex-center;
+
+      i {
+        font-size: 28px;
+        color: $text-secondary;
+        transition: $transition;
+        transform-origin: center;
+      }
+    }
+
+    .service-info {
+      text-align: center;
+
+      .service-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $text-primary;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+      }
+
+      .service-description {
+        font-size: 0.85rem;
+        color: $text-secondary;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+      }
+
+      .service-price {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $secondary-color;
+        transition: $transition;
+      }
+    }
+
+    @include med.mobile-only {
+      padding: 1rem;
+
+      .service-icon {
+        width: 48px;
+        height: 48px;
+
+        i {
+          font-size: 24px;
+        }
+      }
+
+      .service-info {
+        .service-name {
+          font-size: 1rem;
+        }
+
+        .service-price {
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  color: $text-secondary;
+  @include mix.flex-column;
+
+  .loading-icon {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.error-message {
+  color: $error-color;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  @include mix.flex-inline(0.5rem);
+
+  &::before {
+    content: "error_outline";
+    font-family: 'Material Icons';
+    font-size: 14px;
+    color: $error-color;
+  }
+
+  &.centered-error {
+    justify-content: center;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

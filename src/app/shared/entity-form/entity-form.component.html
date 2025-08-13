@@ -3,57 +3,69 @@
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="entity-form__form">
     <div class="entity-form__fields">
-      <div *ngFor="let field of fields; trackBy: trackByField" class="entity-form__field">
-
+      <div
+        *ngFor="let field of fields; trackBy: trackByField"
+        class="entity-form__field"
+      >
         <!-- Label solo si no es checkbox -->
-        <label *ngIf="field.type !== 'checkbox'"
-               [for]="field.key"
-               class="entity-form__label">
+        <label
+          *ngIf="field.type !== 'checkbox'"
+          [for]="field.key"
+          class="entity-form__label"
+        >
           {{ field.label }}
           <span *ngIf="field.required" class="required-mark">*</span>
         </label>
 
         <!-- Input de texto -->
-        <input *ngIf="['text','email','password','number','date'].includes(field.type)"
-               [type]="field.type"
-               [id]="field.key"
-               [formControlName]="field.key"
-               [placeholder]="getPlaceholder(field)"
-               class="entity-form__input"
-               [class.is-invalid]="hasAnyError(field.key)"
-               [attr.aria-invalid]="hasAnyError(field.key)"
-               [attr.aria-describedby]="getErrorId(field.key)"
-               [required]="field.required ?? false"
-               [attr.aria-required]="field.required ?? false"
-               [attr.readonly]="field.readonly ? true : null"
-               (focus)="logFocus(field.key)" />
+        <input
+          *ngIf="
+            ['text', 'email', 'password', 'number', 'date'].includes(field.type)
+          "
+          [type]="field.type"
+          [id]="field.key"
+          [formControlName]="field.key"
+          [placeholder]="getPlaceholder(field)"
+          class="entity-form__input"
+          [class.is-invalid]="hasAnyError(field.key)"
+          [attr.aria-invalid]="hasAnyError(field.key)"
+          [attr.aria-describedby]="getErrorId(field.key)"
+          [required]="field.required ?? false"
+          [attr.aria-required]="field.required ?? false"
+          [attr.readonly]="field.readonly ? true : null"
+          (focus)="logFocus(field.key)"
+        />
 
         <!-- Textarea -->
-        <textarea *ngIf="field.type === 'textarea'"
-                  [id]="field.key"
-                  [formControlName]="field.key"
-                  [placeholder]="getPlaceholder(field)"
-                  class="entity-form__textarea"
-                  [class.is-invalid]="hasAnyError(field.key)"
-                  [attr.aria-invalid]="hasAnyError(field.key)"
-                  [attr.aria-describedby]="getErrorId(field.key)"
-                  [required]="field.required ?? false"
-                  [attr.aria-required]="field.required ?? false"
-                  [attr.readonly]="field.readonly ? true : null"
-                  (focus)="logFocus(field.key)">
+        <textarea
+          *ngIf="field.type === 'textarea'"
+          [id]="field.key"
+          [formControlName]="field.key"
+          [placeholder]="getPlaceholder(field)"
+          class="entity-form__textarea"
+          [class.is-invalid]="hasAnyError(field.key)"
+          [attr.aria-invalid]="hasAnyError(field.key)"
+          [attr.aria-describedby]="getErrorId(field.key)"
+          [required]="field.required ?? false"
+          [attr.aria-required]="field.required ?? false"
+          [attr.readonly]="field.readonly ? true : null"
+          (focus)="logFocus(field.key)"
+        >
         </textarea>
 
         <!-- Select -->
-        <select *ngIf="field.type === 'select'"
-                [id]="field.key"
-                [formControlName]="field.key"
-                class="entity-form__select"
-                [class.is-invalid]="hasAnyError(field.key)"
-                [attr.aria-invalid]="hasAnyError(field.key)"
-                [attr.aria-describedby]="getErrorId(field.key)"
-                [required]="field.required ?? false"
-                [attr.aria-required]="field.required ?? false"
-                (focus)="logFocus(field.key)">
+        <select
+          *ngIf="field.type === 'select'"
+          [id]="field.key"
+          [formControlName]="field.key"
+          class="entity-form__select"
+          [class.is-invalid]="hasAnyError(field.key)"
+          [attr.aria-invalid]="hasAnyError(field.key)"
+          [attr.aria-describedby]="getErrorId(field.key)"
+          [required]="field.required ?? false"
+          [attr.aria-required]="field.required ?? false"
+          (focus)="logFocus(field.key)"
+        >
           <option value="" disabled>Seleccione una opción</option>
           <option *ngFor="let option of field.options" [value]="option.value">
             {{ option.label }}
@@ -61,12 +73,17 @@
         </select>
 
         <!-- Checkbox -->
-        <div *ngIf="field.type === 'checkbox'" class="entity-form__checkbox-wrapper">
-          <input type="checkbox"
-                 [id]="field.key"
-                 [formControlName]="field.key"
-                 class="entity-form__checkbox"
-                 (focus)="logFocus(field.key)" />
+        <div
+          *ngIf="field.type === 'checkbox'"
+          class="entity-form__checkbox-wrapper"
+        >
+          <input
+            type="checkbox"
+            [id]="field.key"
+            [formControlName]="field.key"
+            class="entity-form__checkbox"
+            (focus)="logFocus(field.key)"
+          />
           <label [for]="field.key" class="entity-form__checkbox-label">
             {{ field.label }}
             <span *ngIf="field.required" class="required-mark">*</span>
@@ -74,106 +91,169 @@
         </div>
 
         <!-- Zona de drag and drop mejorada para archivos -->
-        <div *ngIf="field.type === 'file' && enableImageUpload" 
-             class="entity-form__file-dropzone"
-             [class.is-dragover]="isDragOver[field.key]"
-             [class.has-file]="selectedFiles[field.key]"
-             (dragover)="onDragOver($event, field.key)"
-             (dragleave)="onDragLeave($event, field.key)"
-             (drop)="onDrop($event, field.key)"
-             (click)="triggerFileInput(field.key)">
-          
+        <div
+          *ngIf="field.type === 'file' && enableImageUpload"
+          class="entity-form__file-dropzone"
+          [class.is-dragover]="isDragOver[field.key]"
+          [class.has-file]="selectedFiles[field.key]"
+          (dragover)="onDragOver($event, field.key)"
+          (dragleave)="onDragLeave($event, field.key)"
+          (drop)="onDrop($event, field.key)"
+          (click)="triggerFileInput(field.key)"
+        >
           <!-- Input file oculto -->
-          <input type="file"
-                 [id]="field.key"
-                 #fileInput
-                 (change)="onFileSelected($event, field.key)"
-                 accept="image/*"
-                 class="entity-form__file-input"
-                 [required]="field.required ?? false"
-                 [attr.aria-required]="field.required ?? false"
-                 [attr.aria-describedby]="getErrorId(field.key)"
-                 style="display: none;" />
+          <input
+            type="file"
+            [id]="field.key"
+            #fileInput
+            (change)="onFileSelected($event, field.key)"
+            accept="image/*"
+            class="entity-form__file-input"
+            [required]="field.required ?? false"
+            [attr.aria-required]="field.required ?? false"
+            [attr.aria-describedby]="getErrorId(field.key)"
+            style="display: none"
+          />
 
           <!-- Contenido de la zona de drop -->
           <div class="entity-form__dropzone-content">
             <div class="entity-form__dropzone-icon">
-              <svg *ngIf="!selectedFiles[field.key]" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17,8 12,3 7,8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
+              <svg
+                *ngIf="!selectedFiles[field.key]"
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17,8 12,3 7,8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              <svg *ngIf="selectedFiles[field.key]" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14,2 14,8 20,8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10,9 9,9 8,9"/>
+              <svg
+                *ngIf="selectedFiles[field.key]"
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14,2 14,8 20,8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10,9 9,9 8,9" />
               </svg>
             </div>
-            
+
             <div class="entity-form__dropzone-text">
-              <p class="entity-form__dropzone-primary" *ngIf="!selectedFiles[field.key]">
+              <p
+                class="entity-form__dropzone-primary"
+                *ngIf="!selectedFiles[field.key]"
+              >
                 <strong>Arrastra tu archivo aquí</strong>
               </p>
-              <p class="entity-form__dropzone-primary" *ngIf="selectedFiles[field.key]">
-                <strong>{{ selectedFiles[field.key]?.name }}</strong>
+              <p
+                class="entity-form__dropzone-primary"
+                *ngIf="selectedFiles[field.key]"
+              >
+                <strong>{{ selectedFiles[field.key].name }}</strong>
+                <!-- Cambiado de ?. a . -->
               </p>
-              <p class="entity-form__dropzone-secondary" *ngIf="!selectedFiles[field.key]">
+              <p
+                class="entity-form__dropzone-secondary"
+                *ngIf="!selectedFiles[field.key]"
+              >
                 o haz clic para seleccionar
               </p>
-              <p class="entity-form__dropzone-secondary" *ngIf="selectedFiles[field.key]">
-                {{ formatFileSize(selectedFiles[field.key]?.size) }} • Haz clic para cambiar
+              <p
+                class="entity-form__dropzone-secondary"
+                *ngIf="selectedFiles[field.key]"
+              >
+                {{ formatFileSize(selectedFiles[field.key].size) }} • Haz clic
+                para cambiar
+                <!-- Cambiado de ?. a . -->
               </p>
             </div>
 
             <!-- Botón para remover archivo -->
-            <button *ngIf="selectedFiles[field.key]" 
-                    type="button"
-                    class="entity-form__remove-file"
-                    (click)="removeFile($event, field.key)"
-                    [attr.aria-label]="'Remover archivo ' + selectedFiles[field.key]?.name">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
+            <button
+              *ngIf="selectedFiles[field.key]"
+              type="button"
+              class="entity-form__remove-file"
+              (click)="removeFile($event, field.key)"
+              [attr.aria-label]="
+                'Remover archivo ' + selectedFiles[field.key].name
+              "
+            >
+              <!-- Cambiado de ?. a . -->
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
           </div>
 
           <!-- Indicador de progreso de carga (opcional) -->
-          <div *ngIf="uploadProgress[field.key] !== undefined" class="entity-form__upload-progress">
+          <div
+            *ngIf="uploadProgress[field.key] !== undefined"
+            class="entity-form__upload-progress"
+          >
             <div class="entity-form__progress-bar">
-              <div class="entity-form__progress-fill" [style.width.%]="uploadProgress[field.key]"></div>
+              <div
+                class="entity-form__progress-fill"
+                [style.width.%]="uploadProgress[field.key]"
+              ></div>
             </div>
-            <span class="entity-form__progress-text">{{ uploadProgress[field.key] }}%</span>
+            <span class="entity-form__progress-text"
+              >{{ uploadProgress[field.key] }}%</span
+            >
           </div>
         </div>
 
         <!-- Errores -->
         <ng-container *ngIf="form.get(field.key)?.errors as errors">
-          <div *ngFor="let error of getErrorMessages(field.key)"
-               class="entity-form__error"
-               [id]="error.id"
-               role="alert">
+          <div
+            *ngFor="let error of getErrorMessages(field.key)"
+            class="entity-form__error"
+            [id]="error.id"
+            role="alert"
+          >
             {{ error.message }}
           </div>
         </ng-container>
-
       </div>
     </div>
 
     <div class="entity-form__actions">
-      <button type="button"
-              class="entity-form__button entity-form__button--cancel"
-              (click)="onCancel()"
-              [disabled]="loading"
-              [attr.aria-label]="'Cancelar ' + title.toLowerCase()">
+      <button
+        type="button"
+        class="entity-form__button entity-form__button--cancel"
+        (click)="onCancel()"
+        [disabled]="loading"
+        [attr.aria-label]="'Cancelar ' + title.toLowerCase()"
+      >
         Cancelar
       </button>
-      <button type="submit"
-              class="entity-form__button entity-form__button--submit"
-              [disabled]="loading"
-              [attr.aria-label]="loading ? 'Enviando formulario...' : 'Enviar ' + title.toLowerCase()">
+      <button
+        type="submit"
+        class="entity-form__button entity-form__button--submit"
+        [disabled]="loading"
+        [attr.aria-label]="
+          loading ? 'Enviando formulario...' : 'Enviar ' + title.toLowerCase()
+        "
+      >
         <span *ngIf="loading" class="loading-spinner" aria-hidden="true"></span>
         {{ submitLabel }}
       </button>

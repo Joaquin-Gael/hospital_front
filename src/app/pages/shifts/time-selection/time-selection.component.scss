@@ -1,0 +1,134 @@
+@use '../../../layout/styles/_mixins.scss' as mix;
+@use '../../../layout/styles/_media-queries.scss' as med;
+@use '../_vars.scss' as *;
+
+.form-step {
+  min-height: 350px;
+  animation: fadeInUp 0.5s ease-out;
+
+  @include med.mobile-only {
+    min-height: 300px;
+  }
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: $text-primary;
+  text-align: center;
+
+  @include med.mobile-only {
+    font-size: 1.25rem;
+  }
+}
+
+.step-subtitle {
+  font-size: 0.9rem;
+  color: $text-secondary;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.custom-form-field {
+  margin-bottom: 1.5rem;
+
+  .field-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: $text-primary;
+    @include mix.flex-inline(0.75rem);
+
+    .field-icon {
+      font-size: 18px;
+      color: $primary-color;
+      transition: $transition;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+}
+
+.time-slots-grid {
+  margin-top: 1rem;
+  @include med.responsive-grid(100px, 0.75rem);
+
+  .time-slot {
+    padding: 10px 12px;
+    border: 2px solid $border-color;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+    transition: $transition;
+    background-color: $background-white;
+    color: $text-primary;
+
+    &:hover {
+      border-color: $primary-color;
+      transform: translateY(-2px);
+      box-shadow: $card-shadow;
+    }
+
+    &.selected {
+      background-color: $primary-color;
+      color: $text-on-primary;
+      border-color: transparent;
+      box-shadow: $card-shadow-hover;
+    }
+  }
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  color: $text-secondary;
+  @include mix.flex-column;
+
+  .loading-icon {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.error-message {
+  color: $error-color;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  @include mix.flex-inline(0.5rem);
+
+  &::before {
+    content: "error_outline";
+    font-family: 'Material Icons';
+    font-size: 14px;
+    color: $error-color;
+  }
+
+  &.centered-error {
+    justify-content: center;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,117 @@
+@use '../../../layout/styles/_mixins.scss' as mix;
+@use '../../../layout/styles/_media-queries.scss' as med;
+@use '../_vars.scss' as *;
+@use 'sass:color';
+
+.form-navigation {
+  margin-top: 2rem;
+  gap: 1rem;
+  @include mix.flex-between;
+
+  .nav-button {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    @include mix.button-base;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: $background-light;
+      color: $text-muted;
+      border-color: $border-color;
+    }
+
+    &.back-button {
+      color: $text-secondary;
+      border: 2px solid $border-color;
+      background-color: $background-white;
+
+      i {
+        margin-right: 6px;
+        color: $text-secondary;
+        transition: $transition;
+
+        &:hover {
+          color: $primary-color;
+          transform: translateX(-2px);
+        }
+      }
+
+      @include mix.hover-effect($background-light);
+    }
+
+    &.next-button {
+      background-color: $primary-color;
+      color: $text-on-primary;
+      border: 2px solid transparent;
+
+      i {
+        margin-left: 6px;
+        color: $text-on-primary;
+        transition: $transition;
+
+        &:hover {
+          transform: translateX(2px);
+        }
+      }
+
+      @include mix.hover-effect(color.adjust($primary-color, $lightness: -10%));
+    }
+
+    &.payment-button {
+      background-color: $success-color;
+      color: $text-on-primary;
+      flex: 1;
+      max-width: 280px;
+      border: 2px solid transparent;
+
+      .button-content {
+        @include mix.flex-inline(0.5rem);
+
+        i {
+          margin-right: 6px;
+          color: $text-on-primary;
+          transition: $transition;
+
+          &:hover {
+            transform: scale(1.1);
+          }
+        }
+      }
+
+      .button-loading {
+        @include mix.flex-inline(0.5rem);
+
+        .loading-spinner {
+          margin-right: 6px;
+          color: $text-on-primary;
+          animation: spin 1s linear infinite;
+        }
+      }
+
+      @include mix.hover-effect(color.adjust($success-color, $lightness: -10%));
+    }
+
+    @include med.mobile-only {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+
+      &.payment-button {
+        max-width: none;
+      }
+    }
+  }
+
+  @include med.mobile-only {
+    @include mix.flex-column;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

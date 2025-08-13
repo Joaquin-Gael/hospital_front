@@ -1,0 +1,357 @@
+@use '../../../layout/styles/_mixins.scss' as mix;
+@use '../../../layout/styles/_media-queries.scss' as med;
+@use '../_vars.scss' as *;
+@use 'sass:color';
+
+.form-step {
+  min-height: 350px;
+  animation: fadeInUp 0.5s ease-out;
+
+  @include med.mobile-only {
+    min-height: 300px;
+  }
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: $text-primary;
+  text-align: center;
+
+  @include med.mobile-only {
+    font-size: 1.25rem;
+  }
+}
+
+.step-subtitle {
+  font-size: 0.9rem;
+  color: $text-secondary;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.summary-card {
+  background-color: $background-white;
+  border-radius: 12px;
+  box-shadow: $card-shadow;
+  margin-bottom: 1.5rem;
+
+  .summary-header {
+    background-color: $primary-color;
+    color: $text-on-primary;
+    padding: 1rem 1.5rem;
+    @include mix.flex-inline(0.75rem);
+
+    i {
+      font-size: 20px;
+      color: $text-on-primary;
+      transition: $transition;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+  }
+
+  .summary-content {
+    padding: 1.5rem;
+
+    .summary-item {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid $border-color;
+      @include mix.flex-between;
+
+      &:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+      }
+
+      .summary-label {
+        font-weight: 600;
+        color: $text-primary;
+        min-width: 120px;
+        @include mix.flex-inline(0.5rem);
+
+        i {
+          font-size: 16px;
+          color: $primary-color;
+          transition: $transition;
+
+          &:hover {
+            transform: scale(1.1);
+          }
+        }
+      }
+
+      .summary-value {
+        text-align: right;
+        flex: 1;
+
+        .service-name {
+          display: block;
+          font-weight: 600;
+          color: $text-primary;
+        }
+
+        .service-price {
+          display: block;
+          color: $secondary-color;
+          font-weight: 600;
+        }
+
+        .time-highlight {
+          display: block;
+          color: $primary-color;
+          font-weight: 600;
+        }
+      }
+
+      @include med.mobile-only {
+        gap: 0.5rem;
+        @include mix.flex-column;
+
+        .summary-value {
+          text-align: left;
+        }
+      }
+    }
+  }
+
+  .summary-footer {
+    background-color: $background-light;
+    padding: 1rem 1.5rem;
+    border-top: 2px solid $border-color;
+
+    .total-amount {
+      @include mix.flex-between;
+
+      .total-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: $text-primary;
+      }
+
+      .total-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: $secondary-color;
+      }
+    }
+  }
+}
+
+.reason-options {
+  margin-bottom: 1.5rem;
+  @include med.responsive-grid(250px, 1rem);
+
+  .reason-card {
+    background-color: $background-white;
+    border: 2px solid $border-color;
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: $transition;
+    @include mix.flex-center;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: $card-shadow;
+      border-color: $primary-alpha;
+
+      .reason-name i {
+        color: $primary-color;
+        transform: scale(1.1);
+      }
+    }
+
+    &.selected {
+      border-color: $primary-color;
+      box-shadow: $card-shadow-hover;
+
+      .reason-name {
+        color: $primary-color;
+        font-weight: 600;
+
+        i {
+          color: $primary-color;
+        }
+      }
+    }
+
+    .reason-name {
+      font-weight: 500;
+      color: $text-primary;
+      transition: $transition;
+      @include mix.flex-inline(0.5rem);
+
+      i {
+        font-size: 16px;
+        color: $text-secondary;
+        transition: $transition;
+        transform-origin: center;
+      }
+    }
+  }
+}
+
+.custom-form-field {
+  margin-bottom: 1.5rem;
+
+  .field-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: $text-primary;
+    @include mix.flex-inline(0.75rem);
+
+    .field-icon {
+      font-size: 18px;
+      color: $primary-color;
+      transition: $transition;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  .field-input-container {
+    position: relative;
+  }
+
+  .custom-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid $border-color;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: $transition;
+    background-color: $background-white;
+    font-family: inherit;
+    color: $text-primary;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 4px $primary-light;
+    }
+
+    &.textarea-input {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+  }
+}
+
+.custom-reason-field {
+  margin-top: 1.5rem;
+}
+
+.terms-checkbox {
+  margin: 1.5rem 0;
+
+  .checkbox-container {
+    position: relative;
+    padding-left: 32px;
+    cursor: pointer;
+    @include mix.flex-inline(0.75rem, flex-start);
+
+    input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+
+      &:checked ~ .checkmark {
+        background-color: $primary-color;
+        border-color: transparent;
+
+        &:after {
+          display: block;
+        }
+      }
+    }
+
+    .checkmark {
+      position: absolute;
+      top: 2px;
+      left: 0;
+      height: 20px;
+      width: 20px;
+      background-color: $background-white;
+      border: 2px solid $border-color;
+      border-radius: 6px;
+      transition: $transition;
+
+      &:after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 6px;
+        top: 3px;
+        width: 5px;
+        height: 10px;
+        border: solid $text-on-primary;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+    }
+
+    .checkbox-label {
+      font-size: 0.85rem;
+      color: $text-secondary;
+      line-height: 1.4;
+
+      .terms-link {
+        color: $primary-color;
+        text-decoration: none;
+        font-weight: 500;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+.error-message {
+  color: $error-color;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  @include mix.flex-inline(0.5rem);
+
+  &::before {
+    content: "error_outline";
+    font-family: 'Material Icons';
+    font-size: 14px;
+    color: $error-color;
+  }
+
+  &.centered-error {
+    justify-content: center;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

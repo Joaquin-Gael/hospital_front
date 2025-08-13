@@ -1,0 +1,181 @@
+@use '../../../layout/styles/_mixins.scss' as mix;
+@use '../../../layout/styles/_media-queries.scss' as med;
+@use '../_vars.scss' as *;
+
+:host {
+  display: block;
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+  padding-top: 80px;
+}
+
+// Estilos base
+* {
+  box-sizing: border-box;
+}
+
+.appointment-scheduler-container {
+  padding: 2rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  @include mix.flex-center;
+
+  @include med.mobile-only {
+    padding: 1rem;
+  }
+}
+
+.appointment-card {
+  background-color: $background-white;
+  border-radius: 16px;
+  box-shadow: $card-shadow;
+  width: 100%;
+  max-width: 800px;
+  overflow: hidden;
+  position: relative;
+  @include med.container-responsive;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: $primary-color;
+  }
+}
+
+.card-header {
+  padding: 2rem;
+  background-color: $background-white;
+  @include mix.flex-column;
+
+  @include med.mobile-only {
+    padding: 1rem;
+  }
+}
+
+.appointment-title {
+  color: $text-primary;
+  margin: 0 0 1.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  @include mix.flex-center;
+
+  .title-icon {
+    margin-right: 12px;
+    background-color: $primary-color;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    @include mix.flex-center;
+
+    i {
+      color: $text-on-primary;
+      font-size: 20px;
+      transition: $transition;
+      transform-origin: center;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  .title-text {
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  @include med.mobile-only {
+    font-size: 1.5rem;
+
+    .title-icon {
+      width: 32px;
+      height: 32px;
+
+      i {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+.appointment-form {
+  padding: 2rem;
+
+  @include med.mobile-only {
+    padding: 1rem;
+  }
+}
+
+// Estilos para Angular Material
+::ng-deep {
+  .mat-mdc-form-field {
+    width: 100%;
+    .mat-mdc-form-field-focus-overlay {
+      background-color: $primary-light;
+    }
+
+    &.mat-focused .mat-mdc-form-field-label {
+      color: $primary-color !important;
+    }
+
+    .mat-mdc-form-field-error {
+      color: $error-color;
+      font-size: 0.75rem;
+    }
+  }
+
+  .mat-datepicker-popup {
+
+    .mat-calendar-body-cell {
+      &.mat-calendar-body-disabled {
+        color: #757575; 
+        background-color: #f5f5f5; 
+        cursor: not-allowed;
+
+        &:hover {
+          background-color: #e0e0e0;
+        }
+         
+        &:not(.mat-calendar-body-disabled) {
+          color: #212121; // Negro para destacar días disponibles
+          background-color: #fff; // Fondo blanco
+          border: 1px solid #e0e0e0; // Borde sutil
+
+          &:hover {
+            background-color: #e3f2fd; // Azul claro al pasar el mouse
+            border-color: #bbdefb;
+          }
+
+          &.mat-calendar-body-active {
+            background-color: #2196f3; // Azul para día seleccionado
+            color: #fff;
+            border-color: #2196f3;
+          }
+        }
+      }
+    }
+    
+    .mat-calendar-header {
+      background-color: $primary-color;
+      color: $text-on-primary;
+    }
+    
+    .mat-calendar {
+      background-color: #FFFFFF;
+      padding-top: 10px;
+    }
+
+    .mat-calendar-body-selected {
+      background-color: $primary-color;
+      color: $text-on-primary;
+    }
+
+    .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+      border-color: $primary-color;
+    }
+  }
+}

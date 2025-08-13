@@ -25,7 +25,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
         path: 'shifts',
         loadComponent: () =>
-          import('./pages/shifts/shift.component').then((m) => m.ShiftsComponent),
+          import('./pages/shifts/shift/shift.component').then((m) => m.ShiftsComponent),
       },
       {
         path: 'authorities',
