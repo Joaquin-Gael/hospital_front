@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { LoggerService } from '../../services/core/logger.service';
 import { filter, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
 import { StorageService } from '../../services/core/storage.service';
 
@@ -26,9 +26,12 @@ export class AdminPanelComponent implements OnInit {
   private authService = inject(AuthService);
   private storageService = inject(StorageService);
   private readonly destroy$ = new Subject<void>();
+  private subscriptions: Subscription = new Subscription();
 
   activeSection: string = 'departments';
   isUserMenuOpen: boolean = false;
+  isLoggedIn: boolean = false;
+  scopes: string[] = []
 
   @ViewChild('userButton') userButtonRef!: ElementRef;
   @ViewChild('dropdownMenu') dropdownRef!: ElementRef;
@@ -49,25 +52,30 @@ export class AdminPanelComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const url = this.router.url;
-    const sectionId = url.split('/admin_panel/')[1]?.split('/')[0];
-    if (sectionId && this.sections.some((s) => s.id === sectionId)) {
-      this.activeSection = sectionId;
-    }
+    if(this.authService.getStoredScopes().includes('admin')){
+      const url = this.router.url;
+      const sectionId = url.split('/admin_panel/')[1]?.split('/')[0];
+      if (sectionId && this.sections.some((s) => s.id === sectionId)) {
+        this.activeSection = sectionId;
+      }
 
-    this.router.events
-      .pipe(
-        filter((event) => event instanceof NavigationEnd),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((event) => {
-        const navEvent = event as NavigationEnd;
-        const navUrl = navEvent.urlAfterRedirects;
-        const navSectionId = navUrl.split('/admin_panel/')[1]?.split('/')[0];
-        if (navSectionId && this.sections.some((s) => s.id === navSectionId)) {
-          this.activeSection = navSectionId;
-        }
-      });
+      this.router.events
+        .pipe(
+          filter((event) => event instanceof NavigationEnd),
+          takeUntil(this.destroy$)
+        )
+        .subscribe((event) => {
+          const navEvent = event as NavigationEnd;
+          const navUrl = navEvent.urlAfterRedirects;
+          const navSectionId = navUrl.split('/admin_panel/')[1]?.split('/')[0];
+          if (navSectionId && this.sections.some((s) => s.id === navSectionId)) {
+            this.activeSection = navSectionId;
+          }
+        });
+    } else {
+      this.logger.warn('Acceso denegado.')
+      this.router.navigate(['/home'])
+    }
   }
 
   toggleUserMenu(): void {
@@ -122,5 +130,6 @@ export class AdminPanelComponent implements OnInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.subscriptions.unsubscribe()
   }
 }

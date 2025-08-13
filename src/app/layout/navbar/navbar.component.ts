@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subscription, combineLatest, of } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
+import { StorageService } from '../../services/core/storage.service'
 
 @Component({
   selector: 'app-navbar',
@@ -38,7 +39,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
       { label: 'Inicio', route: '/' },
       { label: 'Contacto', route: '/contact' },
     ];
-
     if (isLoggedIn) {
       let accountRoute = '/user_panel'; 
       if (scopes.includes('doc')) {

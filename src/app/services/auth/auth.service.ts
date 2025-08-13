@@ -191,10 +191,14 @@ export class AuthService {
     if (!refreshToken) {
       this.storage.clearStorage();
       this.loginStatusSubject.next(false);
-      return throwError(() => new Error('No refresh token available'));
+      this.logger.error('No refresh token available ')
     }
 
-    return this.apiService.get<TokenUserResponse>(AUTH_ENDPOINTS.REFRESH).pipe(
+    const options = {
+      headers: { Authorization: `Bearer ${refreshToken}` }
+    }
+
+    return this.apiService.get<TokenUserResponse>(AUTH_ENDPOINTS.REFRESH, options).pipe(
       tap((response) => {
         this.storage.setAccessToken(response.access_token);
         this.storage.setRefreshToken(response.refresh_token);

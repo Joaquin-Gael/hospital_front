@@ -50,7 +50,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }
         this.user = userRead;
         this.loading = false;
-        this.loadHealthInsurance(userRead.health_insurance_id[0]);
+        this.loadHealthInsurance(userRead.health_insurance[0]);
         this.loadLastVisit(userRead.id);
       },
       error: (err: HttpErrorResponse) => {

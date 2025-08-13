@@ -13,7 +13,7 @@ export interface UserRead {
   address: string | null;
   telephone: string | null;
   blood_type: string | null;
-  health_insurance_id: string[];
+  health_insurance: string[];
   img_profile: string | null;
 }
 
@@ -26,7 +26,7 @@ export interface UserCreate {
   telephone?: string;
   address?: string;
   blood_type: string;
-  health_insurance_id: string[];
+  health_insurance: string[];
   password: string;
 }
 
@@ -36,7 +36,7 @@ export interface UserUpdate {
   last_name?: string;
   telephone?: string;
   address?: string;
-  health_insurance_id?: string[];
+  health_insurance?: string[];
   img_profile?: File;
 }
 

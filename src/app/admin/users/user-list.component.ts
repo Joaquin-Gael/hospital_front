@@ -64,7 +64,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     { key: 'password', label: 'Contraseña', type: 'password', required: false, validators: [Validators.minLength(8), Validators.pattern(this.passwordPattern)] },
     { key: 'address', label: 'Dirección', type: 'text', required: false },
     { key: 'telephone', label: 'Teléfono', type: 'text', required: false, validators: [Validators.pattern(/^\+?\d{9,15}$/)] },
-    { key: 'health_insurance_id', label: 'Obra Social', type: 'select', required: false, options: [] },
+    { key: 'health_insurance', label: 'Obra Social', type: 'select', required: false, options: [] },
     { key: 'blood_type', label: 'Tipo de Sangre', type: 'select', required: false, options: [
       { value: 'A+', label: 'A+' },
       { value: 'A-', label: 'A-' },
@@ -75,6 +75,12 @@ export class UserListComponent implements OnInit, OnDestroy {
       { value: 'O+', label: 'O+' },
       { value: 'O-', label: 'O-' },
     ] },
+    {
+      key: "img_profile",
+      label: "Foto de perfil",
+      type: "file",
+      required: false,
+    },
   ];
 
   get formFields(): FormField[] {
@@ -124,8 +130,8 @@ export class UserListComponent implements OnInit, OnDestroy {
         this.isSuperuser = result.userAuth?.is_superuser || false;
         this.users = result.users.map((user) => ({
           ...user,
-          health_insurance_name: user.health_insurance_id
-            ? this.healthInsurances.find(hi => hi.id === user.health_insurance_id[0])?.name || 'Obra social no encontrada'
+          health_insurance_name: user.health_insurance
+            ? this.healthInsurances.find(hi => hi.id === user.health_insurance[0])?.name || 'Obra social no encontrada'
             : 'Sin obra social'
         }));
         this.updateHealthInsuranceOptions();
@@ -274,15 +280,15 @@ export class UserListComponent implements OnInit, OnDestroy {
           telephone: formData.telephone,
           address: formData.address || undefined,
           blood_type: formData.blood_type || undefined,
-          health_insurance_id: formData.health_insurance_id || undefined,
+          health_insurance: formData.health_insurance_id || undefined,
         };
 
         this.userService.createUser(userData).pipe(takeUntil(this.destroy$)).subscribe({
           next: (newUser: UserRead) => {
             const userWithHealthInsurance: ExtendedUser = {
               ...newUser,
-              health_insurance_name: newUser.health_insurance_id
-                ? this.healthInsurances.find(hi => hi['id'] === newUser.health_insurance_id[0])?.name || 'Obra social no encontrada'
+              health_insurance_name: newUser.health_insurance
+                ? this.healthInsurances.find(hi => hi['id'] === newUser.health_insurance[0])?.name || 'Obra social no encontrada'
                 : 'Sin obra social'
             };
             this.logger.debug('user', userWithHealthInsurance)
@@ -305,15 +311,15 @@ export class UserListComponent implements OnInit, OnDestroy {
           last_name: this.isSuperuser ? formData.last_name : undefined,
           telephone: formData.telephone || undefined,
           address: formData.address || undefined,
-          health_insurance_id: formData.health_insurance_id || undefined,
+          health_insurance: formData.health_insurance_id || undefined,
         };
 
         this.userService.updateUser(this.selectedUser.id.toString(), updateData).pipe(takeUntil(this.destroy$)).subscribe({
           next: (updatedUser: UserRead) => {
             const userWithHealthInsurance: ExtendedUser = {
               ...updatedUser,
-              health_insurance_name: updatedUser.health_insurance_id
-                ? this.healthInsurances.find(hi => hi.id === updatedUser.health_insurance_id[0])?.name || 'Obra social no encontrada'
+              health_insurance_name: updatedUser.health_insurance
+                ? this.healthInsurances.find(hi => hi.id === updatedUser.health_insurance[0])?.name || 'Obra social no encontrada'
                 : 'Sin obra social'
             };
             const index = this.users.findIndex(u => u.id === updatedUser.id);
@@ -387,8 +393,8 @@ export class UserListComponent implements OnInit, OnDestroy {
             if (index !== -1) {
               this.users[index] = {
                 ...bannedUser,
-                health_insurance_name: bannedUser.health_insurance_id
-                  ? this.healthInsurances.find(hi => hi.id === bannedUser.health_insurance_id[0])?.name || 'Obra social no encontrada'
+                health_insurance_name: bannedUser.health_insurance
+                  ? this.healthInsurances.find(hi => hi.id === bannedUser.health_insurance[0])?.name || 'Obra social no encontrada'
                   : 'Sin obra social'
               };
             }
@@ -421,8 +427,8 @@ export class UserListComponent implements OnInit, OnDestroy {
             if (index !== -1) {
               this.users[index] = {
                 ...unbannedUser,
-                health_insurance_name: unbannedUser.health_insurance_id
-                  ? this.healthInsurances.find(hi => hi.id === unbannedUser.health_insurance_id[0])?.name || 'Obra social no encontrada'
+                health_insurance_name: unbannedUser.health_insurance
+                  ? this.healthInsurances.find(hi => hi.id === unbannedUser.health_insurance[0])?.name || 'Obra social no encontrada'
                   : 'Sin obra social'
               };
             }

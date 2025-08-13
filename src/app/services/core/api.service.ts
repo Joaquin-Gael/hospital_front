@@ -91,7 +91,7 @@ export class ApiService {
    * @param options Optional HTTP options (e.g., query parameters).
    * @returns Observable of the response data.
    */
-  get<T>(endpoint: string, options?: { params?: HttpParams }): Observable<T> {
+  get<T>(endpoint: string, options?: { headers?: HttpHeaders | { [header: string]: string | string[] }, params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.get<T>(url, options)),
       catchError((err) => {

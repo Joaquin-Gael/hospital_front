@@ -40,31 +40,12 @@
       </div>
       
       <div *ngIf="showForm" class="user-list__form">
-        <div class="user-list__form-field">
-          <label for="img_profile" class="user-list__label">
-            <span class="material-icons">image</span>
-            Imagen de Perfil
-          </label>
-          <input
-            id="img_profile"
-            type="file"
-            accept="image/*"
-            (change)="onFileSelected($event)"
-            class="user-list__input-file"
-          />
-          <div *ngIf="imagePreview" class="user-list__image-preview">
-            <img [src]="imagePreview" alt="Vista previa" class="user-list__preview-image">
-            <button type="button" (click)="removeImage()" class="user-list__remove-image">
-              <span class="material-icons">close</span>
-            </button>
-          </div>
-        </div>
-        
         <app-entity-form
           [fields]="formFields"
           [loading]="formLoading"
           [initialData]="selectedUser"
           [submitLabel]="formMode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario'"
+          [enableImageUpload]="true"
           [title]="formMode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario'"
           (formSubmit)="onFormSubmit($event)"
           (formCancel)="onFormCancel()"

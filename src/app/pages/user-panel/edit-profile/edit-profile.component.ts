@@ -124,7 +124,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             last_name: userRead.last_name,
             address: userRead.address || "",
             telephone: userRead.telephone || "",
-            health_insurance_id: userRead.health_insurance_id || [],
+            health_insurance: userRead.health_insurance || [],
             is_active: userRead.is_active,
             is_admin: userRead.is_admin,
             is_superuser: userRead.is_superuser,
@@ -151,9 +151,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
           this.availableHealthInsurances = [...healthInsurances];
           this.selectedHealthInsurances = [];
 
-          // Cargar las obras sociales seleccionadas del usuario
-          if (this.user?.health_insurance_id) {
-            this.user.health_insurance_id.forEach((id) => {
+          if (this.user?.health_insurance) {
+            this.user.health_insurance.forEach((id) => {
               const insurance = this.availableHealthInsurances.find((ins) => ins.id === id);
               if (insurance) {
                 this.selectedHealthInsurances.push(insurance);
@@ -248,7 +247,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       last_name: formData.last_name || this.user.last_name,
       address: formData.address || undefined,
       telephone: formData.telephone || undefined,
-      health_insurance_id: this.selectedHealthInsurances.map((ins) => ins.id),
+      health_insurance: this.selectedHealthInsurances.map((ins) => ins.id),
       img_profile: this.imgProfile,
     };
 

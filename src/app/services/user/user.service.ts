@@ -50,8 +50,8 @@ export class UserService {
     formData.append('dni', user.dni);
     formData.append('email', user.email);
     formData.append('password', user.password);
-    if (user.health_insurance_id && user.health_insurance_id.length > 0) {
-      user.health_insurance_id.forEach(id => formData.append('health_insurance_id', id));
+    if (user.health_insurance && user.health_insurance.length > 0) {
+      user.health_insurance.forEach(id => formData.append('health_insurance_id', id));
     }
     formData.append('blood_type', user.blood_type);
     formData.append('first_name', user.first_name);
@@ -79,8 +79,8 @@ export class UserService {
     formData.append('last_name', user.last_name || '');
     formData.append('telephone', user.telephone || '');
     formData.append('address', user.address || '');
-    if (user.health_insurance_id && user.health_insurance_id.length > 0) {
-      user.health_insurance_id.forEach(id => formData.append('health_insurance_id', id));
+    if (user.health_insurance && user.health_insurance.length > 0) {
+      user.health_insurance.forEach(id => formData.append('health_insurance_id', id));
     }
     if (user.img_profile instanceof File) {
       formData.append('img_profile', user.img_profile, user.img_profile.name);

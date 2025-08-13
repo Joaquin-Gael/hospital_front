@@ -134,7 +134,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       first_name,
       last_name,
       dni,
-      health_insurance_id: [],
+      health_insurance: [],
       password,
       blood_type: blood_type || undefined,
     };

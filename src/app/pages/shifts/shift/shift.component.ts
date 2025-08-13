@@ -465,8 +465,8 @@ export class ShiftsComponent implements OnInit {
 
     this.logger.debug('Datos del turno enviados:', turnData);
 
-    if (this.currentUser.health_insurance_id && this.currentUser.health_insurance_id.length > 0) {
-      this.healthInsuranceService.getById(this.currentUser.health_insurance_id[0]).subscribe({
+    if (this.currentUser.health_insurance && this.currentUser.health_insurance.length > 0) {
+      this.healthInsuranceService.getById(this.currentUser.health_insurance[0]).subscribe({
         next: (healthInsurance) => {
           if (healthInsurance.discount === 100) {
             this.snackBar.open('Tu obra social cubre el 100% del costo. Creando turno...', 'Cerrar', { duration: 5000 });
