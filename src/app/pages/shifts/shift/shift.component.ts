@@ -16,13 +16,16 @@ import { AppointmentService } from '../../../services/appointment/appointments.s
 import { AuthService } from '../../../services/auth/auth.service';
 import { MedicalScheduleDaysResponse, Service, MedicalScheduleCreate } from '../../../services/interfaces/hospital.interfaces';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
-import { ReasonOption } from '../interfaces/appointment.interfaces';
+import { TurnState, TurnCreate, PayTurnResponse } from '../../../services/interfaces/appointment.interfaces';
+import { ReasonOption } from '../interfaces/appointment.interfaces'
 import { StepIndicatorComponent } from '../step-indicator/step-indicator.component';
 import { ServiceSelectionComponent } from '../service-selection/service-selection.component';
 import { DateSelectionComponent } from '../date-selection/date-selection.component';
 import { TimeSelectionComponent } from '../time-selection/time-selection.component';
 import { AppointmentSummaryComponent } from '../appointment-summary/appointment-summary.component';
 import { NavigationButtonsComponent } from '../navigation-buttons/navigation-buttons.component';
+import { HealthInsuranceSelectionComponent } from '../health-insarunce-selection/health-insarunce-selection.component';
+import { HealthInsuranceRead } from '../../../services/interfaces/health-insurance.interfaces'
 
 @Component({
   selector: 'app-appointment-scheduler',
@@ -35,7 +38,8 @@ import { NavigationButtonsComponent } from '../navigation-buttons/navigation-but
     DateSelectionComponent,
     TimeSelectionComponent,
     AppointmentSummaryComponent,
-    NavigationButtonsComponent
+    NavigationButtonsComponent,
+    HealthInsuranceSelectionComponent
   ],
   templateUrl: './shift.component.html',
   styleUrls: ['./shift.component.scss'],
@@ -60,7 +64,6 @@ import { NavigationButtonsComponent } from '../navigation-buttons/navigation-but
 export class ShiftsComponent implements OnInit {
   private fb = inject(FormBuilder);
   private serviceService = inject(ServiceService);
-  private doctorService = inject(DoctorService);
   private scheduleService = inject(ScheduleService);
   private logger = inject(LoggerService);
   private snackBar = inject(MatSnackBar);
@@ -77,7 +80,8 @@ export class ShiftsComponent implements OnInit {
   availableDays: string[] = [];
   availableTimeSlots: string[] = [];
   currentUser: UserRead | null = null;
-  
+  healthInsurances: HealthInsuranceRead[] = [];
+
   // Form and UI state
   appointmentForm!: FormGroup;
   error: string | null = null;
@@ -87,7 +91,7 @@ export class ShiftsComponent implements OnInit {
   isLoading = false;
   currentStep = 1;
   totalSteps = 4;
-  
+
   reasonOptions: ReasonOption[] = [
     { id: 1, name: 'Primera consulta' },
     { id: 2, name: 'Seguimiento' },
@@ -110,11 +114,44 @@ export class ShiftsComponent implements OnInit {
         if (!user) {
           this.snackBar.open('Debes iniciar sesión para reservar un turno', 'Cerrar', { duration: 5000 });
           this.router.navigate(['/login']);
+          return;
         }
+        this.loadHealthInsurances();
       },
       error: (error: HttpErrorResponse) => {
         this.handleError(error, 'Error al cargar datos del usuario');
         this.router.navigate(['/login']);
+      }
+    });
+  }
+
+  private loadHealthInsurances(): void {
+    if (!this.currentUser?.health_insurance?.length) {
+      this.healthInsurances = [];
+      this.totalSteps = 4;
+      this.appointmentForm.get('healthInsurance')?.setValue(null);
+      return;
+    }
+
+    this.healthInsuranceService.getAll().subscribe({
+      next: (insurances) => {
+        this.healthInsurances = insurances.filter(insurance =>
+          this.currentUser!.health_insurance.includes(insurance.id)
+        );
+        this.totalSteps = this.healthInsurances.length > 1 ? 5 : 4;
+        if (this.healthInsurances.length === 1) {
+          this.appointmentForm.get('healthInsurance')?.setValue(this.healthInsurances[0].id);
+        } else if (this.healthInsurances.length > 1) {
+          this.appointmentForm.get('healthInsurance')?.setValidators([Validators.required]);
+          this.appointmentForm.get('healthInsurance')?.updateValueAndValidity();
+        }
+        this.cdr.detectChanges();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.handleError(error, 'Error al cargar obras sociales');
+        this.healthInsurances = [];
+        this.totalSteps = 4;
+        this.appointmentForm.get('healthInsurance')?.setValue(null);
       }
     });
   }
@@ -126,7 +163,8 @@ export class ShiftsComponent implements OnInit {
       appointmentTime: [null, Validators.required],
       reasonOption: [null, Validators.required],
       customReason: [''],
-      termsAccepted: [false, Validators.requiredTrue]
+      termsAccepted: [false, Validators.requiredTrue],
+      healthInsurance: [null]
     });
   }
 
@@ -165,12 +203,9 @@ export class ShiftsComponent implements OnInit {
     });
   }
 
+  onServiceChange(serviceId: string): void {}
 
-  onServiceChange(serviceId: string): void {
-  }
-
-  onReasonChange(reasonId: number): void { 
-  }
+  onReasonChange(reasonId: number): void {}
 
   onButtonHover(isHovering: boolean): void {
     this.buttonState = isHovering ? 'active' : 'inactive';
@@ -316,10 +351,9 @@ export class ShiftsComponent implements OnInit {
   }
 
   formatTime(date: Date): string {
-    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:00`;
   }
 
-  // Navigation methods
   nextStep(): void {
     if (this.isStepValid(this.currentStep)) {
       if (this.currentStep < this.totalSteps) {
@@ -353,6 +387,17 @@ export class ShiftsComponent implements OnInit {
       case 3:
         return !!this.appointmentForm.get('appointmentTime')?.valid;
       case 4:
+        if (this.totalSteps === 4) {
+          const reasonControl = this.appointmentForm.get('reasonOption');
+          const customReasonControl = this.appointmentForm.get('customReason');
+          const termsControl = this.appointmentForm.get('termsAccepted');
+          return !!reasonControl?.valid && 
+                 (!this.showCustomReason || !!customReasonControl?.valid) && 
+                 !!termsControl?.valid;
+        } else {
+          return !!this.appointmentForm.get('healthInsurance')?.valid;
+        }
+      case 5:
         const reasonControl = this.appointmentForm.get('reasonOption');
         const customReasonControl = this.appointmentForm.get('customReason');
         const termsControl = this.appointmentForm.get('termsAccepted');
@@ -396,6 +441,11 @@ export class ShiftsComponent implements OnInit {
   get termsControl(): FormControl {
     return this.appointmentForm.get('termsAccepted') as FormControl;
   }
+
+  get healthInsuranceControl(): FormControl {
+    return this.appointmentForm.get('healthInsurance') as FormControl;
+  }
+
   getSelectedService(): Service | null {
     const serviceId = this.appointmentForm.get('service')?.value;
     return this.services.find(s => s.id === serviceId) || null;
@@ -433,7 +483,6 @@ export class ShiftsComponent implements OnInit {
     return date.toLocaleDateString('es-ES', options);
   }
 
-  // Form submission
   onSubmit(): void {
     if (this.appointmentForm.invalid || !this.currentUser) {
       this.markFormGroupTouched(this.appointmentForm);
@@ -450,69 +499,38 @@ export class ShiftsComponent implements OnInit {
       return;
     }
 
-    const turnData = {
+    const selectedHealthInsuranceId = formValue.healthInsurance || (this.healthInsurances.length === 1 ? this.healthInsurances[0].id : null);
+
+    const turnData: TurnCreate = {
       reason: formValue.reasonOption === 5 ? formValue.customReason : this.reasonOptions.find(r => r.id === formValue.reasonOption)?.name || '',
-      state: 'waiting',
+      state: TurnState.WAITING,
       date: this.formatDateISO(formValue.appointmentDate),
+      time: formValue.appointmentTime,
       date_created: this.formatDateISO(new Date()),
       user_id: this.currentUser.id,
-      doctor_id: this.getDoctorIdFromSchedule(),
       services: [service.id],
-      time: formValue.appointmentTime,
-      date_limit: this.formatDateISO(new Date(new Date(formValue.appointmentDate).setHours(23, 59, 59))),
-      appointment_id: null
+      health_insurance: selectedHealthInsuranceId,
     };
 
     this.logger.debug('Datos del turno enviados:', turnData);
 
-    if (this.currentUser.health_insurance && this.currentUser.health_insurance.length > 0) {
-      this.healthInsuranceService.getById(this.currentUser.health_insurance[0]).subscribe({
-        next: (healthInsurance) => {
-          if (healthInsurance.discount === 100) {
-            this.snackBar.open('Tu obra social cubre el 100% del costo. Creando turno...', 'Cerrar', { duration: 5000 });
-            this.createTurnAndRedirect(turnData);
-          } else {
-            this.showPartialPayment(healthInsurance.discount, turnData);
-          }
-        },
-        error: (error: HttpErrorResponse) => {
-          this.handleError(error, 'Error al verificar la obra social');
-          this.createTurnAndRedirect(turnData);
-        }
-      });
-    } else {
-      this.showPartialPayment(0, turnData);
-    }
-  }
-
-  private getDoctorIdFromSchedule(): string {
-    // TODO: Implementar lógica real para obtener doctor_id basado en specialty, day, time
-    this.logger.warn('getDoctorIdFromSchedule es un placeholder. Implementar lógica real.');
-    return '1';
-  }
-
-  private createTurnAndRedirect(turnData: any): void {
     this.appointmentService.createTurn(turnData).subscribe({
-      next: (turn) => {
-        this.snackBar.open('Turno creado con éxito', 'Cerrar', { duration: 5000 });
+      next: (response: PayTurnResponse) => {
+        this.logger.debug('Turno creado:', response);
+        if (response.payment_url) {
+          this.snackBar.open('Turno creado con éxito. Redirigiendo al pago...', 'Cerrar', { duration: 5000 });
+          window.location.href = response.payment_url; // Redirigir a Stripe
+        } else {
+          this.snackBar.open('Turno creado con éxito', 'Cerrar', { duration: 5000 });
+          this.router.navigate(['/user-panel']);
+        }
         this.isLoading = false;
-        this.router.navigate(['/user-panel']);
       },
       error: (error: HttpErrorResponse) => {
         this.handleError(error, 'Error al crear el turno');
         this.isLoading = false;
       }
     });
-  }
-
-  private showPartialPayment(discount: number, turnData: any): void {
-    const remainingAmount = this.getSelectedServicePrice() * (1 - discount / 100);
-    if (discount === 0) {
-      this.snackBar.open(`No tienes obra social asociada. Debes pagar ${this.formatPrice(remainingAmount)}. (Funcionalidad de pago pendiente)`, 'Cerrar', { duration: 10000 });
-    } else {
-      this.snackBar.open(`Obra social cubre ${discount}%. Debes pagar ${this.formatPrice(remainingAmount)}. (Funcionalidad de pago pendiente)`, 'Cerrar', { duration: 10000 });
-    }
-    this.createTurnAndRedirect(turnData);
   }
 
   private formatDateISO(date: Date): string {
@@ -530,8 +548,12 @@ export class ShiftsComponent implements OnInit {
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
     this.logger.error('Error en ShiftsComponent:', error);
     const errorMessages: { [key: number]: string } = {
+      400: 'Datos de la solicitud inválidos. Verifica los campos ingresados.',
+      401: 'No estás autorizado. Por favor, inicia sesión.',
+      403: 'Acción no permitida.',
       404: 'No se encontraron horarios disponibles.',
       405: 'Método no permitido. Verifica la configuración del endpoint.',
+      409: 'Conflicto al crear el turno. Intenta con otro horario.',
       500: 'Error en el servidor. Intenta de nuevo más tarde.'
     };
     const message = errorMessages[error.status] || error.error?.detail || defaultMessage;

@@ -4,13 +4,48 @@ import { Service } from './hospital.interfaces';
 
 // Estado del turno o cita
 export enum TurnState {
-  PENDING = 'pending',
-  COMPLETED = 'completed',
+  WAITING = 'waiting',
+  FINISHED = 'finished',
   CANCELLED = 'cancelled',
-  WAITING = 'waiting'
+  REJECTED = 'rejected',
+  ACCEPTED = 'accepted'
+}//
+
+// creacion de turno
+export interface TurnCreate {
+  reason: string;
+  state: TurnState.WAITING; // Siempre 'waiting' para creación
+  date: string; // ISO 8601, e.g., "2025-08-14"
+  time: string; // e.g., "10:00"
+  date_created: string; // ISO 8601, e.g., "2025-08-14"
+  user_id: string; // UUID
+  services: string[]; // Array de UUIDs
+  health_insurance: string | null; // UUID o null
 }
 
-// Modelo de Turno completo (para PACIENTES)
+// respuesta de turno
+export interface TurnResponse {
+  id: string;
+  reason: string;
+  state: TurnState;
+  date: string; // ISO 8601
+  time: string;
+  date_created: string; // ISO 8601
+  date_limit: string; // ISO 8601
+  user_id: string;
+  doctor_id: string;
+  services: string[];
+  appointment_id: string | null;
+  user?: UserRead;
+  doctor?: Doctor;
+  service?: Service[];
+}
+
+export interface PayTurnResponse {
+  turn: TurnResponse;
+  payment_url: string;
+}
+
 export interface Turn {
   id: string;
   reason: string;
@@ -21,27 +56,12 @@ export interface Turn {
   date_created: string; // ISO 8601
   user_id: string;
   doctor_id: string;
-  appointment_id: string;
+  appointment_id: string | null;
   service_id: string;
-
   user?: UserRead;
   doctor?: Doctor;
-  service?: Service;
-  appointment?: AppointmentMinimal; // Evita recursividad completa
-}
-
-// Modelo para creación de turno
-export interface TurnCreate {
-  reason: string;
-  state: string;
-  date: string;
-  date_created: string;
-  user_id: string;
-  doctor_id: string;
-  services: string[]; 
-  time: string;
-  date_limit: string; 
-  appointment_id?: string; 
+  service?: Service[];
+  appointment?: AppointmentMinimal;
 }
 
 // Modelo para eliminación de turno
@@ -63,7 +83,6 @@ export interface Appointment {
   doctor_id: string;
   service_id: string;
   appointment_id: string;
-
   user: UserRead;
   doctor: Doctor;
   service: Service;
@@ -79,12 +98,12 @@ export interface AppointmentMinimal {
   service_id: string;
 }
 
-
+// Vista simplificada para mostrar citas
 export interface AppointmentViewModel {
   id: string;
   turnId: string;
-  date: string; 
-  time: string; 
+  date: string;
+  time: string;
   specialty: string;
   doctorName: string;
   location: string;

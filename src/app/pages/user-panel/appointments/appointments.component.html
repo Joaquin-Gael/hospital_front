@@ -44,9 +44,8 @@
             </div>
             <div class="appointment-card__status">
               <span class="status-badge" [ngClass]="{
-                'status-pending': appointment.state === 'pending',
                 'status-waiting': appointment.state === 'waiting',
-                'status-completed': appointment.state === 'completed',
+                'status-completed': appointment.state === 'finished',
                 'status-cancelled': appointment.state === 'cancelled'
               }">
                 {{ appointment.state | titlecase }}
@@ -54,8 +53,8 @@
             </div>
           </div>
           <div class="appointment-card__footer">
-            <button class="btn btn--outline btn--sm" (click)="onReschedule(appointment.id)" [disabled]="appointment.state !== 'pending' && appointment.state !== 'waiting'">Reprogramar</button>
-            <button class="btn btn--danger btn--sm" (click)="onCancel(appointment.turnId)" [disabled]="appointment.state !== 'pending' && appointment.state !== 'waiting'">Cancelar</button>
+            <button class="btn btn--outline btn--sm" (click)="onReschedule(appointment.id)" [disabled]="appointment.state !== 'waiting'">Reprogramar</button>
+            <button class="btn btn--danger btn--sm" (click)="onCancel(appointment.turnId)" [disabled]="appointment.state !== 'waiting'">Cancelar</button>
           </div>
         </div>
       }

@@ -5,10 +5,10 @@ import { APPOINTMENT_ENDPOINTS } from './appointment-endpoints';
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
-import { Appointment, Turn, TurnCreate, TurnDelete } from '../interfaces/appointment.interfaces';
+import { Appointment, PayTurnResponse, Turn, TurnCreate, TurnDelete } from '../interfaces/appointment.interfaces';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AppointmentService {
   constructor(
@@ -70,11 +70,11 @@ export class AppointmentService {
   /**
    * Crea un nuevo turno.
    * @param turnData Datos del turno a crear.
-   * @returns Observable con los datos del turno creado.
+   * @returns Observable con los datos del turno creado y la URL de pago.
    */
-  createTurn(turnData: TurnCreate): Observable<Turn> {
+  createTurn(turnData: TurnCreate): Observable<PayTurnResponse> {
     this.logger.debug('Creando nuevo turno', turnData);
-    return this.apiService.post<Turn>(APPOINTMENT_ENDPOINTS.CREATE_TURN, turnData).pipe(
+    return this.apiService.post<PayTurnResponse>(APPOINTMENT_ENDPOINTS.CREATE_TURN, turnData).pipe(
       catchError((error) => this.handleError('Error creating turn', error))
     );
   }
@@ -118,6 +118,9 @@ export class AppointmentService {
           break;
         case 404:
           errorMessage = httpError.error?.detail ?? 'Resource not found';
+          break;
+        case 405:
+          errorMessage = httpError.error?.detail ?? 'Method not allowed';
           break;
         default:
           errorMessage = httpError.error?.detail ?? 'Server error';

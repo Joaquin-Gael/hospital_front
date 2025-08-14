@@ -48,9 +48,18 @@
         [error]="error"
       ></app-time-selection>
 
-      <!-- Paso 4: Resumen y Confirmación -->
+      <!-- Paso 4: Selección de Obra Social (este paso solo sale si el usuario tiene mas de 2 obras sociales) -->
+      <app-health-insurance-selection
+        *ngIf="currentStep === 4 && totalSteps === 5"
+        [healthInsurances]="healthInsurances"
+        [healthInsuranceControl]="healthInsuranceControl"
+        [error]="error"
+        (insuranceChange)="healthInsuranceControl.setValue($event)"
+      ></app-health-insurance-selection>
+
+      <!-- Paso 4 o 5: Resumen y Confirmación -->
       <app-appointment-summary
-        *ngIf="currentStep === 4"
+        *ngIf="(currentStep === 4 && totalSteps === 4) || (currentStep === 5 && totalSteps === 5)"
         [reasonControl]="reasonControl"
         [customReasonControl]="customReasonControl"
         [termsControl]="termsControl"

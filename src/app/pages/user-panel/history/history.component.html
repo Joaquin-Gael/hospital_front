@@ -36,11 +36,11 @@
               <td>{{ appointment.location }}</td>
               <td>
                 <span class="status-badge" [ngClass]="{
-                  'status-badge--completed': appointment.state === 'completed',
+                  'status-badge--completed': appointment.state === 'finished',
                   'status-badge--cancelled': appointment.state === 'cancelled'
                 }">
                   <span class="status-badge__dot"></span>
-                  {{ appointment.state === 'completed' ? 'Completada' : appointment.state === 'cancelled' ? 'Cancelada' : 'Pendiente' }}
+                  {{ appointment.state === 'finished' ? 'Completada' : appointment.state === 'cancelled' ? 'Cancelada' : 'Pendiente' }}
                 </span>
               </td>
               <td class="table__actions">

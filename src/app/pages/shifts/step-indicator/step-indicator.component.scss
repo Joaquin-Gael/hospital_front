@@ -25,7 +25,7 @@
   }
 
   .steps-circles {
-    margin-bottom: 8px; 
+    margin-bottom: 8px;
     width: 100%;
     @include mix.flex-between;
 
@@ -75,7 +75,7 @@
 
   .steps-labels {
     width: 100%;
-    align-items: center; 
+    align-items: center;
     @include mix.flex-between;
 
     .step-label {
@@ -88,6 +88,20 @@
 
       @include med.mobile-only {
         font-size: 0.65rem;
+      }
+    }
+  }
+
+  // Ajuste para 5 pasos
+  @include med.mobile-only {
+    .steps-circles {
+      gap: 8px;
+    }
+
+    .steps-labels {
+      gap: 4px;
+      .step-label {
+        font-size: 0.6rem;
       }
     }
   }

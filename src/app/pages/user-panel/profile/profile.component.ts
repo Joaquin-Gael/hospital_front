@@ -82,7 +82,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.appointmentService.getTurnsByUserId(userId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (turns: Turn[]) => {
         const completedTurns = turns
-          .filter(turn => turn.state === TurnState.COMPLETED)
+          .filter(turn => turn.state === TurnState.FINISHED)
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         this.lastVisit = completedTurns.length > 0 ? new Date(completedTurns[0].date) : null;
       },

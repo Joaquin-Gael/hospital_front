@@ -95,13 +95,15 @@
         text-align: right;
         flex: 1;
 
-        .service-name {
+        .service-name,
+        .discount-highlight {
           display: block;
           font-weight: 600;
           color: $text-primary;
         }
 
-        .service-price {
+        .service-price,
+        .discount-highlight {
           display: block;
           color: $secondary-color;
           font-weight: 600;

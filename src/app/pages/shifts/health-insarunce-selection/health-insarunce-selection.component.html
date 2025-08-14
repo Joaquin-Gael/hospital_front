@@ -1,0 +1,24 @@
+<div class="health-insurance-selection">
+  <h3>Selecciona tu obra social</h3>
+  <p>Elige una de tus obras sociales para aplicar el descuento correspondiente.</p>
+  <div class="insurance-list">
+    <div *ngFor="let insurance of healthInsurances" class="insurance-item">
+      <label class="insurance-label">
+        <input
+          type="radio"
+          [value]="insurance.id"
+          [formControl]="healthInsuranceControl"
+          (change)="onInsuranceChange(insurance.id)"
+        />
+        <span>{{ insurance.name }} (Descuento: {{ insurance.discount }}%)</span>
+      </label>
+    </div>
+    <div *ngIf="!healthInsurances.length" class="no-insurances">
+      No tienes obras sociales asociadas.
+    </div>
+  </div>
+  <div *ngIf="healthInsuranceControl.invalid && healthInsuranceControl.touched" class="error-message">
+    Debes seleccionar una obra social.
+  </div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+</div>

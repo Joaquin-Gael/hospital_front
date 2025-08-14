@@ -1,0 +1,66 @@
+.health-insurance-selection {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+
+  h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .insurance-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .insurance-item {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #007bff;
+      background-color: #f0faff;
+    }
+  }
+
+  .insurance-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+
+    input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #007bff;
+    }
+
+    span {
+      flex-grow: 1;
+    }
+  }
+
+  .no-insurances {
+    padding: 15px;
+    color: #666;
+    font-style: italic;
+  }
+
+  .error-message {
+    color: #d32f2f;
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+}
