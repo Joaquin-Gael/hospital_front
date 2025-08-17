@@ -12,7 +12,7 @@
       </div>
 
       <div class="messages__conversations">
-        <button class="btn btn--primary messages__new-chat" (click)="createNewChat()">Nuevo chat</button>
+        <button class="btn btn--primary messages__new-chat" (click)="openNewChatModal()">Nuevo chat</button>
         
         <div
           *ngFor="let chat of filteredChats"
@@ -21,7 +21,7 @@
           (click)="selectChat(chat)"
         >
           <div class="messages__avatar-container">
-            <div class="messages__avatar-initials">
+            <div class="messages__avatar-initials" [style.background]="getAvatarBackground(getParticipant(chat)?.id)">
               {{ getInitials(getParticipant(chat)?.first_name, getParticipant(chat)?.last_name) }}
             </div>
             <span
@@ -71,7 +71,7 @@
         <div class="messages__header">
           <div class="messages__participant">
             <div class="messages__avatar-container">
-              <div class="messages__avatar-initials">
+              <div class="messages__avatar-initials" [style.background]="getAvatarBackground(getParticipant(selectedChat)?.id)">
                 {{ getInitials(getParticipant(selectedChat)?.first_name, getParticipant(selectedChat)?.last_name) }}
               </div>
               <span
@@ -101,31 +101,31 @@
           </div>
         </div>
 
-        <div class="messages__chat">
-          <div class="messages__date-separator" *ngIf="messages.length">
-            <span class="date-text">{{ messages[0].created_at | date:'mediumDate' }}</span>
-          </div>
+        <div class="messages__chat" #chatContainer>
+          <ng-container *ngFor="let message of messages; let i = index">
+            <div class="messages__date-separator" *ngIf="shouldShowDateSeparator(i)">
+              <span class="date-text">{{ message.created_at | date:'mediumDate' }}</span>
+            </div>
+            <div
+              class="messages__message"
+              [ngClass]="{'messages__message--sent': message.sender?.id === currentDoctorId}"
+            >
+              <div *ngIf="message.sender?.id !== currentDoctorId" class="messages__avatar-container messages__avatar-container--small">
+                <div class="messages__avatar-initials messages__avatar-initials--small" [style.background]="getAvatarBackground(getParticipant(selectedChat)?.id)">
+                  {{ getInitials(getParticipant(selectedChat)?.first_name, getParticipant(selectedChat)?.last_name) }}
+                </div>
+              </div>
 
-          <div
-            *ngFor="let message of messages"
-            class="messages__message"
-            [ngClass]="{'messages__message--sent': message.sender?.id === currentDoctorId}"
-          >
-            <div *ngIf="message.sender?.id !== currentDoctorId" class="messages__avatar-container messages__avatar-container--small">
-              <div class="messages__avatar-initials messages__avatar-initials--small">
-                {{ getInitials(getParticipant(selectedChat)?.first_name, getParticipant(selectedChat)?.last_name) }}
+              <div class="messages__bubble">
+                <div class="messages__bubble-content">
+                  {{ message.content }}
+                </div>
+                <div class="messages__bubble-time">
+                  {{ message.created_at | date:'HH:mm' }}
+                </div>
               </div>
             </div>
-
-            <div class="messages__bubble">
-              <div class="messages__bubble-content">
-                {{ message.content }}
-              </div>
-              <div class="messages__bubble-time">
-                {{ message.created_at | date:'HH:mm' }}
-              </div>
-            </div>
-          </div>
+          </ng-container>
         </div>
 
         <div class="messages__composer">
@@ -148,6 +148,47 @@
           </button>
         </div>
       </ng-container>
+    </div>
+  </div>
+
+  <!-- Crear nuevos chats (ya no es un input feo) -->
+  <div class="messages__modal" *ngIf="showNewChatModal">
+    <div class="messages__modal-content">
+      <div class="messages__modal-header">
+        <h2>Seleccionar médico para nuevo chat</h2>
+        <button class="btn btn--icon" (click)="closeNewChatModal()">
+          <span class="icon-x"></span>
+        </button>
+      </div>
+      <div class="messages__modal-search">
+        <input
+          type="text"
+          placeholder="Buscar médicos..."
+          class="messages__search-input"
+          (input)="searchDoctors($event)"
+        >
+        <span class="messages__search-icon icon-search"></span>
+      </div>
+      <div class="messages__modal-list">
+        <div
+          *ngFor="let doctor of filteredDoctors"
+          class="messages__doctor-item"
+          (click)="createChatWithDoctor(doctor.id)"
+        >
+          <div class="messages__avatar-container">
+            <div class="messages__avatar-initials" [style.background]="getAvatarBackground(doctor.id)">
+              {{ getInitials(doctor.first_name, doctor.last_name) }}
+            </div>
+          </div>
+          <div class="messages__doctor-info">
+            <h3>{{ doctor.first_name }} {{ doctor.last_name }}</h3>
+            <p>{{ doctor.username }} - {{ doctor.email }}</p>
+          </div>
+        </div>
+        <div *ngIf="filteredDoctors.length === 0" class="messages__empty">
+          <p>No se encontraron médicos.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>

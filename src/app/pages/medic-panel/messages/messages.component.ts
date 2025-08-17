@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
@@ -7,7 +8,7 @@ import { LoggerService } from '../../../services/core/logger.service';
 import { StorageService } from '../../../services/core/storage.service';
 import { DoctorService } from '../../../services/doctor/doctor.service';
 import { ChatResponse, MessageResponse, DoctorResponse, WebSocketMessage } from '../../../services/interfaces/chat.interfaces';
-import { DoctorMeResponse } from '../../../services/interfaces/doctor.interfaces';
+import { DoctorMeResponse, Doctor } from '../../../services/interfaces/doctor.interfaces';
 
 @Component({
   selector: 'app-messages',
@@ -21,6 +22,8 @@ export class MessagesComponent implements OnInit, OnDestroy {
   private readonly logger = inject(LoggerService);
   private readonly storageService = inject(StorageService);
   private readonly doctorService = inject(DoctorService);
+  private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   chats: ChatResponse[] = [];
   filteredChats: ChatResponse[] = [];
@@ -31,131 +34,213 @@ export class MessagesComponent implements OnInit, OnDestroy {
   onlineStatus: { [doctorId: string]: boolean } = {};
   currentDoctorId: string | null = null;
   lastViewed: { [chatId: string]: string } = {};
+  doctors: Doctor[] = [];
+  filteredDoctors: Doctor[] = [];
+  showNewChatModal = false;
+  doctorSearchTerm = '';
+
+  @ViewChild('chatContainer') chatContainer!: ElementRef;
 
   private readonly destroy$ = new Subject<void>();
+  private readonly LAST_VIEWED_KEY = 'last_viewed_chats';
 
   ngOnInit(): void {
     const token = this.storageService.getAccessToken();
     if (!token) {
       this.logger.info('No auth token found, redirecting to /login');
-      window.location.href = '/login';
+      this.router.navigate(['/login']);
       return;
     }
 
-    // Obtener el ID del doctor autenticado
+    const storedLastViewed = this.storageService.getItem(this.LAST_VIEWED_KEY);
+    if (storedLastViewed) {
+      this.lastViewed = JSON.parse(storedLastViewed);
+    }
+
     this.doctorService.getMe().pipe(takeUntil(this.destroy$)).subscribe({
       next: (doctor: DoctorMeResponse) => {
         this.currentDoctorId = doctor.doc.id;
         this.loadChats();
+        this.loadDoctors();
       },
-      error: (err) => {
-        this.logger.error('Failed to fetch authenticated doctor', err);
-        window.location.href = '/login';
+      error: (err: Error) => {
+        this.logger.error('Failed to fetch authenticated doctor', { error: err.message });
+        this.router.navigate(['/login']);
       },
     });
   }
 
-  /**
-   * Carga los chats del médico autenticado.
-   */
   private loadChats(): void {
     this.chatService.getChats().pipe(takeUntil(this.destroy$)).subscribe({
       next: (chats) => {
         this.chats = chats;
         this.filteredChats = [...chats];
         this.logger.info('Chats loaded', { count: chats.length });
+        this.connectWebSockets();
       },
-      error: (err) => {
-        this.logger.error('Failed to load chats', err);
+      error: (err: Error) => {
+        this.logger.error('Failed to load chats', { error: err.message });
       },
     });
   }
 
-  /**
-   * Selecciona un chat y conecta al WebSocket.
-   * @param chat Chat seleccionado.
-   */
+  private loadDoctors(): void {
+    this.doctorService.getDoctors().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (doctors) => {
+        this.doctors = doctors.filter(doc => doc.id !== this.currentDoctorId);
+        this.filteredDoctors = [...this.doctors];
+        this.logger.info('Doctors loaded for new chat', { count: this.doctors.length });
+      },
+      error: (err: Error) => {
+        this.logger.error('Failed to load doctors', { error: err.message });
+      },
+    });
+  }
+
+  private connectWebSockets(): void {
+    this.chats.forEach(chat => {
+      this.chatService.connectToChat(chat.id).then(() => {
+        this.logger.info('Connected to WebSocket for chat', { chatId: chat.id });
+      }).catch(err => {
+        this.logger.error('Failed to connect to WebSocket for chat', { chatId: chat.id, error: err });
+      });
+    });
+
+    this.chatService.onMessage().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (msg: WebSocketMessage) => {
+        if (msg.type === 'message' && msg.message) {
+          this.handleNewMessage(msg.message);
+        } else if (msg.type === 'presence' && msg.user) {
+          this.onlineStatus[msg.user] = msg.status === 'online';
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err: Error) => {
+        this.logger.error('WebSocket message error', { error: err.message });
+      },
+    });
+  }
+
+  private handleNewMessage(message: MessageResponse): void {
+    if (!message.chat?.id) {
+      this.logger.warn('Received message with undefined chat', { message });
+      return;
+    }
+
+    if (message.chat.id === this.selectedChat?.id) {
+      if (!this.messages.find(msg => msg.id === message.id)) {
+        this.messages = [...this.messages, message];
+        this.lastViewed[message.chat.id] = new Date().toISOString();
+        this.storageService.setItem(this.LAST_VIEWED_KEY, JSON.stringify(this.lastViewed));
+        this.cdr.detectChanges();
+        this.scrollToBottom();
+      }
+    }
+
+    this.chats = this.chats.map((chat) => {
+      if (chat.id === message.chat?.id) {
+        if (!chat.messages?.find(msg => msg.id === message.id)) {
+          return {
+            ...chat,
+            messages: [...(chat.messages || []), message],
+          };
+        }
+      }
+      return chat;
+    });
+    this.filteredChats = [...this.chats];
+    this.cdr.detectChanges();
+  }
+
   selectChat(chat: ChatResponse): void {
     if (this.selectedChat?.id !== chat.id) {
-      this.chatService.disconnect(); // Desconectar WebSocket anterior
+      this.chatService.disconnect();
+      this.chatService.connectToChat(chat.id).then(() => {
+        this.logger.info('Reconnected WebSocket for selected chat', { chatId: chat.id });
+      }).catch(err => {
+        this.logger.error('Failed to reconnect WebSocket', { error: err });
+      });
     }
 
     this.selectedChat = chat;
     this.messages = chat.messages || [];
     this.newMessage = '';
-    this.lastViewed[chat.id] = new Date().toISOString(); // Marcar como visto
-
-    // Conectar al WebSocket
-    this.chatService.connectToChat(chat.id).then(() => {
-      this.chatService.onMessage().pipe(takeUntil(this.destroy$)).subscribe({
-        next: (msg: WebSocketMessage) => {
-          if (msg.type === 'message' && msg.message) {
-            if (msg.message.chat?.id === this.selectedChat?.id) {
-              this.messages = [...this.messages, msg.message];
-              this.lastViewed[chat.id] = new Date().toISOString(); // Actualizar última visualización
-            }
-            this.updateChatMessages(msg.message);
-          } else if (msg.type === 'presence' && msg.user) {
-            this.onlineStatus[msg.user] = msg.status === 'online';
-          }
-        },
-        error: (err) => {
-          this.logger.error('WebSocket message error', err);
-        },
-      });
-    }).catch((err) => {
-      this.logger.error('Failed to connect to WebSocket', err);
-    });
+    this.lastViewed[chat.id] = new Date().toISOString();
+    this.storageService.setItem(this.LAST_VIEWED_KEY, JSON.stringify(this.lastViewed));
+    this.cdr.detectChanges();
+    this.scrollToBottom();
   }
 
-  /**
-   * Actualiza los mensajes en la lista de chats.
-   * @param message Nuevo mensaje recibido.
-   */
-  private updateChatMessages(message: MessageResponse): void {
-    this.chats = this.chats.map((chat) => {
-      if (chat.id === message.chat?.id) {
-        return {
-          ...chat,
-          messages: [...(chat.messages || []), message],
-        };
-      }
-      return chat;
-    });
-    this.filteredChats = [...this.chats];
-  }
-
-  /**
-   * Envía un nuevo mensaje a través del WebSocket.
-   */
   sendMessage(): void {
     if (!this.newMessage.trim() || !this.selectedChat) return;
+
+    const tempMessage: MessageResponse = {
+      id: 'temp-' + Date.now(),
+      content: this.newMessage,
+      created_at: new Date().toISOString(),
+      sender: { id: this.currentDoctorId || '' } as DoctorResponse,
+      chat: this.selectedChat,
+    };
+    this.messages = [...this.messages, tempMessage];
+    this.updateChatMessages(tempMessage);
+    this.cdr.detectChanges();
+    this.scrollToBottom();
 
     this.chatService.sendMessage(this.selectedChat.id, this.newMessage);
     this.newMessage = '';
   }
 
-  /**
-   * Filtra los chats según el término de búsqueda.
-   * @param event Evento del input de búsqueda.
-   */
-  searchChats(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.searchTerm = target.value.toLowerCase();
+  private updateChatMessages(message: MessageResponse): void {
+    if (!message.chat?.id) {
+      this.logger.warn('Attempted to update chat with undefined chat', { message });
+      return;
+    }
 
-    this.filteredChats = this.chats.filter((chat) => {
-      const doc = chat.doc_1?.id === this.currentDoctorId ? chat.doc_2 : chat.doc_1;
-      const name = `${doc?.first_name || ''} ${doc?.last_name || ''}`.toLowerCase();
-      const lastMessage = chat.messages?.[chat.messages.length - 1]?.content.toLowerCase() || '';
-      return name.includes(this.searchTerm) || lastMessage.includes(this.searchTerm);
+    this.chats = this.chats.map((chat) => {
+      if (chat.id === message.chat?.id) {
+        if (!chat.messages?.find(msg => msg.id === message.id)) {
+          return {
+            ...chat,
+            messages: [...(chat.messages || []), message],
+          };
+        }
+      }
+      return chat;
     });
+    this.filteredChats = [...this.chats];
+    this.cdr.detectChanges();
   }
 
-  /**
-   * Formatea la fecha para mostrar en la UI.
-   * @param date Fecha en formato ISO.
-   * @returns String con el formato de fecha.
-   */
+  private matchesSearch(term: string, name: string, extra?: string): boolean {
+    return name.toLowerCase().includes(term) || (extra?.toLowerCase().includes(term) ?? false);
+  }
+
+  searchChats(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    if (!target) return;
+
+    this.searchTerm = target.value.toLowerCase();
+    this.filteredChats = this.chats.filter((chat) => {
+      const doc = this.getParticipant(chat);
+      const name = `${doc?.first_name || ''} ${doc?.last_name || ''}`;
+      const lastMessage = chat.messages?.[chat.messages.length - 1]?.content || '';
+      return this.matchesSearch(this.searchTerm, name, lastMessage);
+    });
+    this.cdr.detectChanges();
+  }
+
+  searchDoctors(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    if (!target) return;
+
+    this.doctorSearchTerm = target.value.toLowerCase();
+    this.filteredDoctors = this.doctors.filter(doc => {
+      const name = `${doc.first_name || ''} ${doc.last_name || ''}`;
+      return this.matchesSearch(this.doctorSearchTerm, name, doc.username);
+    });
+    this.cdr.detectChanges();
+  }
+
   getTimeString(date: string): string {
     const messageDate = new Date(date);
     const today = new Date();
@@ -171,50 +256,67 @@ export class MessagesComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Obtiene el participante del chat (el otro médico).
-   * @param chat Chat actual.
-   * @returns DoctorResponse del participante.
-   */
   getParticipant(chat: ChatResponse): DoctorResponse | undefined {
     return chat.doc_1?.id === this.currentDoctorId ? chat.doc_2 : chat.doc_1;
   }
 
-  /**
-   * Genera las iniciales del nombre y apellido del médico.
-   * @param firstName Nombre del médico.
-   * @param lastName Apellido del médico.
-   * @returns Iniciales en formato string.
-   */
   getInitials(firstName: string | undefined, lastName: string | undefined): string {
     const first = firstName?.charAt(0) || '';
     const last = lastName?.charAt(0) || '';
     return `${first}${last}`.toUpperCase();
   }
 
-  /**
-   * Cuenta los mensajes no leídos en un chat.
-   * @param chat Chat actual.
-   * @returns Número de mensajes no leídos.
-   */
   unreadCount(chat: ChatResponse): number {
     const lastViewedTime = this.lastViewed[chat.id] || '1970-01-01T00:00:00Z';
-    return chat.messages?.filter(msg => new Date(msg.created_at) > new Date(lastViewedTime)).length || 0;
+    return chat.messages?.filter(msg => new Date(msg.created_at) > new Date(lastViewedTime) && msg.sender?.id !== this.currentDoctorId).length || 0;
   }
 
-  /**
-   * Crea un nuevo chat con otro médico.
-   */
-  createNewChat(): void {
-    const doc2Id = prompt('Introduce el ID del médico (UUID):');
-    if (doc2Id) {
-      this.chatService.createChat(doc2Id).pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => {
-          this.loadChats();
-          this.logger.info('New chat created', { doc2Id });
-        },
-        error: (err) => this.logger.error('Failed to create chat', err),
-      });
+  shouldShowDateSeparator(index: number): boolean {
+    if (index === 0) return true;
+    const prevDate = new Date(this.messages[index - 1].created_at).toDateString();
+    const currDate = new Date(this.messages[index].created_at).toDateString();
+    return prevDate !== currDate;
+  }
+
+  getAvatarBackground(doctorId: string | undefined): string {
+    if (!doctorId) return 'linear-gradient(135deg, #FF6B6B, #FF8E8E)';
+    const colors = [
+      'linear-gradient(135deg, #FF6B6B, #FF8E8E)',
+      'linear-gradient(135deg, #4ECDC4, #6EDDD6)',
+      'linear-gradient(135deg, #45B7D1, #67C3DB)',
+      'linear-gradient(135deg, #96CEB4, #A8D5C4)',
+      'linear-gradient(135deg, #FFEEAD, #FFF2C7)',
+    ];
+    const hash = doctorId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[hash % colors.length];
+  }
+
+  openNewChatModal(): void {
+    this.showNewChatModal = true;
+    this.filteredDoctors = [...this.doctors];
+    this.cdr.detectChanges();
+  }
+
+  closeNewChatModal(): void {
+    this.showNewChatModal = false;
+    this.doctorSearchTerm = '';
+    this.cdr.detectChanges();
+  }
+
+  createChatWithDoctor(doctorId: string): void {
+    this.chatService.createChat(doctorId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.loadChats();
+        this.closeNewChatModal();
+        this.logger.info('New chat created', { doctorId });
+      },
+      error: (err: Error) => this.logger.error('Failed to create chat', { error: err.message }),
+    });
+  }
+
+  private scrollToBottom(): void {
+    if (this.chatContainer) {
+      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
     }
   }
 
