@@ -152,14 +152,17 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  selectChat(chat: ChatResponse): void {
+  async selectChat(chat: ChatResponse): Promise<void> {
     if (this.selectedChat?.id !== chat.id) {
       this.chatService.disconnect();
-      this.chatService.connectToChat(chat.id).then(() => {
-        this.logger.info('Reconnected WebSocket for selected chat', { chatId: chat.id });
-      }).catch(err => {
-        this.logger.error('Failed to reconnect WebSocket', { error: err });
-      });
+
+      try{
+        await this.chatService.connectToChat(chat.id)
+        this.logger.info('Reconectando para el chat seleccionado: ', { chatId: chat.id });
+      } catch (err) {
+        this.logger.error('Fallo al conectar con el websocket', { error: err });
+        return;
+      }
     }
 
     this.selectedChat = chat;
@@ -171,7 +174,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.scrollToBottom();
   }
 
-  sendMessage(): void {
+  async sendMessage(): Promise<void> {
     if (!this.newMessage.trim() || !this.selectedChat) return;
 
     const tempMessage: MessageResponse = {
@@ -186,7 +189,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
     this.scrollToBottom();
 
-    this.chatService.sendMessage(this.selectedChat.id, this.newMessage);
+    await this.chatService.sendMessage(this.selectedChat.id, this.newMessage);
     this.newMessage = '';
   }
 

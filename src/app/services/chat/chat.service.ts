@@ -93,7 +93,8 @@ export class ChatService {
     });
   }
 
-  sendMessage(chatId: string, content: string): void {
+  async sendMessage(chatId: string, content: string): Promise<void> {
+    await this.connectToChat(chatId)
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
       this.logger.error('WebSocket not connected');
       throw new Error('WebSocket is not connected');

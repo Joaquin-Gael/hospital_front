@@ -28,7 +28,7 @@ export class AdminPanelComponent implements OnInit {
   private readonly destroy$ = new Subject<void>();
   private subscriptions: Subscription = new Subscription();
 
-  activeSection: string = 'departments';
+  activeSection: string = 'departments';            
   isUserMenuOpen: boolean = false;
   isLoggedIn: boolean = false;
   scopes: string[] = []

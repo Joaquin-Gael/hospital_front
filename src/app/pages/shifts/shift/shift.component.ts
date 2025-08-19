@@ -519,7 +519,7 @@ export class ShiftsComponent implements OnInit {
         this.logger.debug('Turno creado:', response);
         if (response.payment_url) {
           this.snackBar.open('Turno creado con éxito. Redirigiendo al pago...', 'Cerrar', { duration: 5000 });
-          window.location.href = response.payment_url; // Redirigir a Stripe
+          window.location.href = response.payment_url; // Redirigir a Striper
         } else {
           this.snackBar.open('Turno creado con éxito', 'Cerrar', { duration: 5000 });
           this.router.navigate(['/user-panel']);
