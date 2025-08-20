@@ -106,6 +106,5 @@ export interface AppointmentViewModel {
   time: string;
   specialty: string;
   doctorName: string;
-  location: string;
   state: TurnState;
 }
