@@ -26,12 +26,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    if (this.user?.id) {
-      this.loadAppointments(this.user.id);
-    } else {
-      this.logger.error('No user ID provided for fetching appointments');
-      this.appointments = [];
-    }
   }
 
   ngOnDestroy(): void {
@@ -39,32 +33,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadAppointments(userId: string): void {
-    this.appointmentService.getTurnsByUserId(userId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (turns: Turn[]) => {
-          this.appointments = this.mapTurnsToAppointments(turns);
-          this.logger.debug('Appointments loaded successfully', this.appointments);
-        },
-        error: (error) => {
-          this.logger.error('Failed to load appointments', error);
-          this.appointments = [];
-        },
-      });
-  }
-
-  private mapTurnsToAppointments(turns: Turn[]): AppointmentViewModel[] {
-    return turns.map(turn => ({
-      id: turn.appointment_id ?? turn.id, // Usamos appointment_id si existe, sino el id del turno
-      turnId: turn.id,
-      date: turn.date,
-      time: turn.time,
-      specialty: turn.service?.[0]?.name ?? 'Sin especialidad', // Asumimos el primer servicio como especialidad
-      doctorName: turn.doctor?.first_name ?? 'Sin médico asignado',
-      state: turn.state,
-    }));
-  }
 
   getDayName(dateStr: string): string {
     const date = new Date(dateStr);

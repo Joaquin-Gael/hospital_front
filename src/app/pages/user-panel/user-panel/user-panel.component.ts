@@ -76,17 +76,17 @@ export class UserPanelComponent implements OnInit, OnDestroy {
   private loadAppointments(userId: string): void {
     this.appointmentService.getTurnsByUserId(userId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (turns: Turn[]) => {
+      .subscribe(
+        (turns: Turn[]) => {
           this.appointments = this.mapTurnsToAppointments(turns);
           this.logger.debug('Appointments loaded successfully', this.appointments);
         },
-        error: (error) => {
+        (error: any) => {
           this.logger.error('Failed to load appointments', error);
           this.notificationService.error('No se pudieron cargar los turnos');
           this.appointments = [];
-        },
-      });
+        }
+      );
   }
 
   private mapTurnsToAppointments(turns: Turn[]): AppointmentViewModel[] {
