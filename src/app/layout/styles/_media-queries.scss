@@ -117,10 +117,12 @@ $ultra-wide: 1920px;
 
 // Container responsive mejorado
 @mixin container-responsive {
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 1rem;
-  
+  &{
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
   @include tablet-up {
     padding: 0 1.5rem;
   }
@@ -188,8 +190,10 @@ $ultra-wide: 1920px;
 
 // Sidebar responsive
 @mixin sidebar-responsive($width: 280px, $collapsed-width: 80px) {
-  width: $width;
-  transition: width 0.3s ease, transform 0.3s ease;
+  &{
+    width: $width;
+    transition: width 0.3s ease, transform 0.3s ease;
+  }
   
   @include nav-mobile {
     position: fixed;

@@ -1,35 +1,51 @@
+@use '../../../layout/styles/_media-queries.scss' as *;
+@use '../../../layout/styles/_mixins.scss' as *;
 @use '../shared.scss' as *;
 
 .appointments {
   padding: 20px;
 
+  @include mobile-only {
+    padding: 16px;
+  }
+
   &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
+    @include responsive-grid(320px, 24px);
+
+    @include mobile-only {
+      gap: 16px;
+    }
   }
 }
 
 .appointment-card {
-  @include card;
   overflow: hidden;
+  transition: $transition;
+  @include card;
 
   &:hover {
     transform: translateY(-4px);
     box-shadow: $box-shadow-lg;
+
+    @include reduce-motion {
+      transform: none;
+    }
   }
 
   &__header {
-    @include flex-between;
     padding: 16px;
     background-color: $primary-bg;
     border-bottom: 1px solid $border-color;
+    @include flex-between;
+
+    @include mobile-only {
+      padding: 12px;
+    }
   }
 
   &__date {
-    display: flex;
-    flex-direction: column;
     align-items: center;
+    @include flex-column;
   }
 
   &__day-name {
@@ -37,6 +53,10 @@
     font-weight: 500;
     color: $primary-color;
     text-transform: uppercase;
+
+    @include mobile-only {
+      font-size: 11px;
+    }
   }
 
   &__day {
@@ -44,6 +64,10 @@
     font-weight: 700;
     color: $primary-color;
     line-height: 1;
+
+    @include mobile-only {
+      font-size: 20px;
+    }
   }
 
   &__month {
@@ -51,24 +75,39 @@
     font-weight: 500;
     color: $primary-color;
     text-transform: capitalize;
+
+    @include mobile-only {
+      font-size: 12px;
+    }
   }
 
   &__time {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     color: $primary-color;
     font-weight: 500;
+    @include flex-inline(8px);
 
     .icon {
       color: $primary-color;
       width: 20px;
       height: 20px;
+
+      @include mobile-only {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    @include mobile-only {
+      font-size: 14px;
     }
   }
 
   &__body {
     padding: 16px;
+
+    @include mobile-only {
+      padding: 12px;
+    }
   }
 
   &__specialty {
@@ -76,34 +115,56 @@
     font-weight: 600;
     margin: 0 0 16px;
     color: $text-color;
+
+    @include mobile-only {
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
   }
 
   &__doctor,
   &__location {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     margin-bottom: 12px;
     color: $text-light;
     font-size: 14px;
+    @include flex-inline(8px);
 
     .icon {
       color: $text-lighter;
       width: 18px;
       height: 18px;
+
+      @include mobile-only {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    @include mobile-only {
+      font-size: 13px;
+      margin-bottom: 8px;
     }
   }
 
   &__status {
     margin-top: 12px;
+
+    @include mobile-only {
+      margin-top: 8px;
+    }
   }
 
   &__footer {
     padding: 16px;
     border-top: 1px solid $border-color;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
+    @include flex-inline(12px, center, flex-end);
+
+    @include mobile-only {
+      padding: 12px;
+      gap: 8px;
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 
   .status-badge {
@@ -133,16 +194,23 @@
       background-color: rgba($danger-color, 0.1);
       color: $danger-color;
     }
+
+    @include mobile-only {
+      font-size: 11px;
+      padding: 4px 8px;
+    }
   }
 
   .btn {
+    @include mobile-only {
+      width: 100%;
+      justify-content: center;
+    }
+
     &--outline {
       color: $primary-color;
       border-color: $primary-color;
-
-      &:hover {
-        background-color: $primary-bg;
-      }
+      @include hover-effect($primary-bg);
 
       &[disabled] {
         color: $text-lighter;
@@ -153,10 +221,7 @@
 
     &--danger {
       border-color: $danger-color;
-
-      &:hover {
-        background-color: rgba($danger-color, 0.1);
-      }
+      @include hover-effect(rgba($danger-color, 0.1));
 
       &[disabled] {
         color: $text-lighter;
@@ -168,26 +233,41 @@
 }
 
 .empty-state {
-  @include flex-center;
-  flex-direction: column;
   padding: 60px 20px;
   text-align: center;
   background-color: $background-color;
   border-radius: $border-radius;
   box-shadow: $box-shadow;
+  @include flex-center;
+  @include flex-column;
+
+  @include mobile-only {
+    padding: 40px 16px;
+  }
 
   &__icon {
-    @include flex-center;
     width: 80px;
     height: 80px;
     border-radius: 50%;
     background-color: $primary-bg;
     color: $primary-color;
     margin-bottom: 24px;
-
+    @include flex-center;
+    
     .icon {
       width: 40px;
       height: 40px;
+
+      @include mobile-only {
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    @include mobile-only {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
     }
   }
 
@@ -196,17 +276,28 @@
     font-weight: 600;
     margin: 0 0 8px;
     color: $text-color;
+
+    @include mobile-only {
+      font-size: 18px;
+    }
   }
 
   p {
     font-size: 14px;
     color: $text-light;
     margin: 0 0 24px;
+
+    @include mobile-only {
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
   }
 
   .btn--primary {
-    &:hover {
-      background-color: $primary-dark;
+    @include hover-effect($primary-dark);
+
+    @include mobile-only {
+      width: 100%;
     }
   }
 }

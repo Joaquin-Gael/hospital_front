@@ -1,42 +1,60 @@
-@use '../_shared.scss' as *;
+@use '../../../layout/styles/_media-queries.scss' as *;
+@use '../../../layout/styles/_mixins.scss' as *;
+@use '../shared.scss' as *;
 
 .notifications {
   &__list {
-    display: flex;
-    flex-direction: column;
     gap: 16px;
+    @include flex-column;
+
+    @include mobile-only {
+      gap: 12px;
+    }
   }
 }
 
 .notification-card {
-  @include card;
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
   padding: 16px;
   cursor: pointer;
   transition: $transition;
   position: relative;
-  
+  @include card;
+  @include flex-inline(16px, flex-start);
+
   &:hover {
     background-color: $background-color;
+
+    @include touch-device {
+      background-color: white;
+    }
   }
   
   &--unread {
     border-left: 3px solid $primary-color;
+  }
+
+  @include mobile-only {
+    padding: 12px;
+    gap: 12px;
   }
   
   &__icon {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    @include flex-center;
     background-color: rgba($primary-color, 0.1);
     color: $primary-color;
-    
+    flex-shrink: 0;
+    @include flex-center;
+
     .icon {
       width: 20px;
       height: 20px;
+
+      @include mobile-only {
+        width: 18px;
+        height: 18px;
+      }
     }
     
     &--reminder {
@@ -53,21 +71,37 @@
       background-color: rgba($primary-color, 0.1);
       color: $primary-color;
     }
+
+    @include mobile-only {
+      width: 32px;
+      height: 32px;
+    }
   }
   
   &__content {
     flex: 1;
+    min-width: 0;
   }
   
   &__message {
     margin: 0 0 8px;
     font-size: 14px;
     color: $text-color;
+    line-height: 1.4;
+
+    @include mobile-only {
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
   }
   
   &__date {
     font-size: 12px;
     color: $text-light;
+
+    @include mobile-only {
+      font-size: 11px;
+    }
   }
   
   &__badge {
@@ -75,5 +109,104 @@
     height: 10px;
     border-radius: 50%;
     background-color: $primary-color;
+    flex-shrink: 0;
+    margin-top: 4px;
+
+    @include mobile-only {
+      width: 8px;
+      height: 8px;
+    }
+  }
+
+  // Acciones de notificación
+  &__actions {
+    margin-top: 12px;
+    @include flex-inline(8px);
+
+    @include mobile-only {
+      flex-direction: column;
+      gap: 6px;
+    }
+  }
+
+  &__action-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    @include button-base;
+    @include hover-effect($primary-bg, $primary-color);
+
+    &--primary {
+      background-color: $primary-color;
+      color: white;
+      border-color: $primary-color;
+      @include hover-effect($primary-dark);
+    }
+
+    @include mobile-only {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+// Lista vacía de notificaciones
+.notifications-empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: $text-light;
+  @include flex-center;
+  @include flex-column;
+
+  @include mobile-only {
+    padding: 40px 16px;
+  }
+
+  &__icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: $background-color;
+    margin-bottom: 16px;
+    color: $text-lighter;
+    @include flex-center;
+    
+    .icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    @include mobile-only {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+
+      .icon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: $text-color;
+
+    @include mobile-only {
+      font-size: 16px;
+    }
+  }
+
+  &__message {
+    font-size: 14px;
+    margin: 0;
+    max-width: 300px;
+
+    @include mobile-only {
+      font-size: 13px;
+    }
   }
 }

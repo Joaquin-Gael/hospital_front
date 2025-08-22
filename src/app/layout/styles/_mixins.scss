@@ -79,7 +79,9 @@
 
 // Mixin para hover effects
 @mixin hover-effect($bg-color: var.$navbar-hover-bg, $text-color: null) {
-  transition: var.$navbar-transition;
+  &{
+    transition: var.$navbar-transition; 
+  }
   
   &:hover {
     background-color: $bg-color;

@@ -55,7 +55,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         this.loadAppointments(this.user.id);
       },
       error: (err) => {
-        console.log('Error loading user:', err);  // Depura
+        console.log('Error loading user:', err);
         this.error = 'Error al cargar los datos del usuario';
         this.loading = false;
         this.logger.error('Failed to load user', err);
@@ -65,18 +65,18 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   private loadAppointments(userId: string): void {
-    console.log('loadAppointments called with ID:', userId);  // Depura
+    console.log('loadAppointments called with ID:', userId); 
     this.appointmentService.getTurnsByUserId(userId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (turns: Turn[]) => {
-          console.log('Turns received:', turns);  // Depura
+          console.log('Turns received:', turns); 
           this.appointments = this.mapTurnsToAppointments(turns);
           this.logger.debug('Appointments loaded successfully', this.appointments);
         },  
         error: (err) => {
-          console.log('Error in loadAppointments:', err);  // Depura
-          this.logger.error('Error al mostrar los turnos: ', err);  // Cambia a error para que aparezca
+          console.log('Error in loadAppointments:', err); 
+          this.logger.error('Error al mostrar los turnos: ', err);  
         }
       });
   }
@@ -128,7 +128,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   onNewAppointment(): void {
-    console.log('New appointment requested');  // Depura
+    console.log('New appointment requested');  
     this.router.navigate(['/shifts']);
   }
 

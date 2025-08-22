@@ -1,14 +1,25 @@
+@use '../../../layout/styles/_media-queries.scss' as *;
+@use '../../../layout/styles/_mixins.scss' as *;
 @use '../shared.scss' as *;
 
 .header {
   height: $header-height;
   padding: 0 32px;
-  @include flex-between;
   background-color: white;
   border-bottom: 1px solid $border-color;
   position: sticky;
   top: 0;
   z-index: 5;
+  @include flex-between;
+
+  @include mobile-only {
+    height: $navbar-mobile-height;
+    padding: 0 16px;
+  }
+
+  @include tablet-only {
+    padding: 0 24px;
+  }
   
   &__title {
     h1 {
@@ -16,11 +27,66 @@
       font-weight: 600;
       margin: 0;
       color: $text-color;
+
+      @include mobile-only {
+        font-size: 20px;
+      }
+
+      @include tablet-only {
+        font-size: 22px;
+      }
     }
   }
   
   &__actions {
-    display: flex;
-    gap: 12px;
+    @include flex-inline(12px);
+
+    @include mobile-only {
+      gap: 8px;
+    }
+  }
+
+  // Botón de menú móvil
+  &__menu-btn {
+
+    width: 40px;
+    height: 40px;
+    border-radius: $border-radius-sm;
+    color: $text-color;
+    transition: $transition;
+    @include button-reset;
+    @include flex-center;
+    @include show-on-mobile-only;
+    @include hover-effect($background-color);
+
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  // Breadcrumbs responsive
+  &__breadcrumbs {
+    color: $text-light;
+    font-size: 14px;
+    @include flex-inline(8px);
+    
+    @include mobile-only {
+      display: none;
+    }
+
+    a {
+      color: $text-light;
+      text-decoration: none;
+      transition: $transition;
+
+      &:hover {
+        color: $primary-color;
+      }
+    }
+
+    .separator {
+      color: $text-lighter;
+    }
   }
 }

@@ -1,76 +1,150 @@
+@use '../../../layout/styles/_media-queries.scss' as *;
+@use '../../../layout/styles/_mixins.scss' as *;
 @use '../shared.scss' as *;
 
 .sidebar {
   width: $sidebar-width;
   background-color: white;
   border-right: 1px solid $border-color;
-  display: flex;
-  flex-direction: column;
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
   z-index: 10;
+  @include flex-column;
+  @include sidebar-responsive($sidebar-width, $sidebar-collapsed-width);
+  
+  @include mobile-only {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    
+    &.open {
+      transform: translateX(0);
+    }
+  }
+
+  @include tablet-only {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    
+    &.open {
+      transform: translateX(0);
+    }
+  }
   
   &__header {
     height: $header-height;
     padding: 0 24px;
-    @include flex-between;
     border-bottom: 1px solid $border-color;
+    @include flex-between;
+
+    @include mobile-only {
+      padding: 0 16px;
+      height: $navbar-mobile-height;
+    }
+  }
+
+  &__close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: $border-radius-sm;
+    color: $text-light;
+    transition: $transition;
+    cursor: pointer;
+    display: none;
+    @include button-reset;
+    @include flex-center;
+    @include hover-effect($background-color);  
+      
+    @include mobile-only {
+      display: flex;
+    }
+
+    @include tablet-only {
+      display: flex;
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+    }
   }
   
   &__logo {
-    display: flex;
-    align-items: center;
-    gap: 20px;
     font-size: 20px;
     font-weight: 700;
-    color: $text-color;
-    
+    @include flex-center;
+
     img {
-      width: 32px;
-      height: 32px;
+      height: 60px;
+      width: 60px;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    @include mobile-only {
+      font-size: 18px;
+      gap: 16px;
     }
   }
   
   &__user {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     padding: 24px;
     border-bottom: 1px solid $border-color;
+
+    @include mobile-only {
+      padding: 16px;
+    }
+  }
+
+  &__user-content {
+    @include flex-inline(12px);
   }
   
   &__avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: $primary-color;
-    @include flex-center;
+    @include avatar(48px);
     
+    &-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    &-placeholder {
+      width: 100%;
+      height: 100%;
+      background: $primary-color;
+      border-radius: 50%;
+      @include flex-center;
+    }
+
     &-initials {
       color: white;
       font-size: 18px;
       font-weight: 600;
     }
-  }
 
-    &__avatar-img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: $primary-color;
-    @include flex-center;
-    
-    &-initials {
-      color: white;
-      font-size: 18px;
-      font-weight: 600;
+    @include mobile-only {
+      @include avatar(40px);
+      
+      &-initials {
+        font-size: 16px;
+      }
     }
   }
   
   &__user-info {
     overflow: hidden;
+    flex: 1;
   }
   
   &__user-name {
@@ -78,24 +152,43 @@
     font-weight: 600;
     margin: 0;
     color: $text-color;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    @include text-truncate;
+
+    @include mobile-only {
+      font-size: 14px;
+    }
   }
   
   &__user-id {
     font-size: 12px;
     color: $text-light;
     margin: 4px 0 0;
+
+    @include mobile-only {
+      font-size: 11px;
+    }
   }
   
   &__nav {
     flex: 1;
     padding: 24px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
     overflow-y: auto;
+
+    @include mobile-only {
+      padding: 16px 12px;
+    }
+  }
+
+  &__menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 8px;
+    @include flex-column;  
+  }
+
+  &__item {
+    margin: 0;
   }
   
   &__nav-item {
@@ -109,22 +202,25 @@
     font-weight: 500;
     cursor: pointer;
     transition: $transition;
-    border: none;
-    background-color: transparent;
-    text-align: left;
-    
-    &:hover {
-      background-color: $background-color;
-      color: $text-color;
-    }
+    text-decoration: none;
+    width: 100%;
+    @include hover-effect($background-color, $text-color);
     
     &--active {
-      background-color: $primary-bg;
-      color: $primary-color;
+      @include active-state($primary-bg, $primary-color);
       
       .sidebar__nav-icon {
         color: $primary-color;
       }
+    }
+
+    @include mobile-only {
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    @include touch-device {
+      padding: 14px 16px;
     }
   }
   
@@ -132,31 +228,33 @@
     position: relative;
     color: $text-light;
     transition: $transition;
+    flex-shrink: 0;
+    @include flex-center;
+
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
   }
   
   &__nav-badge {
     position: absolute;
     top: -6px;
     right: -6px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: $danger-color;
-    color: white;
     font-size: 10px;
-    font-weight: 600;
-    @include flex-center;
+    @include badge($danger-color, white, 16px);
   }
   
   &__footer {
     padding: 16px;
     border-top: 1px solid $border-color;
+
+    @include mobile-only {
+      padding: 12px;
+    }
   }
   
   &__footer-btn {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     width: 100%;
     padding: 12px 16px;
     border-radius: $border-radius-sm;
@@ -168,13 +266,84 @@
     border: none;
     background-color: transparent;
     text-align: left;
-    
-    &:hover {
-      background-color: rgba($danger-color, 0.05);
-    }
+    @include flex-inline(12px);
+    @include hover-effect(rgba($danger-color, 0.05));
     
     .icon {
       color: $danger-color;
     }
+
+    @include mobile-only {
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+  }
+
+  // Estados colapsado
+  &.collapsed {
+    .sidebar__logo a,
+    .sidebar__user-info,
+    .sidebar__nav-item span:not(.sidebar__nav-badge),
+    .sidebar__footer-btn span {
+      @include desktop-up {
+        display: none;
+      }
+    }
+
+    .sidebar__user-content {
+      @include desktop-up {
+        justify-content: center;
+      }
+    }
+
+    .sidebar__nav-item {
+      @include desktop-up {
+        justify-content: center;
+        padding: 12px;
+      }
+    }
+  }
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease-in-out;
+  
+  display: none;
+  
+  @include mobile-only {
+    display: block;
+    
+    &.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  @include tablet-only {
+    display: block;
+    
+    &.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}
+
+body.sidebar-open {
+  @include mobile-only {
+    overflow: hidden;
+  }
+
+  @include tablet-only {
+    overflow: hidden;
   }
 }

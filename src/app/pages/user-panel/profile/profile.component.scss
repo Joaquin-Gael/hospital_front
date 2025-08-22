@@ -1,27 +1,37 @@
-@use '../_shared.scss' as *;
+@use '../../../layout/styles/_media-queries.scss' as *;
+@use '../../../layout/styles/_mixins.scss' as *;
+@use '../shared.scss' as *;
 
 .profile {
+  margin-top: 32px;
   &__card {
-    @include card;
     overflow: hidden;
+    @include card;
   }
   
   &__header {
-    display: flex;
-    align-items: center;
-    gap: 24px;
     padding: 24px;
     background-color: $primary-bg;
     border-bottom: 1px solid $border-color;
+    @include flex-inline(24px);
+
+    @include mobile-only {
+      flex-direction: column;
+      text-align: center;
+      gap: 16px;
+      padding: 20px 16px;
+    }
+
+    @include tablet-only {
+      gap: 20px;
+      padding: 20px;
+    }
   }
   
   &__avatar{
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background-color: $primary-color;
-    @include flex-center;
-    
+    flex-shrink: 0;
+    @include avatar(80px);
+        
     &-img {
       width: 100%;
       height: 100%;
@@ -33,6 +43,23 @@
       color: white;
       font-size: 32px;
       font-weight: 600;
+
+      @include mobile-only {
+        font-size: 28px;
+      }
+    }
+
+    @include mobile-only {
+      @include avatar(64px);
+    }
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+
+    @include mobile-only {
+      text-align: center;
     }
   }
   
@@ -41,16 +68,36 @@
     font-weight: 600;
     margin: 0 0 4px;
     color: $text-color;
+
+    @include mobile-only {
+      font-size: 20px;
+    }
+
+    @include tablet-only {
+      font-size: 22px;
+    }
   }
   
   &__id {
     font-size: 14px;
     color: $text-light;
     margin: 0;
+
+    @include mobile-only {
+      font-size: 13px;
+    }
   }
   
   &__body {
     padding: 24px;
+
+    @include mobile-only {
+      padding: 16px;
+    }
+
+    @include tablet-only {
+      padding: 20px;
+    }
   }
   
   &__section {
@@ -58,6 +105,10 @@
     
     &:last-child {
       margin-bottom: 0;
+    }
+
+    @include mobile-only {
+      margin-bottom: 24px;
     }
   }
   
@@ -68,16 +119,27 @@
     color: $text-color;
     padding-bottom: 8px;
     border-bottom: 1px solid $border-color;
+
+    @include mobile-only {
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
   }
   
   &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 24px;
+    @include responsive-grid(250px, 24px);
+
+    @include mobile-only {
+      gap: 16px;
+    }
   }
   
   &__field {
     margin-bottom: 8px;
+
+    @include mobile-only {
+      margin-bottom: 6px;
+    }
   }
   
   &__label {
@@ -86,19 +148,105 @@
     font-weight: 500;
     color: $text-light;
     margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    @include mobile-only {
+      font-size: 11px;
+    }
   }
   
   &__value {
     font-size: 14px;
     color: $text-color;
     margin: 0;
+    word-break: break-word;
+
+    @include mobile-only {
+      font-size: 13px;
+    }
+
+    &--empty {
+      color: $text-lighter;
+      font-style: italic;
+    }
   }
   
   &__footer {
     padding: 16px 24px;
     border-top: 1px solid $border-color;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
+    @include flex-inline(12px, center, flex-end);
+
+    @include mobile-only {
+      padding: 12px 16px;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    @include tablet-only {
+      padding: 14px 20px;
+    }
+  }
+
+  // Información de contacto con iconos
+  &__contact-info {
+    @include flex-inline(8px);
+    
+    .icon {
+      color: $text-lighter;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    @include mobile-only {
+      .icon {
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+
+  // Estados de verificación
+  &__verified {
+    color: $success-color;
+    font-size: 12px;
+    font-weight: 500;
+    @include flex-inline(6px);
+
+    .icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    @include mobile-only {
+      font-size: 11px;
+
+      .icon {
+        width: 12px;
+        height: 12px;
+      }
+    }
+  }
+
+  &__unverified {
+    color: $warning-color;
+    font-size: 12px;
+    font-weight: 500;
+    @include flex-inline(6px);
+    
+    .icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    @include mobile-only {
+      font-size: 11px;
+
+      .icon {
+        width: 12px;
+        height: 12px;
+      }
+    }
   }
 }

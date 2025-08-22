@@ -1,24 +1,35 @@
+@use '../../../layout/styles/_media-queries.scss' as *;
+@use '../../../layout/styles/_mixins.scss' as *;
 @use '../shared.scss' as *;
 
 .documents {
   &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
+    @include responsive-grid(300px, 24px);
+
+    @include mobile-only {
+      gap: 16px;
+    }
   }
 }
 
 .document-card {
-  @include card;
-  display: flex;
-  align-items: center;
-  gap: 16px;
   padding: 16px;
   transition: $transition;
-  
+  @include card;
+  @include flex-inline(16px);
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: $box-shadow-lg;
+
+    @include reduce-motion {
+      transform: none;
+    }
+  }
+
+  @include mobile-only {
+    padding: 12px;
+    gap: 12px;
   }
   
   &__icon {
@@ -27,23 +38,39 @@
     border-radius: $border-radius-sm;
     background-color: rgba($primary-color, 0.1);
     color: $primary-color;
-    @include flex-center;
-    flex-direction: column;
     gap: 4px;
-    
+    flex-shrink: 0;
+    @include flex-center;
+    @include flex-column;
+
     .icon {
       width: 20px;
       height: 20px;
+
+      @include mobile-only {
+        width: 18px;
+        height: 18px;
+      }
     }
     
     span {
       font-size: 10px;
       font-weight: 600;
+
+      @include mobile-only {
+        font-size: 9px;
+      }
+    }
+
+    @include mobile-only {
+      width: 40px;
+      height: 40px;
     }
   }
   
   &__content {
     flex: 1;
+    min-width: 0;
   }
   
   &__title {
@@ -51,25 +78,63 @@
     font-weight: 500;
     margin: 0 0 4px;
     color: $text-color;
+    @include text-truncate;
+
+    @include mobile-only {
+      font-size: 14px;
+    }
   }
   
   &__date {
     font-size: 12px;
     color: $text-light;
     margin: 0;
+
+    @include mobile-only {
+      font-size: 11px;
+    }
   }
   
   &__download {
     color: $text-light;
     transition: $transition;
-    
-    &:hover {
-      color: $primary-color;
-    }
-    
+    padding: 8px;
+    border-radius: $border-radius-sm;
+    @include hover-effect(transparent, $primary-color);
+        
     .icon {
       width: 20px;
       height: 20px;
+
+      @include mobile-only {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    @include mobile-only {
+      padding: 6px;
+    }
+
+    @include touch-device {
+      padding: 12px;
+    }
+  }
+
+  // Versión stack para móvil muy pequeño
+  @include mobile-only {
+    @media (max-width: 360px) {
+      flex-direction: column;
+      text-align: center;
+
+      &__content {
+        order: 2;
+      }
+
+      &__download {
+        order: 3;
+        align-self: center;
+      }
     }
   }
 }

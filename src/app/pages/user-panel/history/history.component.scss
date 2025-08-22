@@ -1,19 +1,35 @@
+@use '../../../layout/styles/_media-queries.scss' as *;
+@use '../../../layout/styles/_mixins.scss' as *;
 @use '../shared.scss' as *;
 
 .table-container {
   overflow-x: auto;
   border-radius: $border-radius;
   box-shadow: $box-shadow;
+  
+  @include mobile-only {
+    margin: 0 -16px;
+    border-radius: 0;
+  }
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   background-color: white;
+  min-width: 600px;
   
   th, td {
     padding: 16px;
     text-align: left;
+
+    @include mobile-only {
+      padding: 12px 8px;
+    }
+
+    @include tablet-only {
+      padding: 14px 12px;
+    }
   }
   
   th {
@@ -22,12 +38,23 @@
     font-weight: 500;
     font-size: 14px;
     border-bottom: 1px solid $border-color;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    @include mobile-only {
+      font-size: 12px;
+    }
   }
   
   td {
     border-bottom: 1px solid $border-color;
     color: $text-color;
     font-size: 14px;
+
+    @include mobile-only {
+      font-size: 13px;
+    }
   }
   
   tr:last-child td {
@@ -36,46 +63,76 @@
   
   tr:hover td {
     background-color: $background-color;
+
+    @include touch-device {
+      background-color: transparent;
+    }
   }
   
   &__date {
-    display: flex;
-    flex-direction: column;
+    @include flex-column;
     
     &-day {
       font-weight: 500;
       color: $text-color;
+
+      @include mobile-only {
+        font-size: 13px;
+      }
     }
     
     &-time {
       font-size: 12px;
       color: $text-light;
       margin-top: 4px;
+
+      @include mobile-only {
+        font-size: 11px;
+      }
     }
   }
   
   &__actions {
-    display: flex;
-    gap: 8px;
+    @include flex-inline(8px);
+
+    @include mobile-only {
+      flex-direction: column;
+      gap: 4px;
+    }
+  }
+
+  // Ocultar columnas menos importantes en móvil
+  &__hide-mobile {
+    @include mobile-only {
+      display: none;
+    }
+  }
+
+  // Columnas compactas en tablet
+  &__compact-tablet {
+    @include tablet-only {
+      max-width: 120px;
+      @include text-truncate;
+    }
   }
 }
 
 .status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   padding: 4px 10px;
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 500;
   background-color: rgba($secondary-color, 0.1);
   color: $secondary-color;
-  
+  white-space: nowrap;
+  @include flex-inline(6px, center, center);
+
   &__dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     background-color: $secondary-color;
+    flex-shrink: 0;
   }
   
   &--completed {
@@ -94,5 +151,70 @@
     .status-badge__dot {
       background-color: $danger-color;
     }
+  }
+
+  @include mobile-only {
+    font-size: 11px;
+    padding: 3px 8px;
+
+    &__dot {
+      width: 6px;
+      height: 6px;
+    }
+  }
+}
+
+// Tabla responsive alternativa para móvil
+.table-mobile {
+  @include mobile-only {
+    display: block;
+  }
+
+  @include tablet-up {
+    display: none;
+  }
+
+  &__item {
+    margin-bottom: 16px;
+    padding: 16px;
+    @include card;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid $border-color;
+    @include flex-between;
+  }
+
+  &__title {
+    font-weight: 600;
+    color: $text-color;
+  }
+
+  &__field {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba($border-color, 0.5);
+    @include flex-between;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__label {
+    font-size: 12px;
+    color: $text-light;
+    font-weight: 500;
+  }
+
+  &__value {
+    font-size: 14px;
+    color: $text-color;
+    text-align: right;
   }
 }
