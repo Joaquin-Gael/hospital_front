@@ -62,7 +62,6 @@ export class UserPanelComponent implements OnInit, OnDestroy {
           this.router.navigate(['/login']);
           return;
         }
-        this.loadAppointments(this.user.id);
       },
       error: (err) => {
         this.error = 'Error al cargar los datos del usuario';
@@ -71,72 +70,6 @@ export class UserPanelComponent implements OnInit, OnDestroy {
         this.router.navigate(['/login']);
       },
     });
-  }
-
-  private loadAppointments(userId: string): void {
-    this.appointmentService.getTurnsByUserId(userId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(
-        (turns: Turn[]) => {
-          this.appointments = this.mapTurnsToAppointments(turns);
-          this.logger.debug('Appointments loaded successfully', this.appointments);
-        },
-        (error: any) => {
-          this.logger.error('Failed to load appointments', error);
-          this.notificationService.error('No se pudieron cargar los turnos');
-          this.appointments = [];
-        }
-      );
-  }
-
-  private mapTurnsToAppointments(turns: Turn[]): AppointmentViewModel[] {
-    return turns.map(turn => ({
-      id: turn.appointment_id ?? turn.id,
-      turnId: turn.id,
-      date: turn.date,
-      time: turn.time.split(':').slice(0, 2).join(':'), // Convertir "23:20:31" a "23:20"
-      specialty: turn.service?.[0]?.name ?? 'Sin especialidad',
-      doctorName: turn.doctor ? `${turn.doctor.first_name} ${turn.doctor.last_name}`.trim() : 'Sin médico asignado',
-      state: turn.state,
-    }));
-  }
-
-  onReschedule(appointmentId: string): void {
-    this.logger.debug(`Rescheduling appointment: ${appointmentId}`);
-    // Implementar lógica para reprogramar (p.ej., redirigir a un formulario)
-    this.router.navigate(['/reschedule-appointment', appointmentId]);
-  }
-
-  onCancel(turnId: string): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: 'Cancelar turno',
-        message: '¿Estás seguro de que deseas cancelar este turno?',
-      },
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.appointmentService.deleteTurn(turnId)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              this.notificationService.success('Turno cancelado correctamente');
-              if (this.user?.id) {
-                this.loadAppointments(this.user.id); // Recargar turnos
-              }
-            },
-            error: (err) => {
-              this.notificationService.error('Error al cancelar el turno');
-              this.logger.error('Failed to cancel turn', err);
-            },
-          });
-      }
-    });
-  }
-
-  onNewAppointment(): void {
-    this.router.navigate(['/new-appointment']);
   }
 
   onLogout(): void {
