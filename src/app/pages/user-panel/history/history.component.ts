@@ -11,8 +11,13 @@ import { AppointmentViewModel } from '../../../services/interfaces/appointment.i
 })
 export class HistoryComponent {
   @Input() appointments: AppointmentViewModel[] = [];
+  @Input() loading: boolean = false;
   @Output() viewDetails = new EventEmitter<AppointmentViewModel>();
   @Output() downloadReceipt = new EventEmitter<AppointmentViewModel>();
+
+  get filteredAppointments(): AppointmentViewModel[] {
+    return this.appointments;
+  }
 
   formatShortDate(dateStr: string): string {
     const date = new Date(dateStr);
@@ -25,5 +30,9 @@ export class HistoryComponent {
 
   onDownloadReceipt(appointment: AppointmentViewModel): void {
     this.downloadReceipt.emit(appointment);
+  }
+
+  trackById(index: number, item: AppointmentViewModel): string {
+    return item.id;
   }
 }

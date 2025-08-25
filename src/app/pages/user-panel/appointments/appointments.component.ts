@@ -1,22 +1,22 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';  // Quita inputs/outputs innecesarios
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';  // Agrega para navigate
+import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';  // Agrega para dialog
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AppointmentViewModel, Turn, TurnState } from '../../../services/interfaces/appointment.interfaces';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
 import { AppointmentService } from '../../../services/appointment/appointments.service';
-import { AuthService } from '../../../services/auth/auth.service';  // Agrega para getUser
+import { AuthService } from '../../../services/auth/auth.service';
 import { LoggerService } from '../../../services/core/logger.service';
-import { NotificationService } from '../../../core/notification';  // Agrega para notifications
-import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';  // Agrega para confirm
+import { NotificationService } from '../../../core/notification';
+import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
 
 @Component({
   selector: 'app-appointments',
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.scss'],
   standalone: true,
-  imports: [CommonModule, MatDialogModule],  // Agrega MatDialogModule si usas dialog
+  imports: [CommonModule, MatDialogModule],
 })
 export class AppointmentsComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
@@ -27,13 +27,13 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
 
   appointments: AppointmentViewModel[] = [];
-  user: UserRead | null = null;  // Lo cargamos internamente
+  user: UserRead | null = null;
   error: string | null = null;
   loading: boolean = true;
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    console.log('Appointments ngOnInit started');  // Depura: Debería aparecer en consola
+    console.log('Appointments ngOnInit started');
 
     if (!this.authService.isLoggedIn()) {
       this.logger.info('Usuario no autenticado, redirigiendo a /login');
@@ -43,15 +43,15 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe({
       next: (userRead) => {
-        console.log('User data received:', userRead);  // Depura
+        console.log('User data received:', userRead);
         if (!userRead) {
           this.error = 'No se encontraron datos del usuario';
           this.logger.error('No user data found');
           this.router.navigate(['/login']);
+          this.loading = false;
           return;
         }
         this.user = userRead;
-        this.loading = false;
         this.loadAppointments(this.user.id);
       },
       error: (err) => {
@@ -65,18 +65,22 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   private loadAppointments(userId: string): void {
-    console.log('loadAppointments called with ID:', userId); 
+    console.log('loadAppointments called with ID:', userId);
+    this.loading = true; // Aseguramos que loading esté activo
     this.appointmentService.getTurnsByUserId(userId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (turns: Turn[]) => {
-          console.log('Turns received:', turns); 
+          console.log('Turns received:', turns);
           this.appointments = this.mapTurnsToAppointments(turns);
+          this.loading = false;
           this.logger.debug('Appointments loaded successfully', this.appointments);
-        },  
+        },
         error: (err) => {
-          console.log('Error in loadAppointments:', err); 
-          this.logger.error('Error al mostrar los turnos: ', err);  
+          console.log('Error in loadAppointments:', err);
+          this.error = 'Error al mostrar los turnos';
+          this.loading = false;
+          this.logger.error('Error al mostrar los turnos: ', err);
         }
       });
   }
@@ -91,15 +95,17 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       doctorName: turn.doctor ? `${turn.doctor.first_name} ${turn.doctor.last_name}`.trim() : 'Sin médico asignado',
       state: turn.state,
     }));
+    // Filtro opcional para historial (solo pasados, descomentar si querés):
+    // .filter(turn => turn.state === 'finished' || turn.state === 'cancelled' || new Date(turn.date) < new Date());
   }
 
   onReschedule(appointmentId: string): void {
-    console.log(`Rescheduling appointment: ${appointmentId}`);  // Depura
+    console.log(`Rescheduling appointment: ${appointmentId}`);
     this.router.navigate(['/reschedule-appointment', appointmentId]);
   }
 
   onCancel(turnId: string): void {
-    console.log(`Canceling turn: ${turnId}`);  // Depura
+    console.log(`Canceling turn: ${turnId}`);
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Cancelar turno',
@@ -115,7 +121,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
             next: () => {
               this.notificationService.success('Turno cancelado correctamente');
               if (this.user?.id) {
-                this.loadAppointments(this.user.id);  // Recarga después de cancelar
+                this.loadAppointments(this.user.id);
               }
             },
             error: (err) => {
@@ -128,11 +134,10 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   onNewAppointment(): void {
-    console.log('New appointment requested');  
+    console.log('New appointment requested');
     this.router.navigate(['/shifts']);
   }
 
-  // Funciones de fecha quedan iguales
   getDayName(dateStr: string): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('es-AR', { weekday: 'long' }).toLowerCase();
@@ -146,6 +151,10 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   getMonthName(dateStr: string): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('es-AR', { month: 'long' }).toLowerCase();
+  }
+
+  trackById(index: number, item: AppointmentViewModel): string {
+    return item.id;
   }
 
   ngOnDestroy(): void {

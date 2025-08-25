@@ -1,98 +1,119 @@
 <section class="profile">
   <div class="profile__card">
-    <!-- Mensaje de error -->
-    <div *ngIf="error && !loading" class="error">
-      <span>{{ error }}</span>
-    </div>
+    <ng-container *ngIf="loading; else content">
+      <div class="loading-spinner">
+        <i class="material-icons loading-icon">hourglass_empty</i>
+        <span>Cargando perfil...</span>
+      </div>
+    </ng-container>
 
-    <!-- Contenido del perfil -->
-    <div *ngIf="user && !loading && !error">
-      <div class="profile__header">
-        <div class="profile__avatar">
-          <img
-            *ngIf="user.img_profile; else avatarPlaceholder"
-            [src]="user.img_profile"
-            alt="Avatar"
-            class="profile__avatar-img"
-          />
-          <ng-template #avatarPlaceholder>
-            <div class="profile__avatar-placeholder">
-              <span class="profile__avatar-initials">{{
-                getInitials()
-              }}</span>
-            </div>
-          </ng-template>
+    <ng-template #content>
+      <ng-container *ngIf="error; else profileContent">
+        <div class="error">
+          <span>{{ error }}</span>
         </div>
-        <div>
-          <h2 class="profile__name">
-            {{ user.first_name || "No disponible" }} {{ user.last_name || "" }}
-          </h2>
-          <p class="profile__id">DNI: {{ user.dni || "No disponible" }}</p>
-        </div>
-      </div>
-      <div class="profile__body">
-        <div class="profile__section">
-          <h3 class="profile__section-title">Información Personal</h3>
-          <div class="profile__grid">
-            <div class="profile__field">
-              <span class="profile__label">Nombre Completo</span>
-              <p class="profile__value">
-                {{ user.first_name || "No disponible" }}
-                {{ user.last_name || "" }}
-              </p>
+      </ng-container>
+
+      <ng-template #profileContent>
+        <ng-container *ngIf="user; else emptyState">
+          <div class="profile__header">
+            <div class="profile__avatar">
+              <img
+                *ngIf="user.img_profile; else avatarPlaceholder"
+                [src]="user.img_profile"
+                alt="Avatar"
+                class="profile__avatar-img"
+              />
+              <ng-template #avatarPlaceholder>
+                <div class="profile__avatar-placeholder">
+                  <span class="profile__avatar-initials">{{ getInitials() }}</span>
+                </div>
+              </ng-template>
             </div>
-            <div class="profile__field">
-              <span class="profile__label">Tipo de Sangre</span>
-              <p class="profile__value">
-                {{ user.blood_type || "No disponible" }}
-              </p>
-            </div>
-            <div class="profile__field">
-              <span class="profile__label">Correo Electrónico</span>
-              <p class="profile__value">{{ user.email || "No disponible" }}</p>
-            </div>
-            <div class="profile__field">
-              <span class="profile__label">Teléfono</span>
-              <p class="profile__value">
-                {{ user.telephone || "No disponible" }}
-              </p>
+            <div>
+              <h2 class="profile__name">
+                {{ user.first_name || "No disponible" }} {{ user.last_name || "" }}
+              </h2>
+              <p class="profile__id">DNI: {{ user.dni || "No disponible" }}</p>
             </div>
           </div>
-        </div>
-        <div class="profile__section">
-          <h3 class="profile__section-title">Información Adicional</h3>
-          <div class="profile__grid">
-            <div class="profile__field">
-              <span class="profile__label">Dirección</span>
-              <p class="profile__value">
-                {{ user.address || "No disponible" }}
-              </p>
+          <div class="profile__body">
+            <div class="profile__section">
+              <h3 class="profile__section-title">Información Personal</h3>
+              <div class="profile__grid">
+                <div class="profile__field">
+                  <span class="profile__label">Nombre Completo</span>
+                  <p class="profile__value">
+                    {{ user.first_name || "No disponible" }}
+                    {{ user.last_name || "" }}
+                  </p>
+                </div>
+                <div class="profile__field">
+                  <span class="profile__label">Tipo de Sangre</span>
+                  <p class="profile__value">
+                    {{ user.blood_type || "No disponible" }}
+                  </p>
+                </div>
+                <div class="profile__field">
+                  <span class="profile__label">Correo Electrónico</span>
+                  <p class="profile__value">{{ user.email || "No disponible" }}</p>
+                </div>
+                <div class="profile__field">
+                  <span class="profile__label">Teléfono</span>
+                  <p class="profile__value">
+                    {{ user.telephone || "No disponible" }}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div class="profile__field">
-              <span class="profile__label">Obra Social</span>
-              <p class="profile__value">{{ healthInsurance }}</p>
-            </div>
-            <div class="profile__field">
-              <span class="profile__label">Última Visita</span>
-              <p class="profile__value">{{ formatDate(lastVisit) }}</p>
+            <div class="profile__section">
+              <h3 class="profile__section-title">Información Adicional</h3>
+              <div class="profile__grid">
+                <div class="profile__field">
+                  <span class="profile__label">Dirección</span>
+                  <p class="profile__value">
+                    {{ user.address || "No disponible" }}
+                  </p>
+                </div>
+                <div class="profile__field">
+                  <span class="profile__label">Obra Social</span>
+                  <p class="profile__value">{{ healthInsurance }}</p>
+                </div>
+                <div class="profile__field">
+                  <span class="profile__label">Última Visita</span>
+                  <p class="profile__value">{{ formatDate(lastVisit) }}</p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="profile__footer">
-        <button
-          class="btn btn--outline"
-          [routerLink]="['/user_panel/change-password']"
-        >
-          Cambiar Contraseña
-        </button>
-        <button
-          class="btn btn--primary"
-          [routerLink]="['/user_panel/edit-profile']"
-        >
-          Editar Perfil
-        </button>
-      </div>
-    </div>
+          <div class="profile__footer">
+            <button
+              class="btn btn--outline"
+              [routerLink]="['/user_panel/change-password']"
+            >
+              Cambiar Contraseña
+            </button>
+            <button
+              class="btn btn--primary"
+              [routerLink]="['/user_panel/edit-profile']"
+            >
+              Editar Perfil
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-template #emptyState>
+          <div class="empty-state">
+            <div class="empty-state__icon">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h2>No hay datos de perfil</h2>
+            <p>No se encontraron datos para mostrar. Por favor, intenta de nuevo.</p>
+          </div>
+        </ng-template>
+      </ng-template>
+    </ng-template>
   </div>
 </section>

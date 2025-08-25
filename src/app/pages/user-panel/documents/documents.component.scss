@@ -31,7 +31,7 @@
     padding: 12px;
     gap: 12px;
   }
-  
+
   &__icon {
     width: 48px;
     height: 48px;
@@ -52,7 +52,7 @@
         height: 18px;
       }
     }
-    
+
     span {
       font-size: 10px;
       font-weight: 600;
@@ -67,12 +67,12 @@
       height: 40px;
     }
   }
-  
+
   &__content {
     flex: 1;
     min-width: 0;
   }
-  
+
   &__title {
     font-size: 16px;
     font-weight: 500;
@@ -84,7 +84,7 @@
       font-size: 14px;
     }
   }
-  
+
   &__date {
     font-size: 12px;
     color: $text-light;
@@ -94,14 +94,14 @@
       font-size: 11px;
     }
   }
-  
+
   &__download {
     color: $text-light;
     transition: $transition;
     padding: 8px;
     border-radius: $border-radius-sm;
     @include hover-effect(transparent, $primary-color);
-        
+
     .icon {
       width: 20px;
       height: 20px;
@@ -121,7 +121,6 @@
     }
   }
 
-  // Versión stack para móvil muy pequeño
   @include mobile-only {
     @media (max-width: 360px) {
       flex-direction: column;
@@ -136,5 +135,27 @@
         align-self: center;
       }
     }
+  }
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  color: $text-color;
+  @include flex-column;
+
+  .loading-icon {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

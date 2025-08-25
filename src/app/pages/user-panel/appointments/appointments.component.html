@@ -1,19 +1,28 @@
 <section class="appointments">
-  @if (appointments.length === 0) {
-    <div class="empty-state">
-      <div class="empty-state__icon">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </div>
-      <h2>No hay turnos agendados</h2>
-      <p>Agenda un nuevo turno para comenzar.</p>
-      <button class="btn btn--primary">Agendar turno</button>
+  <ng-container *ngIf="loading; else content">
+    <div class="loading-spinner">
+      <i class="material-icons loading-icon">hourglass_empty</i>
+      <span>Cargando turnos...</span>
     </div>
-  } @else {
-    <div class="appointments__grid">
-      @for (appointment of appointments; track appointment.id) {
-        <div class="appointment-card">
+  </ng-container>
+
+  <ng-template #content>
+    <ng-container *ngIf="appointments.length === 0; else grid">
+      <div class="empty-state">
+        <div class="empty-state__icon">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h2>No hay turnos agendados</h2>
+        <p>Agenda un nuevo turno para comenzar.</p>
+        <button class="btn btn--primary" (click)="onNewAppointment()">Agendar turno</button>
+      </div>
+    </ng-container>
+
+    <ng-template #grid>
+      <div class="appointments__grid">
+        <div *ngFor="let appointment of appointments; trackBy: trackById" class="appointment-card">
           <div class="appointment-card__header">
             <div class="appointment-card__date">
               <span class="appointment-card__day-name">{{ getDayName(appointment.date) }}</span>
@@ -56,7 +65,7 @@
             <button class="btn btn--danger btn--sm" (click)="onCancel(appointment.turnId)" [disabled]="appointment.state !== 'waiting'">Cancelar</button>
           </div>
         </div>
-      }
-    </div>
-  }
+      </div>
+    </ng-template>
+  </ng-template>
 </section>

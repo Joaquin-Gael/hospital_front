@@ -1,27 +1,24 @@
 <header class="header">
   <div class="header__title">
-    @if (activeSection === 'appointments') {
-      <h1>Turnos Agendados</h1>
-    } @else if (activeSection === 'history') {
-      <h1>Historial</h1>
-    } @else if (activeSection === 'notifications') {
-      <h1>Notificaciones</h1>
-    } @else if (activeSection === 'documents') {
-      <h1>Documentos</h1>
-    } @else if (activeSection === 'profile') {
-      <h1>Perfil</h1>
-    }
+    <ng-container [ngSwitch]="activeSection">
+      <h1 *ngSwitchCase="'appointments'">Turnos Agendados</h1>
+      <h1 *ngSwitchCase="'history'">Historial</h1>
+      <h1 *ngSwitchCase="'notifications'">Notificaciones</h1>
+      <h1 *ngSwitchCase="'documents'">Documentos</h1>
+      <h1 *ngSwitchCase="'profile'">Perfil</h1>
+    </ng-container>
   </div>
   <div class="header__actions">
-    @if (activeSection === 'appointments') {
+    <ng-container *ngIf="activeSection === 'appointments'">
       <button class="btn btn--primary" (click)="requestNewAppointment()">
         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
         </svg>
         Nuevo Turno
       </button>
-    } @else if (activeSection === 'profile') {
+    </ng-container>
+    <ng-container *ngIf="activeSection === 'profile'">
       <button class="btn btn--primary" (click)="onEditProfile()">Editar Perfil</button>
-    }
+    </ng-container>
   </div>
 </header>

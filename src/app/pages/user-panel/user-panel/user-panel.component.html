@@ -6,9 +6,16 @@
   <div class="main-content">
     <app-header></app-header>
     <div class="content">
-      <div *ngIf="loading" class="loading">Cargando...</div>
-      <div *ngIf="error" class="error">{{ error }}</div>
-      <router-outlet></router-outlet>
+      <ng-container *ngIf="loading; else content">
+        <div class="loading-spinner">
+          <i class="material-icons loading-icon">hourglass_empty</i>
+          <span>Cargando...</span>
+        </div>
+      </ng-container>
+      <ng-template #content>
+        <div *ngIf="error" class="error">{{ error }}</div>
+        <router-outlet></router-outlet>
+      </ng-template>
     </div>
   </div>
 </div>

@@ -11,9 +11,14 @@ import { Document } from '../interfaces/user-panel.interfaces';
 })
 export class DocumentsComponent {
   @Input() documents: Document[] = [];
+  @Input() loading: boolean = false;
 
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  trackById(index: number, item: Document): string {
+    return item.id;
   }
 }

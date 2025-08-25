@@ -1,18 +1,27 @@
 <section class="documents">
-  @if (documents.length === 0) {
-    <div class="empty-state">
-      <div class="empty-state__icon">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </div>
-      <h2>No hay documentos</h2>
-      <p>Tus documentos aparecerán aquí cuando estén disponibles.</p>
+  <ng-container *ngIf="loading; else content">
+    <div class="loading-spinner">
+      <i class="material-icons loading-icon">hourglass_empty</i>
+      <span>Cargando documentos...</span>
     </div>
-  } @else {
-    <div class="documents__grid">
-      @for (document of documents; track document.id) {
-        <div class="document-card">
+  </ng-container>
+
+  <ng-template #content>
+    <ng-container *ngIf="documents.length === 0; else grid">
+      <div class="empty-state">
+        <div class="empty-state__icon">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h2>No hay documentos</h2>
+        <p>Tus documentos aparecerán aquí cuando estén disponibles.</p>
+      </div>
+    </ng-container>
+
+    <ng-template #grid>
+      <div class="documents__grid">
+        <div *ngFor="let document of documents; trackBy: trackById" class="document-card">
           <div class="document-card__icon">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -29,7 +38,7 @@
             </svg>
           </a>
         </div>
-      }
-    </div>
-  }
+      </div>
+    </ng-template>
+  </ng-template>
 </section>

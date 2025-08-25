@@ -20,7 +20,7 @@
   @include tablet-only {
     padding: 0 24px;
   }
-  
+
   &__title {
     h1 {
       font-size: 24px;
@@ -37,7 +37,7 @@
       }
     }
   }
-  
+
   &__actions {
     @include flex-inline(12px);
 
@@ -46,9 +46,7 @@
     }
   }
 
-  // Botón de menú móvil
   &__menu-btn {
-
     width: 40px;
     height: 40px;
     border-radius: $border-radius-sm;
@@ -65,12 +63,11 @@
     }
   }
 
-  // Breadcrumbs responsive
   &__breadcrumbs {
     color: $text-light;
     font-size: 14px;
     @include flex-inline(8px);
-    
+
     @include mobile-only {
       display: none;
     }

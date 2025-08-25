@@ -1,23 +1,22 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Router } from '@angular/router';
-import { debounceTime } from 'rxjs/operators';
 import { ServiceService } from '../../../services/service/service.service';
-import { DoctorService } from '../../../services/doctor/doctor.service';
 import { ScheduleService } from '../../../services/schedule/schedule.service';
 import { LoggerService } from '../../../services/core/logger.service';
 import { UserService } from '../../../services/user/user.service';
 import { HealthInsuranceService } from '../../../services/health_insarunce/health-insurance.service';
 import { AppointmentService } from '../../../services/appointment/appointments.service';
 import { AuthService } from '../../../services/auth/auth.service';
+import { NotificationService } from '../../../core/notification';
 import { MedicalScheduleDaysResponse, Service, MedicalScheduleCreate } from '../../../services/interfaces/hospital.interfaces';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
 import { TurnState, TurnCreate, PayTurnResponse } from '../../../services/interfaces/appointment.interfaces';
-import { ReasonOption } from '../interfaces/appointment.interfaces'
+import { HealthInsuranceRead } from '../../../services/interfaces/health-insurance.interfaces';
+import { ReasonOption } from '../interfaces/appointment.interfaces';
 import { StepIndicatorComponent } from '../step-indicator/step-indicator.component';
 import { ServiceSelectionComponent } from '../service-selection/service-selection.component';
 import { DateSelectionComponent } from '../date-selection/date-selection.component';
@@ -25,7 +24,6 @@ import { TimeSelectionComponent } from '../time-selection/time-selection.compone
 import { AppointmentSummaryComponent } from '../appointment-summary/appointment-summary.component';
 import { NavigationButtonsComponent } from '../navigation-buttons/navigation-buttons.component';
 import { HealthInsuranceSelectionComponent } from '../health-insarunce-selection/health-insarunce-selection.component';
-import { HealthInsuranceRead } from '../../../services/interfaces/health-insurance.interfaces'
 
 @Component({
   selector: 'app-appointment-scheduler',
@@ -66,13 +64,14 @@ export class ShiftsComponent implements OnInit {
   private serviceService = inject(ServiceService);
   private scheduleService = inject(ScheduleService);
   private logger = inject(LoggerService);
-  private snackBar = inject(MatSnackBar);
+  private notificationService = inject(NotificationService);
   private cdr = inject(ChangeDetectorRef);
   private userService = inject(UserService);
   private healthInsuranceService = inject(HealthInsuranceService);
   private appointmentService = inject(AppointmentService);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private platformId = inject(PLATFORM_ID);
 
   // Data properties
   services: Service[] = [];
@@ -112,7 +111,7 @@ export class ShiftsComponent implements OnInit {
       next: (user) => {
         this.currentUser = user;
         if (!user) {
-          this.snackBar.open('Debes iniciar sesión para reservar un turno', 'Cerrar', { duration: 5000 });
+          this.notificationService.error('Debes iniciar sesión para reservar un turno', { duration: 5000 });
           this.router.navigate(['/login']);
           return;
         }
@@ -169,19 +168,6 @@ export class ShiftsComponent implements OnInit {
   }
 
   watchFormChanges(): void {
-    this.appointmentForm.get('service')?.valueChanges.pipe(debounceTime(300)).subscribe(serviceId => {
-      if (serviceId) {
-        const selectedService = this.services.find(s => s.id === serviceId);
-        if (selectedService && selectedService.specialty_id) {
-          this.loadAvailableDays(selectedService.specialty_id);
-        } else {
-          this.resetSchedules();
-        }
-      } else {
-        this.resetSchedules();
-      }
-    });
-
     this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
       if (date) {
         this.generateTimeSlots(date);
@@ -203,7 +189,16 @@ export class ShiftsComponent implements OnInit {
     });
   }
 
-  onServiceChange(serviceId: string): void {}
+  onServiceChange(serviceId: string): void {
+    const selectedService = this.services.find(s => s.id === serviceId);
+    if (selectedService && selectedService.specialty_id) {
+      this.isLoading = true;
+      this.nextStep();
+      this.loadAvailableDays(selectedService.specialty_id);
+    } else {
+      this.resetSchedules();
+    }
+  }
 
   onReasonChange(reasonId: number): void {}
 
@@ -230,7 +225,9 @@ export class ShiftsComponent implements OnInit {
   }
 
   loadAvailableDays(specialtyId: string): void {
-    this.isLoading = true;
+    const minLoadingTime = 500; 
+    const startTime = Date.now();
+    
     this.scheduleService.getAvailableDays(specialtyId).subscribe({
       next: (response: MedicalScheduleDaysResponse) => {
         this.schedules = response.available_days.map(day => ({
@@ -242,12 +239,25 @@ export class ShiftsComponent implements OnInit {
         this.appointmentForm.get('appointmentDate')?.setValue(null);
         this.appointmentForm.get('appointmentTime')?.setValue(null);
         this.availableTimeSlots = [];
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        
+        // Asegura que el spinner se muestre al menos 'minLoadingTime'
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = minLoadingTime - elapsedTime;
+        
+        setTimeout(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }, remainingTime > 0 ? remainingTime : 0);
       },
       error: (error: HttpErrorResponse) => {
-        this.isLoading = false;
-        this.handleError(error, 'Error al cargar horarios');
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = minLoadingTime - elapsedTime;
+        
+        setTimeout(() => {
+          this.isLoading = false;
+          this.currentStep = 1; // Vuelve a paso 1 si hay error
+          this.handleError(error, 'Error al cargar horarios');
+        }, remainingTime > 0 ? remainingTime : 0);
       }
     });
   }
@@ -258,6 +268,17 @@ export class ShiftsComponent implements OnInit {
     this.availableTimeSlots = [];
     this.appointmentForm.get('appointmentDate')?.setValue(null);
     this.appointmentForm.get('appointmentTime')?.setValue(null);
+  }
+
+  private scrollToTop(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const card = document.querySelector('.appointment-card');
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
   }
 
   generateTimeSlots(date: Date): void {
@@ -358,6 +379,7 @@ export class ShiftsComponent implements OnInit {
     if (this.isStepValid(this.currentStep)) {
       if (this.currentStep < this.totalSteps) {
         this.currentStep++;
+        this.scrollToTop();
       } else {
         this.onSubmit();
       }
@@ -369,12 +391,14 @@ export class ShiftsComponent implements OnInit {
   prevStep(): void {
     if (this.currentStep > 1) {
       this.currentStep--;
+      this.scrollToTop();
     }
   }
 
   goToStep(step: number): void {
     if (step <= this.currentStep || this.isStepValid(step - 1)) {
       this.currentStep = step;
+      this.scrollToTop();
     }
   }
 
@@ -486,7 +510,7 @@ export class ShiftsComponent implements OnInit {
   onSubmit(): void {
     if (this.appointmentForm.invalid || !this.currentUser) {
       this.markFormGroupTouched(this.appointmentForm);
-      this.snackBar.open('Por favor, completa todos los campos requeridos', 'Cerrar', { duration: 5000 });
+      this.notificationService.error('Por favor, completa todos los campos requeridos', { duration: 5000 });
       return;
     }
 
@@ -494,7 +518,7 @@ export class ShiftsComponent implements OnInit {
     const formValue = this.appointmentForm.value;
     const service = this.getSelectedService();
     if (!service) {
-      this.snackBar.open('Servicio no válido', 'Cerrar', { duration: 5000 });
+      this.notificationService.error('Servicio no válido', { duration: 5000 });
       this.isLoading = false;
       return;
     }
@@ -518,10 +542,12 @@ export class ShiftsComponent implements OnInit {
       next: (response: PayTurnResponse) => {
         this.logger.debug('Turno creado:', response);
         if (response.payment_url) {
-          this.snackBar.open('Turno creado con éxito. Redirigiendo al pago...', 'Cerrar', { duration: 5000 });
-          window.location.href = response.payment_url; // Redirigir a Striper
+          this.notificationService.success('Turno creado con éxito. Redirigiendo al pago...', { duration: 5000 });
+          if (isPlatformBrowser(this.platformId)) {
+            window.location.href = response.payment_url; 
+          }
         } else {
-          this.snackBar.open('Turno creado con éxito', 'Cerrar', { duration: 5000 });
+          this.notificationService.success('Turno creado con éxito', { duration: 5000 });
           this.router.navigate(['/user-panel']);
         }
         this.isLoading = false;
@@ -557,7 +583,7 @@ export class ShiftsComponent implements OnInit {
       500: 'Error en el servidor. Intenta de nuevo más tarde.'
     };
     const message = errorMessages[error.status] || error.error?.detail || defaultMessage;
-    this.snackBar.open(message, 'Cerrar', { duration: 5000 });
+    this.notificationService.error(message, { duration: 5000 });
     this.error = message;
   }
 }

@@ -175,11 +175,6 @@
     font-weight: 500;
     text-transform: capitalize;
 
-    &.status-pending {
-      background-color: $primary-bg;
-      color: $primary-color;
-    }
-
     &.status-waiting {
       background-color: rgba($warning-color, 0.1);
       color: $warning-color;
@@ -253,7 +248,7 @@
     color: $primary-color;
     margin-bottom: 24px;
     @include flex-center;
-    
+
     .icon {
       width: 40px;
       height: 40px;
@@ -299,5 +294,27 @@
     @include mobile-only {
       width: 100%;
     }
+  }
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  color: $text-color;
+  @include flex-column;
+
+  .loading-icon {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
