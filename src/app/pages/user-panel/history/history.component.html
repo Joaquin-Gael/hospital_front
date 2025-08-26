@@ -1,5 +1,5 @@
 <section>
-  <ng-container *ngIf="loading; else content">
+  <ng-container *ngIf="loading || localLoading; else content">
     <div class="loading-spinner">
       <i class="material-icons loading-icon">hourglass_empty</i>
       <span>Cargando historial...</span>
@@ -7,7 +7,12 @@
   </ng-container>
 
   <ng-template #content>
-    <ng-container *ngIf="filteredAppointments.length === 0; else table">
+    <ng-container *ngIf="error">
+      <div class="error-state">
+        <p>{{ error }}</p>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="!error && filteredAppointments.length === 0; else table">
       <div class="empty-state">
         <div class="empty-state__icon">
           <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -47,7 +52,7 @@
                   'status-badge--cancelled': appointment.state === 'cancelled'
                 }">
                   <span class="status-badge__dot"></span>
-                  {{ appointment.state === 'finished' ? 'Completada' : appointment.state === 'cancelled' ? 'Cancelada' : 'Pendiente' }}
+                  {{ getStateText(appointment.state) }}
                 </span>
               </td>
               <td class="table__actions">

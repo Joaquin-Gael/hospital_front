@@ -33,7 +33,11 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    console.log('Appointments ngOnInit started');
+    if (this.appointments.length > 0) {
+      this.appointments = this.appointments.filter(appointment => appointment.state == 'waiting');
+      this.loading = this.loading;
+      return;
+    }
 
     if (!this.authService.isLoggedIn()) {
       this.logger.info('Usuario no autenticado, redirigiendo a /login');
@@ -95,8 +99,12 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       doctorName: turn.doctor ? `${turn.doctor.first_name} ${turn.doctor.last_name}`.trim() : 'Sin médico asignado',
       state: turn.state,
     }));
-    // Filtro opcional para historial (solo pasados, descomentar si querés):
-    // .filter(turn => turn.state === 'finished' || turn.state === 'cancelled' || new Date(turn.date) < new Date());
+  }
+
+  get filteredAppointments(): AppointmentViewModel[] {
+    return this.appointments.length > 0 
+      ? this.appointments.filter(appointment => appointment.state === 'waiting')
+      : this.appointments;
   }
 
   onReschedule(appointmentId: string): void {
@@ -105,7 +113,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   onCancel(turnId: string): void {
-    console.log(`Canceling turn: ${turnId}`);
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Cancelar turno',
@@ -115,7 +122,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.appointmentService.deleteTurn(turnId)
+        this.appointmentService.updateTurnState(turnId, 'cancelled')
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: () => {

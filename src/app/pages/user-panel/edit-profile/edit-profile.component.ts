@@ -251,6 +251,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       img_profile: this.imgProfile,
     };
 
+    this.logger.debug('lo que envio: ',payload)
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: "Confirmar cambios",
@@ -258,6 +260,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       },
     });
 
+    this.logger.debug('lo que envio: ',payload)
+    
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.isSubmitting = true;

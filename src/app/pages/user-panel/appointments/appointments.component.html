@@ -7,7 +7,7 @@
   </ng-container>
 
   <ng-template #content>
-    <ng-container *ngIf="appointments.length === 0; else grid">
+    <ng-container *ngIf="filteredAppointments.length === 0; else grid">
       <div class="empty-state">
         <div class="empty-state__icon">
           <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -22,7 +22,7 @@
 
     <ng-template #grid>
       <div class="appointments__grid">
-        <div *ngFor="let appointment of appointments; trackBy: trackById" class="appointment-card">
+        <div *ngFor="let appointment of filteredAppointments; trackBy: trackById" class="appointment-card">
           <div class="appointment-card__header">
             <div class="appointment-card__date">
               <span class="appointment-card__day-name">{{ getDayName(appointment.date) }}</span>
