@@ -5,6 +5,7 @@ import { AppointmentViewModel, Turn, TurnState } from '../../../services/interfa
 import { AppointmentService } from '../../../services/appointment/appointments.service';
 import { AuthService } from '../../../services/auth/auth.service';
 import { LoggerService } from '../../../services/core/logger.service';
+import { NotificationService } from '../../../core/notification';
 import { Router } from '@angular/router';
 
 @Component({
@@ -21,6 +22,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
   @Output() downloadReceipt = new EventEmitter<AppointmentViewModel>();
 
   private readonly authService = inject(AuthService);
+  private readonly notificationService = inject(NotificationService);
   private readonly appointmentService = inject(AppointmentService);
   private readonly logger = inject(LoggerService);
   private readonly router = inject(Router);
@@ -120,11 +122,11 @@ export class HistoryComponent implements OnInit, OnDestroy {
   }
 
   onViewDetails(appointment: AppointmentViewModel): void {
-    this.viewDetails.emit(appointment);
+    this.notificationService.info('Ver detalles próximamente disponible');
   }
 
   onDownloadReceipt(appointment: AppointmentViewModel): void {
-    this.downloadReceipt.emit(appointment);
+    this.notificationService.info('Descarga de comprobante próximamente disponible');
   }
 
   trackById(index: number, item: AppointmentViewModel): string {

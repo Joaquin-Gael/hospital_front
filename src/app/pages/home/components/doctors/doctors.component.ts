@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface Doctor {
@@ -21,8 +21,10 @@ interface Doctor {
         <p class="section-description">Contamos con un equipo médico de excelencia comprometido con tu salud</p>
       </div>
       
-      <div class="testimonials-container">
-        <div class="testimonial-card" *ngFor="let doctor of doctors; let i = index" [class.active]="i === currentDoctorIndex">
+      <div class="testimonials-container" 
+           [style.transform]="'translateX(-' + (currentSlideIndex * 0) + '%)'"
+           [style.transition]="hasTransition ? 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'none'">
+        <div class="testimonial-card" *ngFor="let doctor of slides; let i = index">
           <div class="testimonial-content">
             <blockquote>
               <p>"{{doctor.description}}"</p>
@@ -47,8 +49,8 @@ interface Doctor {
         <span 
           class="dot" 
           *ngFor="let doctor of doctors; let i = index" 
-          [class.active]="i === currentDoctorIndex"
-          (click)="currentDoctorIndex = i">
+          [class.active]="i === realIndex"
+          (click)="goToDoctor(i)">
         </span>
       </div>
     </section>
@@ -57,10 +59,22 @@ interface Doctor {
 })
 export class DoctorsComponent implements OnInit, OnDestroy {
   @Input() doctors: Doctor[] = [];
-  currentDoctorIndex = 0;
+  slides: Doctor[] = [];
+  currentSlideIndex = 1;
+  realIndex = 0;
+  hasTransition = true;
   private intervalId?: number;
 
+  constructor(private cdr: ChangeDetectorRef) {}
+
   ngOnInit() {
+    if (this.doctors.length > 0) {
+      const last = this.doctors[this.doctors.length - 1];
+      const first = this.doctors[0];
+      this.slides = [last, ...this.doctors, first];
+      this.currentSlideIndex = 1;
+      this.realIndex = 0;
+    }
     this.startDoctorRotation();
   }
 
@@ -72,8 +86,34 @@ export class DoctorsComponent implements OnInit, OnDestroy {
 
   startDoctorRotation() {
     this.intervalId = window.setInterval(() => {
-      this.currentDoctorIndex = (this.currentDoctorIndex + 1) % this.doctors.length;
+      this.nextSlide();
     }, 8000);
+  }
+
+  nextSlide() {
+    this.currentSlideIndex++;
+    this.cdr.detectChanges();
+
+    if (this.currentSlideIndex === this.slides.length - 1) {
+      setTimeout(() => {
+        this.hasTransition = false;
+        this.currentSlideIndex = 1;
+        this.cdr.detectChanges();
+        this.hasTransition = true;
+      }, 600); // Tiempo de transición en ms
+    }
+
+    this.realIndex = (this.currentSlideIndex - 1) % this.doctors.length;
+  }
+
+  goToDoctor(index: number) {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+    this.currentSlideIndex = index + 1;
+    this.realIndex = index;
+    this.cdr.detectChanges();
+    this.startDoctorRotation();
   }
 
   getStars(rating: number): number[] {

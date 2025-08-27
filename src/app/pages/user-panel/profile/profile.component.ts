@@ -10,6 +10,7 @@ import { UserRead } from '../../../services/interfaces/user.interfaces';
 import { HealthInsuranceRead } from '../../../services/interfaces/health-insurance.interfaces';
 import { Turn, TurnState } from '../../../services/interfaces/appointment.interfaces';
 import { HttpErrorResponse } from '@angular/common/http';
+import { NotificationService } from '../../../core/notification';
 
 @Component({
   selector: 'app-profile',
@@ -31,6 +32,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   error: string | null = null;
   loading: boolean = true;
   private readonly destroy$ = new Subject<void>();
+  private readonly notificationService = inject(NotificationService);
 
   ngOnInit(): void {
     if (!this.authService.isLoggedIn()) {
@@ -114,7 +116,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   onChangePassword(): void {
-    this.router.navigate(['/user_panel/change-password']);
+    this.notificationService.info('Cambio de contraseña próximamente disponible');
+    //this.router.navigate(['/user_panel/change-password']);
   }
 
   ngOnDestroy(): void {

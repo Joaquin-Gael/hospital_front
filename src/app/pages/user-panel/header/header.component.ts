@@ -10,12 +10,11 @@ import { Router } from '@angular/router';
   imports: [CommonModule]
 })
 export class HeaderComponent implements OnInit {
-  @Output() newAppointment = new EventEmitter<void>();
   @Output() editProfile = new EventEmitter<void>();
 
   activeSection: string = '';
 
-  constructor(private router: Router) {}
+  constructor(public router: Router) {}
 
   ngOnInit(): void {
     this.setActiveSectionFromRoute();
@@ -39,7 +38,7 @@ export class HeaderComponent implements OnInit {
   }
 
   requestNewAppointment(): void {
-    this.newAppointment.emit();
+    this.router.navigate(['/shifts'])
   }
 
   onEditProfile(): void {
