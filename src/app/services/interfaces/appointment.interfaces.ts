@@ -64,6 +64,10 @@ export interface Turn {
   appointment?: AppointmentMinimal;
 }
 
+export interface UpdateTurnState {
+  new_state: string; // 'accepted', 'rejected', 'cancelled', 'finished'
+}
+
 // Modelo para eliminación de turno
 export interface TurnDelete {
   id: string;

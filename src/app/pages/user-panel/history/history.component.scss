@@ -3,6 +3,7 @@
 @use '../shared.scss' as *;
 
 .table-container {
+  margin-top: 32px;
   overflow-x: auto;
   border-radius: $border-radius;
   box-shadow: $box-shadow;

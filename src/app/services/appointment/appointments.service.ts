@@ -5,7 +5,7 @@ import { APPOINTMENT_ENDPOINTS } from './appointment-endpoints';
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
-import { Appointment, PayTurnResponse, Turn, TurnCreate, TurnDelete } from '../interfaces/appointment.interfaces';
+import { Appointment, PayTurnResponse, Turn, TurnCreate, TurnDelete, UpdateTurnState } from '../interfaces/appointment.interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -54,7 +54,7 @@ export class AppointmentService {
       catchError((error) => this.handleError(`Error fetching turns for user ${userId}`, error))
     );
   }
-
+   
   /**
    * Obtiene un turno específico por su ID.
    * @param turnId ID del turno.
@@ -76,6 +76,14 @@ export class AppointmentService {
     this.logger.debug('Creando nuevo turno', turnData);
     return this.apiService.post<PayTurnResponse>(APPOINTMENT_ENDPOINTS.CREATE_TURN, turnData).pipe(
       catchError((error) => this.handleError('Error creating turn', error))
+    );
+  }
+
+  updateTurnState(turnId: string, newState: string): Observable<UpdateTurnState> {
+    const endpoint = `${APPOINTMENT_ENDPOINTS.UPDATE_TURN_STATE()}?turn_id=${encodeURIComponent(turnId)}&new_state=${encodeURIComponent(newState)}`;
+    this.logger.debug(`Updating turn state for turn ${turnId} with newState: ${newState} at ${endpoint}`);
+    return this.apiService.patch<UpdateTurnState>(endpoint, null).pipe(
+      catchError((error) => this.handleError(`Error updating turn state for turn ${turnId}`, error))
     );
   }
 
