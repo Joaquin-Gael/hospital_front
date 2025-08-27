@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute, RouterOutlet } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AppointmentViewModel, Turn, TurnState } from '../../../services/interfaces/appointment.interfaces';
@@ -16,7 +16,7 @@ import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.scss'],
   standalone: true,
-  imports: [CommonModule, MatDialogModule],
+  imports: [CommonModule, MatDialogModule, RouterOutlet],
 })
 export class AppointmentsComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
@@ -25,6 +25,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly notificationService = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
+  private route = inject(ActivatedRoute);
 
   appointments: AppointmentViewModel[] = [];
   user: UserRead | null = null;
@@ -99,9 +100,9 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     // .filter(turn => turn.state === 'finished' || turn.state === 'cancelled' || new Date(turn.date) < new Date());
   }
 
-  onReschedule(appointmentId: string): void {
-    console.log(`Rescheduling appointment: ${appointmentId}`);
-    this.router.navigate(['/reschedule-appointment', appointmentId]);
+  onReschedule(id: string): void {
+    console.log(`Rescheduling appointment: ${id}`);
+    this.router.navigate(['reschedule-appointment', id], { relativeTo: this.route });
   }
 
   onCancel(turnId: string): void {

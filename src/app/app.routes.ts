@@ -71,6 +71,14 @@ export const routes: Routes = [
         path: 'appointments',
         loadComponent: () =>
           import('./pages/user-panel/appointments/appointments.component').then((m) => m.AppointmentsComponent),
+          children: [
+            {
+              path: 'reschedule-appointment/:id',
+              loadComponent: () =>
+                import('./pages/user-panel/update-appointment/update-appointment.component')
+                  .then((m) => m.UpdateAppointmentComponent)
+            }
+          ]
       },
       {
         path: 'history',
