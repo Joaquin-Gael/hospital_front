@@ -1,0 +1,118 @@
+<div class="health-insurance-manager">
+  <div class="health-insurance-manager__header">
+    <h2 class="health-insurance-manager__title">
+      <i class="fas fa-hospital health-insurance-manager__title-icon"></i>
+      Gestionar Obras Sociales
+    </h2>
+    <p class="health-insurance-manager__description">
+      Selecciona las obras sociales con las que tienes relación
+    </p>
+  </div>
+
+  <div class="health-insurance-manager__content">
+    <div class="health-insurance-drag-drop">
+      <!-- Columna de obras sociales disponibles -->
+      <div class="health-insurance-column">
+        <h3 class="health-insurance-column__title">
+          <i class="fas fa-hospital health-insurance-column__icon"></i>
+          Obras Sociales Disponibles
+        </h3>
+        <div 
+          class="health-insurance-list health-insurance-list--available"
+          (dragover)="onDragOver($event)"
+          (dragenter)="onDragEnter($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDropToAvailable($event)"
+          [class.health-insurance-list--drag-over]="isDraggingOver"
+        >
+          <div 
+            *ngFor="let insurance of availableInsurances; trackBy: trackByFn"
+            class="health-insurance-item health-insurance-item--available"
+            draggable="true"
+            (dragstart)="onDragStart($event, insurance)"
+            (click)="addToSelected(insurance)"
+          >
+            <div class="health-insurance-item__content">
+              <span class="health-insurance-item__name">{{ insurance.name }}</span>
+              <span class="health-insurance-item__discount">{{ insurance.discount }}% desc.</span>
+            </div>
+            <button 
+              class="health-insurance-item__action"
+              (click)="$event.stopPropagation(); addToSelected(insurance)"
+              title="Agregar obra social"
+            >
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          
+          <div *ngIf="availableInsurances.length === 0" class="health-insurance-empty">
+            <i class="fas fa-star health-insurance-empty__icon"></i>
+            <p class="health-insurance-empty__text">Todas las obras sociales están seleccionadas</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna de obras sociales seleccionadas -->
+      <div class="health-insurance-column">
+        <h3 class="health-insurance-column__title">
+          <i class="fas fa-check-circle health-insurance-column__icon"></i>
+          Mis Obras Sociales
+          <span class="health-insurance-column__count" *ngIf="selectedInsurances.length > 0">
+            ({{ selectedInsurances.length }})
+          </span>
+        </h3>
+        <div 
+          class="health-insurance-list health-insurance-list--selected"
+          (dragover)="onDragOver($event)"
+          (dragenter)="onDragEnter($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDropToSelected($event)"
+          [class.health-insurance-list--drag-over]="isDraggingOver"
+        >
+          <div 
+            *ngFor="let insurance of selectedInsurances; trackBy: trackByFn"
+            class="health-insurance-item health-insurance-item--selected"
+            draggable="true"
+            (dragstart)="onDragStart($event, insurance)"
+            (click)="removeFromSelected(insurance)"
+          >
+            <div class="health-insurance-item__content">
+              <span class="health-insurance-item__name">{{ insurance.name }}</span>
+              <span class="health-insurance-item__discount">{{ insurance.discount }}% desc.</span>
+            </div>
+            <button 
+              class="health-insurance-item__action health-insurance-item__action--remove"
+              (click)="$event.stopPropagation(); removeFromSelected(insurance)"
+              title="Quitar obra social"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div *ngIf="selectedInsurances.length === 0" class="health-insurance-empty">
+            <i class="fas fa-hand-point-up health-insurance-empty__icon"></i>
+            <p class="health-insurance-empty__text">Arrastra aquí las obras sociales con las que tienes relacion</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="health-insurance-manager__actions">
+      <button 
+        type="button"
+        class="health-insurance-manager__button health-insurance-manager__button--primary"
+        (click)="onSave()"
+        [disabled]="!hasChanges"
+      >
+        <i class="fas fa-save"></i>
+        Guardar cambios
+      </button>
+      
+      <div class="health-insurance-manager__status" *ngIf="selectedInsurances.length > 0">
+        <i class="fas fa-info-circle"></i>
+        {{ selectedInsurances.length }} obra{{ selectedInsurances.length === 1 ? '' : 's' }} social{{ selectedInsurances.length === 1 ? '' : 'es' }} seleccionada{{ selectedInsurances.length === 1 ? '' : 's' }}
+      </div>
+    </div>
+  </div>
+</div>

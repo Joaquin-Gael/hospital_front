@@ -1,0 +1,536 @@
+@use '../../../../layout/styles/_media-queries.scss' as *;
+@use '../../../../layout/styles/_mixins.scss' as *;
+@use '../../shared.scss' as *;
+
+.health-insurance-manager {
+  max-width: 1000px;
+  margin: 0 auto;
+
+  &__header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+
+    @include mobile-only {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+    }
+  }
+
+  &__title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 12px 0;
+    @include flex-inline(12px, center, center);
+
+    @include mobile-only {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+  }
+
+  &__title-icon {
+    font-size: 32px;
+    color: #059669;
+
+    @include mobile-only {
+      font-size: 28px;
+    }
+  }
+
+  &__description {
+    font-size: 16px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.5;
+
+    @include mobile-only {
+      font-size: 14px;
+    }
+  }
+
+  &__content {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+
+    @include mobile-only {
+      padding: 20px;
+      border-radius: 12px;
+    }
+  }
+
+  &__actions {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #f3f4f6;
+    @include flex-inline(16px, center, space-between);
+
+    @include mobile-only {
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+    }
+  }
+
+  &__button {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    min-width: 160px;
+    @include flex-inline(8px, center, center);
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    &--primary {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(5, 150, 105, 0.35);
+
+        @include reduce-motion {
+          transform: none;
+        }
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
+    }
+
+    @include mobile-only {
+      width: 100%;
+      padding: 14px 20px;
+      font-size: 16px;
+    }
+  }
+
+  &__status {
+    font-size: 14px;
+    color: #059669;
+    font-weight: 500;
+    @include flex-inline(8px, center);
+
+    @include mobile-only {
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    i {
+      font-size: 16px;
+
+      @include mobile-only {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.health-insurance-drag-drop {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  min-height: 400px;
+
+  @include tablet-only {
+    gap: 20px;
+    min-height: 350px;
+  }
+
+  @include mobile-only {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    min-height: 600px;
+  }
+}
+
+.health-insurance-column {
+  &__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 16px 0;
+    padding: 0 4px;
+    @include flex-inline(8px);
+
+    @include mobile-only {
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+  }
+
+  &__icon {
+    font-size: 20px;
+    color: #3b82f6;
+    flex-shrink: 0;
+    
+    &.fa-check-circle {
+      color: #059669; 
+    }
+
+    @include mobile-only {
+      font-size: 18px;
+    }
+  }
+
+  &__count {
+    font-size: 14px;
+    font-weight: 500;
+    color: #059669;
+    background: #d1fae5;
+    padding: 4px 10px; 
+    border-radius: 12px;
+    margin-left: auto;
+
+    @include mobile-only {
+      font-size: 12px;
+      padding: 3px 8px;
+    }
+  }
+}
+
+.health-insurance-list {
+  background: #ffffff;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 320px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow-y: auto;
+  max-height: 500px;
+
+  @include mobile-only {
+    min-height: 250px;
+    max-height: 300px;
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  @include tablet-only {
+    min-height: 280px;
+    max-height: 400px;
+  }
+
+  &--available {
+    border-color: #3b82f6;
+    
+    &:hover {
+      border-color: #2563eb;
+      background: #f8faff;
+
+      @include touch-device {
+        background: #ffffff;
+      }
+    }
+  }
+
+  &--selected {
+    border-color: #059669;
+    
+    &:hover {
+      border-color: #047857;
+      background: #f0fdf4;
+
+      @include touch-device {
+        background: #ffffff;
+      }
+    }
+  }
+
+  &--drag-over {
+    border-style: solid;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+
+    @include reduce-motion {
+      transform: none;
+    }
+  }
+
+  // Scrollbar personalizado
+  &::-webkit-scrollbar {
+    width: 6px;
+
+    @include mobile-only {
+      width: 4px;
+    }
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #94a3b8; 
+    border-radius: 3px;
+    
+    &:hover {
+      background: #6b7280;
+    }
+  }
+}
+
+.health-insurance-item {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: grab;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  user-select: none;
+  @include flex-between;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  @include mobile-only {
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+
+  @include reduce-motion {
+    transition: none;
+  }
+
+  &--available {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-color: #e2e8f0;
+
+    &:hover {
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      border-color: #0ea5e9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+
+      @include reduce-motion {
+        transform: none;
+      }
+
+      @include touch-device {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        transform: none;
+        box-shadow: none;
+      }
+    }
+  }
+
+  &--selected {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: #bbf7d0;
+
+    &:hover {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border-color: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+
+      @include reduce-motion {
+        transform: none;
+      }
+
+      @include touch-device {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        transform: none;
+        box-shadow: none;
+      }
+    }
+  }
+
+  &__content {
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+    @include flex-column;
+
+    @include mobile-only {
+      gap: 2px;
+    }
+  }
+
+  &__name {
+    font-weight: 500;
+    color: #1f2937; 
+    font-size: 14px;
+    line-height: 1.3;
+    @include text-truncate;
+
+    @include mobile-only {
+      font-size: 12px;
+    }
+  }
+
+  &__discount {
+    font-size: 12px;
+    color: #059669;
+    font-weight: 500;
+    background: #d1fae5;
+    padding: 2px 8px; 
+    border-radius: 4px;
+    align-self: flex-start;
+
+    @include mobile-only {
+      font-size: 10px;
+      padding: 1px 4px;
+    }
+  }
+
+  &__action {
+    width: 32px; 
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #3b82f6;
+    color: white;
+    flex-shrink: 0;
+    @include flex-center;
+    @include hover-effect(#2563eb);
+
+    &:hover {
+      transform: scale(1.1);
+
+      @include reduce-motion {
+        transform: none;
+      }
+
+      @include touch-device {
+        transform: none;
+      }
+    }
+
+    &--remove {
+      background: #ef4444;
+      font-size: 16px;
+      @include hover-effect(#dc2626);
+    }
+
+    @include mobile-only {
+      width: 28px;
+      height: 28px;
+      font-size: 14px;
+    }
+
+    @include touch-device {
+      width: 36px;
+      height: 36px;
+    }
+  }
+}
+
+.health-insurance-empty {
+  height: 100%;
+  min-height: 200px;
+  text-align: center;
+  color: #6b7280;
+  @include flex-center;
+  @include flex-column;
+  
+  @include mobile-only {
+    min-height: 150px;
+  }
+
+  &__icon {
+    font-size: 40px; 
+    margin-bottom: 16px;
+    opacity: 0.7;
+
+    @include mobile-only {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+  }
+
+  &__text {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 200px;
+
+    @include mobile-only {
+      font-size: 13px;
+      max-width: 180px;
+    }
+  }
+}
+
+// Estados de accesibilidad
+@include reduce-motion {
+  .health-insurance-item,
+  .health-insurance-list,
+  .health-insurance-item__action,
+  .health-insurance-manager__button {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+// Focus visible para accesibilidad
+:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// Mejoras para pantallas muy pequeñas
+@media (max-width: 360px) {
+  .health-insurance-item {
+    &__content {
+      gap: 2px;
+    }
+
+    &__name {
+      font-size: 11px;
+    }
+
+    &__discount {
+      font-size: 9px;
+      padding: 1px 3px;
+    }
+
+    &__action {
+      width: 24px;
+      height: 24px;
+      font-size: 12px;
+    }
+  }
+
+  .health-insurance-empty {
+    min-height: 120px;
+
+    &__icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    &__text {
+      font-size: 12px;
+      max-width: 160px;
+    }
+  }
+}
