@@ -22,17 +22,22 @@ import { animate, style, transition, trigger } from '@angular/animations';
     <div class="form-step" @slideIn>
       <h3 class="step-title">¿Cuándo quieres tu cita?</h3>
       <p class="step-subtitle">Selecciona la fecha que mejor te convenga</p>
-
-      <div class="custom-form-field" *ngIf="!isLoading; else loadingSpinner">
-        <label class="field-label">
-          <i class="material-icons field-icon">calendar_today</i>
-          Fecha de la cita
-        </label>
-        <div class="field-input-container">
-          <input
-            [matDatepicker]="picker"
-            [formControl]="dateControl"
-            [min]="minDate"
+      @if (isLoading) {
+        <div class="loading-spinner">
+          <i class="material-icons loading-icon">hourglass_empty</i>
+          <span>Cargando fechas...</span>
+        </div>
+      } @else {
+        <div class="custom-form-field">
+          <label class="field-label">
+            <i class="material-icons field-icon">calendar_today</i>
+            Fecha de la cita
+          </label>
+          <div class="field-input-container">
+            <input
+              [matDatepicker]="picker"
+              [formControl]="dateControl"
+              [min]="minDate"
             [matDatepickerFilter]="dayFilter"
             placeholder="Selecciona una fecha"
             aria-label="Selecciona la fecha para tu turno"
@@ -43,13 +48,14 @@ import { animate, style, transition, trigger } from '@angular/animations';
           </div>
         </div>
         <mat-datepicker #picker></mat-datepicker>
-        <div
-          *ngIf="dateControl.invalid && dateControl.touched"
-          class="error-message"
-          role="alert"
-        >
-          {{ getErrorMessage() }}
-        </div>
+        @if (dateControl.invalid && dateControl.touched) {
+          <div
+            class="error-message"
+            role="alert"
+          >
+            {{ getErrorMessage() }}
+          </div>
+        }
       </div>
 
       <ng-template #loadingSpinner>
@@ -59,9 +65,12 @@ import { animate, style, transition, trigger } from '@angular/animations';
         </div>
       </ng-template>
 
-      <div *ngIf="error" class="error-message centered-error" role="alert">
-        {{ error }}
-      </div>
+      @if (error) {
+        <div class="error-message centered-error" role="alert">
+          {{ error }}
+        </div>
+      }
+      }
     </div>
   `,
   styleUrl: './date-selection.component.scss',

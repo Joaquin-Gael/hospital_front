@@ -6,23 +6,30 @@
     ></div>
   </div>
   <div class="steps-circles">
-    <div
-      *ngFor="let step of stepsArray; let i = index"
-      class="step-circle"
-      [class.active]="currentStep >= step"
-      [class.completed]="currentStep > step"
-      (click)="onStepClick(step)"
-      [attr.aria-label]="'Ir al paso ' + step"
-    >
-      <span class="step-number" *ngIf="currentStep <= step">{{ step }}</span>
-      <i *ngIf="currentStep > step" class="material-icons step-check">check</i>
-    </div>
+    @for (step of stepsArray; track step; let i = $index) {
+      <div
+        class="step-circle"
+        [class.active]="currentStep >= step"
+        [class.completed]="currentStep > step"
+        (click)="onStepClick(step)"
+        [attr.aria-label]="'Ir al paso ' + step"
+      >
+        @if (currentStep <= step) {
+          <span class="step-number">{{ step }}</span>
+        }
+        @if (currentStep > step) {
+          <i class="material-icons step-check">check</i>
+        }
+      </div>
+    }
   </div>
   <div class="steps-labels">
     <span class="step-label">Servicio</span>
     <span class="step-label">Fecha</span>
     <span class="step-label">Hora</span>
-    <span class="step-label" *ngIf="totalSteps === 5">Obra Social</span>
+    @if (totalSteps === 5) {
+      <span class="step-label">Obra Social</span>
+    }
     <span class="step-label">Motivo y Pago</span>
   </div>
 </div>

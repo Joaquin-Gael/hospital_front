@@ -1,4 +1,4 @@
-import { Component, type OnInit, type OnDestroy, inject, ViewChild } from "@angular/core";
+import { Component, type OnInit, type OnDestroy, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router, RouterModule } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
@@ -6,20 +6,28 @@ import { AuthService } from "../../../services/auth/auth.service";
 import { UserService } from "../../../services/user/user.service";
 import { HealthInsuranceService } from "../../../services/health_insarunce/health-insurance.service";
 import { LoggerService } from "../../../services/core/logger.service";
+import { NotificationService } from "../../../core/notification";
 import type { UserRead, UserUpdate } from "../../../services/interfaces/user.interfaces";
 import type { HealthInsuranceRead } from "../../../services/interfaces/health-insurance.interfaces";
-import { EntityFormComponent, type FormField } from "../../../shared/entity-form/entity-form.component";
-import { DniUploaderComponent } from "./dni-uploader/dni-uploader/dni-uploader.component";
 import type { HttpErrorResponse } from "@angular/common/http";
-import { Validators } from "@angular/forms";
-import { MatDialog, MatDialogModule } from "@angular/material/dialog";
-import { ConfirmDialogComponent } from "../../../shared/confirm-dialog.component";
-import { NotificationService } from "../../../core/notification";
+
+// Import child components
+import { ProfileFormComponent } from "./profile-form/profile-form.component";
+import { HealthInsuranceManagerComponent } from "./health-insurance-manager/health-insurance-manager.component";
+import { DniUploaderComponent } from "./dni-uploader/dni-uploader.component";
+
+export type TabType = 'profile' | 'insurance' | 'dni';
 
 @Component({
   selector: "app-edit-profile",
   standalone: true,
-  imports: [CommonModule, RouterModule, EntityFormComponent, MatDialogModule, DniUploaderComponent],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    ProfileFormComponent,
+    HealthInsuranceManagerComponent,
+    DniUploaderComponent
+  ],
   templateUrl: "./edit-profile.component.html",
   styleUrls: ["./edit-profile.component.scss"],
 })
@@ -30,68 +38,16 @@ export class EditProfileComponent implements OnInit, OnDestroy {
   private readonly notificationService = inject(NotificationService);
   private readonly logger = inject(LoggerService);
   private readonly router = inject(Router);
-  private readonly dialog = inject(MatDialog);
   private readonly destroy$ = new Subject<void>();
 
   user: UserRead | null = null;
   healthInsurances: HealthInsuranceRead[] = [];
   isSubmitting = false;
-  error: string | null = null;
+  activeTab: TabType = 'profile';
   initialData: any = null;
-  imgProfile: File | undefined = undefined;
-  @ViewChild(EntityFormComponent) entityForm!: EntityFormComponent;
 
   availableHealthInsurances: HealthInsuranceRead[] = [];
   selectedHealthInsurances: HealthInsuranceRead[] = [];
-  draggedInsurance: HealthInsuranceRead | null = null;
-  isDraggingOver = false;
-
-  formFields: FormField[] = [
-    {
-      key: "username",
-      label: "Nombre de usuario",
-      type: "text",
-      required: true,
-      readonly: true,
-      validators: [Validators.required, Validators.minLength(3)],
-    },
-    {
-      key: "first_name",
-      label: "Nombre",
-      type: "text",
-      required: true,
-      readonly: true,
-      validators: [Validators.required],
-    },
-    {
-      key: "last_name",
-      label: "Apellido",
-      type: "text",
-      required: true,
-      readonly: true,
-      validators: [Validators.required],
-    },
-    {
-      key: "address",
-      label: "Dirección",
-      type: "text",
-      required: false,
-      validators: [Validators.maxLength(255)],
-    },
-    {
-      key: "telephone",
-      label: "Teléfono",
-      type: "text",
-      required: false,
-      validators: [Validators.pattern(/^\+?\d{9,15}$/)],
-    },
-    {
-      key: "img_profile",
-      label: "Foto de perfil",
-      type: "file",
-      required: false,
-    },
-  ];
 
   ngOnInit(): void {
     if (!this.authService.isLoggedIn()) {
@@ -100,6 +56,11 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.loadUserData();
+    this.loadHealthInsurances();
+  }
+
+  private loadUserData(): void {
     this.authService
       .getUser()
       .pipe(takeUntil(this.destroy$))
@@ -117,6 +78,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             this.router.navigate(["/login"]);
             return;
           }
+          
           this.user = userRead;
           this.initialData = {
             username: userRead.username,
@@ -124,6 +86,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             last_name: userRead.last_name,
             address: userRead.address || "",
             telephone: userRead.telephone || "",
+            img_profile: userRead.img_profile || null,
             health_insurance: userRead.health_insurance || [],
             is_active: userRead.is_active,
             is_admin: userRead.is_admin,
@@ -141,7 +104,9 @@ export class EditProfileComponent implements OnInit, OnDestroy {
           this.router.navigate(["/login"]);
         },
       });
+  }
 
+  private loadHealthInsurances(): void {
     this.healthInsuranceService
       .getAll()
       .pipe(takeUntil(this.destroy$))
@@ -167,75 +132,12 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       });
   }
 
-  // Agregar el método trackBy
-  trackByFn(index: number, insurance: HealthInsuranceRead): string {
-    return insurance.id;
+  setActiveTab(tab: TabType): void {
+    this.activeTab = tab;
   }
 
-  onDragStart(event: DragEvent, insurance: HealthInsuranceRead): void {
-    this.draggedInsurance = insurance;
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/html", insurance.id);
-    }
-  }
-
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = "move";
-    }
-  }
-
-  onDragEnter(event: DragEvent): void {
-    event.preventDefault();
-    this.isDraggingOver = true;
-  }
-
-  onDragLeave(event: DragEvent): void {
-    event.preventDefault();
-    this.isDraggingOver = false;
-  }
-
-  onDropToSelected(event: DragEvent): void {
-    event.preventDefault();
-    this.isDraggingOver = false;
-
-    if (this.draggedInsurance) {
-      this.selectedHealthInsurances.push(this.draggedInsurance);
-      this.availableHealthInsurances = this.availableHealthInsurances.filter(
-        (ins) => ins.id !== this.draggedInsurance!.id
-      );
-      this.draggedInsurance = null;
-    }
-  }
-
-  onDropToAvailable(event: DragEvent): void {
-    event.preventDefault();
-    this.isDraggingOver = false;
-
-    if (this.draggedInsurance) {
-      this.availableHealthInsurances.push(this.draggedInsurance);
-      this.selectedHealthInsurances = this.selectedHealthInsurances.filter(
-        (ins) => ins.id !== this.draggedInsurance!.id
-      );
-      this.draggedInsurance = null;
-    }
-  }
-
-  removeFromSelected(insurance: HealthInsuranceRead): void {
-    this.selectedHealthInsurances = this.selectedHealthInsurances.filter((ins) => ins.id !== insurance.id);
-    this.availableHealthInsurances.push(insurance);
-  }
-
-  addToSelected(insurance: HealthInsuranceRead): void {
-    this.availableHealthInsurances = this.availableHealthInsurances.filter((ins) => ins.id !== insurance.id);
-    this.selectedHealthInsurances.push(insurance);
-  }
-
-  onFormSubmit(formData: any): void {
+  onProfileSubmit(formData: any): void {
     if (!this.user) {
-      this.error = "No se encontraron datos del usuario.";
       this.logger.error("No se encontraron datos del usuario");
       return;
     }
@@ -243,61 +145,83 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     const userId = this.user.id;
     const payload: UserUpdate = {
       username: this.user.username,
-      first_name: formData.first_name || this.user.first_name,
-      last_name: formData.last_name || this.user.last_name,
+      first_name: this.user.first_name || undefined,
+      last_name: this.user.last_name || undefined,
       address: formData.address || undefined,
       telephone: formData.telephone || undefined,
       health_insurance: this.selectedHealthInsurances.map((ins) => ins.id),
-      img_profile: this.imgProfile,
+      img_profile: formData.img_profile,
     };
 
-    this.logger.debug('lo que envio: ',payload)
-
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: "Confirmar cambios",
-        message: "¿Estás seguro de que deseas guardar los cambios en tu perfil?",
-      },
-    });
-
-    this.logger.debug('lo que envio: ',payload)
-    
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.isSubmitting = true;
-        this.error = null;
-        this.userService
-          .updateUser(userId, payload)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (updatedUser) => {
-              this.isSubmitting = false;
-              this.error = null;
-              this.notificationService.success("¡Datos actualizados con éxito!", {
-                duration: 5000,
-                action: {
-                  label: "Cerrar",
-                  action: () => this.notificationService.dismissAll(),
-                },
-              });
-              setTimeout(() => {
-                this.router.navigate(["/user_panel/profile"]);
-              }, 2000);
-            },
-            error: (err: HttpErrorResponse) => {
-              this.isSubmitting = false;
-              this.notificationService.error("¡Ocurrió un error al actualizar el perfil!", {
-                duration: 5000,
-                action: {
-                  label: "Cerrar",
-                  action: () => this.notificationService.dismissAll(),
-                },
-              });
-              this.handleError(err, "Error al actualizar el perfil");
+    this.isSubmitting = true;
+    this.userService
+      .updateUser(userId, payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedUser) => {
+          this.isSubmitting = false;
+          this.notificationService.success("¡Datos actualizados con éxito!", {
+            duration: 5000,
+            action: {
+              label: "Cerrar",
+              action: () => this.notificationService.dismissAll(),
             },
           });
-      }
-    });
+          
+          setTimeout(() => {
+            this.router.navigate(["/user_panel/profile"]);
+          }, 2000);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isSubmitting = false;
+          this.notificationService.error("¡Ocurrió un error al actualizar el perfil!", {
+            duration: 5000,
+            action: {
+              label: "Cerrar",
+              action: () => this.notificationService.dismissAll(),
+            },
+          });
+          this.handleError(err, "Error al actualizar el perfil");
+        },
+      });
+  }
+
+  onInsurancesChanged(data: { available: HealthInsuranceRead[], selected: HealthInsuranceRead[] }): void {
+    this.availableHealthInsurances = data.available;
+    this.selectedHealthInsurances = data.selected;
+  }
+
+  onSaveInsurances(selectedIds: string[]): void {
+    if (!this.user) return;
+
+    const payload: UserUpdate = {
+      username: this.user.username,
+      first_name: this.user.first_name || undefined,
+      last_name: this.user.last_name || undefined,
+      address: this.user.address || undefined,
+      telephone: this.user.telephone || undefined,
+      health_insurance: selectedIds,
+    };
+
+    this.isSubmitting = true;
+    this.userService
+      .updateUser(this.user.id, payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedUser) => {
+          this.isSubmitting = false;
+          this.notificationService.success("¡Obras sociales actualizadas con éxito!", {
+            duration: 3000,
+          });
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isSubmitting = false;
+          this.notificationService.error("Error al actualizar las obras sociales", {
+            duration: 5000,
+          });
+          this.handleError(err, "Error al actualizar las obras sociales");
+        },
+      });
   }
 
   onFormCancel(): void {
@@ -306,15 +230,22 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 
   onDniUploadSuccess(response: any): void {
     this.logger.info("DNI enviado exitosamente:", response);
+    this.notificationService.success("DNI enviado correctamente para verificación", {
+      duration: 5000,
+    });
   }
 
   onDniUploadError(error: string): void {
     this.logger.error("Error al enviar DNI:", error);
+    this.notificationService.error(error, {
+      duration: 7000,
+    });
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
     this.logger.error(defaultMessage, error);
     let errorMessage = defaultMessage;
+    
     if (error.status === 422 && error.error?.detail) {
       const details = error.error.detail;
       if (Array.isArray(details)) {
@@ -327,17 +258,10 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     } else {
       errorMessage = error.error?.detail || error.error?.message || error.message || defaultMessage;
     }
-    this.error = errorMessage;
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  ngAfterViewInit() {
-    this.entityForm.imageSelected.subscribe((file: File) => {
-      this.imgProfile = file;
-    });
   }
 }

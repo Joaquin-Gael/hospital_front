@@ -91,3 +91,22 @@ export interface DoctorMeResponse {
   doc: Doctor;
   schedules: MedicalSchedule[];
 }
+
+export interface DoctorStatsResponse {
+  turns_per_month: {
+    card: {
+      month: number;
+      turns_per_month: number;
+      monthly_growth: number;
+    };
+    line_chart: {
+      day: number[];
+      turns_per_day: number[];
+    };
+    pipe_chart: {
+      state: string[];
+      day: number[];
+      total_turns: number[];
+    };
+  };
+}

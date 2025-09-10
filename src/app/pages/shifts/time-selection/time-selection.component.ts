@@ -2,58 +2,55 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-time-selection',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LoadingSpinnerComponent],
   template: `
     <div class="form-step" @slideIn>
       <h3 class="step-title">Selecciona un horario</h3>
       <p class="step-subtitle">Elige un horario disponible para tu consulta</p>
 
-      <div class="custom-form-field" *ngIf="!isLoading; else loadingSpinner">
-        <label class="field-label">
-          <i class="material-icons field-icon">schedule</i>
-          Hora disponible
-        </label>
-        <div class="time-slots-grid">
-          <div
-            *ngFor="let timeSlot of availableTimeSlots"
-            class="time-slot"
-            [class.selected]="timeControl.value === timeSlot"
-            (click)="onTimeSelect(timeSlot)"
-            [attr.aria-label]="'Seleccionar horario ' + timeSlot"
-          >
-            {{ timeSlot }}
+      @if (isLoading) {
+        <app-loading-spinner [message]="'Cargando horarios...'"></app-loading-spinner>
+      } @else {
+        <div class="custom-form-field">
+          <label class="field-label">
+            <i class="material-icons field-icon">schedule</i>
+            Hora disponible
+          </label>
+          <div class="time-slots-grid">
+            @for (timeSlot of availableTimeSlots; track timeSlot) {
+              <div
+                class="time-slot"
+                [class.selected]="timeControl.value === timeSlot"
+                (click)="onTimeSelect(timeSlot)"
+                [attr.aria-label]="'Seleccionar horario ' + timeSlot"
+              >
+                {{ timeSlot }}
+              </div>
+            }
+            @if (availableTimeSlots.length === 0) {
+              <div class="error-message" role="alert">
+                No hay horarios disponibles para la fecha seleccionada.
+              </div>
+            }
           </div>
+          @if (timeControl.invalid && timeControl.touched) {
+            <div class="error-message" role="alert">
+              {{ getErrorMessage() }}
+            </div>
+          }
         </div>
-        <div
-          *ngIf="availableTimeSlots.length === 0 && !isLoading"
-          class="error-message"
-          role="alert"
-        >
-          No hay horarios disponibles para la fecha seleccionada.
-        </div>
-        <div
-          *ngIf="timeControl.invalid && timeControl.touched"
-          class="error-message"
-          role="alert"
-        >
-          {{ getErrorMessage() }}
-        </div>
-      </div>
+      }
 
-      <ng-template #loadingSpinner>
-        <div class="loading-spinner">
-          <i class="material-icons loading-icon">hourglass_empty</i>
-          <span>Cargando horarios...</span>
+      @if (error) {
+        <div class="error-message centered-error" role="alert">
+          {{ error }}
         </div>
-      </ng-template>
-
-      <div *ngIf="error" class="error-message centered-error" role="alert">
-        {{ error }}
-      </div>
+      }
     </div>
   `,
   styleUrl: './time-selection.component.scss',

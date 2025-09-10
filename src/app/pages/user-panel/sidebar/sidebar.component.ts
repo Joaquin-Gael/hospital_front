@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
-import { Notification } from '../interfaces/user-panel.interfaces';
 
 @Component({
   selector: 'app-sidebar',

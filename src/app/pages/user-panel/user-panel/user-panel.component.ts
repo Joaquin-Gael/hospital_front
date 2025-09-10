@@ -14,7 +14,7 @@ import { HeaderComponent } from '../header/header.component';
 import { RouterOutlet } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
-import { AppointmentsComponent } from '../appointments/appointments.component';
+import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-user-panel',
@@ -27,6 +27,7 @@ import { AppointmentsComponent } from '../appointments/appointments.component';
     RouterOutlet,
     CommonModule,
     MatDialogModule,
+    LoadingSpinnerComponent
   ],
 })
 export class UserPanelComponent implements OnInit, OnDestroy {

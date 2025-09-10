@@ -8,53 +8,60 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
   imports: [CommonModule],
   template: `
     <div class="form-navigation">
-      <button
-        type="button"
-        class="nav-button back-button"
-        *ngIf="currentStep > 1"
-        (click)="onBackClick()"
-        [disabled]="isLoading"
-        aria-label="Volver al paso anterior"
-      >
-        <i class="material-icons">arrow_back</i>
-        Atrás
-      </button>
+      @if (currentStep > 1) {
+        <button
+          type="button"
+          class="nav-button back-button"
+          (click)="onBackClick()"
+          [disabled]="isLoading"
+          aria-label="Volver al paso anterior"
+        >
+          <i class="material-icons">arrow_back</i>
+          Atrás
+        </button>
+      }
 
-      <button
-        *ngIf="currentStep < totalSteps"
-        type="button"
-        class="nav-button next-button"
-        (click)="onNextClick()"
-        [disabled]="!isStepValid || isLoading"
-        aria-label="Continuar al siguiente paso"
-        [@pulse]="buttonState"
-        (mouseenter)="onButtonHover(true)"
-        (mouseleave)="onButtonHover(false)"
-      >
-        Continuar
-        <i class="material-icons">arrow_forward</i>
-      </button>
+      @if (currentStep < totalSteps) {
+        <button
+          type="button"
+          class="nav-button next-button"
+          (click)="onNextClick()"
+          [disabled]="!isStepValid || isLoading"
+          aria-label="Continuar al siguiente paso"
+          [@pulse]="buttonState"
+          (mouseenter)="onButtonHover(true)"
+          (mouseleave)="onButtonHover(false)"
+        >
+          Continuar
+          <i class="material-icons">arrow_forward</i>
+        </button>
+      }
 
-      <button
-        *ngIf="currentStep === totalSteps"
-        type="submit"
-        class="nav-button payment-button"
-        [disabled]="!isFormValid || isLoading"
-        aria-label="Confirmar turno"
-        [@pulse]="buttonState"
-        (mouseenter)="onButtonHover(true)"
-        (mouseleave)="onButtonHover(false)"
-        (click)="onSubmitClick()"
-      >
-        <span *ngIf="!isLoading" class="button-content">
-          <i class="material-icons">check_circle</i>
-          Confirmar turno
-        </span>
-        <span *ngIf="isLoading" class="button-loading">
-          <i class="material-icons loading-spinner">hourglass_empty</i>
-          Procesando...
-        </span>
-      </button>
+      @if (currentStep === totalSteps) {
+        <button
+          type="submit"
+          class="nav-button payment-button"
+          [disabled]="!isFormValid || isLoading"
+          aria-label="Confirmar turno"
+          [@pulse]="buttonState"
+          (mouseenter)="onButtonHover(true)"
+          (mouseleave)="onButtonHover(false)"
+          (click)="onSubmitClick()"
+        >
+          @if (!isLoading) {
+            <span class="button-content">
+              <i class="material-icons">check_circle</i>
+              Confirmar turno
+            </span>
+          }
+          @if (isLoading) {
+            <span class="button-loading">
+              <i class="material-icons loading-spinner">hourglass_empty</i>
+              Procesando...
+            </span>
+          }
+        </button>
+      }
     </div>
   `,
   styleUrl: './navigation-buttons.component.scss',

@@ -1,19 +1,20 @@
 import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
-import { AppointmentViewModel, Turn, TurnState } from '../../../services/interfaces/appointment.interfaces';
+import { AppointmentViewModel, Turn } from '../../../services/interfaces/appointment.interfaces';
 import { AppointmentService } from '../../../services/appointment/appointments.service';
 import { AuthService } from '../../../services/auth/auth.service';
 import { LoggerService } from '../../../services/core/logger.service';
 import { NotificationService } from '../../../core/notification';
 import { Router } from '@angular/router';
+import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-history',
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoadingSpinnerComponent],
 })
 export class HistoryComponent implements OnInit, OnDestroy {
   @Input() appointments: AppointmentViewModel[] = [];

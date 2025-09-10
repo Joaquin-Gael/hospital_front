@@ -1,8 +1,8 @@
 import { Component, inject, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { NotificationService } from '../../../../../core/notification/services/notification.service';
-import { LoggerService } from '../../../../../services/core/logger.service';
+import { NotificationService } from '../../../../core/notification';
+import { LoggerService } from '../../../../services/core/logger.service';
 
 interface DniUploadFile {
   file: File;
@@ -33,7 +33,7 @@ export class DniUploaderComponent {
   isDraggingBack = false;
 
   private readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  private readonly ALLOWED_TYPES = ['image/jpeg', 'image/png'];
+  private readonly ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 
   get canSubmit(): boolean {
     return !!(this.frontDni?.isValid && this.backDni?.isValid && !this.isSubmitting);

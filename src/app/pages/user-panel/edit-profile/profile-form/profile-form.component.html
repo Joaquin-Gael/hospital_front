@@ -1,0 +1,195 @@
+<div class="profile-form">
+  <div class="profile-form__header">
+    <h2 class="profile-form__title">
+      <i class="fas fa-user profile-form__title-icon"></i>
+      Información Personal
+    </h2>
+    <p class="profile-form__description">
+      Actualiza tu información de contacto y foto de perfil
+    </p>
+  </div>
+
+  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form__form" novalidate>
+    
+    <!-- Photo Upload Section -->
+    <div class="profile-form__photo-section">
+      <div class="profile-photo-upload">
+        <div class="profile-photo-upload__preview">
+          <img 
+            *ngIf="currentPhotoUrl" 
+            [src]="currentPhotoUrl" 
+            alt="Foto de perfil actual"
+            class="profile-photo-upload__image"
+          />
+          <div 
+            *ngIf="!currentPhotoUrl" 
+            class="profile-photo-upload__placeholder">
+            <i class="fas fa-user profile-photo-upload__placeholder-icon"></i>
+          </div>
+          
+          <div class="profile-photo-upload__overlay">
+            <button 
+              type="button"
+              class="profile-photo-upload__button"
+              (click)="triggerFileInput()"
+            >
+              <i class="fas fa-camera"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="profile-photo-upload__info">
+          <h4 class="profile-photo-upload__title">Foto de perfil</h4>
+          <p class="profile-photo-upload__hint">
+            JPG o PNG, máximo 2MB
+          </p>
+          <button 
+            *ngIf="selectedFile || currentPhotoUrl"
+            type="button"
+            class="profile-photo-upload__remove"
+            (click)="removePhoto()"
+          >
+            <i class="fas fa-trash-alt"></i>
+            Eliminar foto
+          </button>
+        </div>
+      </div>
+
+      <input 
+        type="file"
+        #fileInput
+        class="profile-photo-upload__input"
+        accept=".jpg,.jpeg,.png"
+        (change)="onFileSelected($event)"
+      />
+    </div>
+
+    <!-- Form Fields -->
+    <div class="profile-form__fields">
+      
+      <!-- Username (readonly) -->
+      <div class="form-field form-field--readonly">
+        <label class="form-field__label" for="username">
+          Nombre de usuario
+          <span class="form-field__required">*</span>
+        </label>
+        <input 
+          type="text"
+          id="username"
+          class="form-field__input"
+          formControlName="username"
+          readonly
+        />
+        <div class="form-field__hint">
+          <i class="fas fa-info-circle"></i>
+          El nombre de usuario no puede ser modificado
+        </div>
+      </div>
+
+      <!-- First Name (readonly) -->
+      <div class="form-field form-field--readonly">
+        <label class="form-field__label" for="first_name">
+          Nombre
+          <span class="form-field__required">*</span>
+        </label>
+        <input 
+          type="text"
+          id="first_name"
+          class="form-field__input"
+          formControlName="first_name"
+          readonly
+        />
+        <div class="form-field__hint">
+          <i class="fas fa-info-circle"></i>
+          El nombre no puede ser modificado
+        </div>
+      </div>
+
+      <!-- Last Name (readonly) -->
+      <div class="form-field form-field--readonly">
+        <label class="form-field__label" for="last_name">
+          Apellido
+          <span class="form-field__required">*</span>
+        </label>
+        <input 
+          type="text"
+          id="last_name"
+          class="form-field__input"
+          formControlName="last_name"
+          readonly
+        />
+        <div class="form-field__hint">
+          <i class="fas fa-info-circle"></i>
+          El apellido no puede ser modificado
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="form-field">
+        <label class="form-field__label" for="address">
+          Dirección
+        </label>
+        <input 
+          type="text"
+          id="address"
+          class="form-field__input"
+          formControlName="address"
+          placeholder="Ingresa tu dirección"
+        />
+        <div 
+          class="form-field__error" 
+          *ngIf="profileForm.get('address')?.invalid && profileForm.get('address')?.touched"
+        >
+          <i class="fas fa-exclamation-triangle"></i>
+          {{ getFieldError('address') }}
+        </div>
+      </div>
+
+      <!-- Telephone -->
+      <div class="form-field">
+        <label class="form-field__label" for="telephone">
+          Teléfono
+        </label>
+        <input 
+          type="tel"
+          id="telephone"
+          class="form-field__input"
+          formControlName="telephone"
+          placeholder="Ingresa tu número de teléfono"
+        />
+        <div 
+          class="form-field__error" 
+          *ngIf="profileForm.get('telephone')?.invalid && profileForm.get('telephone')?.touched"
+        >
+          <i class="fas fa-exclamation-triangle"></i>
+          {{ getFieldError('telephone') }}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Form Actions -->
+    <div class="profile-form__actions">
+      <button 
+        type="button"
+        class="profile-form__button profile-form__button--secondary"
+        (click)="onCancel()"
+        [disabled]="isSubmitting"
+      >
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
+      
+      <button 
+        type="submit"
+        class="profile-form__button profile-form__button--primary"
+        [disabled]="profileForm.invalid || isSubmitting"
+      >
+        <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+        <i class="fas fa-save" *ngIf="!isSubmitting"></i>
+        {{ isSubmitting ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </div>
+
+  </form>
+</div>

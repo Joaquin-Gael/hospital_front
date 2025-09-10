@@ -15,7 +15,8 @@ import {
   DoctorDelete,
   DoctorMeResponse,
   MedicalSchedule,
-  DoctorUpdatePassword
+  DoctorUpdatePassword,
+  DoctorStatsResponse
 } from '../interfaces/doctor.interfaces';
 import { UserRead } from '../interfaces/user.interfaces';
 import { ServiceService } from '../service/service.service';
@@ -56,6 +57,16 @@ export class DoctorService {
         this.handleError(error, `Failed to fetch doctor ${doctorId}`)
       )
     );
+  }
+
+  getDoctorStats(doctorId: string): Observable<DoctorStatsResponse> {
+    return this.apiService
+      .get<DoctorStatsResponse>(DOCTOR_ENDPOINTS.GET_STATS(doctorId))
+      .pipe(
+        catchError((error) =>
+          this.handleError(error, `Failed to fetch doctor ${doctorId}`)
+        )
+      );
   }
 
   /**

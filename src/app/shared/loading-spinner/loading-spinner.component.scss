@@ -1,0 +1,25 @@
+@use '../../layout/styles/_media-queries.scss' as *; 
+@use '../../layout/styles/_mixins.scss' as *;
+@use '../../pages/user-panel/_shared.scss' as *;  
+
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  color: $text-color;
+  @include flex-column;
+
+  .loading-icon {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

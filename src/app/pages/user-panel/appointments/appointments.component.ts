@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import {
@@ -14,13 +14,14 @@ import { AuthService } from '../../../services/auth/auth.service';
 import { LoggerService } from '../../../services/core/logger.service';
 import { NotificationService } from '../../../core/notification';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
+import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-appointments',
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.scss'],
   standalone: true,
-  imports: [CommonModule, MatDialogModule],
+  imports: [CommonModule, MatDialogModule, LoadingSpinnerComponent],
 })
 export class AppointmentsComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
@@ -29,7 +30,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly notificationService = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
-  private route = inject(ActivatedRoute);
 
   appointments: AppointmentViewModel[] = [];
   user: UserRead | null = null;

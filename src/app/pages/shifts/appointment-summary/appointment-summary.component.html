@@ -30,16 +30,18 @@
           <span class="time-highlight">{{ selectedTime }}</span>
         </div>
       </div>
-
-      <div class="summary-item" *ngIf="getSelectedHealthInsurance()">
-        <div class="summary-label">
-          <i class="material-icons">health_and_safety</i>
-          Obra Social:
-        </div>
-        <div class="summary-value">
-          <span>{{ getSelectedHealthInsurance()?.name }}</span>
-          <span class="discount-highlight">(Descuento: {{ getSelectedHealthInsurance()?.discount }}%)</span>
-        </div>
+      
+      <div class="summary-item">
+        @if (getSelectedHealthInsurance()) {
+          <div class="summary-label">
+            <i class="material-icons">health_and_safety</i>
+            Obra Social:
+          </div>
+          <div class="summary-value">
+            <span>{{ getSelectedHealthInsurance()?.name }}</span>
+            <span class="discount-highlight">(Descuento: {{ getSelectedHealthInsurance()?.discount }}%)</span>
+          </div>
+        }
       </div>
 
       <div class="summary-item">
@@ -64,51 +66,46 @@
   <div class="custom-form-field">
     <h4 class="step-title">Motivo de la consulta</h4>
     <div class="reason-options">
-      <div
-        *ngFor="let reason of reasonOptions"
-        class="reason-card"
-        [class.selected]="reasonControl.value === reason.id"
-        (click)="onReasonSelect(reason.id)"
-        [attr.aria-label]="'Seleccionar motivo ' + reason.name"
-      >
-        <div class="reason-name">{{ reason.name }}</div>
+      @for (reason of reasonOptions; track reason.id) {
+        <div
+          class="reason-card"
+          [class.selected]="reasonControl.value === reason.id"
+          (click)="onReasonSelect(reason.id)"
+          [attr.aria-label]="'Seleccionar motivo ' + reason.name"
+        >
+          <div class="reason-name">{{ reason.name }}</div>
+        </div>
+      }
+    </div>
+    @if (reasonControl.invalid && reasonControl.touched) {
+      <div class="error-message" role="alert">
+        {{ getReasonErrorMessage() }}
       </div>
-    </div>
-    <div
-      *ngIf="reasonControl.invalid && reasonControl.touched"
-      class="error-message"
-      role="alert"
-    >
-      {{ getReasonErrorMessage() }}
-    </div>
+    }
   </div>
 
-  <div
-    *ngIf="showCustomReason"
-    class="custom-form-field custom-reason-field"
-    @fadeInOut
-  >
-    <label class="field-label">
-      <i class="material-icons field-icon">edit</i>
-      Especifica el motivo de tu consulta
-    </label>
-    <div class="field-input-container">
-      <textarea
-        [formControl]="customReasonControl"
-        placeholder="Describe detalladamente el motivo de tu visita (mínimo 10 caracteres)"
-        rows="4"
-        aria-label="Describe el motivo específico de tu visita"
-        class="custom-input textarea-input"
-      ></textarea>
+  @if (showCustomReason) {
+    <div class="custom-form-field custom-reason-field" @fadeInOut>
+      <label class="field-label">
+        <i class="material-icons field-icon">edit</i>
+        Especifica el motivo de tu consulta
+      </label>
+      <div class="field-input-container">
+        <textarea
+          [formControl]="customReasonControl"
+          placeholder="Describe detalladamente el motivo de tu visita (mínimo 10 caracteres)"
+          rows="4"
+          aria-label="Describe el motivo específico de tu visita"
+          class="custom-input textarea-input"
+        ></textarea>
+      </div>
+      @if (customReasonControl.invalid && customReasonControl.touched) {
+        <div class="error-message" role="alert">
+          {{ getCustomReasonErrorMessage() }}
+        </div>
+      }
     </div>
-    <div
-      *ngIf="customReasonControl.invalid && customReasonControl.touched"
-      class="error-message"
-      role="alert"
-    >
-      {{ getCustomReasonErrorMessage() }}
-    </div>
-  </div>
+  }
 
   <div class="terms-checkbox">
     <label class="checkbox-container">
@@ -125,12 +122,10 @@
         <a href="#" class="terms-link">políticas de privacidad</a>
       </span>
     </label>
-    <div
-      *ngIf="termsControl.invalid && termsControl.touched"
-      class="error-message"
-      role="alert"
-    >
-      Debes aceptar los términos y condiciones
-    </div>
+    @if (termsControl.invalid && termsControl.touched) {
+      <div class="error-message" role="alert">
+        Debes aceptar los términos y condiciones
+      </div>
+    }
   </div>
 </div>

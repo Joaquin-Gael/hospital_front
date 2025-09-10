@@ -46,17 +46,17 @@
       <div class="contact-form-container">
         <h3>Envíenos un mensaje</h3>
         
-        <!-- Mensaje de éxito -->
-        <div *ngIf="submitSuccess" class="alert alert-success">
-          <i class="fas fa-check-circle"></i>
-          <p>¡Su mensaje ha sido enviado con éxito! Nos pondremos en contacto con usted pronto.</p>
-        </div>
-        
-        <!-- Mensaje de error -->
-        <div *ngIf="submitError" class="alert alert-error">
-          <i class="fas fa-exclamation-circle"></i>
-          <p>{{ errorMessage }}</p>
-        </div>
+        @if (submitSuccess) {
+          <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <p>¡Su mensaje ha sido enviado con éxito! Nos pondremos en contacto con usted pronto.</p>
+          </div>
+        } @else {
+          <div class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>{{ errorMessage }}</p>
+          </div>
+        }
         
         <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
           <div class="form-group">
@@ -65,9 +65,11 @@
               <i class="fas fa-user"></i>
               <input type="text" id="name" formControlName="name" placeholder="Ingrese su nombre completo">
             </div>
-            <div class="error-message" *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched">
-              El nombre es requerido
-            </div>
+            @if (contactForm.get('name')?.invalid && contactForm.get('name')?.touched) {
+              <div class="error-message">
+                El nombre es requerido
+              </div>
+            }
           </div>
 
           <div class="form-group">
@@ -76,9 +78,11 @@
               <i class="fas fa-envelope"></i>
               <input type="email" id="email" formControlName="email" placeholder="Ingrese su correo electrónico">
             </div>
-            <div class="error-message" *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
-              Ingrese un correo electrónico válido
-            </div>
+            @if (contactForm.get('email')?.invalid && contactForm.get('email')?.touched) {
+              <div class="error-message">
+                Ingrese un correo electrónico válido
+              </div>
+            }
           </div>
 
           <div class="form-group">
@@ -87,9 +91,11 @@
               <i class="fas fa-phone-alt"></i>
               <input type="tel" id="phone" formControlName="phone" placeholder="Ingrese su número de teléfono">
             </div>
-            <div class="error-message" *ngIf="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched">
-              Ingrese un número de teléfono válido (10 dígitos)
-            </div>
+            @if (contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched) {
+              <div class="error-message">
+                Ingrese un número de teléfono válido (10 dígitos)
+              </div>
+            }
           </div>
 
           <div class="form-group">
@@ -105,9 +111,11 @@
                 <option value="otro">Otro</option>
               </select>
             </div>
-            <div class="error-message" *ngIf="contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched">
-              Seleccione un asunto
-            </div>
+            @if (contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched) {
+              <div class="error-message">
+                Seleccione un asunto
+              </div>
+            }
           </div>
 
           <div class="form-group">
@@ -116,16 +124,21 @@
               <i class="fas fa-comment"></i>
               <textarea id="message" formControlName="message" rows="5" placeholder="Escriba su mensaje aquí"></textarea>
             </div>
-            <div class="error-message" *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched">
-              El mensaje debe tener al menos 10 caracteres
-            </div>
+            @if (contactForm.get('message')?.invalid && contactForm.get('message')?.touched) {
+              <div class="error-message">
+                El mensaje debe tener al menos 10 caracteres
+              </div>
+            }
           </div>
 
           <button type="submit" class="submit-btn" [disabled]="contactForm.invalid || isSubmitting">
-            <span *ngIf="isSubmitting">
-              <i class="fas fa-spinner fa-spin"></i> Enviando...
-            </span>
-            <span *ngIf="!isSubmitting">Enviar mensaje</span>
+            @if (isSubmitting){
+              <span *ngIf="isSubmitting">
+                <i class="fas fa-spinner fa-spin"></i> Enviando...
+              </span>
+            } @else {
+              <span>Enviar mensaje</span>
+            }
           </button>
         </form>
       </div>

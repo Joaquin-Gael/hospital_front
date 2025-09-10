@@ -1,123 +1,66 @@
 <div class="edit-profile">
-  <!-- Formulario de perfil -->
-  <div class="edit-profile__form">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="initialData"
-      [loading]="isSubmitting"
-      [submitLabel]="isSubmitting ? 'Guardando...' : 'Finalizar'"
-      [enableImageUpload]="true"
-      (formSubmit)="onFormSubmit($event)"
-      (formCancel)="onFormCancel()"
-    ></app-entity-form>
+
+  
+  <!-- Navigation Tabs -->
+  <div class="edit-profile__navigation">
+    <nav class="profile-tabs">
+      <button 
+        class="profile-tabs__item"
+        [class.profile-tabs__item--active]="activeTab === 'profile'"
+        (click)="setActiveTab('profile')"
+        type="button">
+        <i class="fas fa-user profile-tabs__icon"></i>
+        <span class="profile-tabs__label">Datos Personales</span>
+      </button>
+      
+      <button 
+        class="profile-tabs__item"
+        [class.profile-tabs__item--active]="activeTab === 'insurance'"
+        (click)="setActiveTab('insurance')"
+        type="button">
+        <i class="fas fa-hospital profile-tabs__icon"></i>
+        <span class="profile-tabs__label">Obras Sociales</span>
+      </button>
+      
+      <button 
+        class="profile-tabs__item"
+        [class.profile-tabs__item--active]="activeTab === 'dni'"
+        (click)="setActiveTab('dni')"
+        type="button">
+        <i class="fas fa-id-card profile-tabs__icon"></i>
+        <span class="profile-tabs__label">Verificar DNI</span>
+      </button>
+    </nav>
   </div>
 
-  <!-- Nueva sección de drag and drop para obras sociales -->
-  <div class="edit-profile__divider">
-    <div class="edit-profile__divider-line"></div>
-    <div class="edit-profile__divider-line"></div>
-  </div>
-
-  <div class="edit-profile__health-insurance-section">
-    <div class="health-insurance-drag-drop">
-      <!-- Columna de obras sociales disponibles -->
-      <div class="health-insurance-column">
-        <h3 class="health-insurance-column__title">
-          <i class="fas fa-hospital health-insurance-column__icon"></i>
-          Obras Sociales Disponibles
-        </h3>
-        <div 
-          class="health-insurance-list health-insurance-list--available"
-          (dragover)="onDragOver($event)"
-          (dragenter)="onDragEnter($event)"
-          (dragleave)="onDragLeave($event)"
-          (drop)="onDropToAvailable($event)"
-          [class.health-insurance-list--drag-over]="isDraggingOver"
-        >
-          <div 
-            *ngFor="let insurance of availableHealthInsurances; trackBy: trackByFn"
-            class="health-insurance-item health-insurance-item--available"
-            draggable="true"
-            (dragstart)="onDragStart($event, insurance)"
-            (click)="addToSelected(insurance)"
-          >
-            <div class="health-insurance-item__content">
-              <span class="health-insurance-item__name">{{ insurance.name }}</span>
-              <span class="health-insurance-item__discount">{{ insurance.discount }}% desc.</span>
-            </div>
-            <button 
-              class="health-insurance-item__action"
-              (click)="$event.stopPropagation(); addToSelected(insurance)"
-              title="Agregar obra social"
-            >
-              <i class="fas fa-plus"></i>
-            </button>
-          </div>
-          
-          <div *ngIf="availableHealthInsurances.length === 0" class="health-insurance-empty">
-            <i class="fas fa-star health-insurance-empty__icon"></i>
-            <p class="health-insurance-empty__text">Todas las obras sociales están seleccionadas</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Columna de obras sociales seleccionadas -->
-      <div class="health-insurance-column">
-        <h3 class="health-insurance-column__title">
-          <i class="fas fa-check-circle health-insurance-column__icon"></i>
-          Mis Obras Sociales
-          <span class="health-insurance-column__count" *ngIf="selectedHealthInsurances.length > 0">
-            ({{ selectedHealthInsurances.length }})
-          </span>
-        </h3>
-        <div 
-          class="health-insurance-list health-insurance-list--selected"
-          (dragover)="onDragOver($event)"
-          (dragenter)="onDragEnter($event)"
-          (dragleave)="onDragLeave($event)"
-          (drop)="onDropToSelected($event)"
-          [class.health-insurance-list--drag-over]="isDraggingOver"
-        >
-          <div 
-            *ngFor="let insurance of selectedHealthInsurances; trackBy: trackByFn"
-            class="health-insurance-item health-insurance-item--selected"
-            draggable="true"
-            (dragstart)="onDragStart($event, insurance)"
-            (click)="removeFromSelected(insurance)"
-          >
-            <div class="health-insurance-item__content">
-              <span class="health-insurance-item__name">{{ insurance.name }}</span>
-              <span class="health-insurance-item__discount">{{ insurance.discount }}% desc.</span>
-            </div>
-            <button 
-              class="health-insurance-item__action health-insurance-item__action--remove"
-              (click)="$event.stopPropagation(); removeFromSelected(insurance)"
-              title="Quitar obra social"
-            >
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          
-          <div *ngIf="selectedHealthInsurances.length === 0" class="health-insurance-empty">
-            <i class="fas fa-hand-point-up health-insurance-empty__icon"></i>
-            <p class="health-insurance-empty__text">Arrastra aquí las obras sociales con las que tienes relacion</p>
-          </div>
-        </div>
-      </div>
+  <!-- Tab Content -->
+  <div class="edit-profile__content">
+    <!-- Profile Form Tab -->
+    <div class="edit-profile__tab" *ngIf="activeTab === 'profile'">
+      <app-profile-form
+        [initialData]="initialData"
+        [isSubmitting]="isSubmitting"
+        (formSubmit)="onProfileSubmit($event)"
+        (formCancel)="onFormCancel()">
+      </app-profile-form>
     </div>
-  </div>
 
-  <!-- Separador visual -->
-  <div class="edit-profile__divider">
-    <div class="edit-profile__divider-line"></div>
-    <div class="edit-profile__divider-line"></div>
-  </div>
+    <!-- Health Insurance Tab -->
+    <div class="edit-profile__tab" *ngIf="activeTab === 'insurance'">
+      <app-health-insurance-manager
+        [availableInsurances]="availableHealthInsurances"
+        [selectedInsurances]="selectedHealthInsurances"
+        (insurancesChanged)="onInsurancesChanged($event)"
+        (saveInsurances)="onSaveInsurances($event)">
+      </app-health-insurance-manager>
+    </div>
 
-  <!-- Componente de verificación DNI -->
-  <div class="edit-profile__dni-section">
-    <app-dni-uploader
-      (uploadSuccess)="onDniUploadSuccess($event)"
-      (uploadError)="onDniUploadError($event)"
-    ></app-dni-uploader>
+    <!-- DNI Upload Tab -->
+    <div class="edit-profile__tab" *ngIf="activeTab === 'dni'">
+      <app-dni-uploader
+        (uploadSuccess)="onDniUploadSuccess($event)"
+        (uploadError)="onDniUploadError($event)">
+      </app-dni-uploader>
+    </div>
   </div>
 </div>
