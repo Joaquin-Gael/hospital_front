@@ -1,98 +1,128 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.open]="isOpen" [class.collapsed]="isCollapsed">
   <div class="sidebar__header">
     <div class="sidebar__logo">
-      <img src="assets/logo-siglas-negro.png" alt="Logo" />
-      <a href="/home">Hospital SDLG</a>
+      <img src="assets/logo-siglas-negro.png" alt="Hospital Logo" />
+      <a href="/home" class="sidebar__logo-text">Hospital SDLG</a>
     </div>
+    
+    <button 
+      class="sidebar__close-btn"
+      (click)="onClose()"
+      [attr.aria-label]="'Cerrar menú'"
+    >
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
   </div>
-  <div class="sidebar__user">
-    <!-- Estado de carga -->
-    <div *ngIf="!user" class="loading">
-      <span>Cargando...</span>
-    </div>
 
-    <!-- Información del usuario -->
-    <div *ngIf="user" class="sidebar__user-content">
-      <div class="sidebar__avatar">
-        <img
-          *ngIf="user.img_profile; else avatarPlaceholder"
-          [src]="user.img_profile"
-          alt="Avatar"
-          class="sidebar__avatar-img"
-        />
-        <ng-template #avatarPlaceholder>
-          <div class="sidebar__avatar-placeholder">
-            <span class="sidebar__avatar-initials">{{
-              getInitials(user.username)
-            }}</span>
+  <div class="sidebar__user">
+    @if (!user) {
+      <div class="sidebar__user-loading">
+        <div class="loading-skeleton">
+          <div class="skeleton-avatar"></div>
+          <div class="skeleton-content">
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line skeleton-line--subtitle"></div>
           </div>
-        </ng-template>
+        </div>
       </div>
-      <div class="sidebar__user-info">
-        <h3 class="sidebar__user-name">{{ user.username }}</h3>
-        <p class="sidebar__user-id">DNI: {{ user.dni }}</p>
+    } @else {
+      <div class="sidebar__user-content">
+        <div class="sidebar__avatar">
+          @if (user.img_profile) {
+            <img
+              [src]="user.img_profile"
+              [alt]="'Avatar de ' + user.username"
+              class="sidebar__avatar-img"
+              (error)="onImageError()"
+            />
+          } @else {
+            <div class="sidebar__avatar-placeholder">
+              <span class="sidebar__avatar-initials">
+                {{ getInitials(user.username) }}
+              </span>
+            </div>
+          }
+        </div>
+        
+        <div class="sidebar__user-info">
+          <h3 class="sidebar__user-name">{{ user.username }}</h3>
+          <p class="sidebar__user-id">DNI: {{ user.dni }}</p>
+        </div>
       </div>
-    </div>
+    }
   </div>
+
   <nav class="sidebar__nav">
     <ul class="sidebar__menu">
-      <li *ngFor="let item of menuItems" class="sidebar__item">
-        <a
-          [routerLink]="item.route"
-          routerLinkActive="sidebar__nav-item--active"
-          class="sidebar__nav-item"
-        >
-          <span class="sidebar__nav-icon">
-            <svg
-              class="icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                *ngIf="item.icon === 'calendar'"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-              <path
-                *ngIf="item.icon === 'history'"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-              <path
-                *ngIf="item.icon === 'bell'"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              />
-              <path
-                *ngIf="item.icon === 'file'"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-              <path
-                *ngIf="item.icon === 'user'"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-              <path
-                *ngIf="item.icon === 'edit'"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-              />
-            </svg>
-          </span>
-          <span>{{ item.label }}</span>
-        </a>
-      </li>
+      @for (item of menuItems; track item.route) {
+        <li class="sidebar__item">
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="sidebar__nav-item--active"
+            class="sidebar__nav-item"
+            (click)="onNavItemClick(item)"
+            [attr.aria-label]="item.label"
+          >
+            <span class="sidebar__nav-icon">
+              <svg
+                class="icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                @switch (item.icon) {
+                  @case ('calendar') {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  }
+                  @case ('history') {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  }
+                  @case ('bell') {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  }
+                  @case ('file') {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  }
+                  @case ('user') {
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  }
+                }
+              </svg>
+              
+              @if (item.badge) {
+                <span class="sidebar__nav-badge">{{ item.badge }}</span>
+              }
+            </span>
+            <span class="sidebar__nav-text">{{ item.label }}</span>
+          </a>
+        </li>
+      }
     </ul>
   </nav>
+
   <div class="sidebar__footer">
     <button class="sidebar__footer-btn" (click)="onLogout()">
       <svg
@@ -108,7 +138,14 @@
           d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
         />
       </svg>
-      <span>Cerrar Sesión</span>
+      <span class="sidebar__footer-text">Cerrar Sesión</span>
     </button>
   </div>
 </aside>
+
+<div 
+  class="sidebar-overlay" 
+  [class.visible]="isOpen"
+  (click)="onClose()"
+  [attr.aria-hidden]="!isOpen"
+></div>

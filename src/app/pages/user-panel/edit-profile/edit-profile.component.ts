@@ -15,7 +15,7 @@ import type { HttpErrorResponse } from "@angular/common/http";
 import { ProfileFormComponent } from "./profile-form/profile-form.component";
 import { HealthInsuranceManagerComponent } from "./health-insurance-manager/health-insurance-manager.component";
 import { DniUploaderComponent } from "./dni-uploader/dni-uploader.component";
-
+import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component'
 export type TabType = 'profile' | 'insurance' | 'dni';
 
 @Component({
@@ -26,7 +26,7 @@ export type TabType = 'profile' | 'insurance' | 'dni';
     RouterModule, 
     ProfileFormComponent,
     HealthInsuranceManagerComponent,
-    DniUploaderComponent
+    DniUploaderComponent,
   ],
   templateUrl: "./edit-profile.component.html",
   styleUrls: ["./edit-profile.component.scss"],
@@ -39,7 +39,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
   private readonly logger = inject(LoggerService);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
-
+  
+  loading = true; // Initialize loading state
   user: UserRead | null = null;
   healthInsurances: HealthInsuranceRead[] = [];
   isSubmitting = false;

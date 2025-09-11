@@ -9,7 +9,9 @@
   border-bottom: 1px solid $border-color;
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.95);
   @include flex-between;
 
   @include mobile-only {
@@ -21,28 +23,13 @@
     padding: 0 24px;
   }
 
-  &__title {
-    h1 {
-      font-size: 24px;
-      font-weight: 600;
-      margin: 0;
-      color: $text-color;
-
-      @include mobile-only {
-        font-size: 20px;
-      }
-
-      @include tablet-only {
-        font-size: 22px;
-      }
-    }
-  }
-
-  &__actions {
-    @include flex-inline(12px);
+  &__left {
+    min-width: 0;
+    flex: 1;
+    @include flex-inline(16px);
 
     @include mobile-only {
-      gap: 8px;
+      gap: 12px;
     }
   }
 
@@ -51,25 +38,69 @@
     height: 40px;
     border-radius: $border-radius-sm;
     color: $text-color;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
     transition: $transition;
-    @include button-reset;
     @include flex-center;
     @include show-on-mobile-only;
-    @include hover-effect($background-color);
+
+    &:hover {
+      background-color: $background-color;
+      color: $primary-color;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
 
     .icon {
       width: 20px;
       height: 20px;
+      stroke-width: 2.5;
+    }
+
+    @include tablet-only {
+      display: flex;
+    }
+  }
+
+  &__title {
+    min-width: 0;
+    flex: 1;
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+      color: $text-color;
+      line-height: 1.2;
+      @include text-truncate;
+
+      @include mobile-only {
+        font-size: 18px;
+        margin: 0;
+      }
+
+      @include tablet-only {
+        font-size: 20px;
+      }
     }
   }
 
   &__breadcrumbs {
     color: $text-light;
-    font-size: 14px;
-    @include flex-inline(8px);
+    font-size: 13px;
+    line-height: 1;
+    @include flex-inline(6px);
 
     @include mobile-only {
       display: none;
+    }
+
+    @include tablet-only {
+      font-size: 12px;
     }
 
     a {
@@ -84,6 +115,56 @@
 
     .separator {
       color: $text-lighter;
+      font-size: 12px;
     }
   }
+
+  &__actions {
+    flex-shrink: 0;
+    @include flex-inline(12px);
+
+    @include mobile-only {
+      gap: 8px;
+    }
+
+    .btn {
+      @include mobile-only {
+        padding: 8px 12px;
+        font-size: 13px;
+
+        &__text {
+          @media (max-width: 360px) {
+            display: none;
+          }
+        }
+
+        .icon {
+          width: 16px;
+          height: 16px;
+        }
+      }
+
+      @include tablet-only {
+        padding: 9px 14px;
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+// Animación para el botón hamburguesa
+@keyframes menuPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+.header__menu-btn.active {
+  animation: menuPulse 0.6s;
 }

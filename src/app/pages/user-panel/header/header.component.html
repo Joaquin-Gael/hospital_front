@@ -1,24 +1,74 @@
 <header class="header">
-  <div class="header__title">
-    <ng-container [ngSwitch]="activeSection">
-      <h1 *ngSwitchCase="'appointments'">Turnos Agendados</h1>
-      <h1 *ngSwitchCase="'history'">Historial</h1>
-      <h1 *ngSwitchCase="'notifications'">Notificaciones</h1>
-      <h1 *ngSwitchCase="'documents'">Documentos</h1>
-      <h1 *ngSwitchCase="'profile'">Perfil</h1>
-    </ng-container>
+  <div class="header__left">
+    <button 
+      class="header__menu-btn"
+      (click)="onToggleSidebar()"
+      [attr.aria-label]="'Abrir menú'"
+    >
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M3 6h18M3 18h18" />
+      </svg>
+    </button>
+    
+    <div class="header__title">
+      @switch (activeSection) {
+        @case ('appointments') {
+          <h1>Turnos Agendados</h1>
+        }
+        @case ('history') {
+          <h1>Historial</h1>
+        }
+        @case ('notifications') {
+          <h1>Notificaciones</h1>
+        }
+        @case ('documents') {
+          <h1>Documentos</h1>
+        }
+        @case ('profile') {
+          <h1>Perfil</h1>
+        }
+        @case ('edit-profile') {
+          <h1>Editar Perfil</h1>
+        }
+        @default {
+          <h1>Panel de Usuario</h1>
+        }
+      }
+      
+      <div class="header__breadcrumbs">
+        <a href="/home">Inicio</a>
+        <span class="separator">/</span>
+        <span>{{ getBreadcrumbText(activeSection) }}</span>
+      </div>
+    </div>
   </div>
+  
   <div class="header__actions">
-    <ng-container *ngIf="activeSection === 'appointments'">
-      <button class="btn btn--primary" (click)="requestNewAppointment()">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
-        Nuevo Turno
-      </button>
-    </ng-container>
-    <ng-container *ngIf="activeSection === 'profile'">
-      <button class="btn btn--primary" (click)="onEditProfile()">Editar Perfil</button>
-    </ng-container>
+    @switch (activeSection) {
+      @case ('appointments') {
+        <button class="btn btn--primary" (click)="requestNewAppointment()">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          <span class="btn__text">Nuevo Turno</span>
+        </button>
+      }
+      @case ('profile') {
+        <button class="btn btn--primary" (click)="onEditProfile()">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          <span class="btn__text">Editar</span>
+        </button>
+      }
+      @case ('edit-profile') {
+        <button class="btn btn--outline" (click)="onCancelEdit()">
+          <span class="btn__text">Cancelar</span>
+        </button>
+        <button class="btn btn--primary" (click)="onSaveProfile()">
+          <span class="btn__text">Guardar</span>
+        </button>
+      }
+    }
   </div>
 </header>

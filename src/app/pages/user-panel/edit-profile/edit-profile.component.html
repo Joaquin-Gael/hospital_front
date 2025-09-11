@@ -1,6 +1,4 @@
 <div class="edit-profile">
-
-  
   <!-- Navigation Tabs -->
   <div class="edit-profile__navigation">
     <nav class="profile-tabs">
@@ -36,31 +34,37 @@
   <!-- Tab Content -->
   <div class="edit-profile__content">
     <!-- Profile Form Tab -->
-    <div class="edit-profile__tab" *ngIf="activeTab === 'profile'">
-      <app-profile-form
-        [initialData]="initialData"
-        [isSubmitting]="isSubmitting"
-        (formSubmit)="onProfileSubmit($event)"
-        (formCancel)="onFormCancel()">
-      </app-profile-form>
-    </div>
+    @if (activeTab === 'profile') {
+      <div class="edit-profile__tab">
+        <app-profile-form
+          [initialData]="initialData"
+          [isSubmitting]="isSubmitting"
+          (formSubmit)="onProfileSubmit($event)"
+          (formCancel)="onFormCancel()">
+        </app-profile-form>
+      </div>
+    }
 
     <!-- Health Insurance Tab -->
-    <div class="edit-profile__tab" *ngIf="activeTab === 'insurance'">
-      <app-health-insurance-manager
-        [availableInsurances]="availableHealthInsurances"
-        [selectedInsurances]="selectedHealthInsurances"
-        (insurancesChanged)="onInsurancesChanged($event)"
-        (saveInsurances)="onSaveInsurances($event)">
-      </app-health-insurance-manager>
-    </div>
+    @if (activeTab === 'insurance') {
+      <div class="edit-profile__tab">
+        <app-health-insurance-manager
+          [availableInsurances]="availableHealthInsurances"
+          [selectedInsurances]="selectedHealthInsurances"
+          (insurancesChanged)="onInsurancesChanged($event)"
+          (saveInsurances)="onSaveInsurances($event)">
+        </app-health-insurance-manager>
+      </div>
+    }
 
     <!-- DNI Upload Tab -->
-    <div class="edit-profile__tab" *ngIf="activeTab === 'dni'">
-      <app-dni-uploader
-        (uploadSuccess)="onDniUploadSuccess($event)"
-        (uploadError)="onDniUploadError($event)">
-      </app-dni-uploader>
-    </div>
+    @if (activeTab === 'dni') {
+      <div class="edit-profile__tab">
+        <app-dni-uploader
+          (uploadSuccess)="onDniUploadSuccess($event)"
+          (uploadError)="onDniUploadError($event)">
+        </app-dni-uploader>
+      </div>
+    }
   </div>
 </div>

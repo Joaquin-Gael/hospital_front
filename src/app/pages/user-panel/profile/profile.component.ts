@@ -100,14 +100,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
     return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
-  getInitials(): string {
-    const name = this.user ? `${this.user.first_name || ''} ${this.user.last_name || ''}`.trim() : '';
+  getInitials(name: string): string {
     if (!name || name === 'No disponible') return 'ND';
-    return name
-      .split(' ')
-      .filter(word => word)
-      .map(word => word.charAt(0).toUpperCase())
+    
+    const words = name.trim().split(' ').filter(word => word.length > 0);
+    if (words.length === 0) return 'ND';
+    
+    if (words.length === 1) {
+      return words[0].substring(0, 2).toUpperCase();
+    }
+    
+    return words
       .slice(0, 2)
+      .map(word => word.charAt(0).toUpperCase())
       .join('');
   }
 
@@ -120,6 +125,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     //this.router.navigate(['/user_panel/change-password']);
   }
 
+  onImageError(): void {
+    if (this.user) {
+      this.user.img_profile = null;
+    }
+  }
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

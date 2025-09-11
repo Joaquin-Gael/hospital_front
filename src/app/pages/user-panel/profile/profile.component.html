@@ -1,34 +1,33 @@
 <section class="profile">
   <div class="profile__card">
-    <ng-container *ngIf="loading; else content">
+    @if (loading) {
       <div class="loading-spinner">
         <i class="material-icons loading-icon">hourglass_empty</i>
         <span>Cargando perfil...</span>
       </div>
-    </ng-container>
-
-    <ng-template #content>
-      <ng-container *ngIf="error; else profileContent">
+    } @else {
+      @if (error) {
         <div class="error">
           <span>{{ error }}</span>
         </div>
-      </ng-container>
-
-      <ng-template #profileContent>
-        <ng-container *ngIf="user; else emptyState">
+      } @else {
+        @if (user) {
           <div class="profile__header">
             <div class="profile__avatar">
-              <img
-                *ngIf="user.img_profile; else avatarPlaceholder"
-                [src]="user.img_profile"
-                alt="Avatar"
-                class="profile__avatar-img"
-              />
-              <ng-template #avatarPlaceholder>
-                <div class="profile__avatar-placeholder">
-                  <span class="profile__avatar-initials">{{ getInitials() }}</span>
+              @if (user.img_profile) {
+                <img
+                  [src]="user.img_profile"
+                  [alt]="'Avatar de ' + user.username"
+                  class="profile__avatar-initials"
+                  (error)="onImageError()"
+                />
+              } @else {
+                <div class="sidebar__avatar-placeholder">
+                  <span class="profile__avatar-initials">
+                    {{ getInitials(user.username) }}
+                  </span>
                 </div>
-              </ng-template>
+              }
             </div>
             <div>
               <h2 class="profile__name">
@@ -101,9 +100,7 @@
               Editar Perfil
             </button>
           </div>
-        </ng-container>
-
-        <ng-template #emptyState>
+        } @else {
           <div class="empty-state">
             <div class="empty-state__icon">
               <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -113,8 +110,8 @@
             <h2>No hay datos de perfil</h2>
             <p>No se encontraron datos para mostrar. Por favor, intenta de nuevo.</p>
           </div>
-        </ng-template>
-      </ng-template>
-    </ng-template>
+        }
+      }
+    }
   </div>
 </section>

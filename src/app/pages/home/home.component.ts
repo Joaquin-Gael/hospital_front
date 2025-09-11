@@ -30,11 +30,9 @@ import { DEPARTMENTS, DOCTORS, NEWS, FAQS, SPECIALTIES, STATS, HERO } from './da
     ServicesComponent,
     SpecialtiesComponent,
     ServiceTabsComponent,
-    DoctorsComponent,
     NewsComponent,
     FaqComponent,
     CtaComponent,
-    NewsletterComponent
   ]
 })
 export class HomeComponent {

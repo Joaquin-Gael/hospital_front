@@ -167,12 +167,13 @@
   }
 
   &__icon {
-    font-size: 48px;
+    font-size: 36px; /* Reduced for Material Icons */
     margin-bottom: 16px;
-    opacity: 0.7;
+    color: #6b7280; /* Match text color for consistency */
+    line-height: 1; /* Ensure proper alignment */
 
     @include mobile-only {
-      font-size: 40px;
+      font-size: 32px;
       margin-bottom: 12px;
     }
   }
@@ -235,11 +236,13 @@
   }
 
   &__error-icon {
-    font-size: 48px;
+    font-size: 36px; /* Adjusted for Material Icons */
     margin-bottom: 16px;
+    color: #dc2626; /* Match error text color */
+    line-height: 1;
 
     @include mobile-only {
-      font-size: 40px;
+      font-size: 32px;
       margin-bottom: 12px;
     }
   }
@@ -266,8 +269,8 @@
     border-radius: 50%;
     background: rgba(239, 68, 68, 0.9);
     color: white;
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 24px; /* Adjusted for Material Icons */
+    font-weight: normal; /* Material Icons don't need bold */
     cursor: pointer;
     transition: all 0.2s ease;
     z-index: 10;
@@ -286,7 +289,7 @@
     @include mobile-only {
       width: 32px;
       height: 32px;
-      font-size: 16px;
+      font-size: 20px; /* Adjusted for mobile */
       top: 8px;
       right: 8px;
     }
@@ -351,11 +354,11 @@
       font-size: 16px;
     }
 
-    i {
-      font-size: 18px;
+    i.material-icons {
+      font-size: 24px; /* Adjusted for Material Icons */
 
       @include mobile-only {
-        font-size: 16px;
+        font-size: 20px;
       }
     }
   }
@@ -375,47 +378,55 @@
       font-size: 13px;
       margin-top: 16px;
     }
-  }
-}
 
-// Animaciones para estados de carga
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
+    i.material-icons {
+      font-size: 20px; /* Adjusted for status icon */
 
-.dni-uploader__submit-btn:disabled {
-  animation: pulse 2s ease-in-out infinite;
+      @include mobile-only {
+        font-size: 18px;
+      }
+    }
+  }
 
+  // Animaciones para estados de carga
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  &__submit-btn:disabled {
+    animation: pulse 2s ease-in-out infinite;
+
+    @include reduce-motion {
+      animation: none;
+    }
+  }
+
+  // Estados de accesibilidad
   @include reduce-motion {
-    animation: none;
-  }
-}
+    .dni-uploader__dropzone,
+    .dni-uploader__submit-btn,
+    .dni-uploader__remove-btn {
+      transition: none !important;
 
-// Estados de accesibilidad
-@include reduce-motion {
-  .dni-uploader__dropzone,
-  .dni-uploader__submit-btn,
-  .dni-uploader__remove-btn {
-    transition: none !important;
+      &:hover {
+        transform: none !important;
+      }
+    }
 
-    &:hover {
+    .dni-uploader__dropzone--dragging {
       transform: none !important;
     }
   }
 
-  .dni-uploader__dropzone--dragging {
-    transform: none !important;
+  // Focus visible para accesibilidad
+  :focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
   }
-}
-
-// Focus visible para accesibilidad
-:focus-visible {
-  outline: 3px solid #3b82f6;
-  outline-offset: 2px;
-  border-radius: 4px;
 }

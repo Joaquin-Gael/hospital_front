@@ -6,9 +6,27 @@
   display: flex;
   min-height: 100vh;
   background-color: $background-color;
+  position: relative;
 
-  @include nav-mobile {
+  @include mobile-only {
     flex-direction: column;
+    height: 100vh;
+    overflow-x: hidden;
+  }
+
+  @include tablet-only {
+    height: 100vh;
+    overflow-x: hidden;
+  }
+
+  &.sidebar-open {
+    @include mobile-only {
+      overflow: hidden;
+    }
+
+    @include tablet-only {
+      overflow: hidden;
+    }
   }
 }
 
@@ -16,62 +34,189 @@
   flex: 1;
   margin-left: $sidebar-width;
   min-height: 100vh;
+  width: calc(100% - #{$sidebar-width});
   @include flex-column;
 
-  @include nav-mobile {
+  @include mobile-only {
+    margin-left: 0;
+    width: 100%;
+    min-height: calc(100vh - #{$navbar-mobile-height});
+  }
+
+  @include tablet-only {
     margin-left: 0;
     width: 100%;
   }
 
-  @include tablet-only {
-    margin-left: $sidebar-collapsed-width;
-  }
+  // Transición suave cuando cambia el tamaño
+  transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 
-  & {
-    transition: margin-left 0.3s ease;
+  .dashboard.sidebar-collapsed & {
+    @include desktop-up {
+      margin-left: $sidebar-collapsed-width;
+      width: calc(100% - #{$sidebar-collapsed-width});
+    }
   }
 }
 
 .content {
   flex: 1;
   padding: 32px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: $background-color;
+  min-height: calc(100vh - #{$header-height});
 
   @include mobile-only {
     padding: 16px;
+    min-height: calc(100vh - #{$navbar-mobile-height});
   }
 
   @include tablet-only {
     padding: 24px;
   }
 
+  // Contenedor responsive
   @include container-responsive;
-}
 
-.loading-spinner {
-  text-align: center;
-  padding: 2rem;
-  color: $text-color;
-  @include flex-column;
-
-  .loading-icon {
-    font-size: 2rem;
-    animation: spin 1s linear infinite;
-    margin-bottom: 0.5rem;
+  // Mejora la experiencia de scroll en móviles
+  @include mobile-only {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 }
 
-@keyframes spin {
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  max-width: 400px;
+  margin: 0 auto;
+  @include flex-center;
+  flex-direction: column;
+
+  &__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: rgba($danger-color, 0.1);
+    color: $danger-color;
+    margin-bottom: 24px;
+    @include flex-center;
+
+    .icon {
+      width: 40px;
+      height: 40px;
+      stroke-width: 2;
+    }
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: $text-color;
+
+    @include mobile-only {
+      font-size: 20px;
+    }
+  }
+
+  p {
+    font-size: 16px;
+    color: $text-light;
+    margin: 0 0 32px;
+    line-height: 1.5;
+
+    @include mobile-only {
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+  }
+
+  .btn {
+    min-width: 120px;
+
+    @include mobile-only {
+      width: 100%;
+    }
+  }
+}
+
+// Animaciones de entrada suave
+@keyframes fadeInUp {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.error {
-  color: $danger-color;
-  text-align: center;
-  padding: 1rem;
-  font-size: 1rem;
+.content > * {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+// Mejoras de accesibilidad
+@media (prefers-reduced-motion: reduce) {
+  .main-content,
+  .content > * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Modo oscuro (preparado para futuro)
+@media (prefers-color-scheme: dark) {
+  .dashboard {
+    background-color: #1a1a1a;
+  }
+  
+  .content {
+    background-color: #1a1a1a;
+  }
+}
+*/
+
+// Soporte para dispositivos plegables
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+// Optimización para tablets en landscape
+@include tablet-only {
+  @include landscape {
+    .content {
+      padding: 20px 24px;
+    }
+  }
+}
+
+// Mejoras para pantallas pequeñas
+@media (max-width: 360px) {
+  .content {
+    padding: 12px;
+  }
+  
+  .error-state {
+    padding: 40px 16px;
+    
+    &__icon {
+      width: 64px;
+      height: 64px;
+      
+      .icon {
+        width: 32px;
+        height: 32px;
+      }
+    }
+    
+    h2 {
+      font-size: 18px;
+    }
+  }
 }
