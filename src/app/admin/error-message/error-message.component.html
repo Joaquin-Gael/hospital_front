@@ -1,0 +1,15 @@
+<div class="error-message" role="alert" *ngIf="message">
+  <div class="error-message__icon">
+    <span class="material-icons">error_outline</span>
+  </div>
+  <div class="error-message__content">
+    <p class="error-message__text">{{ message }}</p>
+  </div>
+  <button
+    class="error-message__close-btn"
+    (click)="onClose()"
+    [attr.aria-label]="closeAriaLabel"
+  >
+    <span class="material-icons">close</span>
+  </button>
+</div>

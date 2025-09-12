@@ -1,0 +1,19 @@
+<div class="section-header">
+  <div class="section-header__title-wrapper">
+    <h2 class="section-header__title">{{ title }}</h2>
+    <p *ngIf="subtitle" class="section-header__subtitle">{{ subtitle }}</p>
+  </div>
+
+  <div class="section-header__actions" *ngIf="actions && actions.length > 0">
+    <button
+      *ngFor="let action of actions"
+      class="section-header__action-btn"
+      [class]="'section-header__action-btn--' + (action.variant || 'primary')"
+      [attr.aria-label]="action.ariaLabel || action.label"
+      (click)="action.onClick()"
+    >
+      <span class="material-icons">{{ action.icon }}</span>
+      <span class="section-header__action-text">{{ action.label }}</span>
+    </button>
+  </div>
+</div>

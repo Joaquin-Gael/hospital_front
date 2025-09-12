@@ -118,38 +118,6 @@
       font-size: 12px;
     }
   }
-
-  &__actions {
-    flex-shrink: 0;
-    @include flex-inline(12px);
-
-    @include mobile-only {
-      gap: 8px;
-    }
-
-    .btn {
-      @include mobile-only {
-        padding: 8px 12px;
-        font-size: 13px;
-
-        &__text {
-          @media (max-width: 360px) {
-            display: none;
-          }
-        }
-
-        .icon {
-          width: 16px;
-          height: 16px;
-        }
-      }
-
-      @include tablet-only {
-        padding: 9px 14px;
-        font-size: 13px;
-      }
-    }
-  }
 }
 
 // Animación para el botón hamburguesa

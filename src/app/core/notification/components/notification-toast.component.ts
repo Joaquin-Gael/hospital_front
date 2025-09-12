@@ -30,15 +30,15 @@ import { DomSanitizer, type SafeHtml } from "@angular/platform-browser"
       [attr.aria-live]="ariaLive()">
       <!-- Progress bar -->
       <div 
-        class="notification-progress" 
-        *ngIf="data.showProgress && data.duration > 0">
+        class="notification-progress" >
+        @if (data.showProgress && data.duration > 0){
         <mat-progress-bar 
           mode="determinate" 
           [value]="progressValue()"
           [color]="progressColor()">
         </mat-progress-bar>
+        }
       </div>
-
       <!-- Content -->
       <div class="notification-content">
         <!-- Icon -->
@@ -55,12 +55,13 @@ import { DomSanitizer, type SafeHtml } from "@angular/platform-browser"
 
         <!-- Dismiss button -->
         <button 
-          *ngIf="data.dismissible"
           mat-icon-button
           class="notification-dismiss-btn"
           (click)="dismiss()"
           >
-          <mat-icon>close</mat-icon>
+          @if(data.dismissible){
+            <mat-icon>close</mat-icon>
+          }
         </button>
       </div>
     </div>

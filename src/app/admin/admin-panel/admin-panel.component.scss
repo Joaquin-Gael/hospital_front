@@ -1,4 +1,5 @@
-@use 'sass:color';
+@use '../../layout/styles/_media-queries.scss' as *;
+@use '../../layout/styles/_mixins.scss' as *;
 @use '../styles/_vars.scss' as *;
 
 .admin-panel {
@@ -9,19 +10,15 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
   &__sidebar {
-    width: $sidebar-width;
-    background: $bg-glass;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    color: $text-primary;
-    transition: $transition-smooth;
+    color: $text-white;
     box-shadow: $shadow-glass;
-    display: flex;
-    flex-direction: column;
-    z-index: 100;
     border-right: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
-    
+    z-index: 100;
+    @include sidebar-responsive;
+    @include glass-morphism;
+    @include flex-column;
+
     &::before {
       content: '';
       position: absolute;
@@ -33,18 +30,15 @@
       opacity: 0.95;
       z-index: -1;
     }
-    
-    @media (max-width: 768px) {
-      width: $sidebar-collapsed-width;
-    }
   }
   
   &__logo {
-    padding: 32px 24px;
+    padding: 2rem 1.5rem;
     text-align: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
-    
+    @include flex-inline(1rem, center, center);
+
     &::after {
       content: '';
       position: absolute;
@@ -53,6 +47,29 @@
       right: 20%;
       height: 2px;
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    }
+
+    &-icon {
+      width: 3rem;
+      height: 3rem;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      backdrop-filter: blur(10px);
+      @include flex-center;
+
+      @include mobile-only {
+        width: 2.5rem;
+        height: 2.5rem;
+      }
+
+      .material-icons {
+        font-size: 1.5rem;
+        color: $text-white;
+
+        @include mobile-only {
+          font-size: 1.25rem;
+        }
+      }
     }
     
     h1 {
@@ -63,60 +80,40 @@
       letter-spacing: -0.025em;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       
-      @media (max-width: 768px) {
-        font-size: 0;
-        &::before {
-          content: 'A';
-          font-size: 1.75rem;
-          background: linear-gradient(135deg, #fbbf24, #f59e0b);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
+      @include mobile-only {
+        display: none;
       }
     }
   }
   
   &__nav {
     flex: 1;
-    padding: 24px 0;
+    padding: 1.5rem 0;
     
     ul {
       list-style: none;
       padding: 0;
       margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      padding: 0 16px;
+      gap: 0.25rem;
+      padding: 0 1rem;
+      @include flex-column;
     }
   }
   
   &__nav-link {
-    display: flex;
-    align-items: center;
-    padding: 16px 20px;
+    padding: 1rem 1.25rem;
     color: rgba(255, 255, 255, 0.85);
     text-decoration: none;
     transition: $transition-smooth;
     border-radius: 16px;
-    margin: 2px 0;
+    margin: 0.125rem 0;
     font-weight: 500;
     font-size: 0.95rem;
     position: relative;
     overflow: hidden;
     backdrop-filter: blur(10px);
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-      transition: left 0.6s ease;
-    }
+    @include flex-inline(1rem, center, flex-start);    
+    @include animated-gradient;
     
     &:hover {
       background: rgba(255, 255, 255, 0.1);
@@ -124,24 +121,19 @@
       transform: translateX(8px);
       box-shadow: $shadow-md;
       
-      &::before {
-        left: 100%;
-      }
-      
-      .material-icons {
+      .admin-panel__nav-icon {
         transform: scale(1.1);
-        color: $accent-color;
       }
     }
     
-    &.active {
+    &--active {
       background: rgba(255, 255, 255, 0.15);
       color: $text-white;
       box-shadow: $shadow-md;
       border: 1px solid rgba(255, 255, 255, 0.2);
       
-      .material-icons {
-        color: $accent-color;
+      .admin-panel__nav-icon {
+        color: $text-white;
       }
       
       &::after {
@@ -152,50 +144,44 @@
         transform: translateY(-50%);
         width: 4px;
         height: 24px;
-        background: $accent-color;
+        background: $text-white;
         border-radius: 0 2px 2px 0;
       }
     }
+  }
+
+  &__nav-icon {
+    transition: $transition-smooth;
+    font-size: 1.375rem;
     
-    .material-icons {
-      margin-right: 16px;
-      transition: $transition-smooth;
-      font-size: 22px;
-      
-      @media (max-width: 768px) {
-        margin-right: 0;
-      }
+    @include mobile-only {
+      font-size: 1.25rem;
     }
-    
-    span:not(.material-icons) {
-      @media (max-width: 768px) {
-        display: none;
-      }
+  }
+  
+  &__nav-text {
+    @include mobile-only {
+      display: none;
     }
   }
   
   &__content {
     flex: 1;
-    display: flex;
-    flex-direction: column;
     overflow: hidden;
     background: $bg-secondary;
+    @include flex-column;
   }
   
   &__header {
     height: $header-height;
-    background: $bg-glass;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid $border-light;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
+    padding: 0 2rem;
     box-shadow: $shadow-sm;
     z-index: 50;
     position: relative;
-    
+    @include glass-morphism;
+    @include flex-between;  
+
     &::before {
       content: '';
       position: absolute;
@@ -205,13 +191,24 @@
       height: 1px;
       background: linear-gradient(90deg, transparent, $border-color, transparent);
     }
-    
-    h2 {
-      margin: 0;
-      font-weight: 700;
-      font-size: 1.5rem;
-      color: $text-primary;
-      letter-spacing: -0.025em;
+
+    @include mobile-only {
+      padding: 0 1rem;
+    }
+  }
+
+  &__page-title {
+    margin: 0;
+    font-weight: 800;
+    font-size: 1.75rem;
+    background: $primary-gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.025em;
+
+    @include mobile-only {
+      font-size: 1.25rem;
     }
   }
   
@@ -220,20 +217,16 @@
   }
   
   &__user-button {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
+    padding: 0.75rem 1.25rem;
     background: $bg-primary;
     border: 2px solid $border-color;
-    border-radius: 50px;
     color: $text-primary;
-    cursor: pointer;
-    transition: $transition-smooth;
     font-weight: 600;
     font-size: 0.95rem;
     box-shadow: $shadow-sm;
-    
+    @include flex-inline(0.75rem);
+    @include button-base;
+
     &:hover {
       background: $primary-light;
       border-color: $primary-color;
@@ -243,16 +236,24 @@
     
     &:focus {
       outline: none;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
     }
     
     &:active {
       transform: translateY(0);
     }
   }
+
+  &__user-avatar {
+    @include avatar(2rem);
+    
+    .material-icons {
+      font-size: 1.25rem;
+    }
+  }
   
   &__dropdown-icon {
-    font-size: 20px;
+    font-size: 1.25rem !important;
     transition: $transition-smooth;
     color: $text-secondary;
     
@@ -264,13 +265,9 @@
   
   &__dropdown {
     position: absolute;
-    top: calc(100% + 12px);
+    top: calc(100% + 0.75rem);
     right: 0;
     min-width: 220px;
-    background: $bg-glass;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     box-shadow: $shadow-lg;
     opacity: 0;
@@ -279,7 +276,8 @@
     transition: $transition-bounce;
     z-index: 1000;
     overflow: hidden;
-    
+    @include glass-morphism;
+
     &::before {
       content: '';
       position: absolute;
@@ -303,11 +301,8 @@
   }
   
   &__dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
     width: 100%;
-    padding: 16px 20px;
+    padding: 1rem 1.25rem;
     background: transparent;
     border: none;
     color: $text-primary;
@@ -316,10 +311,10 @@
     transition: $transition-smooth;
     font-weight: 500;
     font-size: 0.95rem;
-    position: relative;
+    @include flex-inline(1rem);   
     
     &:hover {
-      background: rgba(102, 126, 234, 0.1);
+      background: rgba(59, 130, 246, 0.1);
       
       .material-icons {
         transform: scale(1.1);
@@ -328,11 +323,11 @@
     
     &:focus {
       outline: none;
-      background: rgba(102, 126, 234, 0.15);
+      background: rgba(59, 130, 246, 0.15);
     }
     
     .material-icons {
-      font-size: 22px;
+      font-size: 1.375rem;
       color: #ef4444;
       transition: $transition-smooth;
     }
@@ -340,7 +335,7 @@
   
   &__container {
     flex: 1;
-    padding: 32px;
+    padding: 2rem;
     overflow-y: auto;
     background: $bg-secondary;
     position: relative;
@@ -352,15 +347,19 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: radial-gradient(circle at 1px 1px, rgba(102, 126, 234, 0.1) 1px, transparent 0);
+      background-image: radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.1) 1px, transparent 0);
       background-size: 40px 40px;
       pointer-events: none;
       opacity: 0.5;
     }
+
+    @include mobile-only {
+      padding: 1rem;
+    }
   }
 }
 
-// Animaciones personalizadas
+// Animaciones
 @keyframes slideInRight {
   from {
     opacity: 0;
@@ -372,72 +371,26 @@
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
 .route-animation-fade {
   animation: slideInRight 0.4s ease-out;
 }
 
-// Estados de loading
-.loading-state {
-  .admin-panel__nav-link {
-    animation: pulse 2s infinite;
-  }
-}
-
-// Mejoras de accesibilidad
-@media (prefers-reduced-motion: reduce) {
+@include reduce-motion {
   * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    animation: none !important;
+    transition: none !important;
   }
 }
 
-// Responsive avanzado
-@media (max-width: 1024px) {
+// Responsive
+@include large-desktop-up {
   .admin-panel {
     &__container {
-      padding: 24px;
+      padding: 3rem;
     }
     
     &__header {
-      padding: 0 24px;
+      padding: 0 3rem;
     }
-  }
-}
-
-@media (max-width: 768px) {
-  .admin-panel {
-    &__header {
-      padding: 0 16px;
-      
-      h2 {
-        font-size: 1.25rem;
-      }
-    }
-    
-    &__container {
-      padding: 16px;
-    }
-    
-    &__dropdown {
-      right: -10px;
-      min-width: 200px;
-    }
-  }
-}
-
-// Estados de dark mode (preparado para futuro)
-@media (prefers-color-scheme: dark) {
-  .admin-panel {
-    // Variables dark mode aquí
   }
 }

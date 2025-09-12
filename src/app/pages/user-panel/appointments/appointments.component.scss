@@ -4,6 +4,7 @@
 
 .appointments {
   padding: 20px;
+  @include flex-center();
 
   @include mobile-only {
     padding: 16px;
@@ -289,6 +290,7 @@
   }
 
   .btn--primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     @include hover-effect($primary-dark);
 
     @include mobile-only {

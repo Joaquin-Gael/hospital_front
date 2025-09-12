@@ -42,7 +42,7 @@
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   border: 1px solid #e5e7eb;
-  @include flex-inline(0);
+  @include flex-inline(0);//
 
   @include mobile-only {
     border-radius: 12px;

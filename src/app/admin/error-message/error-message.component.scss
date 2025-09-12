@@ -1,0 +1,90 @@
+@use '../../layout/styles/_media-queries.scss' as *;
+@use '../../layout/styles/_mixins.scss' as *;
+@use '../styles/_vars.scss' as *;
+
+.error-message {
+  @include flex-inline(1rem, flex-start);
+  @include glass-morphism(0.9);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-left: 4px solid $error-color;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  color: darken($error-color, 20%);
+  font-weight: 500;
+  position: relative;
+  animation: slideInDown 0.3s ease-out;
+
+  @include mobile-only {
+    @include flex-column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    
+    .material-icons {
+      font-size: 1.5rem;
+      color: $error-color;
+    }
+  }
+
+  &__content {
+    flex: 1;
+  }
+
+  &__text {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  &__close-btn {
+    @include button-reset;
+    @include flex-center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    color: $error-color;
+    background: transparent;
+    transition: $transition-smooth;
+    flex-shrink: 0;
+
+    @include mobile-only {
+      align-self: flex-end;
+    }
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: scale(1.1);
+    }
+
+    &:focus {
+      outline: 2px solid $error-color;
+      outline-offset: 2px;
+    }
+
+    .material-icons {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@include reduce-motion {
+  .error-message {
+    animation: none;
+  }
+}

@@ -1,43 +1,49 @@
-<div class="department-list">
-  <div class="department-list__header">
-    <h3>Listado de Departamentos</h3>
-    <button 
-      class="add-button" 
-      (click)="onAddNew()"
-      aria-label="Agregar nuevo departamento"
-    >
-      <span class="material-icons">add</span>
-      Nuevo Departamento
-    </button>
-  </div>
-  
-  <div *ngIf="error" class="error-message" role="alert">
-    {{ error }}
-    <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
-  
-  <div class="department-list__content" [class.hidden]="showForm">
-    <app-data-table
-      [data]="departments"
-      [columns]="tableColumns"
-      [loading]="loading"
-      (edit)="onEdit($event)"
-      (delete)="onDelete($event)"
-      (view)="onView($event)"
-    ></app-data-table>
-  </div>
-  
-  <div class="department-list__form" [class.hidden]="!showForm">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="selectedDepartment"
-      [title]="formMode === 'create' ? 'Nuevo Departamento' : 'Editar Departamento'"
-      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
-      [loading]="formLoading"
-      (formSubmit)="onFormSubmit($event)"
-      (formCancel)="onFormCancel()"
-    ></app-entity-form>
-  </div>
+<div class="department-section">
+  <app-section-header
+    title="Gestión de Departamentos"
+    subtitle="Administra los departamentos del sistema médico"
+    [actions]="headerActions">
+  </app-section-header>
+
+  <app-error-message 
+    [message]="error" 
+    (close)="error = null">
+  </app-error-message>
+
+  @if (showForm) {
+    <div class="department-section__form-container">
+      <app-entity-form
+        [fields]="formFields"
+        [initialData]="selectedDepartment"
+        [title]="formMode === 'create' ? 'Nuevo Departamento' : 'Editar Departamento'"
+        [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+        [loading]="formLoading"
+        (formSubmit)="onFormSubmit($event)"
+        (formCancel)="onFormCancel()">
+      </app-entity-form>
+    </div>
+  } @else {
+    @if (loading) {
+      <app-loading-spinner [message]="'Cargando departamentos...'"></app-loading-spinner>
+    } @else {
+      <div class="department-section__table-container">
+        <app-data-table
+          [data]="departments"
+          [columns]="tableColumns"
+          [loading]="loading"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)"
+          (view)="onView($event)">
+        </app-data-table>
+      </div>
+    }
+  }
+
+  <app-view-dialog
+    [isOpen]="viewDialogOpen"
+    [item]="viewDialogData"
+    [columns]="viewDialogColumns"
+    [title]="viewDialogTitle"
+    (close)="closeViewDialog()">
+  </app-view-dialog>
 </div>

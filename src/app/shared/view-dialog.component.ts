@@ -1,117 +1,120 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export interface ViewDialogData {
-  item: any;
-  columns: { key: string; label: string; format?: (value: any) => string }[];
-  title?: string;
+export interface ViewDialogColumn {
+  key: string;
+  label: string;
+  format?: (value: any) => string;
 }
 
 @Component({
   selector: 'app-view-dialog',
   standalone: true,
-  imports: [MatDialogModule, MatButtonModule, CommonModule],
+  imports: [CommonModule],
   template: `
-    <div class="view-dialog">
-      <div class="view-dialog__header">
-        <h2>{{ data.title || 'Detalles del Elemento' }}</h2>
-      </div>
-      
-      <div class="view-dialog__content">
-        <table class="view-dialog__table">
-          <tr *ngFor="let column of data.columns">
-            <td>{{ column.label }}</td>
-            <td>
-              <ng-container [ngSwitch]="getValueType(column, data.item[column.key])">
-                <!-- Imagen -->
-                <img *ngSwitchCase="'image'" 
-                     [src]="data.item[column.key]" 
-                     [alt]="column.label"
-                     class="view-dialog__image"
-                     (error)="handleImageError($event)" />
-                
-                <!-- Email -->
-                <a *ngSwitchCase="'email'"
-                   [href]="'mailto:' + data.item[column.key]"
-                   class="view-dialog__link">
-                  {{ data.item[column.key] }}
-                </a>
-                
-                <!-- Teléfono -->
-                <a *ngSwitchCase="'phone'"
-                   [href]="'tel:' + data.item[column.key]"
-                   class="view-dialog__link">
-                  {{ data.item[column.key] }}
-                </a>
-                
-                <!-- Boolean con badges -->
-                <span *ngSwitchCase="'boolean'"
-                      [class]="getBooleanBadgeClass(data.item[column.key])">
-                  {{ data.item[column.key] ? 'Sí' : 'No' }}
-                </span>
-                
-                <!-- Fecha -->
-                <span *ngSwitchCase="'date'">
-                  {{ formatDate(data.item[column.key]) }}
-                </span>
-                
-                <!-- Valor por defecto -->
-                <span *ngSwitchDefault 
-                      [class.view-dialog__empty-value]="!getValue(column, data.item[column.key])">
-                  {{ getValue(column, data.item[column.key]) || 'No disponible' }}
-                </span>
-              </ng-container>
-            </td>
-          </tr>
-        </table>
-      </div>
-      
-      <div class="view-dialog__actions">
-        <button type="button" 
-                class="view-dialog__close-button" 
-                (click)="dialogRef.close()"
-                aria-label="Cerrar diálogo">
-          Cerrar
-        </button>
+    <div class="view-dialog-overlay" *ngIf="isOpen" (click)="onOverlayClick($event)">
+      <div class="view-dialog" (click)="$event.stopPropagation()">
+        <div class="view-dialog__header">
+          <h2>{{ title || 'Detalles del Elemento' }}</h2>
+        </div>
+        
+        <div class="view-dialog__content">
+          <table class="view-dialog__table">
+            @for (column of columns; track column.key) {
+              <tr>
+                <td class="view-dialog__label">{{ column.label }}</td>
+                <td class="view-dialog__value">
+                  @switch (getValueType(column, item[column.key])) {
+                    @case ('image') {
+                      <img 
+                        [src]="item[column.key]" 
+                        [alt]="column.label"
+                        class="view-dialog__image"
+                        (error)="handleImageError($event)" />
+                    }
+                    @case ('email') {
+                      <a [href]="'mailto:' + item[column.key]" class="view-dialog__link">
+                        {{ item[column.key] }}
+                      </a>
+                    }
+                    @case ('phone') {
+                      <a [href]="'tel:' + item[column.key]" class="view-dialog__link">
+                        {{ item[column.key] }}
+                      </a>
+                    }
+                    @case ('boolean') {
+                      <span [class]="getBooleanBadgeClass(item[column.key])">
+                        {{ item[column.key] ? 'Sí' : 'No' }}
+                      </span>
+                    }
+                    @case ('date') {
+                      <span>{{ formatDate(item[column.key]) }}</span>
+                    }
+                    @default {
+                      <span 
+                        [class.view-dialog__empty-value]="!getValue(column, item[column.key])">
+                        {{ getValue(column, item[column.key]) || 'No disponible' }}
+                      </span>
+                    }
+                  }
+                </td>
+              </tr>
+            }
+          </table>
+        </div>
+        
+        <div class="view-dialog__actions">
+          <button 
+            type="button" 
+            class="view-dialog__close-button" 
+            (click)="onClose()"
+            aria-label="Cerrar diálogo">
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   `,
   styleUrls: ['./view-dialog.component.scss']
 })
 export class ViewDialogComponent {
-  constructor(
-    public dialogRef: MatDialogRef<ViewDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ViewDialogData
-  ) {}
+  @Input() isOpen: boolean = false;
+  @Input() item: any = {};
+  @Input() columns: ViewDialogColumn[] = [];
+  @Input() title?: string;
+  @Output() close = new EventEmitter<void>();
 
-  getValueType(column: any, value: any): string {
+  onClose(): void {
+    this.close.emit();
+  }
+
+  onOverlayClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.onClose();
+    }
+  }
+
+  getValueType(column: ViewDialogColumn, value: any): string {
     if (!value) return 'default';
     
-    // Detectar imagen por la key o por la extensión
     if (column.key === 'img_profile' || column.key.includes('image') || 
         (typeof value === 'string' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(value))) {
       return 'image';
     }
     
-    // Detectar email
     if (column.key === 'email' || (typeof value === 'string' && value.includes('@'))) {
       return 'email';
     }
     
-    // Detectar teléfono
     if (column.key === 'telephone' || column.key === 'phone' || 
         (typeof value === 'string' && /^[\+\d\s\-\(\)]+$/.test(value))) {
       return 'phone';
     }
     
-    // Detectar boolean
     if (typeof value === 'boolean') {
       return 'boolean';
     }
     
-    // Detectar fecha
     if (column.key.includes('date') || column.key.includes('time') ||
         (typeof value === 'string' && /\d{4}-\d{2}-\d{2}/.test(value))) {
       return 'date';
@@ -120,7 +123,7 @@ export class ViewDialogComponent {
     return 'default';
   }
 
-  getValue(column: any, value: any): string {
+  getValue(column: ViewDialogColumn, value: any): string {
     if (column.format) {
       return column.format(value);
     }

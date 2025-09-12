@@ -35,6 +35,7 @@
   margin-left: $sidebar-width;
   min-height: 100vh;
   width: calc(100% - #{$sidebar-width});
+  transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   @include flex-column;
 
   @include mobile-only {
@@ -47,9 +48,6 @@
     margin-left: 0;
     width: 100%;
   }
-
-  // Transición suave cuando cambia el tamaño
-  transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 
   .dashboard.sidebar-collapsed & {
     @include desktop-up {

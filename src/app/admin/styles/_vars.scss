@@ -1,8 +1,9 @@
-$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-$primary-color: #667eea;
-$primary-hover: #5a67d8;
-$primary-light: #e8eaff;
-$primary-dark: #4c51bf;
+// Sistema de colores premium
+$primary-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+$primary-color: #3b82f6;
+$primary-hover: #2563eb;
+$primary-light: #dbeafe;
+$primary-dark: #1e40af;
 
 $secondary-color: #f8fafc;
 $accent-color: #fbbf24;
@@ -19,22 +20,24 @@ $text-white: #ffffff;
 
 $bg-primary: #ffffff;
 $bg-secondary: #f7fafc;
-$bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$bg-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 $bg-glass: rgba(255, 255, 255, 0.95);
 $bg-input: #ffffff;
-$bg-hover: rgba(102, 126, 234, 0.05);
+$bg-hover: rgba(59, 130, 246, 0.05);
 
 $border-color: #e2e8f0;
 $border-light: #f1f5f9;
-$border-focus: #667eea;
+$border-focus: #3b82f6;
+
 $shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
 $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
 $shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 $shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.37);
-$shadow-input: 0 0 0 3px rgba(102, 126, 234, 0.1);
+$shadow-input: 0 0 0 3px rgba(59, 130, 246, 0.1);
 
 $sidebar-width: 280px;
 $sidebar-collapsed-width: 80px;
 $header-height: 72px;
+
 $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 $transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);

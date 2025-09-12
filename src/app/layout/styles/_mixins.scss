@@ -1,4 +1,5 @@
 @use './_variables.scss' as var;
+@use '../../admin/styles/_vars.scss' as admin-var;
 
 // Mixin para centrar elementos con flexbox
 @mixin flex-center {
@@ -176,6 +177,33 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@mixin glass-morphism($opacity: 0.95) {
+  background: rgba(255, 255, 255, $opacity);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+@mixin animated-gradient {
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
 }
 
 // Mixin para links de navegación
@@ -482,5 +510,25 @@
     100% {
       left: 100%;
     }
+  }
+}
+
+// Mixin para cards modernas
+@mixin modern-card($padding: 2rem) {
+  @include glass-morphism;
+  border-radius: 24px;
+  box-shadow: var.$shadow-glass;
+  padding: $padding;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: admin-var.$primary-gradient;
+    border-radius: 24px 24px 0 0;
   }
 }

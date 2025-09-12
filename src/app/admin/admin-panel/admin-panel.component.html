@@ -1,29 +1,62 @@
 <div class="admin-panel">
   <aside class="admin-panel__sidebar">
     <div class="admin-panel__logo">
+      <div class="admin-panel__logo-icon">
+        <span class="material-icons">admin_panel_settings</span>
+      </div>
       <h1>Panel Admin</h1>
     </div>
+    
     <nav class="admin-panel__nav">
       <ul>
-        <li *ngFor="let section of sections">
-          <a
-            [routerLink]="['/admin_panel', section.id]"
-            routerLinkActive="active"
-            (click)="setActiveSection(section.id)"
-            [attr.aria-current]="activeSection === section.id ? 'page' : null"
-            class="admin-panel__nav-link"
-          >
-            <span class="material-icons">{{ section.icon }}</span>
-            <span>{{ section.label }}</span>
-          </a>
-        </li>
+        @for (section of sections; track section.id) {
+          <li>
+            <a
+              [routerLink]="['/admin_panel', section.id]"
+              routerLinkActive="admin-panel__nav-link--active"
+              [attr.aria-current]="activeSection === section.id ? 'page' : null"
+              class="admin-panel__nav-link"
+            >
+              <span class="material-icons admin-panel__nav-icon">{{ section.icon }}</span>
+              <span class="admin-panel__nav-text">{{ section.label }}</span>
+            </a>
+          </li>
+        }
       </ul>
     </nav>
   </aside>
 
   <main class="admin-panel__content">
     <header class="admin-panel__header">
-      <h2>{{ activeSectionLabel }}</h2>
+      @switch (activeSection) {
+        @case ('departments') {
+          <h1 class="admin-panel__page-title">Departamentos</h1>
+        }
+        @case ('specialities') {
+          <h1 class="admin-panel__page-title">Especialidades</h1>
+        }
+        @case ('doctors') {
+          <h1 class="admin-panel__page-title">Doctores</h1>
+        }
+        @case ('schedules') {
+          <h1 class="admin-panel__page-title">Horarios</h1>
+        }
+        @case ('health-insurances') {
+          <h1 class="admin-panel__page-title">Obras Sociales</h1>
+        }
+        @case ('services') {
+          <h1 class="admin-panel__page-title">Servicios</h1>
+        }
+        @case ('locations') {
+          <h1 class="admin-panel__page-title">Ubicaciones</h1>
+        }
+        @case ('users') {
+          <h1 class="admin-panel__page-title">Usuarios</h1>
+        }
+        @default {
+          <h1 class="admin-panel__page-title">Panel de Administración</h1>
+        }
+      }
       
       <div class="admin-panel__user-menu">
         <button 
@@ -34,8 +67,10 @@
           aria-haspopup="true"
           aria-label="Menú de usuario"
         >
-          <span class="material-icons">account_circle</span>
-          <span class="material-icons admin-panel__dropdown-icon">keyboard_arrow_down</span>
+          <span class="admin-panel__user-avatar">
+            <span class="material-icons">account_circle</span>
+          </span>
+          <span class="admin-panel__dropdown-icon material-icons">keyboard_arrow_down</span>
         </button>
         
         <div 

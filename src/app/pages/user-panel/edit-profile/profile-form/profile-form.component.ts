@@ -28,19 +28,27 @@ export class ProfileFormComponent implements AfterViewInit, OnInit, OnChanges {
   profileForm!: FormGroup;
   selectedFile: File | null = null;
   currentPhotoUrl: string | null = null;
+  private dataLoaded = false;
 
   ngOnInit(): void {
     this.initializeForm();
-    if (this.initialData) {
+    if (this.initialData && !this.dataLoaded) {
       this.loadInitialData();
-      this.loading = false; 
+      this.dataLoaded = true;
     }
+    this.loading = false; 
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialData'] && this.initialData !== undefined) {
-      this.loadInitialData();
-      this.loading = false; 
+      if (!this.profileForm){
+        return;
+      }
+      if (!this.dataLoaded){
+        this.loadInitialData();
+        this.dataLoaded = true;
+      }
+      this.loading = false;
     }
   }
 
@@ -55,18 +63,19 @@ export class ProfileFormComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   private loadInitialData(): void {
-    if (this.initialData) {
-      this.profileForm.patchValue({
-        username: this.initialData.username || '',
-        first_name: this.initialData.first_name || '',
-        last_name: this.initialData.last_name || '',
-        address: this.initialData.address || '',
-        telephone: this.initialData.telephone || '',
-      });
+    if (this.initialData || !this.profileForm) {
+      return;
+    }
+    this.profileForm.patchValue({
+      username: this.initialData.username || '',
+      first_name: this.initialData.first_name || '',
+      last_name: this.initialData.last_name || '',
+      address: this.initialData.address || '',
+      telephone: this.initialData.telephone || '',
+    });
 
-      if (this.initialData.img_profile) {
-        this.currentPhotoUrl = this.initialData.img_profile;
-      }
+    if (this.initialData.img_profile){
+      this.currentPhotoUrl = this.initialData.img_profile
     }
   }
 

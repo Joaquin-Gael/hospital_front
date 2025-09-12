@@ -1,35 +1,39 @@
-import { Component, type OnInit, type OnDestroy, inject } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { Router, RouterModule } from "@angular/router";
-import { Subject, takeUntil } from "rxjs";
-import { AuthService } from "../../../services/auth/auth.service";
-import { UserService } from "../../../services/user/user.service";
-import { HealthInsuranceService } from "../../../services/health_insarunce/health-insurance.service";
-import { LoggerService } from "../../../services/core/logger.service";
-import { NotificationService } from "../../../core/notification";
-import type { UserRead, UserUpdate } from "../../../services/interfaces/user.interfaces";
-import type { HealthInsuranceRead } from "../../../services/interfaces/health-insurance.interfaces";
-import type { HttpErrorResponse } from "@angular/common/http";
+import { Component, type OnInit, type OnDestroy, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
+import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { AuthService } from '../../../services/auth/auth.service';
+import { UserService } from '../../../services/user/user.service';
+import { HealthInsuranceService } from '../../../services/health_insarunce/health-insurance.service';
+import { LoggerService } from '../../../services/core/logger.service';
+import { NotificationService } from '../../../core/notification';
+import type {
+  UserRead,
+  UserUpdate,
+} from '../../../services/interfaces/user.interfaces';
+import type { HealthInsuranceRead } from '../../../services/interfaces/health-insurance.interfaces';
+import type { HttpErrorResponse } from '@angular/common/http';
 
 // Import child components
-import { ProfileFormComponent } from "./profile-form/profile-form.component";
-import { HealthInsuranceManagerComponent } from "./health-insurance-manager/health-insurance-manager.component";
-import { DniUploaderComponent } from "./dni-uploader/dni-uploader.component";
-import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component'
+import { ProfileFormComponent } from './profile-form/profile-form.component';
+import { HealthInsuranceManagerComponent } from './health-insurance-manager/health-insurance-manager.component';
+import { DniUploaderComponent } from './dni-uploader/dni-uploader.component';
+import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
 export type TabType = 'profile' | 'insurance' | 'dni';
 
 @Component({
-  selector: "app-edit-profile",
+  selector: 'app-edit-profile',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
+    CommonModule,
+    RouterModule,
     ProfileFormComponent,
     HealthInsuranceManagerComponent,
     DniUploaderComponent,
+    LoadingSpinnerComponent,
   ],
-  templateUrl: "./edit-profile.component.html",
-  styleUrls: ["./edit-profile.component.scss"],
+  templateUrl: './edit-profile.component.html',
+  styleUrls: ['./edit-profile.component.scss'],
 })
 export class EditProfileComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
@@ -39,8 +43,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
   private readonly logger = inject(LoggerService);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
-  
-  loading = true; // Initialize loading state
+
+  loading = true;
   user: UserRead | null = null;
   healthInsurances: HealthInsuranceRead[] = [];
   isSubmitting = false;
@@ -52,13 +56,84 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (!this.authService.isLoggedIn()) {
-      this.logger.info("Usuario no autenticado, redirigiendo a /login");
-      this.router.navigate(["/login"]);
+      this.logger.info('Usuario no autenticado, redirigiendo a /login');
+      this.router.navigate(['/login']);
       return;
     }
 
-    this.loadUserData();
-    this.loadHealthInsurances();
+    forkJoin({
+      user: this.authService.getUser(),
+      insurances: this.healthInsuranceService.getAll(),
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ user: userRead, insurances: healthInsurances }) => {
+          if (!userRead) {
+            this.notificationService.error(
+              'Ocurrió un error inesperado. Por favor, inicia sesión nuevamente.',
+              {
+                duration: 5000,
+                action: {
+                  label: 'Cerrar',
+                  action: () => this.notificationService.dismissAll(),
+                },
+              }
+            );
+            this.logger.error('No se encontraron datos del usuario');
+            this.router.navigate(['/login']);
+            return;
+          }
+
+          this.user = userRead;
+          this.initialData = {
+            username: userRead.username,
+            first_name: userRead.first_name,
+            last_name: userRead.last_name,
+            address: userRead.address || '',
+            telephone: userRead.telephone || '',
+            img_profile: userRead.img_profile || null,
+            health_insurance: userRead.health_insurance || [],
+            is_active: userRead.is_active,
+            is_admin: userRead.is_admin,
+            is_superuser: userRead.is_superuser,
+          };
+
+          this.healthInsurances = healthInsurances;
+          this.availableHealthInsurances = [...healthInsurances];
+          this.selectedHealthInsurances = [];
+
+          if (this.user?.health_insurance) {
+            this.user.health_insurance.forEach((id) => {
+              const insurance = this.availableHealthInsurances.find(
+                (ins) => ins.id === id
+              );
+              if (insurance) {
+                this.selectedHealthInsurances.push(insurance);
+                this.availableHealthInsurances =
+                  this.availableHealthInsurances.filter((ins) => ins.id !== id);
+              }
+            });
+          }
+
+          // ¡AHORA sí! Loading false solo cuando TODO llegó
+          this.loading = false;
+        },
+        error: (err: HttpErrorResponse) => {
+          this.loading = false; // Error: igual hide el spinner, pero con notif
+          this.notificationService.error(
+            'Ocurrió un error al cargar los datos.',
+            {
+              duration: 5000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            }
+          );
+          this.handleError(err, 'Error al cargar datos iniciales');
+          this.router.navigate(['/login']);
+        },
+      });
   }
 
   private loadUserData(): void {
@@ -68,25 +143,28 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (userRead) => {
           if (!userRead) {
-            this.notificationService.error("Ocurrió un error inesperado. Por favor, inicia sesión nuevamente.", {
-              duration: 5000,
-              action: {
-                label: "Cerrar",
-                action: () => this.notificationService.dismissAll(),
-              },
-            });
-            this.logger.error("No se encontraron datos del usuario");
-            this.router.navigate(["/login"]);
+            this.notificationService.error(
+              'Ocurrió un error inesperado. Por favor, inicia sesión nuevamente.',
+              {
+                duration: 5000,
+                action: {
+                  label: 'Cerrar',
+                  action: () => this.notificationService.dismissAll(),
+                },
+              }
+            );
+            this.logger.error('No se encontraron datos del usuario');
+            this.router.navigate(['/login']);
             return;
           }
-          
+
           this.user = userRead;
           this.initialData = {
             username: userRead.username,
             first_name: userRead.first_name,
             last_name: userRead.last_name,
-            address: userRead.address || "",
-            telephone: userRead.telephone || "",
+            address: userRead.address || '',
+            telephone: userRead.telephone || '',
             img_profile: userRead.img_profile || null,
             health_insurance: userRead.health_insurance || [],
             is_active: userRead.is_active,
@@ -95,14 +173,17 @@ export class EditProfileComponent implements OnInit, OnDestroy {
           };
         },
         error: (err: HttpErrorResponse) => {
-          this.notificationService.error("Ocurrió un error al cargar los datos del usuario.", {
-            duration: 5000,
-            action: {
-              label: "Cerrar",
-              action: () => this.notificationService.dismissAll(),
-            },
-          });
-          this.router.navigate(["/login"]);
+          this.notificationService.error(
+            'Ocurrió un error al cargar los datos del usuario.',
+            {
+              duration: 5000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            }
+          );
+          this.router.navigate(['/login']);
         },
       });
   }
@@ -119,16 +200,19 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 
           if (this.user?.health_insurance) {
             this.user.health_insurance.forEach((id) => {
-              const insurance = this.availableHealthInsurances.find((ins) => ins.id === id);
+              const insurance = this.availableHealthInsurances.find(
+                (ins) => ins.id === id
+              );
               if (insurance) {
                 this.selectedHealthInsurances.push(insurance);
-                this.availableHealthInsurances = this.availableHealthInsurances.filter((ins) => ins.id !== id);
+                this.availableHealthInsurances =
+                  this.availableHealthInsurances.filter((ins) => ins.id !== id);
               }
             });
           }
         },
         error: (err: HttpErrorResponse) => {
-          this.handleError(err, "Error al cargar las obras sociales");
+          this.handleError(err, 'Error al cargar las obras sociales');
         },
       });
   }
@@ -139,7 +223,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 
   onProfileSubmit(formData: any): void {
     if (!this.user) {
-      this.logger.error("No se encontraron datos del usuario");
+      this.logger.error('No se encontraron datos del usuario');
       return;
     }
 
@@ -161,33 +245,39 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (updatedUser) => {
           this.isSubmitting = false;
-          this.notificationService.success("¡Datos actualizados con éxito!", {
+          this.notificationService.success('¡Datos actualizados con éxito!', {
             duration: 5000,
             action: {
-              label: "Cerrar",
+              label: 'Cerrar',
               action: () => this.notificationService.dismissAll(),
             },
           });
-          
+
           setTimeout(() => {
-            this.router.navigate(["/user_panel/profile"]);
+            this.router.navigate(['/user_panel/profile']);
           }, 2000);
         },
         error: (err: HttpErrorResponse) => {
           this.isSubmitting = false;
-          this.notificationService.error("¡Ocurrió un error al actualizar el perfil!", {
-            duration: 5000,
-            action: {
-              label: "Cerrar",
-              action: () => this.notificationService.dismissAll(),
-            },
-          });
-          this.handleError(err, "Error al actualizar el perfil");
+          this.notificationService.error(
+            '¡Ocurrió un error al actualizar el perfil!',
+            {
+              duration: 5000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            }
+          );
+          this.handleError(err, 'Error al actualizar el perfil');
         },
       });
   }
 
-  onInsurancesChanged(data: { available: HealthInsuranceRead[], selected: HealthInsuranceRead[] }): void {
+  onInsurancesChanged(data: {
+    available: HealthInsuranceRead[];
+    selected: HealthInsuranceRead[];
+  }): void {
     this.availableHealthInsurances = data.available;
     this.selectedHealthInsurances = data.selected;
   }
@@ -211,33 +301,42 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (updatedUser) => {
           this.isSubmitting = false;
-          this.notificationService.success("¡Obras sociales actualizadas con éxito!", {
-            duration: 3000,
-          });
+          this.notificationService.success(
+            '¡Obras sociales actualizadas con éxito!',
+            {
+              duration: 3000,
+            }
+          );
         },
         error: (err: HttpErrorResponse) => {
           this.isSubmitting = false;
-          this.notificationService.error("Error al actualizar las obras sociales", {
-            duration: 5000,
-          });
-          this.handleError(err, "Error al actualizar las obras sociales");
+          this.notificationService.error(
+            'Error al actualizar las obras sociales',
+            {
+              duration: 5000,
+            }
+          );
+          this.handleError(err, 'Error al actualizar las obras sociales');
         },
       });
   }
 
   onFormCancel(): void {
-    this.router.navigate(["/user_panel/profile"]);
+    this.router.navigate(['/user_panel/profile']);
   }
 
   onDniUploadSuccess(response: any): void {
-    this.logger.info("DNI enviado exitosamente:", response);
-    this.notificationService.success("DNI enviado correctamente para verificación", {
-      duration: 5000,
-    });
+    this.logger.info('DNI enviado exitosamente:', response);
+    this.notificationService.success(
+      'DNI enviado correctamente para verificación',
+      {
+        duration: 5000,
+      }
+    );
   }
 
   onDniUploadError(error: string): void {
-    this.logger.error("Error al enviar DNI:", error);
+    this.logger.error('Error al enviar DNI:', error);
     this.notificationService.error(error, {
       duration: 7000,
     });
@@ -246,18 +345,24 @@ export class EditProfileComponent implements OnInit, OnDestroy {
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
     this.logger.error(defaultMessage, error);
     let errorMessage = defaultMessage;
-    
+
     if (error.status === 422 && error.error?.detail) {
       const details = error.error.detail;
       if (Array.isArray(details)) {
-        errorMessage = details.map((err: any) => `${err.loc.join(".")} (${err.type}): ${err.msg}`).join("; ");
+        errorMessage = details
+          .map((err: any) => `${err.loc.join('.')} (${err.type}): ${err.msg}`)
+          .join('; ');
       } else {
         errorMessage = details || defaultMessage;
       }
     } else if (error.status === 403) {
-      errorMessage = "No tienes permisos para realizar esta acción.";
+      errorMessage = 'No tienes permisos para realizar esta acción.';
     } else {
-      errorMessage = error.error?.detail || error.error?.message || error.message || defaultMessage;
+      errorMessage =
+        error.error?.detail ||
+        error.error?.message ||
+        error.message ||
+        defaultMessage;
     }
   }
 

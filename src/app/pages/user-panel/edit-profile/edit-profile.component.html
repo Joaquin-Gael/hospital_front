@@ -2,29 +2,32 @@
   <!-- Navigation Tabs -->
   <div class="edit-profile__navigation">
     <nav class="profile-tabs">
-      <button 
+      <button
         class="profile-tabs__item"
         [class.profile-tabs__item--active]="activeTab === 'profile'"
         (click)="setActiveTab('profile')"
-        type="button">
+        type="button"
+      >
         <i class="fas fa-user profile-tabs__icon"></i>
         <span class="profile-tabs__label">Datos Personales</span>
       </button>
-      
-      <button 
+
+      <button
         class="profile-tabs__item"
         [class.profile-tabs__item--active]="activeTab === 'insurance'"
         (click)="setActiveTab('insurance')"
-        type="button">
+        type="button"
+      >
         <i class="fas fa-hospital profile-tabs__icon"></i>
         <span class="profile-tabs__label">Obras Sociales</span>
       </button>
-      
-      <button 
+
+      <button
         class="profile-tabs__item"
         [class.profile-tabs__item--active]="activeTab === 'dni'"
         (click)="setActiveTab('dni')"
-        type="button">
+        type="button"
+      >
         <i class="fas fa-id-card profile-tabs__icon"></i>
         <span class="profile-tabs__label">Verificar DNI</span>
       </button>
@@ -34,37 +37,49 @@
   <!-- Tab Content -->
   <div class="edit-profile__content">
     <!-- Profile Form Tab -->
-    @if (activeTab === 'profile') {
-      <div class="edit-profile__tab">
-        <app-profile-form
-          [initialData]="initialData"
-          [isSubmitting]="isSubmitting"
-          (formSubmit)="onProfileSubmit($event)"
-          (formCancel)="onFormCancel()">
-        </app-profile-form>
-      </div>
-    }
+    @if (activeTab === 'profile') { @if (loading || !initialData) {
+    <app-loading-spinner
+      [message]="'Cargando datos del perfil...'"
+    ></app-loading-spinner>
+    } @else {
+    <div class="edit-profile__tab">
+      <app-profile-form
+        [initialData]="initialData"
+        [isSubmitting]="isSubmitting"
+        (formSubmit)="onProfileSubmit($event)"
+        (formCancel)="onFormCancel()"
+      >
+      </app-profile-form>
+    </div>
+    } }
 
     <!-- Health Insurance Tab -->
-    @if (activeTab === 'insurance') {
-      <div class="edit-profile__tab">
-        <app-health-insurance-manager
-          [availableInsurances]="availableHealthInsurances"
-          [selectedInsurances]="selectedHealthInsurances"
-          (insurancesChanged)="onInsurancesChanged($event)"
-          (saveInsurances)="onSaveInsurances($event)">
-        </app-health-insurance-manager>
-      </div>
-    }
+    @if (activeTab === 'insurance') { @if (loading ||
+    availableHealthInsurances.length === 0) {
+    <app-loading-spinner
+      [message]="'Cargando obras sociales...'"
+    ></app-loading-spinner>
+    } @else {
+    <div class="edit-profile__tab">
+      <app-health-insurance-manager
+        [availableInsurances]="availableHealthInsurances"
+        [selectedInsurances]="selectedHealthInsurances"
+        (insurancesChanged)="onInsurancesChanged($event)"
+        (saveInsurances)="onSaveInsurances($event)"
+      >
+      </app-health-insurance-manager>
+    </div>
+    } }
 
     <!-- DNI Upload Tab -->
     @if (activeTab === 'dni') {
-      <div class="edit-profile__tab">
-        <app-dni-uploader
-          (uploadSuccess)="onDniUploadSuccess($event)"
-          (uploadError)="onDniUploadError($event)">
-        </app-dni-uploader>
-      </div>
+    <div class="edit-profile__tab">
+      <app-dni-uploader
+        (uploadSuccess)="onDniUploadSuccess($event)"
+        (uploadError)="onDniUploadError($event)"
+      >
+      </app-dni-uploader>
+    </div>
     }
   </div>
 </div>

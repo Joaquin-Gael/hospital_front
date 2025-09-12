@@ -19,13 +19,15 @@
     </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="register-form">
-      <!-- Indicador de progreso simple -->
-      <div class="form-progress" *ngIf="isSubmitting">
-        <div class="progress-bar">
-          <div class="progress-fill"></div>
+      @if (isSubmitting) {
+        <!-- Indicador de progreso simple -->
+        <div class="form-progress">
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <span class="progress-text">Procesando registro...</span>
         </div>
-        <span class="progress-text">Procesando registro...</span>
-      </div>
+      }
 
       <!-- Datos personales -->
       <div class="form-section">
@@ -44,9 +46,11 @@
               class="form-input"
               [class.form-input--error]="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched"
             >
-            <div class="error-message" *ngIf="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched">
-              El nombre es requerido
-            </div>
+            @if (registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched) {
+              <div class="error-message">
+                El nombre es requerido
+              </div>
+            }
           </div>
 
           <div class="form-group">
@@ -61,9 +65,11 @@
               class="form-input"
               [class.form-input--error]="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched"
             >
-            <div class="error-message" *ngIf="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched">
-              El apellido es requerido
-            </div>
+            @if (registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched) {
+              <div class="error-message">
+                El apellido es requerido
+              </div>
+            }
           </div>
         </div>
 
@@ -80,10 +86,16 @@
             [class.form-input--error]="registerForm.get('dni')?.invalid && registerForm.get('dni')?.touched"
             maxlength="8"
           >
-          <div class="error-message" *ngIf="registerForm.get('dni')?.invalid && registerForm.get('dni')?.touched">
-            <span *ngIf="registerForm.get('dni')?.errors?.['required']">El DNI es requerido</span>
-            <span *ngIf="registerForm.get('dni')?.errors?.['pattern']">El DNI debe tener 8 dígitos</span>
-          </div>
+          @if (registerForm.get('dni')?.invalid && registerForm.get('dni')?.touched) {
+            <div class="error-message">
+              @if (registerForm.get('dni')?.errors?.['required']) {
+                <span>El DNI es requerido</span>
+              }
+              @if (registerForm.get('dni')?.errors?.['pattern']) {
+                <span>El DNI debe tener 8 dígitos</span>
+              }
+            </div>
+          }
         </div>
 
         <div class="form-group">
@@ -98,10 +110,16 @@
             class="form-input"
             [class.form-input--error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
           >
-          <div class="error-message" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
-            <span *ngIf="registerForm.get('email')?.errors?.['required']">El correo electrónico es requerido</span>
-            <span *ngIf="registerForm.get('email')?.errors?.['email']">Ingrese un correo electrónico válido</span>
-          </div>
+          @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+            <div class="error-message">
+              @if (registerForm.get('email')?.errors?.['required']) {
+                <span>El correo electrónico es requerido</span>
+              }
+              @if (registerForm.get('email')?.errors?.['email']) {
+                <span>Ingrese un correo electrónico válido</span>
+              }
+            </div>
+          }
         </div>
       </div>
 
@@ -119,9 +137,11 @@
             class="form-select"
           >
             <option value="">Seleccione su tipo de sangre</option>
-            <option *ngFor="let option of bloodTypeOptions" [value]="option.value">
-              {{ option.label }}
-            </option>
+            @for (option of bloodTypeOptions; track option.value) {
+              <option [value]="option.value">
+                {{ option.label }}
+              </option>
+            }
           </select>
           <div class="field-help">Esta información es importante para emergencias médicas</div>
         </div>
@@ -151,53 +171,62 @@
               (click)="showPassword = !showPassword"
               [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
             >
-              <svg 
-                *ngIf="!showPassword"
-                xmlns="http://www.w3.org/2000/svg" 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                stroke-width="2" 
-                stroke-linecap="round" 
-                stroke-linejoin="round"
-              >
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-              <svg 
-                *ngIf="showPassword"
-                xmlns="http://www.w3.org/2000/svg" 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                stroke-width="2" 
-                stroke-linecap="round" 
-                stroke-linejoin="round"
-              >
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-              </svg>
+              @if (!showPassword) {
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="18" 
+                  height="18" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  stroke-width="2" 
+                  stroke-linecap="round" 
+                  stroke-linejoin="round"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              } @else {
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="18" 
+                  height="18" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  stroke-width="2" 
+                  stroke-linecap="round" 
+                  stroke-linejoin="round"
+                >
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              }
             </button>
           </div>
           
-          <!-- Medidor de fortaleza simplificado -->
-          <div class="password-strength" *ngIf="registerForm.get('password')?.value">
-            <div class="strength-bar">
-              <div class="strength-fill" [ngClass]="passwordStrengthClass" [style.width.%]="passwordStrength"></div>
+          @if (registerForm.get('password')?.value) {
+            <!-- Medidor de fortaleza simplificado -->
+            <div class="password-strength">
+              <div class="strength-bar">
+                <div class="strength-fill" [ngClass]="passwordStrengthClass" [style.width.%]="passwordStrength"></div>
+              </div>
+              <span class="strength-text" [ngClass]="passwordStrengthClass">
+                {{ passwordStrengthText }}
+              </span>
             </div>
-            <span class="strength-text" [ngClass]="passwordStrengthClass">
-              {{ passwordStrengthText }}
-            </span>
-          </div>
+          }
           
-          <div class="error-message" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-            <span *ngIf="registerForm.get('password')?.errors?.['required']">La contraseña es requerida</span>
-            <span *ngIf="registerForm.get('password')?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</span>
-          </div>
+          @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+            <div class="error-message">
+              @if (registerForm.get('password')?.errors?.['required']) {
+                <span>La contraseña es requerida</span>
+              }
+              @if (registerForm.get('password')?.errors?.['minlength']) {
+                <span>La contraseña debe tener al menos 6 caracteres</span>
+              }
+            </div>
+          }
         </div>
 
         <div class="form-group">
@@ -219,42 +248,49 @@
               (click)="showConfirmPassword = !showConfirmPassword"
               [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
             >
-              <svg 
-                *ngIf="!showConfirmPassword"
-                xmlns="http://www.w3.org/2000/svg" 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                stroke-width="2" 
-                stroke-linecap="round" 
-                stroke-linejoin="round"
-              >
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-              <svg 
-                *ngIf="showConfirmPassword"
-                xmlns="http://www.w3.org/2000/svg" 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                stroke-width="2" 
-                stroke-linecap="round" 
-                stroke-linejoin="round"
-              >
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-              </svg>
+              @if (!showConfirmPassword) {
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="18" 
+                  height="18" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  stroke-width="2" 
+                  stroke-linecap="round" 
+                  stroke-linejoin="round"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              } @else {
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="18" 
+                  height="18" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  stroke-width="2" 
+                  stroke-linecap="round" 
+                  stroke-linejoin="round"
+                >
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              }
             </button>
           </div>
-          <div class="error-message" *ngIf="(registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.get('confirmPassword')?.touched">
-            <span *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">Debe confirmar su contraseña</span>
-            <span *ngIf="registerForm.errors?.['passwordMismatch']">Las contraseñas no coinciden</span>
-          </div>
+          @if ((registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.get('confirmPassword')?.touched) {
+            <div class="error-message">
+              @if (registerForm.get('confirmPassword')?.errors?.['required']) {
+                <span>Debe confirmar su contraseña</span>
+              }
+              @if (registerForm.errors?.['passwordMismatch']) {
+                <span>Las contraseñas no coinciden</span>
+              }
+            </div>
+          }
         </div>
       </div>
 
@@ -264,8 +300,12 @@
           class="btn-primary" 
           [disabled]="registerForm.invalid || isSubmitting"
         >
-          <span *ngIf="isSubmitting" class="loading-spinner"></span>
-          {{ isSubmitting ? 'Creando cuenta...' : 'Crear cuenta' }}
+          @if (isSubmitting) {
+            <span class="loading-spinner"></span>
+            Creando cuenta...
+          } @else {
+            Crear cuenta
+          }
         </button>
 
         <div class="auth-footer">

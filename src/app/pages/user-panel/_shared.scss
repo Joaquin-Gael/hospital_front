@@ -106,14 +106,11 @@ $font-size-nav: 14px;
   cursor: pointer;
   transition: $transition;
   border: none;
+  color: white;
   
   &--primary {
-    background-color: $primary-color;
     color: white;
-    
-    &:hover {
-      background-color: $primary-dark;
-    }
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   }
   
   &--outline {
@@ -147,9 +144,6 @@ $font-size-nav: 14px;
 }
 
 .btn-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -158,6 +152,7 @@ $font-size-nav: 14px;
   border: none;
   cursor: pointer;
   transition: $transition;
+  @include flex-inline(8px, center);
   
   &:hover {
     background-color: $background-color;

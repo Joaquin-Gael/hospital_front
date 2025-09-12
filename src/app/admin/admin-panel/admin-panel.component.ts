@@ -30,8 +30,6 @@ export class AdminPanelComponent implements OnInit {
 
   activeSection: string = 'departments';            
   isUserMenuOpen: boolean = false;
-  isLoggedIn: boolean = false;
-  scopes: string[] = []
 
   @ViewChild('userButton') userButtonRef!: ElementRef;
   @ViewChild('dropdownMenu') dropdownRef!: ElementRef;
@@ -41,40 +39,51 @@ export class AdminPanelComponent implements OnInit {
     { id: 'specialities', label: 'Especialidades', icon: 'local_hospital' },
     { id: 'doctors', label: 'Doctores', icon: 'person' },
     { id: 'schedules', label: 'Horarios', icon: 'schedule' },
-    { id: 'health-insurances', label: 'Seguros de Salud', icon: 'health_and_safety' },
+    { id: 'health-insurances', label: 'Obras Sociales', icon: 'health_and_safety' },
     { id: 'services', label: 'Servicios', icon: 'medical_services' },
     { id: 'locations', label: 'Ubicaciones', icon: 'location_on' },
     { id: 'users', label: 'Usuarios', icon: 'people' },
   ];
 
-  get activeSectionLabel(): string {
-    return this.sections.find((s) => s.id === this.activeSection)?.label || 'Panel Admin';
-  }
-
   ngOnInit(): void {
     if(this.authService.getStoredScopes().includes('admin')){
-      const url = this.router.url;
-      const sectionId = url.split('/admin_panel/')[1]?.split('/')[0];
-      if (sectionId && this.sections.some((s) => s.id === sectionId)) {
-        this.activeSection = sectionId;
-      }
+      this.setActiveSectionFromRoute();
 
       this.router.events
         .pipe(
           filter((event) => event instanceof NavigationEnd),
           takeUntil(this.destroy$)
         )
-        .subscribe((event) => {
-          const navEvent = event as NavigationEnd;
-          const navUrl = navEvent.urlAfterRedirects;
-          const navSectionId = navUrl.split('/admin_panel/')[1]?.split('/')[0];
-          if (navSectionId && this.sections.some((s) => s.id === navSectionId)) {
-            this.activeSection = navSectionId;
-          }
+        .subscribe(() => {
+          this.setActiveSectionFromRoute();
         });
     } else {
       this.logger.warn('Acceso denegado.')
       this.router.navigate(['/home'])
+    }
+  }
+
+  private setActiveSectionFromRoute(): void {
+    const url = this.router.url.toLowerCase();
+    
+    if (url.includes('/departments')) {
+      this.activeSection = 'departments';
+    } else if (url.includes('/specialities')) {
+      this.activeSection = 'specialities';
+    } else if (url.includes('/doctors')) {
+      this.activeSection = 'doctors';
+    } else if (url.includes('/schedules')) {
+      this.activeSection = 'schedules';
+    } else if (url.includes('/health-insurances')) {
+      this.activeSection = 'health-insurances';
+    } else if (url.includes('/services')) {
+      this.activeSection = 'services';
+    } else if (url.includes('/locations')) {
+      this.activeSection = 'locations';
+    } else if (url.includes('/users')) {
+      this.activeSection = 'users';
+    } else {
+      this.activeSection = 'departments';
     }
   }
 
@@ -120,11 +129,6 @@ export class AdminPanelComponent implements OnInit {
           this.router.navigate(['/login']);
         },
       });
-  }
-
-  setActiveSection(section: string): void {
-    this.activeSection = section;
-    this.router.navigate(['/admin_panel', section]);
   }
 
   ngOnDestroy(): void {
