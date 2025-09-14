@@ -1,43 +1,49 @@
-<div class="service-list">
-  <div class="service-list__header">
-    <h3>Listado de Servicios</h3>
-    <button 
-      class="add-button" 
-      (click)="onAddNew()"
-      aria-label="Agregar nuevo servicio"
-    >
-      <span class="material-icons">add</span>
-      Nuevo Servicio
-    </button>
-  </div>
-  
-  <div *ngIf="error" class="error-message" role="alert">
-    {{ error }}
-    <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
-  
-  <div class="service-list__content" [class.hidden]="showForm">
-    <app-data-table
-      [data]="services"
-      [columns]="tableColumns"
-      [loading]="loading"
-      (edit)="onEdit($event)"
-      (delete)="onDelete($event)"
-      (view)="onView($event)"
-    ></app-data-table>
-  </div>
-  
-  <div class="service-list__form" [class.hidden]="!showForm">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="selectedService"
-      [title]="formMode === 'create' ? 'Nuevo Servicio' : 'Editar Servicio'"
-      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
-      [loading]="formLoading"
-      (formSubmit)="onFormSubmit($event)"
-      (formCancel)="onFormCancel()"
-    ></app-entity-form>
-  </div>
+<div class="service-section">
+  <app-section-header 
+    title="Gestión de Servicios" 
+    subtitle="Administra los servicios médicos del sistema"
+    [actions]="headerActions">
+  </app-section-header>
+
+  <app-error-message
+    [message]="error"
+    (close)="error = null">
+  </app-error-message>
+
+  @if (showForm) {
+    <div class="service-section__form-container">
+      <app-entity-form
+        [fields]="formFields"
+        [initialData]="selectedService"
+        [title]="formMode === 'create' ? 'Nuevo Servicio' : 'Editar Servicio'"
+        [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+        [loading]="formLoading"
+        (formSubmit)="onFormSubmit($event)"
+        (formCancel)="onFormCancel()">
+      </app-entity-form>
+    </div>
+  } @else {
+    @if (loading) {
+      <app-loading-spinner [message]="'Cargando servicios...'"></app-loading-spinner>
+    } @else {
+      <div class="service-section__table-container">
+        <app-data-table
+          [data]="services"
+          [columns]="tableColumns"
+          [loading]="loading"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)"
+          (view)="onView($event)">
+        </app-data-table>
+      </div>
+    }
+  }
+
+  <app-view-dialog
+    [isOpen]="viewDialogOpen"
+    [item]="viewDialogData"
+    [columns]="viewDialogColumns"
+    [title]="viewDialogTitle"
+    (close)="closeViewDialog()">
+  </app-view-dialog>
 </div>

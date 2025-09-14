@@ -1,7 +1,7 @@
-@use '../layout/styles/_media-queries.scss' as *;
-@use '../layout/styles/_mixins.scss' as *;
-@use '../admin/styles/_vars.scss' as *;
-
+@use 'sass:color';
+@use '../../layout/styles/_media-queries.scss' as *;
+@use '../../layout/styles/_mixins.scss' as *;
+@use '../../admin/styles/_vars.scss' as *;
 
 .view-dialog-overlay {
   position: fixed;
@@ -35,7 +35,7 @@
     padding: 2rem 2rem 0 2rem;
     text-align: center;
     position: relative;
-    
+
     h2 {
       margin: 0 0 1.5rem 0;
       font-size: 1.75rem;
@@ -45,18 +45,6 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
       letter-spacing: -0.025em;
-      
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0.5rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60px;
-        height: 3px;
-        background: $accent-color;
-        border-radius: 2px;
-      }
     }
   }
 
@@ -64,20 +52,20 @@
     padding: 2rem;
     max-height: 50vh;
     overflow-y: auto;
-    
+
     &::-webkit-scrollbar {
       width: 8px;
     }
-    
+
     &::-webkit-scrollbar-track {
       background: rgba(59, 130, 246, 0.1);
       border-radius: 4px;
     }
-    
+
     &::-webkit-scrollbar-thumb {
       background: $primary-color;
       border-radius: 4px;
-      
+
       &:hover {
         background: $primary-hover;
       }
@@ -96,11 +84,11 @@
 
     tr {
       transition: $transition-smooth;
-      
+
       &:nth-child(even) {
         background: rgba(59, 130, 246, 0.02);
       }
-      
+
       &:hover {
         background: rgba(59, 130, 246, 0.08);
         transform: scale(1.01);
@@ -111,7 +99,7 @@
       padding: 1.25rem;
       border-bottom: 1px solid $border-light;
       vertical-align: top;
-      
+
       &:last-child {
         border-bottom: none;
       }
@@ -124,7 +112,7 @@
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(29, 78, 216, 0.05) 100%);
     width: 30%;
     position: relative;
-    
+
     &::after {
       content: '';
       position: absolute;
@@ -149,27 +137,25 @@
   }
 
   &__close-button {
-    @include button-base;
-    @include animated-gradient;
-    background: $primary-gradient;
-    color: $text-white;
     padding: 1rem 2rem;
     font-size: 1rem;
     font-weight: 700;
     min-width: 120px;
     box-shadow: $shadow-md;
+    background: $primary-gradient;
+    color: $text-white;
+    transition: $transition-smooth;
     @include button-base;
-    @include animated-gradient;
 
     &:hover {
       transform: translateY(-2px) scale(1.05);
       box-shadow: $shadow-lg;
     }
-    
+
     &:active {
       transform: translateY(0) scale(1);
     }
-    
+
     @include mobile-only {
       width: 100%;
     }
@@ -183,7 +169,7 @@
     border: 3px solid $bg-primary;
     box-shadow: $shadow-sm;
     transition: $transition-smooth;
-    
+
     &:hover {
       transform: scale(1.5);
       box-shadow: $shadow-md;
@@ -198,18 +184,17 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    @include badge;  
-     
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+
     &--success {
-      background: rgba(16, 185, 129, 0.1);
-      color: $success-color;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -10%) 100%);
+      color: $text-white;
     }
-    
+
     &--error {
-      background: rgba(239, 68, 68, 0.1);
-      color: $error-color;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: linear-gradient(135deg, $error-color 0%, color.adjust($error-color, $lightness: -10%) 100%);
+      color: $text-white;
     }
   }
 
@@ -224,7 +209,7 @@
     text-decoration: none;
     font-weight: 600;
     transition: $transition-smooth;
-    
+
     &:hover {
       color: $primary-hover;
       text-decoration: underline;

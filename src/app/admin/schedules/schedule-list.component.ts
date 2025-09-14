@@ -1,5 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SectionHeaderComponent, ActionButton } from '../section-header/section-header.component';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { ErrorMessageComponent } from '../error-message/error-message.component';
+import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog/view-dialog.component';
 import { DataTableComponent } from '../../shared/data-table/data-table.component';
 import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
 import { ScheduleService } from '../../services/schedule/schedule.service';
@@ -30,6 +34,10 @@ interface ScheduleFormData {
   standalone: true,
   imports: [
     CommonModule,
+    SectionHeaderComponent,
+    LoadingSpinnerComponent,
+    ErrorMessageComponent,
+    ViewDialogComponent,
     DataTableComponent,
     EntityFormComponent,
     MatDialogModule,
@@ -51,6 +59,28 @@ export class ScheduleListComponent implements OnInit {
   selectedSchedule: ExtendedSchedule | null = null;
   formLoading = false;
   error: string | null = null;
+
+  // View dialog
+  viewDialogOpen = false;
+  viewDialogData: any = {};
+  viewDialogTitle = '';
+
+  headerActions: ActionButton[] = [
+    {
+      label: 'Asociar Doctor',
+      icon: 'link',
+      variant: 'success',
+      ariaLabel: 'Asociar doctor a horario',
+      onClick: () => this.openAssignDoctorDialog()
+    },
+    {
+      label: 'Nuevo Horario',
+      icon: 'add',
+      variant: 'primary',
+      ariaLabel: 'Agregar nuevo horario',
+      onClick: () => this.onAddNew()
+    }
+  ];
 
   daysOfWeek = [
     { value: '0', label: 'Domingo' },
@@ -74,7 +104,12 @@ export class ScheduleListComponent implements OnInit {
     },
     { key: 'start_time', label: 'Hora Inicio' },
     { key: 'end_time', label: 'Hora Fin' },
-    //{ key: 'doctorName', label: 'Doctor' }
+  ];
+
+  viewDialogColumns: ViewDialogColumn[] = [
+    { key: 'day', label: 'Día', format: (value: string) => this.getDayLabel(value) },
+    { key: 'start_time', label: 'Hora Inicio' },
+    { key: 'end_time', label: 'Hora Fin' },
   ];
 
   private baseFormFields: FormField[] = [
@@ -202,7 +237,15 @@ export class ScheduleListComponent implements OnInit {
   }
 
   onView(schedule: ExtendedSchedule): void {
-    alert(`Detalles del horario:\nDía: ${this.getDayLabel(schedule.day)}\nHora Inicio: ${schedule.start_time}\nHora Fin: ${schedule.end_time}\nDoctor: ${schedule.doctorName}`);
+    this.viewDialogData = schedule;
+    this.viewDialogTitle = `Horario: ${this.getDayLabel(schedule.day)} ${schedule.start_time}-${schedule.end_time}`;
+    this.viewDialogOpen = true;
+    this.logger.debug('Opening view dialog for schedule', schedule);
+  }
+
+  closeViewDialog(): void {
+    this.viewDialogOpen = false;
+    this.viewDialogData = {};
   }
 
   onFormSubmit(formData: ScheduleFormData): void {

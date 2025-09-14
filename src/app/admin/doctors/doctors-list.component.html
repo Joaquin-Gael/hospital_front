@@ -1,57 +1,53 @@
-<div class="doctor-list">
-  <div class="doctor-list__header">
-    <h3>Listado de Doctores</h3>
-    <div class="button-group">
-      <button 
-        class="add-button assign-button" 
-        (click)="openAssignScheduleDialog()"
-        aria-label="Asociar horario a doctor"
-      >
-        <span class="material-icons">link</span>
-        Asociar Horario
-      </button>
-      <button 
-        class="add-button" 
-        (click)="onAddNew()"
-        aria-label="Agregar nuevo doctor"
-      >
-        <span class="material-icons">add</span>
-        Nuevo Doctor
-      </button>
+<div class="doctor-section">
+  <app-section-header
+    title="Gestión de Doctores"
+    subtitle="Administra los doctores del sistema médico"
+    [actions]="headerActions">
+  </app-section-header>
+
+  <app-error-message 
+    [message]="error" 
+    (close)="error = null">
+  </app-error-message>
+
+  @if (showForm) {
+    <div class="doctor-section__form-container">
+      <app-entity-form
+        [fields]="formFields"
+        [initialData]="selectedDoctor"
+        [mode]="formMode"
+        [title]="formMode === 'create' ? 'Nuevo Doctor' : 'Editar Doctor'"
+        [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+        [loading]="formLoading"
+        (formSubmit)="onFormSubmit($event)"
+        (formCancel)="onFormCancel()">
+      </app-entity-form>
     </div>
-  </div>
-  
-  <div *ngIf="error" class="error-message" role="alert">
-    {{ error }}
-    <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
-  
-  <div class="doctor-list__content" [class.hidden]="showForm">
-    <app-data-table
-      [data]="doctors"
-      [columns]="tableColumns"
-      [loading]="loading"
-      [showBanUnban]="true"  
-      (edit)="onEdit($event)"
-      (delete)="onDelete($event)"
-      (view)="onView($event)"
-      (ban)="onBanEvent($event)"
-      (unban)="onUnbanEvent($event)"
-    ></app-data-table>
-  </div>
-  
-  <div class="doctor-list__form" [class.hidden]="!showForm">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="selectedDoctor"
-      [mode]="formMode"
-      [title]="formMode === 'create' ? 'Nuevo Doctor' : 'Editar Doctor'"
-      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
-      [loading]="formLoading"
-      (formSubmit)="onFormSubmit($event)"
-      (formCancel)="onFormCancel()"
-    ></app-entity-form>
-  </div>
+  } @else {
+    @if (loading) {
+      <app-loading-spinner [message]="'Cargando doctores...'"></app-loading-spinner>
+    } @else {
+      <div class="doctor-section__table-container">
+        <app-data-table
+          [data]="doctors"
+          [columns]="tableColumns"
+          [loading]="loading"
+          [showBanUnban]="true"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)"
+          (view)="onView($event)"
+          (ban)="onBanEvent($event)"
+          (unban)="onUnbanEvent($event)">
+        </app-data-table>
+      </div>
+    }
+  }
+
+  <app-view-dialog
+    [isOpen]="viewDialogOpen"
+    [item]="viewDialogData"
+    [columns]="viewDialogColumns"
+    [title]="viewDialogTitle"
+    (close)="closeViewDialog()">
+  </app-view-dialog>
 </div>

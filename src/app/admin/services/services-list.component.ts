@@ -1,22 +1,23 @@
-import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataTableComponent } from '../../shared/data-table/data-table.component';
-import {
-  EntityFormComponent,
-  FormField,
-} from '../../shared/entity-form/entity-form.component';
+import { SectionHeaderComponent, ActionButton } from '../section-header/section-header.component';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { ErrorMessageComponent } from '../error-message/error-message.component';
+import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog/view-dialog.component';
+import { DataTableComponent, TableColumn } from '../../shared/data-table/data-table.component';
+import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
 import { ServiceService } from '../../services/service/service.service';
+import { LoggerService } from '../../services/core/logger.service';
 import {
   Service,
   ServiceCreate,
   ServiceUpdate,
 } from '../../services/interfaces/hospital.interfaces';
-import { LoggerService } from '../../services/core/logger.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 
 interface ExtendedService extends Service {
   isActive?: boolean;
@@ -37,6 +38,10 @@ interface ServiceFormData {
   standalone: true,
   imports: [
     CommonModule,
+    SectionHeaderComponent,
+    LoadingSpinnerComponent,
+    ErrorMessageComponent,
+    ViewDialogComponent,
     DataTableComponent,
     EntityFormComponent,
     MatDialogModule,
@@ -51,15 +56,29 @@ export class ServiceListComponent implements OnInit {
   private dialog = inject(MatDialog);
 
   services: ExtendedService[] = [];
-  loading: boolean = false;
-  showForm: boolean = false;
-  formMode: 'create' | 'edit' = 'create';
   selectedService: ExtendedService | null = null;
-  formLoading: boolean = false;
+  loading = false;
+  formLoading = false;
   error: string | null = null;
+  showForm = false;
+  formMode: 'create' | 'edit' = 'create';
 
-  tableColumns = [
-    { key: 'id', label: 'ID' },
+  // View dialog
+  viewDialogOpen = false;
+  viewDialogData: any = {};
+  viewDialogTitle = '';
+
+  headerActions: ActionButton[] = [
+    {
+      label: 'Nuevo Servicio',
+      icon: 'add',
+      variant: 'primary',
+      ariaLabel: 'Agregar nuevo servicio',
+      onClick: () => this.onAddNew()
+    }
+  ];
+
+  tableColumns: TableColumn[] = [
     { key: 'name', label: 'Nombre' },
     { key: 'description', label: 'Descripción' },
     {
@@ -67,51 +86,65 @@ export class ServiceListComponent implements OnInit {
       label: 'Precio',
       format: (value: number) => `$${value.toFixed(2)}`,
     },
+    { key: 'icon_code', label: 'Icono' },
+    { key: 'specialty_id', label: 'ID de Especialidad' },
+  ];
+
+  viewDialogColumns: ViewDialogColumn[] = [
+    { key: 'name', label: 'Nombre' },
+    { key: 'description', label: 'Descripción' },
     {
-      key: 'icon_code',
-      label: 'Icono',
-      format: (value: string) => `${value}`,
+      key: 'price',
+      label: 'Precio',
+      format: (value: number) => `$${value.toFixed(2)}`,
     },
-    {
-      key: 'specialty_id',
-      label: 'ID de Especialidad',
-      format: (value: string) => (`${value} ? ${value} : 'No asignado'`),
-    },
-    {
-      key: 'isActive',
-      label: 'Activo',
-      format: (value?: boolean) => (value ? 'Sí' : 'No'),
-    },
+    { key: 'icon_code', label: 'Icono' },
+    { key: 'specialty_id', label: 'ID de Especialidad' },
+    { key: 'isActive', label: 'Activo', format: (value?: boolean) => value ? 'Sí' : 'No' },
   ];
 
   formFields: FormField[] = [
-    { key: 'name', label: 'Nombre', type: 'text', required: true },
+    {
+      key: 'name',
+      label: 'Nombre',
+      type: 'text',
+      required: true,
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(100)]
+    },
     {
       key: 'description',
       label: 'Descripción',
       type: 'textarea',
       required: true,
+      validators: [Validators.required, Validators.maxLength(500)]
     },
     {
       key: 'price',
       label: 'Precio',
       type: 'number',
       required: true,
-      validators: [Validators.min(0)],
+      validators: [Validators.required, Validators.min(0)]
     },
     {
       key: 'icon_code',
       label: 'Icono',
       type: 'text',
       required: true,
+      validators: [Validators.required]
     },
     {
       key: 'specialty_id',
       label: 'ID de Especialidad',
       type: 'text',
       required: true,
+      validators: [Validators.required]
     },
-    { key: 'isActive', label: 'Activo', type: 'checkbox', defaultValue: true },
+    {
+      key: 'isActive',
+      label: 'Activo',
+      type: 'checkbox',
+      defaultValue: true
+    },
   ];
 
   ngOnInit(): void {
@@ -124,10 +157,9 @@ export class ServiceListComponent implements OnInit {
 
     this.serviceService.getServices().subscribe({
       next: (services) => {
-        this.services = services.map((s) => ({
-          ...s,
-          duration: undefined,
-          isActive: true,
+        this.services = services.map((service: Service) => ({
+          ...service,
+          isActive: true, // Valor por defecto
         }));
         this.loading = false;
       },
@@ -142,12 +174,21 @@ export class ServiceListComponent implements OnInit {
     this.formMode = 'create';
     this.selectedService = null;
     this.showForm = true;
+    this.logger.debug('Opening form for new service');
   }
 
   onEdit(service: ExtendedService): void {
     this.formMode = 'edit';
     this.selectedService = service;
     this.showForm = true;
+    this.logger.debug('Opening form for editing service', service);
+  }
+
+  onView(service: ExtendedService): void {
+    this.viewDialogData = service;
+    this.viewDialogTitle = `Servicio: ${service.name}`;
+    this.viewDialogOpen = true;
+    this.logger.debug('Opening view dialog for service', service);
   }
 
   onDelete(service: ExtendedService): void {
@@ -158,7 +199,7 @@ export class ServiceListComponent implements OnInit {
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.loading = true;
 
@@ -166,15 +207,10 @@ export class ServiceListComponent implements OnInit {
           next: () => {
             this.services = this.services.filter((s) => s.id !== service.id);
             this.loading = false;
-            this.logger.info(
-              `Servicio "${service.name}" eliminado correctamente`
-            );
+            this.logger.info(`Servicio "${service.name}" eliminado correctamente`);
           },
           error: (error: HttpErrorResponse) => {
-            this.handleError(
-              error,
-              `Error al eliminar el servicio "${service.name}"`
-            );
+            this.handleError(error, `Error al eliminar el servicio "${service.name}"`);
             this.loading = false;
           },
         });
@@ -182,81 +218,39 @@ export class ServiceListComponent implements OnInit {
     });
   }
 
-  onView(service: ExtendedService): void {
-    alert(
-      `Detalles del servicio: ${service.name}\nDescripción: ${
-        service.description
-      }\nPrecio: $${service.price.toFixed(2)}\nActivo: ${
-        service.isActive ? 'Sí' : 'No'
-      }`
-    );
-  }
-
   onFormSubmit(formData: ServiceFormData): void {
     this.formLoading = true;
     this.error = null;
-    const { duration, isActive, ...serviceData } = formData;
-    if (this.formMode === 'create') {
-      this.serviceService
-        .createService(serviceData as ServiceCreate)
-        .subscribe({
-          next: (newService) => {
-            console.log('Respuesta del backend al crear servicio:', newService); 
-            this.services.push({
-              ...newService,
-              isActive: isActive !== undefined ? isActive : true,
-            });
-            this.formLoading = false;
-            this.showForm = false;
-            this.logger.info(
-              `Servicio "${newService.name}" creado correctamente`
-            );
-          },
-          error: (error: HttpErrorResponse) => {
-            console.log('Error detallado al crear servicio:', error);
-            this.handleError(error, 'Error al crear el servicio');
-            this.formLoading = false;
-          },
-        });
-    } else {
-      if (!this.selectedService) return;
 
-      this.serviceService
-        .updateService(
-          this.selectedService.id.toString(),
-          serviceData as ServiceUpdate
-        )
-        .subscribe({
-          next: (updatedService) => {
-            const index = this.services.findIndex(
-              (s) => s.id === updatedService.id
-            );
-            if (index !== -1) {
-              this.services[index] = {
-                ...updatedService,
-                isActive:
-                  isActive !== undefined
-                    ? isActive
-                    : this.services[index].isActive,
-              };
-            }
-            this.formLoading = false;
-            this.showForm = false;
-            this.logger.info(
-              `Servicio "${updatedService.name}" actualizado correctamente`
-            );
-          },
-          error: (error: HttpErrorResponse) => {
-            console.log('Error detallado al actualizar servicio:', error); 
-            this.handleError(error, 'Error al actualizar el servicio');
-            this.formLoading = false;
-          },
-        });
-    }
+    const { duration, isActive, ...serviceData } = formData;
+
+    const request = this.formMode === 'create'
+      ? this.serviceService.createService(serviceData as ServiceCreate)
+      : this.serviceService.updateService(this.selectedService!.id.toString(), serviceData as ServiceUpdate);
+
+    request.subscribe({
+      next: (result: Service) => {
+        this.formLoading = false;
+        this.showForm = false;
+        this.loadServices();
+        this.logger.info(`Servicio ${this.formMode === 'create' ? 'creado' : 'actualizado'} correctamente`);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.formLoading = false;
+        this.handleError(error, `Error al ${this.formMode === 'create' ? 'crear' : 'actualizar'} el servicio`);
+      }
+    });
   }
 
   onFormCancel(): void {
     this.showForm = false;
+    this.selectedService = null;
+    this.logger.debug('Form cancelled');
+  }
+
+  closeViewDialog(): void {
+    this.viewDialogOpen = false;
+    this.viewDialogData = {};
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {

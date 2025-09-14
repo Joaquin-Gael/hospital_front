@@ -1,262 +1,339 @@
 <div class="entity-form">
-  <h2 class="entity-form__title">{{ title }}</h2>
+  @if (loading) {
+    <div class="entity-form__loading">
+      <div class="loading-spinner"></div>
+      <span>Cargando...</span>
+    </div>
+  } @else {
+    <div class="entity-form__header">
+      <h2 class="entity-form__title">
+        <svg class="entity-form__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        {{ title }}
+      </h2>
+      <p class="entity-form__description">
+        Complete todos los campos requeridos para continuar
+      </p>
+    </div>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="entity-form__form">
-    <div class="entity-form__fields">
-      <div
-        *ngFor="let field of fields; trackBy: trackByField"
-        class="entity-form__field"
-      >
-        <!-- Label solo si no es checkbox -->
-        <label
-          *ngIf="field.type !== 'checkbox'"
-          [for]="field.key"
-          class="entity-form__label"
-        >
-          {{ field.label }}
-          <span *ngIf="field.required" class="required-mark">*</span>
-        </label>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="entity-form__form" novalidate>
+      
+      <!-- Photo Upload Section (solo si hay campos de archivo e imagen habilitada) -->
+      @if (enableImageUpload && hasFileFields()) {
+        <div class="entity-form__photo-section">
+          @for (field of fields; track field.key) {
+            @if (field.type === 'file') {
+              <div class="photo-upload">
+                <div class="photo-upload__preview">
+                  @if (selectedFiles[field.key]) {
+                    <div class="photo-upload__image">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                      </svg>
+                    </div>
+                  } @else {
+                    <div class="photo-upload__placeholder">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17,8 12,3 7,8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                    </div>
+                  }
+                  
+                  <div class="photo-upload__overlay">
+                    <button 
+                      type="button"
+                      class="photo-upload__button"
+                      (click)="triggerFileInput(field.key)"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="photo-upload__info">
+                  <h4 class="photo-upload__title">{{ field.label }}</h4>
+                  <p class="photo-upload__hint">JPG o PNG, máximo 5MB</p>
+                  @if (selectedFiles[field.key]) {
+                    <button 
+                      type="button"
+                      class="photo-upload__remove"
+                      (click)="removeFile($event, field.key)"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polyline points="3,6 5,6 21,6"/>
+                        <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                      </svg>
+                      Eliminar archivo
+                    </button>
+                  }
+                </div>
 
-        <!-- Input de texto -->
-        <input
-          *ngIf="
-            ['text', 'email', 'password', 'number', 'date'].includes(field.type)
-          "
-          [type]="field.type"
-          [id]="field.key"
-          [formControlName]="field.key"
-          [placeholder]="getPlaceholder(field)"
-          class="entity-form__input"
-          [class.is-invalid]="hasAnyError(field.key)"
-          [attr.aria-invalid]="hasAnyError(field.key)"
-          [attr.aria-describedby]="getErrorId(field.key)"
-          [required]="field.required ?? false"
-          [attr.aria-required]="field.required ?? false"
-          [attr.readonly]="field.readonly ? true : null"
-          (focus)="logFocus(field.key)"
-        />
-
-        <!-- Textarea -->
-        <textarea
-          *ngIf="field.type === 'textarea'"
-          [id]="field.key"
-          [formControlName]="field.key"
-          [placeholder]="getPlaceholder(field)"
-          class="entity-form__textarea"
-          [class.is-invalid]="hasAnyError(field.key)"
-          [attr.aria-invalid]="hasAnyError(field.key)"
-          [attr.aria-describedby]="getErrorId(field.key)"
-          [required]="field.required ?? false"
-          [attr.aria-required]="field.required ?? false"
-          [attr.readonly]="field.readonly ? true : null"
-          (focus)="logFocus(field.key)"
-        >
-        </textarea>
-
-        <!-- Select -->
-        <select
-          *ngIf="field.type === 'select'"
-          [id]="field.key"
-          [formControlName]="field.key"
-          class="entity-form__select"
-          [class.is-invalid]="hasAnyError(field.key)"
-          [attr.aria-invalid]="hasAnyError(field.key)"
-          [attr.aria-describedby]="getErrorId(field.key)"
-          [required]="field.required ?? false"
-          [attr.aria-required]="field.required ?? false"
-          (focus)="logFocus(field.key)"
-        >
-          <option value="" disabled>Seleccione una opción</option>
-          <option *ngFor="let option of field.options" [value]="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-
-        <!-- Checkbox -->
-        <div
-          *ngIf="field.type === 'checkbox'"
-          class="entity-form__checkbox-wrapper"
-        >
-          <input
-            type="checkbox"
-            [id]="field.key"
-            [formControlName]="field.key"
-            class="entity-form__checkbox"
-            (focus)="logFocus(field.key)"
-          />
-          <label [for]="field.key" class="entity-form__checkbox-label">
-            {{ field.label }}
-            <span *ngIf="field.required" class="required-mark">*</span>
-          </label>
-        </div>
-
-        <!-- Zona de drag and drop mejorada para archivos -->
-        <div
-          *ngIf="field.type === 'file' && enableImageUpload"
-          class="entity-form__file-dropzone"
-          [class.is-dragover]="isDragOver[field.key]"
-          [class.has-file]="selectedFiles[field.key]"
-          (dragover)="onDragOver($event, field.key)"
-          (dragleave)="onDragLeave($event, field.key)"
-          (drop)="onDrop($event, field.key)"
-          (click)="triggerFileInput(field.key)"
-        >
-          <!-- Input file oculto -->
-          <input
-            type="file"
-            [id]="field.key"
-            #fileInput
-            (change)="onFileSelected($event, field.key)"
-            accept="image/*"
-            class="entity-form__file-input"
-            [required]="field.required ?? false"
-            [attr.aria-required]="field.required ?? false"
-            [attr.aria-describedby]="getErrorId(field.key)"
-            style="display: none"
-          />
-
-          <!-- Contenido de la zona de drop -->
-          <div class="entity-form__dropzone-content">
-            <div class="entity-form__dropzone-icon">
-              <svg
-                *ngIf="!selectedFiles[field.key]"
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="17,8 12,3 7,8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
-              </svg>
-              <svg
-                *ngIf="selectedFiles[field.key]"
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                <input 
+                  type="file"
+                  [id]="field.key"
+                  #fileInput
+                  (change)="onFileSelected($event, field.key)"
+                  accept="image/*"
+                  class="photo-upload__input"
+                  [required]="field.required ?? false"
+                  [attr.aria-required]="field.required ?? false"
+                  [attr.aria-describedby]="getErrorId(field.key)"
+                  style="display: none"
                 />
-                <polyline points="14,2 14,8 20,8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-                <polyline points="10,9 9,9 8,9" />
-              </svg>
-            </div>
-
-            <div class="entity-form__dropzone-text">
-              <p
-                class="entity-form__dropzone-primary"
-                *ngIf="!selectedFiles[field.key]"
-              >
-                <strong>Arrastra tu archivo aquí</strong>
-              </p>
-              <p
-                class="entity-form__dropzone-primary"
-                *ngIf="selectedFiles[field.key]"
-              >
-                <strong>{{ selectedFiles[field.key].name }}</strong>
-                <!-- Cambiado de ?. a . -->
-              </p>
-              <p
-                class="entity-form__dropzone-secondary"
-                *ngIf="!selectedFiles[field.key]"
-              >
-                o haz clic para seleccionar
-              </p>
-              <p
-                class="entity-form__dropzone-secondary"
-                *ngIf="selectedFiles[field.key]"
-              >
-                {{ formatFileSize(selectedFiles[field.key].size) }} • Haz clic
-                para cambiar
-                <!-- Cambiado de ?. a . -->
-              </p>
-            </div>
-
-            <!-- Botón para remover archivo -->
-            <button
-              *ngIf="selectedFiles[field.key]"
-              type="button"
-              class="entity-form__remove-file"
-              (click)="removeFile($event, field.key)"
-              [attr.aria-label]="
-                'Remover archivo ' + selectedFiles[field.key].name
-              "
-            >
-              <!-- Cambiado de ?. a . -->
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Indicador de progreso de carga (opcional) -->
-          <div
-            *ngIf="uploadProgress[field.key] !== undefined"
-            class="entity-form__upload-progress"
-          >
-            <div class="entity-form__progress-bar">
-              <div
-                class="entity-form__progress-fill"
-                [style.width.%]="uploadProgress[field.key]"
-              ></div>
-            </div>
-            <span class="entity-form__progress-text"
-              >{{ uploadProgress[field.key] }}%</span
-            >
-          </div>
+              </div>
+            }
+          }
         </div>
+      }
 
-        <!-- Errores -->
-        <ng-container *ngIf="form.get(field.key)?.errors as errors">
-          <div
-            *ngFor="let error of getErrorMessages(field.key)"
-            class="entity-form__error"
-            [id]="error.id"
-            role="alert"
-          >
-            {{ error.message }}
-          </div>
-        </ng-container>
+      <!-- Form Fields -->
+      <div class="entity-form__fields">
+        @for (field of fields; track field.key) {
+          @if (field.type !== 'file' || !enableImageUpload) {
+            <div class="form-field" [class.form-field--readonly]="field.readonly">
+              
+              <!-- Label para todos excepto checkbox -->
+              @if (field.type !== 'checkbox') {
+                <label class="form-field__label" [for]="field.key">
+                  {{ field.label }}
+                  @if (field.required) {
+                    <span class="form-field__required">*</span>
+                  }
+                </label>
+              }
+
+              <!-- Input de texto, email, password, number, date -->
+              @if (['text', 'email', 'password', 'number', 'date'].includes(field.type)) {
+                <input 
+                  [type]="field.type"
+                  [id]="field.key"
+                  [formControlName]="field.key"
+                  [placeholder]="getPlaceholder(field)"
+                  class="form-field__input"
+                  [class.is-invalid]="hasAnyError(field.key)"
+                  [attr.aria-invalid]="hasAnyError(field.key)"
+                  [attr.aria-describedby]="getErrorId(field.key)"
+                  [required]="field.required ?? false"
+                  [attr.aria-required]="field.required ?? false"
+                  [attr.readonly]="field.readonly ? true : null"
+                  (focus)="logFocus(field.key)"
+                />
+              }
+
+              <!-- Textarea -->
+              @if (field.type === 'textarea') {
+                <textarea
+                  [id]="field.key"
+                  [formControlName]="field.key"
+                  [placeholder]="getPlaceholder(field)"
+                  class="form-field__textarea"
+                  [class.is-invalid]="hasAnyError(field.key)"
+                  [attr.aria-invalid]="hasAnyError(field.key)"
+                  [attr.aria-describedby]="getErrorId(field.key)"
+                  [required]="field.required ?? false"
+                  [attr.aria-required]="field.required ?? false"
+                  [attr.readonly]="field.readonly ? true : null"
+                  (focus)="logFocus(field.key)"
+                ></textarea>
+              }
+
+              <!-- Select -->
+              @if (field.type === 'select') {
+                <select
+                  [id]="field.key"
+                  [formControlName]="field.key"
+                  class="form-field__select"
+                  [class.is-invalid]="hasAnyError(field.key)"
+                  [attr.aria-invalid]="hasAnyError(field.key)"
+                  [attr.aria-describedby]="getErrorId(field.key)"
+                  [required]="field.required ?? false"
+                  [attr.aria-required]="field.required ?? false"
+                  (focus)="logFocus(field.key)"
+                >
+                  <option value="" disabled>Seleccione una opción</option>
+                  @for (option of field.options; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+              }
+
+              <!-- Checkbox -->
+              @if (field.type === 'checkbox') {
+                <div class="form-field__checkbox-wrapper">
+                  <input
+                    type="checkbox"
+                    [id]="field.key"
+                    [formControlName]="field.key"
+                    class="form-field__checkbox"
+                    (focus)="logFocus(field.key)"
+                  />
+                  <label [for]="field.key" class="form-field__checkbox-label">
+                    {{ field.label }}
+                    @if (field.required) {
+                      <span class="form-field__required">*</span>
+                    }
+                  </label>
+                </div>
+              }
+
+              <!-- File dropzone (cuando no hay enableImageUpload) -->
+              @if (field.type === 'file' && !enableImageUpload) {
+                <div
+                  class="form-field__file-dropzone"
+                  [class.is-dragover]="isDragOver[field.key]"
+                  [class.has-file]="selectedFiles[field.key]"
+                  (dragover)="onDragOver($event, field.key)"
+                  (dragleave)="onDragLeave($event, field.key)"
+                  (drop)="onDrop($event, field.key)"
+                  (click)="triggerFileInput(field.key)"
+                >
+                  <input
+                    type="file"
+                    [id]="field.key"
+                    #fileInput
+                    (change)="onFileSelected($event, field.key)"
+                    accept="image/*"
+                    class="form-field__file-input"
+                    [required]="field.required ?? false"
+                    [attr.aria-required]="field.required ?? false"
+                    [attr.aria-describedby]="getErrorId(field.key)"
+                    style="display: none"
+                  />
+
+                  <div class="form-field__dropzone-content">
+                    <div class="form-field__dropzone-icon">
+                      @if (!selectedFiles[field.key]) {
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17,8 12,3 7,8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                      } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                          <polyline points="14,2 14,8 20,8"/>
+                        </svg>
+                      }
+                    </div>
+
+                    <div class="form-field__dropzone-text">
+                      @if (!selectedFiles[field.key]) {
+                        <p class="form-field__dropzone-primary">
+                          <strong>Arrastra tu archivo aquí</strong>
+                        </p>
+                        <p class="form-field__dropzone-secondary">
+                          o haz clic para seleccionar
+                        </p>
+                      } @else {
+                        <p class="form-field__dropzone-primary">
+                          <strong>{{ selectedFiles[field.key].name }}</strong>
+                        </p>
+                        <p class="form-field__dropzone-secondary">
+                          {{ formatFileSize(selectedFiles[field.key].size) }} • Haz clic para cambiar
+                        </p>
+                      }
+                    </div>
+                  </div>
+
+                  @if (selectedFiles[field.key]) {
+                    <button
+                      type="button"
+                      class="form-field__remove-file"
+                      (click)="removeFile($event, field.key)"
+                      [attr.aria-label]="'Remover archivo ' + selectedFiles[field.key].name"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  }
+
+                  @if (uploadProgress[field.key] !== undefined) {
+                    <div class="form-field__upload-progress">
+                      <div class="form-field__progress-bar">
+                        <div
+                          class="form-field__progress-fill"
+                          [style.width.%]="uploadProgress[field.key]"
+                        ></div>
+                      </div>
+                      <span class="form-field__progress-text">{{ uploadProgress[field.key] }}%</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Hint para campos readonly -->
+              @if (field.readonly) {
+                <div class="form-field__hint">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                  Este campo no puede ser modificado
+                </div>
+              }
+
+              <!-- Errores -->
+              @if (form.get(field.key)?.errors) {
+                @for (error of getErrorMessages(field.key); track error.id) {
+                  <div class="form-field__error" [id]="error.id" role="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                      <line x1="12" y1="9" x2="12" y2="13"/>
+                      <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    {{ error.message }}
+                  </div>
+                }
+              }
+
+            </div>
+          }
+        }
       </div>
-    </div>
 
-    <div class="entity-form__actions">
-      <button
-        type="button"
-        class="entity-form__button entity-form__button--cancel"
-        (click)="onCancel()"
-        [disabled]="loading"
-        [attr.aria-label]="'Cancelar ' + title.toLowerCase()"
-      >
-        Cancelar
-      </button>
-      <button
-        type="submit"
-        class="entity-form__button entity-form__button--submit"
-        [disabled]="loading"
-        [attr.aria-label]="
-          loading ? 'Enviando formulario...' : 'Enviar ' + title.toLowerCase()
-        "
-      >
-        <span *ngIf="loading" class="loading-spinner" aria-hidden="true"></span>
-        {{ submitLabel }}
-      </button>
-    </div>
-  </form>
+      <!-- Form Actions -->
+      <div class="entity-form__actions">
+        <button 
+          type="button"
+          class="entity-form__button entity-form__button--secondary"
+          (click)="onCancel()"
+          [disabled]="loading"
+          [attr.aria-label]="'Cancelar ' + title.toLowerCase()"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Cancelar
+        </button>
+        
+        <button 
+          type="submit"
+          class="entity-form__button entity-form__button--primary"
+          [disabled]="loading"
+          [attr.aria-label]="loading ? 'Enviando formulario...' : 'Enviar ' + title.toLowerCase()"
+        >
+          @if (loading) {
+            <span class="loading-spinner" aria-hidden="true"></span>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <polyline points="20,6 9,17 4,12"/>
+            </svg>
+          }
+          {{ submitLabel }}
+        </button>
+      </div>
+
+    </form>
+  }
 </div>

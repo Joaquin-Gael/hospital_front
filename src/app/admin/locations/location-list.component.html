@@ -1,35 +1,19 @@
-<div class="location-list">
-  <div class="location-list__header">
-    <h3>Listado de Ubicaciones</h3>
-    <button 
-      class="add-button" 
-      (click)="onAddNew()"
-      aria-label="Agregar nueva ubicación"
-    >
-      <span class="material-icons">add</span>
-      Nueva Ubicación
-    </button>
-  </div>
-  
-  <div *ngIf="error" class="error-message" role="alert">
-    {{ error }}
-    <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
-  
-  <div class="location-list__content" [class.hidden]="showForm">
-    <app-data-table
-      [data]="locations"
-      [columns]="tableColumns"
-      [loading]="loading"
-      (edit)="onEdit($event)"
-      (delete)="onDelete($event)"
-      (view)="onView($event)"
-    ></app-data-table>
-  </div>
-  
-  <div class="location-list__form" [class.hidden]="!showForm">
+<div class="location-section">
+  <!-- Header usando el componente section-header -->
+  <app-section-header
+    title="Gestión de Ubicaciones"
+    subtitle="Administra las ubicaciones del sistema hospitalario"
+    [actions]="headerActions"
+  >
+  </app-section-header>
+
+  <!-- Error message -->
+  <app-error-message [message]="error" (close)="error = null">
+  </app-error-message>
+
+  <!-- Form container (cuando showForm es true) -->
+  @if (showForm) {
+  <div class="location-section__form-container">
     <app-entity-form
       [fields]="formFields"
       [initialData]="selectedLocation"
@@ -38,6 +22,37 @@
       [loading]="formLoading"
       (formSubmit)="onFormSubmit($event)"
       (formCancel)="onFormCancel()"
-    ></app-entity-form>
+    >
+    </app-entity-form>
   </div>
+  } @else {
+  <!-- Loading spinner -->
+  @if (loading) {
+  <app-loading-spinner
+    [message]="'Cargando ubicaciones...'"
+  ></app-loading-spinner>
+  } @else {
+  <!-- Data table container -->
+  <div class="location-section__table-container">
+    <app-data-table
+      [data]="locations"
+      [columns]="tableColumns"
+      [loading]="loading"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (view)="onView($event)"
+    >
+    </app-data-table>
+  </div>
+  } }
+
+  <!-- View dialog -->
+  <app-view-dialog
+    [isOpen]="viewDialogOpen"
+    [item]="viewDialogData"
+    [columns]="viewDialogColumns"
+    [title]="viewDialogTitle"
+    (close)="closeViewDialog()"
+  >
+  </app-view-dialog>
 </div>

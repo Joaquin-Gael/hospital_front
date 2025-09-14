@@ -1,112 +1,131 @@
 <div class="data-table">
-  <div class="data-table__header" *ngIf="searchEnabled">
-    <div class="data-table__search">
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        placeholder="Buscar..."
-        class="data-table__search-input"
-        aria-label="Buscar en la tabla"
-      />
-      <span class="material-icons">search</span>
-    </div>
+  <!-- Header -->
+  <div class="data-table__header">
+    @if (searchEnabled) {
+      <div class="data-table__search">
+        <input
+          type="text"
+          placeholder="Buscar..."
+          [value]="searchTerm()"
+          (input)="updateSearch($event)"
+          class="data-table__search-input"
+        />
+        <span class="material-icons">search</span>
+      </div>
+    }
   </div>
 
+  <!-- Content -->
   <div class="data-table__content" [class.loading]="loading">
-    <table aria-label="Tabla de datos">
+    <table>
       <thead>
         <tr>
-          <th *ngFor="let column of columns">{{ column.label }}</th>
+          @for (column of columns; track column.key) {
+            <th>{{ column.label }}</th>
+          }
           <th class="actions-column">Acciones</th>
         </tr>
       </thead>
+
       <tbody>
-        <tr *ngIf="loading">
-          <td [attr.colspan]="columns.length + 1" class="loading-cell">
-            <div class="loading-spinner"></div>
-            <span>Cargando datos...</span>
-          </td>
-        </tr>
-        <tr *ngIf="!loading && paginatedData.length === 0">
-          <td [attr.colspan]="columns.length + 1" class="empty-cell">
-            <span>No se encontraron datos</span>
-          </td>
-        </tr>
-        <tr *ngFor="let item of paginatedData" class="data-row">
-          <td *ngFor="let column of columns" class="data-cell">
-            <span *ngIf="!column.format">{{ item[column.key] || "N/A" }}</span>
-            <span *ngIf="column.format">{{ column.format(item[column.key]) || "N/A" }}</span>
-          </td>
-          <td class="actions-cell">
-            <button
-              type="button"
-              class="action-button view-button"
-              (click)="onView(item)"
-              aria-label="Ver detalles"
-            >
-              <span class="material-icons">visibility</span>
-            </button>
-            <button
-              type="button"
-              class="action-button edit-button"
-              (click)="onEdit(item)"
-              aria-label="Editar"
-            >
-              <span class="material-icons">edit</span>
-            </button>
-            <button
-              type="button"
-              class="action-button delete-button"
-              (click)="onDelete(item)"
-              aria-label="Eliminar"
-            >
-              <span class="material-icons">delete</span>
-            </button>
-            <button
-              type="button"
-              class="action-button ban-button"
-              (click)="onBan(item)"
-              aria-label="Banear"
-              *ngIf="showBanUnban && item['is_active']"
-            >
-              <span class="material-icons">block</span>
-            </button>
-            <button
-              type="button"
-              class="action-button unban-button"
-              (click)="onUnban(item)"
-              aria-label="Desbanear"
-              *ngIf="showBanUnban && !item['is_active']"
-            >
-              <span class="material-icons">check_circle</span>
-            </button>
-          </td>
-        </tr>
+        @if (loading) {
+          <tr>
+            <td [attr.colspan]="columns.length + 1" class="loading-cell">
+              <div class="loading-spinner"></div>
+              Cargando datos...
+            </td>
+          </tr>
+        } @else if (paginatedData.length === 0) {
+          <tr>
+            <td [attr.colspan]="columns.length + 1" class="empty-cell">
+              No se encontraron datos
+            </td>
+          </tr>
+        } @else {
+          @for (item of paginatedData; track $index) {
+            <tr class="data-row">
+              @for (column of columns; track column.key) {
+                <td class="data-cell">
+                  @if (!column.format) {
+                    {{ item[column.key] || 'N/A' }}
+                  } @else {
+                    {{ column.format(item[column.key]) || 'N/A' }}
+                  }
+                </td>
+              }
+
+              <td class="actions-cell">
+                <button
+                  type="button"
+                  class="action-button view-button"
+                  (click)="onView(item)"
+                  aria-label="Ver detalles">
+                  <span class="material-icons">visibility</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="action-button edit-button"
+                  (click)="onEdit(item)"
+                  aria-label="Editar">
+                  <span class="material-icons">edit</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="action-button delete-button"
+                  (click)="onDelete(item)"
+                  aria-label="Eliminar">
+                  <span class="material-icons">delete</span>
+                </button>
+
+                @if (showBanUnban && item['is_active']) {
+                  <button
+                    type="button"
+                    class="action-button ban-button"
+                    (click)="onBan(item)"
+                    aria-label="Banear">
+                    <span class="material-icons">block</span>
+                  </button>
+                } @else if (showBanUnban && !item['is_active']) {
+                  <button
+                    type="button"
+                    class="action-button unban-button"
+                    (click)="onUnban(item)"
+                    aria-label="Desbanear">
+                    <span class="material-icons">check_circle</span>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        }
       </tbody>
     </table>
   </div>
 
-  <div class="data-table__pagination" *ngIf="pagination && totalPages > 1">
-    <button
-      [disabled]="currentPage === 1"
-      (click)="changePage(currentPage - 1)"
-      aria-label="Página anterior"
-      class="pagination-button"
-    >
-      <span class="material-icons">chevron_left</span>
-    </button>
+  <!-- Pagination -->
+  @if (pagination && totalPages > 1) {
+    <div class="data-table__pagination">
+      <button
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+        aria-label="Página anterior"
+        class="pagination-button">
+        <span class="material-icons">chevron_left</span>
+      </button>
 
-    <span class="pagination-info">
-      Página {{ currentPage }} de {{ totalPages }}
-    </span>
+      <span class="pagination-info">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
 
-    <button
-      [disabled]="currentPage === totalPages"
-      (click)="changePage(currentPage + 1)"
-      aria-label="Página siguiente"
-      class="pagination-button"
-    >
-      <span class="material-icons">chevron_right</span>
-    </button>
-  </div>
+      <button
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+        aria-label="Página siguiente"
+        class="pagination-button">
+        <span class="material-icons">chevron_right</span>
+      </button>
+    </div>
+  }
 </div>

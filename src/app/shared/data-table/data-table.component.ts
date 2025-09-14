@@ -1,8 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
-import { ViewDialogComponent } from '../view-dialog.component';
 
 export interface TableColumn {
   key: string;
@@ -17,17 +14,17 @@ export interface HasIsActive {
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss'],
 })
 export class DataTableComponent<T extends Record<string, any> & HasIsActive> {
   @Input() data: T[] = [];
   @Input() columns: TableColumn[] = [];
-  @Input() loading: boolean = false;
-  @Input() searchEnabled: boolean = true;
-  @Input() pagination: boolean = true;
-  @Input() showBanUnban: boolean = false; // Nueva propiedad para controlar ban/unban
+  @Input() loading = false;
+  @Input() searchEnabled = true;
+  @Input() pagination = true;
+  @Input() showBanUnban = false;
 
   @Output() edit = new EventEmitter<T>();
   @Output() delete = new EventEmitter<T>();
@@ -35,35 +32,35 @@ export class DataTableComponent<T extends Record<string, any> & HasIsActive> {
   @Output() ban = new EventEmitter<T>();
   @Output() unban = new EventEmitter<T>();
 
-  searchTerm: string = '';
-  currentPage: number = 1;
-  itemsPerPage: number = 10;
-
-  constructor(public dialog: MatDialog) {}
+  searchTerm = signal<string>('');
+  currentPage = 1;
+  itemsPerPage = 10;
 
   get filteredData(): T[] {
-    if (!this.searchTerm.trim()) {
-      return this.data;
-    }
+    const term = this.searchTerm().trim().toLowerCase();
+    if (!term) return this.data;
 
     return this.data.filter((item) =>
-      Object.keys(item).some((key) => {
-        const value = item[key];
-        if (value === null || value === undefined) return false;
-        return value.toString().toLowerCase().includes(this.searchTerm.toLowerCase());
-      })
+      Object.values(item).some(
+        (value) =>
+          value != null && value.toString().toLowerCase().includes(term)
+      )
     );
   }
 
   get paginatedData(): T[] {
     if (!this.pagination) return this.filteredData;
-
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     return this.filteredData.slice(startIndex, startIndex + this.itemsPerPage);
   }
 
   get totalPages(): number {
-    return Math.ceil(this.filteredData.length / this.itemsPerPage);
+    return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1;
+  }
+
+  updateSearch(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchTerm.set(input?.value ?? '');
   }
 
   onEdit(item: T): void {
@@ -75,10 +72,7 @@ export class DataTableComponent<T extends Record<string, any> & HasIsActive> {
   }
 
   onView(item: T): void {
-    this.dialog.open(ViewDialogComponent, {
-      width: '400px',
-      data: { item: item, columns: this.columns }
-    });
+    this.view.emit(item);
   }
 
   onBan(item: T): void {
@@ -90,6 +84,8 @@ export class DataTableComponent<T extends Record<string, any> & HasIsActive> {
   }
 
   changePage(page: number): void {
-    this.currentPage = page;
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
   }
 }

@@ -1,44 +1,49 @@
-<div class="speciality-list">
-  <div class="speciality-list__header">
-    <h3>Listado de Especialidades</h3>
-    <button 
-      class="add-button" 
-      (click)="onAddNew()"
-      aria-label="Agregar nueva especialidad"
-    >
-      <span class="material-icons">add</span>
-      Nueva Especialidad
-    </button>
-  </div>
-  
-  <div *ngIf="error" class="error-message" role="alert">
-    {{ error }}
-    <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
-  
-  <div class="speciality-list__content" [class.hidden]="showForm">
-    <app-data-table
-      [data]="specialities"
-      [columns]="tableColumns"
-      [loading]="loading"
-      (edit)="onEdit($event)"
-      (delete)="onDelete($event)"
-      (view)="onView($event)"
-    ></app-data-table>
-  </div>
-  
-  <div class="speciality-list__form" [class.hidden]="!showForm">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="selectedSpeciality"
-      [mode]="formMode"
-      [title]="formMode === 'create' ? 'Nueva Especialidad' : 'Editar Especialidad'"
-      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
-      [loading]="formLoading"
-      (formSubmit)="onFormSubmit($event)"
-      (cancel)="onFormCancel()"
-    ></app-entity-form>
-  </div>
+<div class="speciality-section">
+  <app-section-header
+    title="Gestión de Especialidades"
+    subtitle="Administra las especialidades del sistema médico"
+    [actions]="headerActions">
+  </app-section-header>
+
+  <app-error-message 
+    [message]="error" 
+    (close)="error = null">
+  </app-error-message>
+
+  @if (showForm) {
+    <div class="speciality-section__form-container">
+      <app-entity-form
+        [fields]="formFields"
+        [initialData]="selectedSpeciality"
+        [title]="formMode === 'create' ? 'Nueva Especialidad' : 'Editar Especialidad'"
+        [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+        [loading]="formLoading"
+        (formSubmit)="onFormSubmit($event)"
+        (formCancel)="onFormCancel()">
+      </app-entity-form>
+    </div>
+  } @else {
+    @if (loading) {
+      <app-loading-spinner [message]="'Cargando especialidades...'"></app-loading-spinner>
+    } @else {
+      <div class="speciality-section__table-container">
+        <app-data-table
+          [data]="specialities"
+          [columns]="tableColumns"
+          [loading]="loading"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)"
+          (view)="onView($event)">
+        </app-data-table>
+      </div>
+    }
+  }
+
+  <app-view-dialog
+    [isOpen]="viewDialogOpen"
+    [item]="viewDialogData"
+    [columns]="viewDialogColumns"
+    [title]="viewDialogTitle"
+    (close)="closeViewDialog()">
+  </app-view-dialog>
 </div>

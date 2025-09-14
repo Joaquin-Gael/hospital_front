@@ -1,16 +1,36 @@
-import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataTableComponent } from '../../shared/data-table/data-table.component';
-import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
+import {
+  SectionHeaderComponent,
+  ActionButton,
+} from '../section-header/section-header.component';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { ErrorMessageComponent } from '../error-message/error-message.component';
+import {
+  ViewDialogComponent,
+  ViewDialogColumn,
+} from '../../shared/view-dialog/view-dialog.component';
+import {
+  DataTableComponent,
+  TableColumn,
+} from '../../shared/data-table/data-table.component';
+import {
+  EntityFormComponent,
+  FormField,
+} from '../../shared/entity-form/entity-form.component';
 import { LocationService } from '../../services/location/location.service';
-import { Location, LocationCreate, LocationUpdate } from '../../services/interfaces/hospital.interfaces';
 import { LoggerService } from '../../services/core/logger.service';
+import {
+  Location,
+  LocationCreate,
+  LocationUpdate,
+} from '../../services/interfaces/hospital.interfaces';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 
-// Interfaz extendida para la tabla y estado local
 interface ExtendedLocation extends Location {
   departmentCount?: number;
 }
@@ -23,7 +43,17 @@ interface LocationFormData {
 @Component({
   selector: 'app-location-list',
   standalone: true,
-  imports: [CommonModule, DataTableComponent, EntityFormComponent, MatDialogModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    SectionHeaderComponent,
+    LoadingSpinnerComponent,
+    ErrorMessageComponent,
+    ViewDialogComponent,
+    DataTableComponent,
+    EntityFormComponent,
+    MatDialogModule,
+    MatButtonModule,
+  ],
   templateUrl: './location-list.component.html',
   styleUrls: ['./location-list.component.scss'],
 })
@@ -33,39 +63,70 @@ export class LocationListComponent implements OnInit {
   private dialog = inject(MatDialog);
 
   locations: ExtendedLocation[] = [];
-  loading: boolean = false;
-  showForm: boolean = false;
-  formMode: 'create' | 'edit' = 'create';
   selectedLocation: ExtendedLocation | null = null;
-  formLoading: boolean = false;
+  loading = false;
+  formLoading = false;
   error: string | null = null;
+  showForm = false;
+  formMode: 'create' | 'edit' = 'create';
 
-  tableColumns = [
+  // View dialog
+  viewDialogOpen = false;
+  viewDialogData: any = {};
+  viewDialogTitle = '';
+
+  headerActions: ActionButton[] = [
+    {
+      label: 'Nueva Ubicación',
+      icon: 'add_location',
+      variant: 'primary',
+      ariaLabel: 'Agregar nueva ubicación',
+      onClick: () => this.onAddNew(),
+    },
+  ];
+
+  tableColumns: TableColumn[] = [
     { key: 'name', label: 'Nombre' },
     { key: 'description', label: 'Descripción' },
-    { key: 'id', label: 'ID de Ubicación' }, 
-    { key: 'departmentCount', label: 'Número de Departamentos', format: (value: number) => (value || 0).toString() },
+    { key: 'id', label: 'ID de Ubicación' },
+    {
+      key: 'departmentCount',
+      label: 'Número de Departamentos',
+      format: (value: number) => (value || 0).toString(),
+    },
   ];
 
-  baseFormFields: FormField[] = [
-    { key: 'name', label: 'Nombre', type: 'text', required: true },
-    { key: 'description', label: 'Descripción', type: 'textarea', required: false },
-    //{ key: 'id', label: 'ID de Ubicación', type: 'text', required: true, readonly: true },
+  viewDialogColumns: ViewDialogColumn[] = [
+    { key: 'name', label: 'Nombre' },
+    { key: 'description', label: 'Descripción' },
+    { key: 'id', label: 'ID de Ubicación' },
+    {
+      key: 'departmentCount',
+      label: 'Número de Departamentos',
+      format: (value?: number) => (value || 0).toString(),
+    },
   ];
 
-  private _formFields: FormField[] = [];
-  get formFields(): FormField[] {
-    if (this.formMode === 'create') {
-      if (!this._formFields.length || this._formFields.some(f => f.key === 'location_id')) {
-        this._formFields = this.baseFormFields.filter(field => field.key !== 'location_id');
-      }
-    } else {
-      if (!this._formFields.length || this._formFields.length !== this.baseFormFields.length) {
-        this._formFields = [...this.baseFormFields];
-      }
-    }
-    return this._formFields;
-  }
+  formFields: FormField[] = [
+    {
+      key: 'name',
+      label: 'Nombre',
+      type: 'text',
+      required: true,
+      validators: [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(100),
+      ],
+    },
+    {
+      key: 'description',
+      label: 'Descripción',
+      type: 'textarea',
+      required: false,
+      validators: [Validators.maxLength(500)],
+    },
+  ];
 
   ngOnInit(): void {
     this.loadLocations();
@@ -78,7 +139,7 @@ export class LocationListComponent implements OnInit {
     this.locationService.getLocations().subscribe({
       next: (locations) => {
         console.log('Datos recibidos en loadLocations:', locations);
-        this.locations = locations.map(l => ({
+        this.locations = locations.map((l) => ({
           ...l,
           departmentCount: l.departments?.length || 0,
         }));
@@ -95,35 +156,48 @@ export class LocationListComponent implements OnInit {
     this.formMode = 'create';
     this.selectedLocation = null;
     this.showForm = true;
+    this.logger.debug('Opening form for new location');
   }
 
   onEdit(location: ExtendedLocation): void {
     this.formMode = 'edit';
-    this.selectedLocation = { 
-      ...location,
-      id: location.id
-    };
-    console.log('selectedLocation en onEdit:', this.selectedLocation);
+    this.selectedLocation = { ...location };
     this.showForm = true;
+    this.logger.debug('Opening form for editing location', location);
+  }
+
+  onView(location: ExtendedLocation): void {
+    this.viewDialogData = location;
+    this.viewDialogTitle = `Ubicación: ${location.name}`;
+    this.viewDialogOpen = true;
+    this.logger.debug('Opening view dialog for location', location);
   }
 
   onDelete(location: ExtendedLocation): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Eliminar Ubicación', message: `¿Está seguro de eliminar la ubicación "${location.name}"?` },
+      data: {
+        title: 'Eliminar Ubicación',
+        message: `¿Está seguro de eliminar la ubicación "${location.name}"?`,
+      },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.loading = true;
 
         this.locationService.deleteLocation(location.id).subscribe({
           next: () => {
-            this.locations = this.locations.filter(l => l.id !== location.id);
+            this.locations = this.locations.filter((l) => l.id !== location.id);
             this.loading = false;
-            this.logger.info(`Ubicación "${location.name}" eliminada correctamente`);
+            this.logger.info(
+              `Ubicación "${location.name}" eliminada correctamente`
+            );
           },
           error: (error: HttpErrorResponse) => {
-            this.handleError(error, `Error al eliminar la ubicación "${location.name}"`);
+            this.handleError(
+              error,
+              `Error al eliminar la ubicación "${location.name}"`
+            );
             this.loading = false;
           },
         });
@@ -131,67 +205,50 @@ export class LocationListComponent implements OnInit {
     });
   }
 
-  onView(location: ExtendedLocation): void {
-    alert(`Detalles de la ubicación: ${location.name}\nDescripción: ${location.description || 'N/A'}\nID: ${location.id}\nDepartamentos: ${location.departments?.length || 0}`);
-  }
-
   onFormSubmit(formData: LocationFormData): void {
     this.formLoading = true;
     this.error = null;
 
-    if (this.formMode === 'create') {
-      const locationData: LocationCreate = {
-        name: formData.name,
-        description: formData.description || '',
-      };
+    const request =
+      this.formMode === 'create'
+        ? this.locationService.addLocation(formData as LocationCreate)
+        : this.locationService.updateLocation(
+            this.selectedLocation!.id,
+            formData as LocationUpdate
+          );
 
-      this.locationService.addLocation(locationData).subscribe({
-        next: (newLocation) => {
-          this.locations.push({
-            ...newLocation,
-            departmentCount: 0,
-          });
-          this.formLoading = false;
-          this.showForm = false;
-          this.logger.info(`Ubicación "${newLocation.name}" creada correctamente`);
-        },
-        error: (error: HttpErrorResponse) => {
-          this.handleError(error, 'Error al crear la ubicación');
-          this.formLoading = false;
-        },
-      });
-    } else {
-      if (!this.selectedLocation) return;
-
-      const locationData: LocationUpdate = {
-        name: formData.name,
-        description: formData.description || '',
-        location_id: this.selectedLocation.id, 
-      };
-
-      this.locationService.updateLocation(this.selectedLocation.id, locationData).subscribe({
-        next: (updatedLocation) => {
-          const index = this.locations.findIndex(l => l.id === updatedLocation.id);
-          if (index !== -1) {
-            this.locations[index] = {
-              ...updatedLocation,
-              departmentCount: this.locations[index].departmentCount,
-            };
-          }
-          this.formLoading = false;
-          this.showForm = false;
-          this.logger.info(`Ubicación "${updatedLocation.name}" actualizada correctamente`);
-        },
-        error: (error: HttpErrorResponse) => {
-          this.handleError(error, 'Error al actualizar la ubicación');
-          this.formLoading = false;
-        },
-      });
-    }
+    request.subscribe({
+      next: (result: Location) => {
+        this.formLoading = false;
+        this.showForm = false;
+        this.loadLocations(); // Recarga la lista
+        this.logger.info(
+          `Ubicación ${
+            this.formMode === 'create' ? 'creada' : 'actualizada'
+          } correctamente`
+        );
+      },
+      error: (error: HttpErrorResponse) => {
+        this.formLoading = false;
+        this.handleError(
+          error,
+          `Error al ${
+            this.formMode === 'create' ? 'crear' : 'actualizar'
+          } la ubicación`
+        );
+      },
+    });
   }
 
   onFormCancel(): void {
     this.showForm = false;
+    this.selectedLocation = null;
+    this.logger.debug('Form cancelled');
+  }
+
+  closeViewDialog(): void {
+    this.viewDialogOpen = false;
+    this.viewDialogData = {};
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {

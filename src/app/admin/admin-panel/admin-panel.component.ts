@@ -30,6 +30,7 @@ export class AdminPanelComponent implements OnInit {
 
   activeSection: string = 'departments';            
   isUserMenuOpen: boolean = false;
+  sidebarOpen: boolean = false;
 
   @ViewChild('userButton') userButtonRef!: ElementRef;
   @ViewChild('dropdownMenu') dropdownRef!: ElementRef;
@@ -87,6 +88,25 @@ export class AdminPanelComponent implements OnInit {
     }
   }
 
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+    this.logger.debug(`Sidebar toggled: ${this.sidebarOpen}`);
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
+    this.logger.debug('Sidebar closed');
+  }
+
+  onNavItemClick(section: Section): void {
+    this.activeSection = section.id;
+    // Close sidebar on mobile after navigation
+    if (window.innerWidth < 1024) {
+      this.closeSidebar();
+    }
+    this.logger.debug(`Navigation clicked: ${section.label}`);
+  }
+
   toggleUserMenu(): void {
     this.isUserMenuOpen = !this.isUserMenuOpen;
     this.logger.debug(`User menu toggled: ${this.isUserMenuOpen}`);
@@ -110,6 +130,18 @@ export class AdminPanelComponent implements OnInit {
     if (this.isUserMenuOpen) {
       this.isUserMenuOpen = false;
       this.logger.debug('User menu closed with Escape key');
+    }
+    if (this.sidebarOpen) {
+      this.closeSidebar();
+      this.logger.debug('Sidebar closed with Escape key');
+    }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onWindowResize(): void {
+    if (window.innerWidth >= 1024 && this.sidebarOpen) {
+      this.sidebarOpen = false;
+      this.logger.debug('Sidebar closed due to desktop resize');
     }
   }
 

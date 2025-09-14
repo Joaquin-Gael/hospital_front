@@ -1,19 +1,28 @@
 <div class="section-header">
   <div class="section-header__title-wrapper">
     <h2 class="section-header__title">{{ title }}</h2>
-    <p *ngIf="subtitle" class="section-header__subtitle">{{ subtitle }}</p>
+    @if (subtitle) {
+      <p class="section-header__subtitle">{{ subtitle }}</p>
+    }
   </div>
 
-  <div class="section-header__actions" *ngIf="actions && actions.length > 0">
-    <button
-      *ngFor="let action of actions"
-      class="section-header__action-btn"
-      [class]="'section-header__action-btn--' + (action.variant || 'primary')"
-      [attr.aria-label]="action.ariaLabel || action.label"
-      (click)="action.onClick()"
-    >
-      <span class="material-icons">{{ action.icon }}</span>
-      <span class="section-header__action-text">{{ action.label }}</span>
-    </button>
-  </div>
+  @if (actions && actions.length > 0) {
+    <div class="section-header__actions">
+      @for (action of actions; track action.label) {
+        <button
+          class="section-header__action-btn"
+          [class.section-header__action-btn--primary]="action.variant === 'primary' || !action.variant"
+          [class.section-header__action-btn--secondary]="action.variant === 'secondary'"
+          [class.section-header__action-btn--success]="action.variant === 'success'"
+          [class.section-header__action-btn--warning]="action.variant === 'warning'"
+          [class.section-header__action-btn--danger]="action.variant === 'danger'"
+          [attr.aria-label]="action.ariaLabel || action.label"
+          (click)="action.onClick()"
+        >
+          <span class="material-icons">{{ action.icon }}</span>
+          <span class="section-header__action-text">{{ action.label }}</span>
+        </button>
+      }
+    </div>
+  }
 </div>

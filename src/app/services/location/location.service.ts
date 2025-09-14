@@ -23,10 +23,10 @@ export class LocationService {
    * @returns Observable of an array of Location objects.
    */
   getLocations(): Observable<Location[]> {
-    return this.apiService.get<{ locations: Location[] }>(LOCATION_ENDPOINTS.GET_ALL).pipe(
+    return this.apiService.get<Location[]>(LOCATION_ENDPOINTS.GET_ALL).pipe(
       map((response) => {
         console.log('Respuesta del endpoint /medic/locations:', response);
-        return response?.locations || []; // Extraer el array de locations o devolver un array vacío si no existe
+        return response || [];
       }),
       catchError((error) => this.handleError('Failed to fetch locations', error))
     );

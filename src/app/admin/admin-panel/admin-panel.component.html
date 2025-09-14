@@ -1,91 +1,148 @@
 <div class="admin-panel">
-  <aside class="admin-panel__sidebar">
-    <div class="admin-panel__logo">
-      <div class="admin-panel__logo-icon">
-        <span class="material-icons">admin_panel_settings</span>
+  <aside class="admin-panel__sidebar" [class.open]="sidebarOpen">
+    <div class="admin-panel__header">
+      <div class="admin-panel__logo">
+        <div class="admin-panel__logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 5.16-1 9-5.45 9-11V7l-10-5z"/>
+          </svg>
+        </div>
+        <h1 class="admin-panel__logo-text">Panel Admin</h1>
       </div>
-      <h1>Panel Admin</h1>
+      
+      <button 
+        class="admin-panel__close-btn"
+        (click)="closeSidebar()"
+        [attr.aria-label]="'Cerrar menú'"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
-    
+
     <nav class="admin-panel__nav">
-      <ul>
+      <ul class="admin-panel__menu">
         @for (section of sections; track section.id) {
-          <li>
+          <li class="admin-panel__item">
             <a
               [routerLink]="['/admin_panel', section.id]"
               routerLinkActive="admin-panel__nav-link--active"
               [attr.aria-current]="activeSection === section.id ? 'page' : null"
               class="admin-panel__nav-link"
+              (click)="onNavItemClick(section)"
+              [attr.aria-label]="section.label"
             >
-              <span class="material-icons admin-panel__nav-icon">{{ section.icon }}</span>
+              <span class="admin-panel__nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  @switch (section.icon) {
+                    @case ('business') {
+                      <path d="M3 21h18"/>
+                      <path d="M5 21V7l8-4v18"/>
+                      <path d="M19 21V11l-6-4"/>
+                    }
+                    @case ('local_hospital') {
+                      <path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2z"/>
+                    }
+                    @case ('person') {
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    }
+                    @case ('schedule') {
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12,6 12,12 16,14"/>
+                    }
+                    @case ('health_and_safety') {
+                      <path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 5.16-1 9-5.45 9-11V7l-10-5z"/>
+                      <path d="M9 12l2 2 4-4"/>
+                    }
+                    @case ('medical_services') {
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                      <line x1="8" y1="21" x2="16" y2="21"/>
+                      <line x1="12" y1="17" x2="12" y2="21"/>
+                    }
+                    @case ('location_on') {
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    }
+                    @case ('people') {
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    }
+                  }
+                </svg>
+              </span>
               <span class="admin-panel__nav-text">{{ section.label }}</span>
             </a>
           </li>
         }
       </ul>
     </nav>
+
+    <div class="admin-panel__footer">
+      <button class="admin-panel__footer-btn" (click)="onLogout()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16,17 21,12 16,7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span class="admin-panel__footer-text">Cerrar Sesión</span>
+      </button>
+    </div>
   </aside>
 
+  <div class="admin-panel__overlay" 
+       [class.visible]="sidebarOpen"
+       (click)="closeSidebar()"
+       [attr.aria-hidden]="!sidebarOpen">
+  </div>
+
   <main class="admin-panel__content">
-    <header class="admin-panel__header">
-      @switch (activeSection) {
-        @case ('departments') {
-          <h1 class="admin-panel__page-title">Departamentos</h1>
-        }
-        @case ('specialities') {
-          <h1 class="admin-panel__page-title">Especialidades</h1>
-        }
-        @case ('doctors') {
-          <h1 class="admin-panel__page-title">Doctores</h1>
-        }
-        @case ('schedules') {
-          <h1 class="admin-panel__page-title">Horarios</h1>
-        }
-        @case ('health-insurances') {
-          <h1 class="admin-panel__page-title">Obras Sociales</h1>
-        }
-        @case ('services') {
-          <h1 class="admin-panel__page-title">Servicios</h1>
-        }
-        @case ('locations') {
-          <h1 class="admin-panel__page-title">Ubicaciones</h1>
-        }
-        @case ('users') {
-          <h1 class="admin-panel__page-title">Usuarios</h1>
-        }
-        @default {
-          <h1 class="admin-panel__page-title">Panel de Administración</h1>
-        }
-      }
-      
-      <div class="admin-panel__user-menu">
+    <header class="admin-panel__header-bar">
+      <div class="admin-panel__header-left">
         <button 
-          #userButton
-          class="admin-panel__user-button"
-          (click)="toggleUserMenu()"
-          [attr.aria-expanded]="isUserMenuOpen"
-          aria-haspopup="true"
-          aria-label="Menú de usuario"
+          class="admin-panel__toggle-btn"
+          (click)="toggleSidebar()"
+          [attr.aria-label]="'Abrir menú'"
         >
-          <span class="admin-panel__user-avatar">
-            <span class="material-icons">account_circle</span>
-          </span>
-          <span class="admin-panel__dropdown-icon material-icons">keyboard_arrow_down</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
         </button>
         
-        <div 
-          #dropdownMenu
-          class="admin-panel__dropdown"
-          [class.admin-panel__dropdown--open]="isUserMenuOpen"
-        >
-          <button 
-            class="admin-panel__dropdown-item"
-            (click)="onLogout()"
-          >
-            <span class="material-icons">logout</span>
-            <span>Cerrar sesión</span>
-          </button>
-        </div>
+        @switch (activeSection) {
+          @case ('departments') {
+            <h1 class="admin-panel__page-title">Departamentos</h1>
+          }
+          @case ('specialities') {
+            <h1 class="admin-panel__page-title">Especialidades</h1>
+          }
+          @case ('doctors') {
+            <h1 class="admin-panel__page-title">Doctores</h1>
+          }
+          @case ('schedules') {
+            <h1 class="admin-panel__page-title">Horarios</h1>
+          }
+          @case ('health-insurances') {
+            <h1 class="admin-panel__page-title">Obras Sociales</h1>
+          }
+          @case ('services') {
+            <h1 class="admin-panel__page-title">Servicios</h1>
+          }
+          @case ('locations') {
+            <h1 class="admin-panel__page-title">Ubicaciones</h1>
+          }
+          @case ('users') {
+            <h1 class="admin-panel__page-title">Usuarios</h1>
+          }
+          @default {
+            <h1 class="admin-panel__page-title">Panel de Administración</h1>
+          }
+        }
       </div>
     </header>
     

@@ -1,188 +1,388 @@
-@use '../../layout/styles/_media-queries.scss' as *;
+@use 'sass:color';
+@use '../../admin/styles/_vars.scss' as *;
 @use '../../layout/styles/_mixins.scss' as *;
-@use '../styles/_vars.scss' as *;
+@use '../../layout/styles/_media-queries.scss' as *;
 
 .admin-panel {
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: $bg-secondary;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
   &__sidebar {
-    color: $text-white;
-    box-shadow: $shadow-glass;
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-    position: relative;
-    z-index: 100;
-    @include sidebar-responsive;
-    @include glass-morphism;
+    width: $sidebar-width;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    color: rgba(255, 255, 255, 0.9);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: $shadow-lg;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
     @include flex-column;
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: $bg-gradient;
-      opacity: 0.95;
-      z-index: -1;
+    @include desktop-up {
+      transform: translateX(0);
+    }
+
+    &.open {
+      transform: translateX(0);
     }
   }
-  
-  &__logo {
-    padding: 2rem 1.5rem;
-    text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
-    @include flex-inline(1rem, center, center);
 
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 20%;
-      right: 20%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  &__header {
+    height: $header-height;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    @include flex-between;
+
+    @include mobile-only {
+      padding: 0 20px;
     }
+  }
+
+  &__logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    @include flex-inline(16px);
 
     &-icon {
-      width: 3rem;
-      height: 3rem;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 50%;
-      backdrop-filter: blur(10px);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, $primary-color 0%, color.adjust($primary-color, $lightness: -10%) 100%);
       @include flex-center;
 
-      @include mobile-only {
-        width: 2.5rem;
-        height: 2.5rem;
+      svg {
+        width: 24px;
+        height: 24px;
+        stroke-width: 2;
+        color: white;
       }
 
-      .material-icons {
-        font-size: 1.5rem;
-        color: $text-white;
+      @include mobile-only {
+        width: 36px;
+        height: 36px;
 
-        @include mobile-only {
-          font-size: 1.25rem;
+        svg {
+          width: 20px;
+          height: 20px;
         }
       }
     }
-    
-    h1 {
-      margin: 0;
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: $text-white;
+
+    &-text {
+      color: inherit;
+      text-decoration: none;
       letter-spacing: -0.025em;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      
+      @include text-truncate;
+
+      &:hover {
+        color: rgba(255, 255, 255, 1);
+      }
+
       @include mobile-only {
-        display: none;
+        font-size: 18px;
       }
     }
   }
-  
-  &__nav {
-    flex: 1;
-    padding: 1.5rem 0;
-    
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      gap: 0.25rem;
-      padding: 0 1rem;
-      @include flex-column;
+
+  &__close-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    @include flex-center;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.5;
+    }
+
+    @include desktop-up {
+      display: none;
+    }
+
+    @include mobile-only {
+      width: 36px;
+      height: 36px;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
     }
   }
-  
-  &__nav-link {
-    padding: 1rem 1.25rem;
-    color: rgba(255, 255, 255, 0.85);
-    text-decoration: none;
-    transition: $transition-smooth;
-    border-radius: 16px;
-    margin: 0.125rem 0;
-    font-weight: 500;
-    font-size: 0.95rem;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-    @include flex-inline(1rem, center, flex-start);    
-    @include animated-gradient;
-    
-    &:hover {
+
+  &__nav {
+    flex: 1;
+    padding: 24px 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    @include mobile-only {
+      padding: 20px 16px;
+    }
+
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
       background: rgba(255, 255, 255, 0.1);
-      color: $text-white;
-      transform: translateX(8px);
-      box-shadow: $shadow-md;
-      
-      .admin-panel__nav-icon {
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+
+  &__menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 6px;
+    @include flex-column;
+  }
+
+  &__item {
+    margin: 0;
+  }
+
+  &__nav-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    width: 100%;
+    min-height: 52px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    border: 2px solid transparent;
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.15);
+      color: rgba(255, 255, 255, 0.95);
+      border-color: rgba(59, 130, 246, 0.3);
+      transform: translateX(4px);
+
+      .admin-panel__nav-icon svg {
+        color: $primary-color;
         transform: scale(1.1);
       }
     }
-    
+
     &--active {
-      background: rgba(255, 255, 255, 0.15);
-      color: $text-white;
-      box-shadow: $shadow-md;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      
-      .admin-panel__nav-icon {
-        color: $text-white;
-      }
-      
-      &::after {
+      background: rgba(59, 130, 246, 0.2);
+      color: white;
+      font-weight: 600;
+      border-color: rgba(59, 130, 246, 0.4);
+      transform: translateX(4px);
+
+      &::before {
         content: '';
         position: absolute;
         left: 0;
         top: 50%;
         transform: translateY(-50%);
         width: 4px;
-        height: 24px;
-        background: $text-white;
-        border-radius: 0 2px 2px 0;
+        height: 32px;
+        background: $primary-color;
+        border-radius: 0 4px 4px 0;
       }
+
+      .admin-panel__nav-icon svg {
+        color: $primary-color;
+        transform: scale(1.1);
+      }
+    }
+
+    @include mobile-only {
+      padding: 14px 18px;
+      font-size: 13px;
+      min-height: 48px;
+      gap: 14px;
+    }
+
+    @include touch-device {
+      min-height: 56px;
     }
   }
 
   &__nav-icon {
-    transition: $transition-smooth;
-    font-size: 1.375rem;
-    
-    @include mobile-only {
-      font-size: 1.25rem;
+    position: relative;
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    @include flex-center;
+
+    svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2;
+
+      @include mobile-only {
+        width: 20px;
+        height: 20px;
+      }
     }
   }
-  
+
   &__nav-text {
+    @include text-truncate;
+
     @include mobile-only {
+      font-size: 13px;
+    }
+  }
+
+  &__footer {
+    padding: 20px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    @include mobile-only {
+      padding: 16px;
+    }
+  }
+
+  &__footer-btn {
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 12px;
+    color: #ef4444;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 2px solid transparent;
+    background-color: transparent;
+    text-align: left;
+    min-height: 52px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    @include flex-inline(16px);
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      transform: translateY(-2px);
+
+      svg {
+        transform: scale(1.1);
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    svg {
+      color: #ef4444;
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+      transition: all 0.3s ease;
+    }
+
+    @include mobile-only {
+      padding: 14px 18px;
+      font-size: 13px;
+      min-height: 48px;
+      gap: 14px;
+    }
+
+    @include touch-device {
+      min-height: 56px;
+    }
+  }
+
+  &__footer-text {
+    @include text-truncate;
+  }
+
+  &__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+
+    &.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    @include desktop-up {
       display: none;
     }
   }
-  
+
   &__content {
     flex: 1;
-    overflow: hidden;
-    background: $bg-secondary;
+    margin-left: $sidebar-width;
+    width: calc(100% - #{$sidebar-width});
+    min-height: 100vh;
+    transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     @include flex-column;
+
+    @include mobile-only {
+      margin-left: 0;
+      width: 100%;
+    }
+
+    @include tablet-only {
+      margin-left: 0;
+      width: 100%;
+    }
   }
-  
-  &__header {
+
+  &__header-bar {
     height: $header-height;
+    background: $bg-primary;
     border-bottom: 1px solid $border-light;
-    padding: 0 2rem;
+    padding: 0 32px;
     box-shadow: $shadow-sm;
     z-index: 50;
     position: relative;
-    @include glass-morphism;
-    @include flex-between;  
+    @include flex-between;
 
-    &::before {
+    &::after {
       content: '';
       position: absolute;
       bottom: 0;
@@ -193,153 +393,80 @@
     }
 
     @include mobile-only {
-      padding: 0 1rem;
+      padding: 0 20px;
+    }
+  }
+
+  &__header-left {
+    @include flex-inline(20px);
+
+    @include mobile-only {
+      gap: 16px;
+    }
+  }
+
+  &__toggle-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: transparent;
+    border: 2px solid $border-color;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    @include flex-center;
+
+    &:hover {
+      background: $primary-light;
+      border-color: $primary-color;
+      color: $primary-color;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+    }
+
+    @include desktop-up {
+      display: none;
+    }
+
+    @include mobile-only {
+      width: 40px;
+      height: 40px;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
     }
   }
 
   &__page-title {
     margin: 0;
     font-weight: 800;
-    font-size: 1.75rem;
-    background: $primary-gradient;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 28px;
+    color: $text-primary;
     letter-spacing: -0.025em;
 
     @include mobile-only {
-      font-size: 1.25rem;
+      font-size: 20px;
     }
-  }
-  
-  &__user-menu {
-    position: relative;
-  }
-  
-  &__user-button {
-    padding: 0.75rem 1.25rem;
-    background: $bg-primary;
-    border: 2px solid $border-color;
-    color: $text-primary;
-    font-weight: 600;
-    font-size: 0.95rem;
-    box-shadow: $shadow-sm;
-    @include flex-inline(0.75rem);
-    @include button-base;
 
-    &:hover {
-      background: $primary-light;
-      border-color: $primary-color;
-      transform: translateY(-2px);
-      box-shadow: $shadow-md;
-    }
-    
-    &:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-    }
-    
-    &:active {
-      transform: translateY(0);
-    }
-  }
-
-  &__user-avatar {
-    @include avatar(2rem);
-    
-    .material-icons {
-      font-size: 1.25rem;
-    }
-  }
-  
-  &__dropdown-icon {
-    font-size: 1.25rem !important;
-    transition: $transition-smooth;
-    color: $text-secondary;
-    
-    .admin-panel__dropdown--open & {
-      transform: rotate(180deg);
-      color: $primary-color;
-    }
-  }
-  
-  &__dropdown {
-    position: absolute;
-    top: calc(100% + 0.75rem);
-    right: 0;
-    min-width: 220px;
-    border-radius: 20px;
-    box-shadow: $shadow-lg;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-20px) scale(0.95);
-    transition: $transition-bounce;
-    z-index: 1000;
-    overflow: hidden;
-    @include glass-morphism;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: -8px;
-      right: 24px;
-      width: 16px;
-      height: 16px;
-      background: $bg-glass;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-bottom: none;
-      border-right: none;
-      transform: rotate(45deg);
-      backdrop-filter: blur(20px);
-    }
-    
-    &--open {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0) scale(1);
-    }
-  }
-  
-  &__dropdown-item {
-    width: 100%;
-    padding: 1rem 1.25rem;
-    background: transparent;
-    border: none;
-    color: $text-primary;
-    text-align: left;
-    cursor: pointer;
-    transition: $transition-smooth;
-    font-weight: 500;
-    font-size: 0.95rem;
-    @include flex-inline(1rem);   
-    
-    &:hover {
-      background: rgba(59, 130, 246, 0.1);
-      
-      .material-icons {
-        transform: scale(1.1);
-      }
-    }
-    
-    &:focus {
-      outline: none;
-      background: rgba(59, 130, 246, 0.15);
-    }
-    
-    .material-icons {
-      font-size: 1.375rem;
-      color: #ef4444;
-      transition: $transition-smooth;
+    @include tablet-only {
+      font-size: 24px;
     }
   }
   
   &__container {
     flex: 1;
-    padding: 2rem;
+    padding: 32px;
     overflow-y: auto;
     background: $bg-secondary;
     position: relative;
     
+    // Pattern background
     &::before {
       content: '';
       position: absolute;
@@ -347,50 +474,82 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.1) 1px, transparent 0);
-      background-size: 40px 40px;
+      background-image: radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.1) 1px, transparent 0);
+      background-size: 32px 32px;
       pointer-events: none;
-      opacity: 0.5;
+      opacity: 0.7;
     }
 
     @include mobile-only {
-      padding: 1rem;
+      padding: 20px;
+    }
+
+    @include tablet-only {
+      padding: 24px;
     }
   }
 }
 
 // Animaciones
-@keyframes slideInRight {
+@keyframes slideInFromLeft {
   from {
-    opacity: 0;
-    transform: translateX(30px);
+    transform: translateX(-100%);
   }
   to {
-    opacity: 1;
     transform: translateX(0);
   }
 }
 
-.route-animation-fade {
-  animation: slideInRight 0.4s ease-out;
-}
-
-@include reduce-motion {
-  * {
-    animation: none !important;
-    transition: none !important;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
-// Responsive
-@include large-desktop-up {
+// Mejoras de accesibilidad
+@include reduce-motion {
+  .admin-panel__sidebar,
+  .admin-panel__overlay,
+  .admin-panel__nav-link,
+  .admin-panel__footer-btn,
+  .admin-panel__user-button,
+  .admin-panel__dropdown {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+
+    &:hover {
+      transform: none !important;
+    }
+  }
+}
+
+// Alto contraste
+@media (prefers-contrast: high) {
   .admin-panel {
-    &__container {
-      padding: 3rem;
+    &__sidebar {
+      border-right-width: 2px;
     }
     
-    &__header {
-      padding: 0 3rem;
+    &__nav-link--active {
+      outline: 2px solid $primary-color;
+    }
+    
+    &__footer-btn:hover {
+      outline: 2px solid $error-color;
     }
   }
+}
+
+// Estados de focus mejorados para accesibilidad
+.admin-panel__nav-link:focus-visible,
+.admin-panel__user-button:focus-visible,
+.admin-panel__footer-btn:focus-visible,
+.admin-panel__toggle-btn:focus-visible,
+.admin-panel__close-btn:focus-visible {
+  outline: 3px solid $primary-color !important;
+  outline-offset: 2px;
+  border-radius: 8px;
 }

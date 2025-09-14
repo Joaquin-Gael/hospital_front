@@ -1,0 +1,67 @@
+@if (isOpen) {
+  <div class="view-dialog-overlay" (click)="onOverlayClick($event)">
+    <div class="view-dialog" (click)="$event.stopPropagation()">
+      <div class="view-dialog__header">
+        <h2>{{ title || 'Detalles del Elemento' }}</h2>
+      </div>
+      
+      <div class="view-dialog__content">
+        <table class="view-dialog__table">
+          @for (column of columns; track column.key) {
+            <tr>
+              <td class="view-dialog__label">{{ column.label }}</td>
+              <td class="view-dialog__value">
+                @switch (getValueType(column, item[column.key])) {
+                  @case ('image') {
+                    <img 
+                      [src]="item[column.key]" 
+                      [alt]="column.label"
+                      class="view-dialog__image"
+                      (error)="handleImageError($event)" />
+                  }
+                  @case ('email') {
+                    <a [href]="'mailto:' + item[column.key]" class="view-dialog__link">
+                      {{ item[column.key] }}
+                    </a>
+                  }
+                  @case ('phone') {
+                    <a [href]="'tel:' + item[column.key]" class="view-dialog__link">
+                      {{ item[column.key] }}
+                    </a>
+                  }
+                  @case ('boolean') {
+                    <span [class.view-dialog__badge--success]="item[column.key]" 
+                          [class.view-dialog__badge--error]="!item[column.key]"
+                          class="view-dialog__badge">
+                      {{ item[column.key] ? 'Sí' : 'No' }}
+                    </span>
+                  }
+                  @case ('date') {
+                    <span>{{ formatDate(item[column.key]) }}</span>
+                  }
+                  @default {
+                    <span 
+                      [class.view-dialog__empty-value]="!getValue(column, item[column.key])"
+                      class="view-dialog__value">
+                      {{ getValue(column, item[column.key]) || 'No disponible' }}
+                    </span>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </table>
+      </div>
+      
+      <div class="view-dialog__actions">
+        <button 
+          type="button" 
+          class="view-dialog__close-button" 
+          (click)="onClose()"
+          aria-label="Cerrar diálogo">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+}

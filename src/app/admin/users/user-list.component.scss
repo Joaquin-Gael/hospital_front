@@ -1,389 +1,545 @@
-@use 'sass:color';
-@use '../styles/_vars.scss' as *;
+@use "sass:color";
+@use "../styles/_vars.scss" as *;
+@use "../../layout/styles/_mixins.scss" as *;
+@use "../../layout/styles/_media-queries.scss" as *;
 
-.user-list {
-  max-width: 100%;
-  margin: 0 auto;
-  
-  &__card {
-    background: $bg-glass;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 24px;
-    box-shadow: $shadow-glass;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    overflow: hidden;
-    position: relative;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
-    }
-  }
-  
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 32px;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    border-bottom: 1px solid $border-light;
-    position: relative;
-    
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 5%;
-      right: 5%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, $border-color, transparent);
-    }
-  }
-  
-  &__title {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 800;
-    background: $primary-gradient;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.02em;
-    position: relative;
-    
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -8px;
-      left: 0;
-      width: 60px;
-      height: 3px;
-      background: $accent-color;
-      border-radius: 2px;
-    }
-  }
-  
-  &__body {
-    padding: 32px;
-  }
-  
-  &__alert {
-    padding: 20px 24px;
-    border-radius: 16px;
-    margin-bottom: 24px;
-    border: 1px solid;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-weight: 500;
-    position: relative;
-    backdrop-filter: blur(10px);
-    
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      border-radius: 2px 0 0 2px;
-    }
-    
-    &.alert--danger {
-      background: rgba(239, 68, 68, 0.1);
-      border-color: rgba(239, 68, 68, 0.3);
-      color: #dc2626;
-      
-      &::before {
-        background: $error-color;
-      }
-    }
-    
-    .close-button {
-      background: none;
-      border: none;
-      color: inherit;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 50%;
-      transition: $transition-smooth;
-      margin-left: auto;
-      
-      &:hover {
-        background: rgba(0, 0, 0, 0.1);
-      }
-    }
-  }
-  
-  &__loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 60px;
-    color: $text-muted;
-    font-size: 1.1rem;
-    font-weight: 500;
-    
-    &::before {
-      content: '';
-      width: 32px;
-      height: 32px;
-      border: 3px solid rgba(102, 126, 234, 0.3);
-      border-top: 3px solid $primary-color;
-      border-radius: 50%;
-      margin-right: 16px;
-      animation: spin 1s linear infinite;
-    }
-  }
-  
-  &__empty {
-    text-align: center;
-    padding: 80px 20px;
-    color: $text-muted;
-    font-size: 1.1rem;
-    font-weight: 500;
-    
-    &::before {
-      content: '📭';
-      display: block;
-      font-size: 4rem;
-      margin-bottom: 16px;
-      opacity: 0.7;
-    }
-  }
-  
-  &__content {
-    transition: $transition-smooth;
-    
-    &.hidden {
-      display: none;
-    }
-  }
-  
-  &__form {
+.user-section {
+  animation: fadeInUp 0.6s ease-out;
+
+  &__form-container {
+    margin-bottom: 32px;
     background: $bg-primary;
     border-radius: 20px;
-    padding: 32px;
-    box-shadow: $shadow-md;
+    padding: 40px;
+    box-shadow: $shadow-lg;
     border: 1px solid $border-light;
     position: relative;
-    
+
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, $primary-color, transparent);
+      height: 4px;
+      background: $primary-gradient;
+      border-radius: 20px 20px 0 0;
+    }
+
+    @include mobile-only {
+      padding: 24px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
+
+    @include tablet-only {
+      padding: 32px;
+      margin-bottom: 28px;
     }
   }
-  
-  &__form-field {
-    margin-bottom: 32px;
-  }
-  
-  &__label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: $text-primary;
-    letter-spacing: 0.025em;
-    
-    .material-icons {
-      font-size: 24px;
-      color: $primary-color;
-    }
-  }
-  
-  &__input-file {
-    width: 100%;
-    padding: 20px 24px;
-    border: 3px dashed $border-color;
+
+  &__table-container {
+    overflow: hidden;
+    background: $bg-primary;
     border-radius: 20px;
-    background: $bg-secondary;
-    cursor: pointer;
-    transition: $transition-smooth;
-    font-size: 1rem;
-    font-weight: 600;
-    color: $text-secondary;
-    text-align: center;
+    box-shadow: $shadow-lg;
+    border: 1px solid $border-light;
     position: relative;
-    overflow: hidden;
-    
+
     &::before {
-      content: '📁';
-      display: block;
-      font-size: 2.5rem;
-      margin-bottom: 12px;
-      opacity: 0.7;
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(
+        90deg,
+        $primary-color 0%,
+        $success-color 50%,
+        $accent-color 100%
+      );
+      border-radius: 20px 20px 0 0;
     }
-    
-    &::after {
-      content: 'Arrastra una imagen aquí o haz clic para seleccionar';
-      display: block;
-      font-size: 0.9rem;
-      color: $text-muted;
-      margin-top: 8px;
+
+    @include mobile-only {
+      border-radius: 16px;
     }
-    
-    &:hover {
-      border-color: $primary-color;
-      background: $primary-light;
-      transform: translateY(-3px);
-      box-shadow: $shadow-md;
-      color: $primary-color;
-    }
-    
-    &:focus {
-      outline: none;
-      border-color: $primary-color;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+
+    // Imagen de perfil en tabla
+    :global(.table__image) {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid $bg-primary;
+      box-shadow: $shadow-sm;
+      transition: $transition-smooth;
+
+      &:hover {
+        transform: scale(1.3);
+        box-shadow: $shadow-md;
+        z-index: 10;
+        position: relative;
+        border-color: $primary-color;
+      }
     }
   }
-  
-  &__image-preview {
-    margin-top: 20px;
+
+  &__empty {
+    padding: 80px 20px;
+    background: $bg-primary;
+    border-radius: 20px;
+    box-shadow: $shadow-lg;
+    border: 1px solid $border-light;
     position: relative;
-    display: inline-block;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: $shadow-md;
-  }
-  
-  &__preview-image {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 16px;
-    border: 3px solid $bg-primary;
-    transition: $transition-smooth;
-    
-    &:hover {
-      transform: scale(1.05);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, $warning-color 0%, $accent-color 100%);
+      border-radius: 20px 20px 0 0;
     }
-  }
-  
-  &__remove-image {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: $error-color;
-    color: $text-white;
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: $transition-smooth;
-    box-shadow: $shadow-sm;
-    
-    &:hover {
-      background: color.adjust($error-color, $lightness: -10%);
-      transform: scale(1.1);
-      box-shadow: $shadow-md;
-    }
-    
-    .material-icons {
-      font-size: 18px;
-    }
-  }
-  
-  // Mejora para la imagen en la tabla
-  :global(.table__image) {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid $bg-primary;
-    box-shadow: $shadow-sm;
-    transition: $transition-smooth;
-    
-    &:hover {
-      transform: scale(1.3);
-      box-shadow: $shadow-md;
-      z-index: 10;
-      position: relative;
-      border-color: $primary-color;
+
+    @include mobile-only {
+      padding: 60px 20px;
+      border-radius: 16px;
     }
   }
 }
 
-// Botones mejorados
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 32px;
-  border: none;
-  border-radius: 50px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: $transition-smooth;
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  letter-spacing: 0.025em;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.6s ease;
+// Empty state component
+.empty-state {
+  text-align: center;
+  max-width: 400px;
+  margin: 0 auto;
+
+  &__icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.1) 0%,
+      rgba(251, 191, 36, 0.1) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 70%
+      );
+      animation: shimmer 2s infinite;
+    }
+
+    svg {
+      width: 40px;
+      height: 40px;
+      color: $text-secondary;
+      stroke-width: 1.5;
+    }
+
+    @include mobile-only {
+      width: 64px;
+      height: 64px;
+
+      svg {
+        width: 32px;
+        height: 32px;
+      }
+    }
   }
-  
-  &:hover::before {
-    left: 100%;
+
+  &__title {
+    margin: 0 0 12px 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $text-primary;
+    letter-spacing: -0.02em;
+
+    @include mobile-only {
+      font-size: 1.25rem;
+    }
   }
-  
-  &--primary {
+
+  &__message {
+    margin: 0 0 32px 0;
+    font-size: 1rem;
+    color: $text-secondary;
+    line-height: 1.6;
+
+    @include mobile-only {
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+  }
+
+  &__button {
     background: $primary-gradient;
     color: $text-white;
+    border: none;
+    border-radius: 50px;
+    padding: 16px 32px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: $transition-smooth;
     box-shadow: $shadow-md;
-    
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transition: left 0.6s ease;
+    }
+
     &:hover {
       transform: translateY(-3px) scale(1.02);
       box-shadow: $shadow-lg;
+
+      &::before {
+        left: 100%;
+      }
     }
-    
+
     &:active {
       transform: translateY(-1px) scale(1);
     }
-    
+
+    svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+    }
+
+    @include mobile-only {
+      width: 100%;
+      justify-content: center;
+      padding: 14px 28px;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+// Botones globales (siguiendo el patrón establecido)
+:global(.user-section) {
+  :global(.btn),
+  :global(.action-btn),
+  :global(.primary-btn) {
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    padding: 12px 24px !important;
+    min-height: 44px !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    text-decoration: none !important;
+    position: relative !important;
+    overflow: hidden !important;
+
+    &:disabled,
+    &.disabled {
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+      box-shadow: none !important;
+      background: color.adjust($bg-secondary, $lightness: -5%) !important;
+      color: $text-muted !important;
+      border-color: $border-light !important;
+    }
+
+    svg,
+    i,
     .material-icons {
-      font-size: 20px;
+      width: 16px !important;
+      height: 16px !important;
+      font-size: 16px !important;
+      stroke-width: 2 !important;
+      flex-shrink: 0 !important;
+    }
+
+    @include mobile-only {
+      font-size: 13px !important;
+      padding: 10px 20px !important;
+      min-height: 40px !important;
+      gap: 6px !important;
+
+      svg,
+      i,
+      .material-icons {
+        width: 14px !important;
+        height: 14px !important;
+        font-size: 14px !important;
+      }
+    }
+
+    @include tablet-only {
+      font-size: 13px !important;
+      padding: 11px 22px !important;
+      min-height: 42px !important;
+      gap: 7px !important;
+    }
+
+    &.btn-sm {
+      font-size: 12px !important;
+      padding: 8px 16px !important;
+      min-height: 36px !important;
+
+      svg,
+      i,
+      .material-icons {
+        width: 14px !important;
+        height: 14px !important;
+        font-size: 14px !important;
+      }
+
+      @include mobile-only {
+        font-size: 11px !important;
+        padding: 6px 12px !important;
+        min-height: 32px !important;
+      }
+    }
+
+    &.btn-lg {
+      font-size: 16px !important;
+      padding: 16px 32px !important;
+      min-height: 48px !important;
+
+      svg,
+      i,
+      .material-icons {
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 18px !important;
+      }
+
+      @include mobile-only {
+        font-size: 14px !important;
+        padding: 14px 28px !important;
+        min-height: 44px !important;
+      }
+    }
+  }
+
+  // Variantes de botones
+  :global(.btn.btn-primary),
+  :global(.btn--primary),
+  :global(.action-btn.btn-primary),
+  :global(.action-btn--primary),
+  :global(.primary-btn.btn-primary),
+  :global(.primary-btn--primary) {
+    background: $primary-gradient !important;
+    color: white !important;
+    box-shadow: $shadow-md !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0) !important;
+    }
+  }
+
+  :global(.btn.btn-secondary),
+  :global(.btn--secondary),
+  :global(.action-btn.btn-secondary),
+  :global(.action-btn--secondary),
+  :global(.primary-btn.btn-secondary),
+  :global(.primary-btn--secondary) {
+    background: $bg-secondary !important;
+    color: $text-primary !important;
+    border: 2px solid $border-color !important;
+    box-shadow: $shadow-sm !important;
+
+    &:hover:not(:disabled) {
+      background: $primary-light !important;
+      border-color: $primary-color !important;
+      color: $primary-dark !important;
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-md !important;
+    }
+  }
+
+  :global(.btn.btn-success),
+  :global(.btn--success),
+  :global(.action-btn.btn-success),
+  :global(.action-btn--success),
+  :global(.primary-btn.btn-success),
+  :global(.primary-btn--success) {
+    background: linear-gradient(
+      135deg,
+      $success-color 0%,
+      color.adjust($success-color, $lightness: -10%) 100%
+    ) !important;
+    color: white !important;
+    box-shadow: $shadow-md !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+  }
+
+  :global(.btn.btn-warning),
+  :global(.btn--warning),
+  :global(.action-btn.btn-warning),
+  :global(.action-btn--warning),
+  :global(.primary-btn.btn-warning),
+  :global(.primary-btn--warning) {
+    background: linear-gradient(
+      135deg,
+      $warning-color 0%,
+      color.adjust($warning-color, $lightness: -10%) 100%
+    ) !important;
+    color: white !important;
+    box-shadow: $shadow-md !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+  }
+
+  :global(.btn.btn-danger),
+  :global(.btn--danger),
+  :global(.action-btn.btn-danger),
+  :global(.action-btn--danger),
+  :global(.primary-btn.btn-danger),
+  :global(.primary-btn--danger) {
+    background: linear-gradient(
+      135deg,
+      $error-color 0%,
+      color.adjust($error-color, $lightness: -10%) 100%
+    ) !important;
+    color: white !important;
+    box-shadow: $shadow-md !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+  }
+
+  :global(.btn.btn-info),
+  :global(.btn--info),
+  :global(.action-btn.btn-info),
+  :global(.action-btn--info),
+  :global(.primary-btn.btn-info),
+  :global(.primary-btn--info) {
+    background: linear-gradient(
+      135deg,
+      $info-color 0%,
+      color.adjust($info-color, $lightness: -10%) 100%
+    ) !important;
+    color: white !important;
+    box-shadow: $shadow-md !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+  }
+
+  :global(.btn.btn-outline),
+  :global(.action-btn.btn-outline),
+  :global(.primary-btn.btn-outline) {
+    background: transparent !important;
+    border: 2px solid $primary-color !important;
+    color: $primary-color !important;
+
+    &:hover:not(:disabled) {
+      background: $primary-color !important;
+      color: white !important;
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-md !important;
+    }
+  }
+
+  // Grupos de botones
+  :global(.btn-group),
+  :global(.action-buttons) {
+    display: flex !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+
+    @include mobile-only {
+      gap: 8px !important;
+      flex-direction: column !important;
+
+      .btn {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+    }
+  }
+
+  // Acciones de tabla
+  :global(.table-actions),
+  :global(.row-actions) {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+
+    .btn {
+      min-width: 36px !important;
+      padding: 8px 12px !important;
+      min-height: 36px !important;
+
+      @include mobile-only {
+        min-width: 32px !important;
+        padding: 6px 10px !important;
+        min-height: 32px !important;
+      }
     }
   }
 }
 
 // Animaciones
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
@@ -391,86 +547,80 @@
   }
 }
 
-.user-list {
-  animation: fadeInUp 0.5s ease-out;
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
-// Responsive design
-@media (max-width: 768px) {
-  .user-list {
-    &__card {
-      border-radius: 16px;
-      margin: 0 8px;
+// Accesibilidad
+@include reduce-motion {
+  .user-section {
+    animation: none !important;
+  }
+
+  .empty-state__icon::before {
+    animation: none !important;
+  }
+
+  :global(.user-section) {
+    :global(.btn),
+    :global(.action-btn),
+    :global(.primary-btn) {
+      transition: none !important;
+
+      &:hover {
+        transform: none !important;
+      }
     }
-    
-    &__header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 20px;
-      padding: 24px 20px;
-    }
-    
-    &__title {
-      font-size: 1.5rem;
-    }
-    
-    &__body {
-      padding: 20px;
-    }
-    
-    &__form {
-      padding: 20px;
-      border-radius: 16px;
-    }
-    
-    &__form-field {
-      margin-bottom: 24px;
-    }
-    
-    &__input-file {
-      padding: 16px 20px;
-    }
-    
-    &__preview-image {
-      width: 100px;
-      height: 100px;
-    }
-    
-    .btn--primary {
-      width: 100%;
-      justify-content: center;
+  }
+
+  .empty-state__button {
+    transition: none !important;
+
+    &:hover {
+      transform: none !important;
     }
   }
 }
 
-// Estados de accesibilidad
-@media (prefers-reduced-motion: reduce) {
-  .user-list,
-  .btn,
-  .user-list__input-file,
-  .user-list__preview-image,
-  .user-list__remove-image {
-    animation: none;
-    transition: none;
+// Focus states
+:global(.user-section) {
+  :global(.btn:focus-visible),
+  :global(.action-btn:focus-visible),
+  :global(.primary-btn:focus-visible) {
+    outline: 3px solid $primary-color !important;
+    outline-offset: 2px !important;
+    border-radius: 8px !important;
   }
 }
 
-// Soporte para touch devices
+.empty-state__button:focus-visible {
+  outline: 3px solid $primary-color;
+  outline-offset: 2px;
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  :global(.user-section) {
+    :global(.btn),
+    :global(.action-btn),
+    :global(.primary-btn) {
+      border: 2px solid currentColor !important;
+    }
+  }
+
+  .empty-state__button {
+    border: 2px solid currentColor;
+  }
+}
+
+// Touch devices
 @media (hover: none) and (pointer: coarse) {
-  .user-list {
-    &__input-file:hover {
-      transform: none;
-    }
-    
-    :global(.table__image:hover) {
-      transform: none;
-    }
-  }
-}
-
-// Mejora para dark mode futuro
-@media (prefers-color-scheme: dark) {
-  .user-list {
-    // Variables para dark mode
+  :global(.table__image:hover) {
+    transform: none;
   }
 }

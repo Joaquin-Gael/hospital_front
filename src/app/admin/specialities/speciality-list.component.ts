@@ -1,24 +1,25 @@
-import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataTableComponent } from '../../shared/data-table/data-table.component';
+import { SectionHeaderComponent, ActionButton } from '../section-header/section-header.component';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { ErrorMessageComponent } from '../error-message/error-message.component';
+import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog/view-dialog.component';
+import { DataTableComponent, TableColumn } from '../../shared/data-table/data-table.component';
 import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
 import { SpecialityService } from '../../services/speciality/speciality.service';
-import { Specialty, SpecialtyCreate, SpecialtyUpdate } from '../../services/interfaces/hospital.interfaces';
 import { LoggerService } from '../../services/core/logger.service';
+import { Specialty, SpecialtyCreate, SpecialtyUpdate } from '../../services/interfaces/hospital.interfaces';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 
-// Interfaz extendida para incluir isActive
 interface ExtendedSpecialty extends Specialty {
   isActive?: boolean;
 }
 
-// Interfaz para el formulario
 interface SpecialtyFormData {
-  id: string;
   name: string;
   description: string;
   department_id: string;
@@ -28,7 +29,17 @@ interface SpecialtyFormData {
 @Component({
   selector: 'app-speciality-list',
   standalone: true,
-  imports: [CommonModule, DataTableComponent, EntityFormComponent, MatDialogModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    SectionHeaderComponent,
+    LoadingSpinnerComponent,
+    ErrorMessageComponent,
+    ViewDialogComponent,
+    DataTableComponent,
+    EntityFormComponent,
+    MatDialogModule,
+    MatButtonModule
+  ],
   templateUrl: './speciality-list.component.html',
   styleUrls: ['./speciality-list.component.scss'],
 })
@@ -38,143 +49,176 @@ export class SpecialityListComponent implements OnInit {
   private dialog = inject(MatDialog);
 
   specialities: ExtendedSpecialty[] = [];
-  loading: boolean = false;
-  showForm: boolean = false;
-  formMode: 'create' | 'edit' = 'create';
   selectedSpeciality: ExtendedSpecialty | null = null;
-  formLoading: boolean = false;
+  loading = false;
+  formLoading = false;
   error: string | null = null;
+  showForm = false;
+  formMode: 'create' | 'edit' = 'create';
 
-  tableColumns = [
-	{ key: 'id', label: 'ID' },
-	{ key: 'name', label: 'Nombre' },
-	{ key: 'description', label: 'Descripción' },
-	{ key: 'department_id', label: 'ID de Departamento' },
-	//{ key: 'isActive', label: 'Activo', format: (value?: boolean) => value ? 'Sí' : 'No' },
+  // View dialog
+  viewDialogOpen = false;
+  viewDialogData: any = {};
+  viewDialogTitle = '';
+
+  headerActions: ActionButton[] = [
+    {
+      label: 'Nueva Especialidad',
+      icon: 'add',
+      variant: 'primary',
+      ariaLabel: 'Agregar nueva especialidad',
+      onClick: () => this.onAddNew()
+    }
+  ];
+
+  tableColumns: TableColumn[] = [
+    { key: 'name', label: 'Nombre' },
+    { key: 'description', label: 'Descripción' },
+    { key: 'department_id', label: 'Departamento ID' },
+  ];
+
+  viewDialogColumns: ViewDialogColumn[] = [
+    { key: 'name', label: 'Nombre' },
+    { key: 'description', label: 'Descripción' },
+    { key: 'department_id', label: 'Departamento ID' },
+    { key: 'isActive', label: 'Activo', format: (value?: boolean) => value ? 'Sí' : 'No' },
   ];
 
   formFields: FormField[] = [
-	{ key: 'name', label: 'Nombre', type: 'text', required: true },
-	{ key: 'description', label: 'Descripción', type: 'textarea', required: true },
-	{ key: 'department_id', label: 'ID de Departamento', type: 'text', required: true },
-	{ key: 'isActive', label: 'Activo', type: 'checkbox', defaultValue: true },
+    {
+      key: 'name',
+      label: 'Nombre',
+      type: 'text',
+      required: true,
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(100)]
+    },
+    {
+      key: 'description',
+      label: 'Descripción',
+      type: 'textarea',
+      required: false,
+      validators: [Validators.maxLength(500)]
+    },
+    {
+      key: 'department_id',
+      label: 'Departamento ID',
+      type: 'text',
+      required: true,
+      validators: [Validators.required]
+    },
+    {
+      key: 'isActive',
+      label: 'Activo',
+      type: 'checkbox',
+      defaultValue: true
+    },
   ];
 
   ngOnInit(): void {
-	this.loadSpecialities();
+    this.loadSpecialities();
   }
 
   loadSpecialities(): void {
-	this.loading = true;
-	this.error = null;
+    this.loading = true;
+    this.error = null;
 
-	this.specialityService.getSpecialities().subscribe({
-	  next: (specialities) => {
-		this.specialities = specialities.map((s: Specialty) => ({
-		  ...s,
-		  isActive: true, // Valor por defecto
-		}));
-		this.loading = false;
-	  },
-	  error: (error: HttpErrorResponse) => {
-		this.handleError(error, 'Error al cargar las especialidades');
-		this.loading = false;
-	  },
-	});
+    this.specialityService.getSpecialities().subscribe({
+      next: (specialities) => {
+        this.specialities = specialities.map((s: Specialty) => ({
+          ...s,
+          isActive: true, // Valor por defecto
+        }));
+        this.loading = false;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.handleError(error, 'Error al cargar las especialidades');
+        this.loading = false;
+      },
+    });
   }
 
   onAddNew(): void {
-	this.formMode = 'create';
-	this.selectedSpeciality = null;
-	this.showForm = true;
+    this.formMode = 'create';
+    this.selectedSpeciality = null;
+    this.showForm = true;
+    this.logger.debug('Opening form for new speciality');
   }
 
   onEdit(speciality: ExtendedSpecialty): void {
-	this.formMode = 'edit';
-	this.selectedSpeciality = speciality;
-	this.showForm = true;
-  }
-
-  onDelete(speciality: ExtendedSpecialty): void {
-	const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-	  data: { title: 'Eliminar Especialidad', message: `¿Está seguro de eliminar la especialidad "${speciality.name}"?` },
-	});
-
-	dialogRef.afterClosed().subscribe((result: boolean) => {
-	  if (result) {
-		this.loading = true;
-
-		this.specialityService.deleteSpeciality(speciality.id).subscribe({
-		  next: () => {
-			this.specialities = this.specialities.filter((s) => s.id !== speciality.id);
-			this.loading = false;
-			this.logger.info(`Especialidad "${speciality.name}" eliminada correctamente`);
-		  },
-		  error: (error: HttpErrorResponse) => {
-			this.handleError(error, `Error al eliminar la especialidad "${speciality.name}"`);
-			this.loading = false;
-		  },
-		});
-	  }
-	});
+    this.formMode = 'edit';
+    this.selectedSpeciality = speciality;
+    this.showForm = true;
+    this.logger.debug('Opening form for editing speciality', speciality);
   }
 
   onView(speciality: ExtendedSpecialty): void {
-	alert(`Detalles de la especialidad: ${speciality.name}\nDescripción: ${speciality.description}\nDepartamento ID: ${speciality.department_id}\nActivo: ${speciality.isActive ? 'Sí' : 'No'}`);
+    this.viewDialogData = speciality;
+    this.viewDialogTitle = `Especialidad: ${speciality.name}`;
+    this.viewDialogOpen = true;
+    this.logger.debug('Opening view dialog for speciality', speciality);
+  }
+
+  onDelete(speciality: ExtendedSpecialty): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: { title: 'Eliminar Especialidad', message: `¿Está seguro de eliminar la especialidad "${speciality.name}"?` },
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.loading = true;
+
+        this.specialityService.deleteSpeciality(speciality.id).subscribe({
+          next: () => {
+            this.specialities = this.specialities.filter((s) => s.id !== speciality.id);
+            this.loading = false;
+            this.logger.info(`Especialidad "${speciality.name}" eliminada correctamente`);
+          },
+          error: (error: HttpErrorResponse) => {
+            this.handleError(error, `Error al eliminar la especialidad "${speciality.name}"`);
+            this.loading = false;
+          },
+        });
+      }
+    });
   }
 
   onFormSubmit(formData: SpecialtyFormData): void {
-	this.formLoading = true;
-	this.error = null;
+    this.formLoading = true;
+    this.error = null;
 
-	const { isActive, ...specialtyData } = formData;
+    const { isActive, ...specialtyData } = formData;
 
-	if (this.formMode === 'create') {
-	  this.specialityService.addSpeciality(specialtyData as SpecialtyCreate).subscribe({
-		next: (newSpeciality: Specialty) => {
-		  this.specialities.push({
-			...newSpeciality,
-			isActive: isActive !== undefined ? isActive : true,
-		  });
-		  this.formLoading = false;
-		  this.showForm = false;
-		  this.logger.info(`Especialidad "${newSpeciality.name}" creada correctamente`);
-		},
-		error: (error: HttpErrorResponse) => {
-		  this.handleError(error, 'Error al crear la especialidad');
-		  this.formLoading = false;
-		},
-	  });
-	} else {
-	  if (!this.selectedSpeciality) return;
+    const request = this.formMode === 'create'
+      ? this.specialityService.addSpeciality(specialtyData as SpecialtyCreate)
+      : this.specialityService.updateSpeciality(this.selectedSpeciality!.id, specialtyData as SpecialtyUpdate);
 
-	  this.specialityService.updateSpeciality(this.selectedSpeciality.id, specialtyData as SpecialtyUpdate).subscribe({
-		next: (updatedSpeciality: Specialty) => {
-		  const index = this.specialities.findIndex((s) => s.id === updatedSpeciality.id);
-		  if (index !== -1) {
-			this.specialities[index] = {
-			  ...updatedSpeciality,
-			  isActive: isActive !== undefined ? isActive : this.specialities[index].isActive,
-			};
-		  }
-		  this.formLoading = false;
-		  this.showForm = false;
-		  this.logger.info(`Especialidad "${updatedSpeciality.name}" actualizada correctamente`);
-		},
-		error: (error: HttpErrorResponse) => {
-		  this.handleError(error, 'Error al actualizar la especialidad');
-		  this.formLoading = false;
-		},
-	  });
-	}
+    request.subscribe({
+      next: (result: Specialty) => {
+        this.formLoading = false;
+        this.showForm = false;
+        this.loadSpecialities();
+        this.logger.info(`Especialidad ${this.formMode === 'create' ? 'creada' : 'actualizada'} correctamente`);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.formLoading = false;
+        this.handleError(error, `Error al ${this.formMode === 'create' ? 'crear' : 'actualizar'} la especialidad`);
+      }
+    });
   }
 
   onFormCancel(): void {
-	this.showForm = false;
+    this.showForm = false;
+    this.selectedSpeciality = null;
+    this.logger.debug('Form cancelled');
+  }
+
+  closeViewDialog(): void {
+    this.viewDialogOpen = false;
+    this.viewDialogData = {};
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
-	this.logger.error('Error en SpecialityListComponent:', error);
-	this.error = error.error?.detail || error.message || defaultMessage;
+    this.logger.error('Error en SpecialityListComponent:', error);
+    this.error = error.error?.detail || error.message || defaultMessage;
   }
 }

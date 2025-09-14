@@ -63,7 +63,7 @@ export class ProfileFormComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   private loadInitialData(): void {
-    if (this.initialData || !this.profileForm) {
+    if (!this.initialData || !this.profileForm) {
       return;
     }
     this.profileForm.patchValue({

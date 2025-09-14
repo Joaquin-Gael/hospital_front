@@ -1,39 +1,49 @@
-<div class="health-insurance-list">
-  <div class="health-insurance-list__header">
-    <h3>Obras Sociales</h3>
-    <button class="add-button" (click)="onAddNew()" aria-label="Agregar obra social">
-      <span class="material-icons">add</span>
-      Nueva Obra Social
-    </button>
-  </div>
+<div class="health-insurance-section">
+  <app-section-header 
+    title="Gestión de Obras Sociales" 
+    subtitle="Administra las obras sociales del sistema médico"
+    [actions]="headerActions">
+  </app-section-header>
 
-  <div *ngIf="error" class="error-message" role="alert">
-    {{ error }}
-    <button class="close-button" (click)="error = null" aria-label="Cerrar error">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
+  <app-error-message
+    [message]="error"
+    (close)="error = null">
+  </app-error-message>
 
-  <div class="health-insurance-list__content" [class.hidden]="showForm">
-    <app-data-table
-      [data]="insurances"
-      [columns]="tableColumns"
-      [loading]="loading"
-      (edit)="onEdit($event)"
-      (delete)="onDelete($event)"
-      (view)="onView($event)"
-    ></app-data-table>
-  </div>
+  @if (showForm) {
+    <div class="health-insurance-section__form-container">
+      <app-entity-form
+        [fields]="formFields"
+        [initialData]="selectedInsurance"
+        [title]="formMode === 'create' ? 'Nueva Obra Social' : 'Editar Obra Social'"
+        [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+        [loading]="formLoading"
+        (formSubmit)="onFormSubmit($event)"
+        (formCancel)="onFormCancel()">
+      </app-entity-form>
+    </div>
+  } @else {
+    @if (loading) {
+      <app-loading-spinner [message]="'Cargando obras sociales...'"></app-loading-spinner>
+    } @else {
+      <div class="health-insurance-section__table-container">
+        <app-data-table
+          [data]="insurances"
+          [columns]="tableColumns"
+          [loading]="loading"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)"
+          (view)="onView($event)">
+        </app-data-table>
+      </div>
+    }
+  }
 
-  <div class="health-insurance-list__form" [class.hidden]="!showForm">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="selectedInsurance"
-      [title]="formMode === 'create' ? 'Nueva Obra Social' : 'Editar Obra Social'"
-      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
-      [loading]="formLoading"
-      (formSubmit)="onFormSubmit($event)"
-      (formCancel)="onFormCancel()"
-    ></app-entity-form>
-  </div>
+  <app-view-dialog
+    [isOpen]="viewDialogOpen"
+    [item]="viewDialogData"
+    [columns]="viewDialogColumns"
+    [title]="viewDialogTitle"
+    (close)="closeViewDialog()">
+  </app-view-dialog>
 </div>

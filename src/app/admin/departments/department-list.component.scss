@@ -1,25 +1,336 @@
+@use 'sass:color';
 @use '../styles/_vars.scss' as *;
 @use '../../layout/styles/_mixins.scss' as *;
 @use '../../layout/styles/_media-queries.scss' as *;
 
 .department-section {
-  animation: fadeInUp 0.5s ease-out;
+  animation: fadeInUp 0.6s ease-out;
 
   &__form-container {
-    margin-bottom: 2rem;
-    @include modern-card;
+    margin-bottom: 32px;
+    background: $bg-primary;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: $shadow-lg;
+    border: 1px solid $border-light;
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: $primary-gradient;
+      border-radius: 20px 20px 0 0;
+    }
+
+    @include mobile-only {
+      padding: 24px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
+
+    @include tablet-only {
+      padding: 32px;
+      margin-bottom: 28px;
+    }
   }
 
   &__table-container {
     overflow: hidden;
-    @include modern-card(0);
+    background: $bg-primary;
+    border-radius: 20px;
+    box-shadow: $shadow-lg;
+    border: 1px solid $border-light;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, $primary-color 0%, $info-color 50%, $accent-color 100%);
+      border-radius: 20px 20px 0 0;
+    }
+
+    @include mobile-only {
+      border-radius: 16px;
+    }
+  }
+}
+
+// Mejoras para los botones dentro de las secciones
+:global(.department-section) {
+  
+  // Botones de acción principales (estilos base)
+  :global(.btn),
+  :global(.action-btn),
+  :global(.primary-btn) {
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    padding: 12px 24px !important;
+    min-height: 44px !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    text-decoration: none !important;
+    position: relative !important;
+    overflow: hidden !important;
+
+    // Estados deshabilitados (mantenemos esto anidado porque no usa sufijo problemático)
+    &:disabled,
+    &.disabled {
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+      box-shadow: none !important;
+      background: color.adjust($bg-secondary, $lightness: -5%) !important;
+      color: $text-muted !important;
+      border-color: $border-light !important;
+    }
+
+    // Iconos dentro de botones
+    svg,
+    i {
+      width: 16px !important;
+      height: 16px !important;
+      stroke-width: 2 !important;
+      flex-shrink: 0 !important;
+    }
+
+    // Tamaños responsivos
+    @include mobile-only {
+      font-size: 13px !important;
+      padding: 10px 20px !important;
+      min-height: 40px !important;
+      gap: 6px !important;
+
+      svg,
+      i {
+        width: 14px !important;
+        height: 14px !important;
+      }
+    }
+
+    @include tablet-only {
+      font-size: 13px !important;
+      padding: 11px 22px !important;
+      min-height: 42px !important;
+      gap: 7px !important;
+    }
+
+    // Botones pequeños
+    &.btn-sm {
+      font-size: 12px !important;
+      padding: 8px 16px !important;
+      min-height: 36px !important;
+
+      svg,
+      i {
+        width: 14px !important;
+        height: 14px !important;
+      }
+
+      @include mobile-only {
+        font-size: 11px !important;
+        padding: 6px 12px !important;
+        min-height: 32px !important;
+      }
+    }
+
+    // Botones grandes
+    &.btn-lg {
+      font-size: 16px !important;
+      padding: 16px 32px !important;
+      min-height: 48px !important;
+
+      svg,
+      i {
+        width: 18px !important;
+        height: 18px !important;
+      }
+
+      @include mobile-only {
+        font-size: 14px !important;
+        padding: 14px 28px !important;
+        min-height: 44px !important;
+      }
+    }
+  }
+
+  // Variantes de botones (APLANADAS: selectores combinados sin anidamiento problemático)
+  :global(.btn.btn-primary),
+  :global(.btn--primary),
+  :global(.action-btn.btn-primary),
+  :global(.action-btn--primary),
+  :global(.primary-btn.btn-primary),
+  :global(.primary-btn--primary) {
+    background: $primary-gradient !important;
+    color: white !important;
+    box-shadow: $shadow-md !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0) !important;
+    }
+  }
+
+  :global(.btn.btn-secondary),
+  :global(.btn--secondary),
+  :global(.action-btn.btn-secondary),
+  :global(.action-btn--secondary),
+  :global(.primary-btn.btn-secondary),
+  :global(.primary-btn--secondary) {
+    background: $bg-secondary !important;
+    color: $text-primary !important;
+    border: 2px solid $border-color !important;
+    box-shadow: $shadow-sm !important;
+
+    &:hover:not(:disabled) {
+      background: $primary-light !important;
+      border-color: $primary-color !important;
+      color: $primary-dark !important;
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-md !important;
+    }
+  }
+
+  :global(.btn.btn-success),
+  :global(.btn--success),
+  :global(.action-btn.btn-success),
+  :global(.action-btn--success),
+  :global(.primary-btn.btn-success),
+  :global(.primary-btn--success) {
+    background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -10%) 100%) !important;
+    color: white !important;
+    box-shadow: $shadow-md !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+  }
+
+  :global(.btn.btn-warning),
+  :global(.btn--warning),
+  :global(.action-btn.btn-warning),
+  :global(.action-btn--warning),
+  :global(.primary-btn.btn-warning),
+  :global(.primary-btn--warning) {
+    background: linear-gradient(135deg, $warning-color 0%, color.adjust($warning-color, $lightness: -10%) 100%) !important;
+    color: white !important;
+    box-shadow: $shadow-md !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+  }
+
+  :global(.btn.btn-danger),
+  :global(.btn--danger),
+  :global(.action-btn.btn-danger),
+  :global(.action-btn--danger),
+  :global(.primary-btn.btn-danger),
+  :global(.primary-btn--danger) {
+    background: linear-gradient(135deg, $error-color 0%, color.adjust($error-color, $lightness: -10%) 100%) !important;
+    color: white !important;
+    box-shadow: $shadow-md !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+  }
+
+  :global(.btn.btn-info),
+  :global(.btn--info),
+  :global(.action-btn.btn-info),
+  :global(.action-btn--info),
+  :global(.primary-btn.btn-info),
+  :global(.primary-btn--info) {
+    background: linear-gradient(135deg, $info-color 0%, color.adjust($info-color, $lightness: -10%) 100%) !important;
+    color: white !important;
+    box-shadow: $shadow-md !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+  }
+
+  :global(.btn.btn-outline),
+  :global(.action-btn.btn-outline),
+  :global(.primary-btn.btn-outline) {
+    background: transparent !important;
+    border: 2px solid $primary-color !important;
+    color: $primary-color !important;
+
+    &:hover:not(:disabled) {
+      background: $primary-color !important;
+      color: white !important;
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-md !important;
+    }
+  }
+
+  // Grupos de botones
+  :global(.btn-group),
+  :global(.action-buttons) {
+    display: flex !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+
+    @include mobile-only {
+      gap: 8px !important;
+      flex-direction: column !important;
+      
+      .btn {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+    }
+  }
+
+  // Botones de tabla/acciones de fila
+  :global(.table-actions),
+  :global(.row-actions) {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+
+    .btn {
+      min-width: 36px !important;
+      padding: 8px 12px !important;
+      min-height: 36px !important;
+
+      @include mobile-only {
+        min-width: 32px !important;
+        padding: 6px 10px !important;
+        min-height: 32px !important;
+      }
+    }
   }
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
@@ -27,8 +338,43 @@
   }
 }
 
+// Estados de accesibilidad
 @include reduce-motion {
   .department-section {
-    animation: none;
+    animation: none !important;
+  }
+
+  :global(.department-section) {
+    :global(.btn),
+    :global(.action-btn),
+    :global(.primary-btn) {
+      transition: none !important;
+
+      &:hover {
+        transform: none !important;
+      }
+    }
+  }
+}
+
+// Focus states para accesibilidad
+:global(.department-section) {
+  :global(.btn:focus-visible),
+  :global(.action-btn:focus-visible),
+  :global(.primary-btn:focus-visible) {
+    outline: 3px solid $primary-color !important;
+    outline-offset: 2px !important;
+    border-radius: 8px !important;
+  }
+}
+
+// Estados de alto contraste
+@media (prefers-contrast: high) {
+  :global(.department-section) {
+    :global(.btn),
+    :global(.action-btn),
+    :global(.primary-btn) {
+      border: 2px solid currentColor !important;
+    }
   }
 }

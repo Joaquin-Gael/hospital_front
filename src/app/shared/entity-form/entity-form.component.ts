@@ -83,6 +83,10 @@ export class EntityFormComponent implements OnInit, OnChanges {
     return JSON.stringify(obj1) === JSON.stringify(obj2)
   }
 
+  hasFileFields(): boolean {
+    return this.fields.some(field => field.type === 'file')
+  }
+
   /** Método que loggea el foco en un campo */
   logFocus(fieldKey: string): void {
     const control = this.form.get(fieldKey)

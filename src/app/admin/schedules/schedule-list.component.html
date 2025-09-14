@@ -1,54 +1,50 @@
-<div class="schedule-list">
-  <div class="schedule-list__header">
-    <h3>Listado de Horarios</h3>
-    <div class="button-group">
-      <button 
-        class="add-button assign-button" 
-        (click)="openAssignDoctorDialog()"
-        aria-label="Asociar doctor a horario"
-      >
-        <span class="material-icons">link</span>
-        Asociar Doctor
-      </button>
-      <button 
-        class="add-button" 
-        (click)="onAddNew()"
-        aria-label="Agregar nuevo horario"
-      >
-        <span class="material-icons">add</span>
-        Nuevo Horario
-      </button>
+<div class="schedule-section">
+  <app-section-header
+    title="Gestión de Horarios"
+    subtitle="Administra los horarios médicos del sistema"
+    [actions]="headerActions">
+  </app-section-header>
+
+  <app-error-message 
+    [message]="error" 
+    (close)="error = null">
+  </app-error-message>
+
+  @if (showForm) {
+    <div class="schedule-section__form-container">
+      <app-entity-form
+        [fields]="formFields"
+        [initialData]="initialData"
+        [mode]="formMode"
+        [title]="formMode === 'create' ? 'Nuevo Horario' : 'Editar Horario'"
+        [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+        [loading]="formLoading"
+        (formSubmit)="onFormSubmit($event)"
+        (formCancel)="onFormCancel()">
+      </app-entity-form>
     </div>
-  </div>
-  
-  <div *ngIf="error" class="error-message" role="alert">
-    {{ error }}
-    <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
-  
-  <div class="schedule-list__content" [class.hidden]="showForm">
-    <app-data-table
-      [data]="schedules"
-      [columns]="tableColumns"
-      [loading]="loading"
-      (edit)="onEdit($event)"
-      (delete)="onDelete($event)"
-      (view)="onView($event)"
-    ></app-data-table>
-  </div>
-  
-  <div class="schedule-list__form" [class.hidden]="!showForm">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="initialData"
-      [mode]="formMode"
-      [title]="formMode === 'create' ? 'Nuevo Horario' : 'Editar Horario'"
-      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
-      [loading]="formLoading"
-      (formSubmit)="onFormSubmit($event)"
-      (formCancel)="onFormCancel()"
-    ></app-entity-form>
-  </div>
+  } @else {
+    @if (loading) {
+      <app-loading-spinner [message]="'Cargando horarios...'"></app-loading-spinner>
+    } @else {
+      <div class="schedule-section__table-container">
+        <app-data-table
+          [data]="schedules"
+          [columns]="tableColumns"
+          [loading]="loading"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)"
+          (view)="onView($event)">
+        </app-data-table>
+      </div>
+    }
+  }
+
+  <app-view-dialog
+    [isOpen]="viewDialogOpen"
+    [item]="viewDialogData"
+    [columns]="viewDialogColumns"
+    [title]="viewDialogTitle"
+    (close)="closeViewDialog()">
+  </app-view-dialog>
 </div>

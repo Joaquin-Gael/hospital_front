@@ -1,5 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SectionHeaderComponent, ActionButton } from '../section-header/section-header.component';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { ErrorMessageComponent } from '../error-message/error-message.component';
+import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog/view-dialog.component';
 import { DataTableComponent } from '../../shared/data-table/data-table.component';
 import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
 import { DoctorService } from '../../services/doctor/doctor.service';
@@ -40,9 +44,13 @@ interface DoctorFormData {
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogModule,
+    SectionHeaderComponent,
+    LoadingSpinnerComponent,
+    ErrorMessageComponent,
+    ViewDialogComponent,
     DataTableComponent,
     EntityFormComponent,
+    MatDialogModule,
     MatButtonModule,
   ],
   templateUrl: './doctors-list.component.html',
@@ -64,6 +72,27 @@ export class DoctorListComponent implements OnInit {
   selectedDoctor: ExtendedDoctor | null = null;
   formLoading = false;
   error: string | null = null;
+  
+  viewDialogOpen = false;
+  viewDialogData: any = {};
+  viewDialogTitle = '';
+
+  headerActions: ActionButton[] = [
+    {
+      label: 'Asociar Horario',
+      icon: 'link',
+      variant: 'success',
+      ariaLabel: 'Asociar horario a doctor',
+      onClick: () => this.openAssignScheduleDialog()
+    },
+    {
+      label: 'Nuevo Doctor',
+      icon: 'add',
+      variant: 'primary',
+      ariaLabel: 'Agregar nuevo doctor',
+      onClick: () => this.onAddNew()
+    }
+  ];
 
   private readonly passwordPattern =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
@@ -121,8 +150,20 @@ export class DoctorListComponent implements OnInit {
       }
     }},
     { key: 'is_active', label: 'Activo', format: (value: boolean) => (value ? 'Sí' : 'No') },
-    { key: 'is_admin', label: 'Admin', format: (value: boolean) => (value ? 'Sí' : 'No') },
-    { key: 'is_superuser', label: 'Superusuario', format: (value: boolean) => (value ? 'Sí' : 'No') },
+  ];
+
+  viewDialogColumns: ViewDialogColumn[] = [
+    { key: 'first_name', label: 'Nombre' },
+    { key: 'last_name', label: 'Apellido' },
+    { key: 'dni', label: 'DNI' },
+    { key: 'email', label: 'Email' },
+    { key: 'telephone', label: 'Teléfono' },
+    { key: 'address', label: 'Dirección' },
+    { key: 'blood_type', label: 'Tipo de Sangre' },
+    { key: 'specialityName', label: 'Especialidad' },
+    { key: 'doctor_state', label: 'Estado', format: (value?: DoctorStatus) => this.formatDoctorStatus(value) },
+    { key: 'scheduleNames', label: 'Horarios' },
+    { key: 'is_active', label: 'Activo', format: (value: boolean) => (value ? 'Sí' : 'No') },
   ];
 
   private daysMap: { [key: string]: string } = {
@@ -256,7 +297,15 @@ export class DoctorListComponent implements OnInit {
   }
 
   onView(doctor: ExtendedDoctor): void {
-    alert(`Detalles del doctor:\nNombre: ${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}\nEmail: ${doctor.email}\nTeléfono: ${doctor.telephone || 'N/A'}\nEspecialidad: ${doctor.specialityName || 'N/A'}\nEstado: ${this.formatDoctorStatus(doctor.doctor_state)}\nHorarios: ${doctor.scheduleNames}\nActivo: ${doctor.is_active ? 'Sí' : 'No'}`);
+    this.viewDialogData = doctor;
+    this.viewDialogTitle = `Doctor: ${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}`;
+    this.viewDialogOpen = true;
+    this.logger.debug('Opening view dialog for doctor', doctor);
+  }
+
+  closeViewDialog(): void {
+    this.viewDialogOpen = false;
+    this.viewDialogData = {};
   }
 
   private formatDoctorStatus(status?: DoctorStatus): string {
@@ -399,6 +448,10 @@ export class DoctorListComponent implements OnInit {
     });
   }
 
+  onFormCancel(): void {
+    this.showForm = false;
+  }
+
   onBanEvent(event: ExtendedDoctor): void {
     this.onBan(event);
   }
@@ -451,10 +504,6 @@ export class DoctorListComponent implements OnInit {
         });
       }
     });
-  }
-
-  onFormCancel(): void {
-    this.showForm = false;
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {

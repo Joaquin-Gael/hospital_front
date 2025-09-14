@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SectionHeaderComponent, ActionButton } from '../section-header/section-header.component';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { ErrorMessageComponent } from '../error-message/error-message.component';
-import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog.component';
+import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog/view-dialog.component';
 import { DataTableComponent, TableColumn } from '../../shared/data-table/data-table.component';
 import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
 import { DepartmentService } from '../../services/department/department.service';

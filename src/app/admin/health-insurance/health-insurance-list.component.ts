@@ -1,30 +1,48 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataTableComponent } from '../../shared/data-table/data-table.component';
+import { SectionHeaderComponent, ActionButton } from '../section-header/section-header.component';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { ErrorMessageComponent } from '../error-message/error-message.component';
+import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog/view-dialog.component';
+import { DataTableComponent, TableColumn } from '../../shared/data-table/data-table.component';
 import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
-import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { Validators } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
-
 import { HealthInsuranceService } from '../../services/health_insarunce/health-insurance.service';
+import { LoggerService } from '../../services/core/logger.service';
 import {
   HealthInsuranceRead,
   HealthInsuranceCreate,
   HealthInsuranceUpdate,
 } from '../../services/interfaces/health-insurance.interfaces';
-import { LoggerService } from '../../services/core/logger.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Validators } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
+
+interface ExtendedHealthInsurance extends HealthInsuranceRead {
+  isActive?: boolean;
+}
+
+interface HealthInsuranceFormData {
+  name: string;
+  description?: string;
+  discount: number;
+  isActive?: boolean;
+}
 
 @Component({
   selector: 'app-health-insurance-list',
   standalone: true,
   imports: [
     CommonModule,
+    SectionHeaderComponent,
+    LoadingSpinnerComponent,
+    ErrorMessageComponent,
+    ViewDialogComponent,
     DataTableComponent,
     EntityFormComponent,
     MatDialogModule,
-    MatButtonModule,
+    MatButtonModule
   ],
   templateUrl: './health-insurance-list.component.html',
   styleUrls: ['./health-insurance-list.component.scss'],
@@ -34,30 +52,69 @@ export class HealthInsuranceListComponent implements OnInit {
   private logger = inject(LoggerService);
   private dialog = inject(MatDialog);
 
-  insurances: HealthInsuranceRead[] = [];
+  insurances: ExtendedHealthInsurance[] = [];
+  selectedInsurance: ExtendedHealthInsurance | null = null;
   loading = false;
-  showForm = false;
-  formMode: 'create' | 'edit' = 'create';
-  selectedInsurance: HealthInsuranceRead | null = null;
   formLoading = false;
   error: string | null = null;
+  showForm = false;
+  formMode: 'create' | 'edit' = 'create';
 
-  tableColumns = [
-    { key: 'id', label: 'ID' },
+  // View dialog
+  viewDialogOpen = false;
+  viewDialogData: any = {};
+  viewDialogTitle = '';
+
+  headerActions: ActionButton[] = [
+    {
+      label: 'Nueva Obra Social',
+      icon: 'add',
+      variant: 'primary',
+      ariaLabel: 'Agregar nueva obra social',
+      onClick: () => this.onAddNew()
+    }
+  ];
+
+  tableColumns: TableColumn[] = [
     { key: 'name', label: 'Nombre' },
     { key: 'description', label: 'Descripción' },
-    { key: 'discount', label: 'Descuento (%)' },
+    { key: 'discount', label: 'Descuento (%)', format: (value: number) => `${value}%` },
+  ];
+
+  viewDialogColumns: ViewDialogColumn[] = [
+    { key: 'name', label: 'Nombre' },
+    { key: 'description', label: 'Descripción' },
+    { key: 'discount', label: 'Descuento (%)', format: (value: number) => `${value}%` },
+    { key: 'isActive', label: 'Activo', format: (value?: boolean) => value ? 'Sí' : 'No' },
   ];
 
   formFields: FormField[] = [
-    { key: 'name', label: 'Nombre', type: 'text', required: true },
-    { key: 'description', label: 'Descripción', type: 'textarea' },
+    {
+      key: 'name',
+      label: 'Nombre',
+      type: 'text',
+      required: true,
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(100)]
+    },
+    {
+      key: 'description',
+      label: 'Descripción',
+      type: 'textarea',
+      required: false,
+      validators: [Validators.maxLength(500)]
+    },
     {
       key: 'discount',
       label: 'Descuento (%)',
       type: 'number',
       required: true,
-      validators: [Validators.min(0), Validators.max(100)],
+      validators: [Validators.required, Validators.min(0), Validators.max(100)]
+    },
+    {
+      key: 'isActive',
+      label: 'Activo',
+      type: 'checkbox',
+      defaultValue: true
     },
   ];
 
@@ -70,12 +127,15 @@ export class HealthInsuranceListComponent implements OnInit {
     this.error = null;
 
     this.service.getAll().subscribe({
-      next: (data) => {
-        this.insurances = data;
+      next: (insurances) => {
+        this.insurances = insurances.map((insurance: HealthInsuranceRead) => ({
+          ...insurance,
+          isActive: true, // Valor por en efecto 🗿🚬
+        }));
         this.loading = false;
       },
-      error: (err: HttpErrorResponse) => {
-        this.handleError(err, 'Error al cargar las obras sociales');
+      error: (error: HttpErrorResponse) => {
+        this.handleError(error, 'Error al cargar las obras sociales');
         this.loading = false;
       },
     });
@@ -85,33 +145,43 @@ export class HealthInsuranceListComponent implements OnInit {
     this.formMode = 'create';
     this.selectedInsurance = null;
     this.showForm = true;
+    this.logger.debug('Opening form for new health insurance');
   }
 
-  onEdit(item: HealthInsuranceRead): void {
+  onEdit(insurance: ExtendedHealthInsurance): void {
     this.formMode = 'edit';
-    this.selectedInsurance = { ...item };
+    this.selectedInsurance = insurance;
     this.showForm = true;
+    this.logger.debug('Opening form for editing health insurance', insurance);
   }
 
-  onDelete(item: HealthInsuranceRead): void {
+  onView(insurance: ExtendedHealthInsurance): void {
+    this.viewDialogData = insurance;
+    this.viewDialogTitle = `Obra Social: ${insurance.name}`;
+    this.viewDialogOpen = true;
+    this.logger.debug('Opening view dialog for health insurance', insurance);
+  }
+
+  onDelete(insurance: ExtendedHealthInsurance): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: 'Eliminar Obra Social',
-        message: `¿Estás seguro de eliminar "${item.name}"?`,
+      data: { 
+        title: 'Eliminar Obra Social', 
+        message: `¿Está seguro de eliminar la obra social "${insurance.name}"?` 
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.loading = true;
-        this.service.delete(item.id).subscribe({
+
+        this.service.delete(insurance.id).subscribe({
           next: () => {
-            this.insurances = this.insurances.filter((i) => i.id !== item.id);
-            this.logger.info(`Obra social "${item.name}" eliminada correctamente`);
+            this.insurances = this.insurances.filter((i) => i.id !== insurance.id);
             this.loading = false;
+            this.logger.info(`Obra social "${insurance.name}" eliminada correctamente`);
           },
-          error: (err: HttpErrorResponse) => {
-            this.handleError(err, `Error al eliminar "${item.name}"`);
+          error: (error: HttpErrorResponse) => {
+            this.handleError(error, `Error al eliminar la obra social "${insurance.name}"`);
             this.loading = false;
           },
         });
@@ -119,50 +189,43 @@ export class HealthInsuranceListComponent implements OnInit {
     });
   }
 
-  onView(item: HealthInsuranceRead): void {
-    alert(`Obra Social: ${item.name}\nDescripción: ${item.description || 'N/A'}\nDescuento: ${item.discount}%`);
-  }
-
-  onFormSubmit(formData: HealthInsuranceCreate | HealthInsuranceUpdate): void {
+  onFormSubmit(formData: HealthInsuranceFormData): void {
     this.formLoading = true;
     this.error = null;
 
-    if (this.formMode === 'create') {
-      this.service.create(formData as HealthInsuranceCreate).subscribe({
-        next: (created) => {
-          this.insurances.push(created);
-          this.logger.info(`Obra social "${created.name}" creada correctamente`);
-          this.showForm = false;
-          this.formLoading = false;
-        },
-        error: (err: HttpErrorResponse) => {
-          this.handleError(err, 'Error al crear la obra social');
-          this.formLoading = false;
-        },
-      });
-    } else if (this.selectedInsurance) {
-      this.service.update(this.selectedInsurance.id, formData as HealthInsuranceUpdate).subscribe({
-        next: (updated) => {
-          const index = this.insurances.findIndex((i) => i.id === updated.id);
-          if (index !== -1) this.insurances[index] = updated;
-          this.logger.info(`Obra social "${updated.name}" actualizada correctamente`);
-          this.showForm = false;
-          this.formLoading = false;
-        },
-        error: (err: HttpErrorResponse) => {
-          this.handleError(err, 'Error al actualizar la obra social');
-          this.formLoading = false;
-        },
-      });
-    }
+    const { isActive, ...insuranceData } = formData;
+
+    const request = this.formMode === 'create'
+      ? this.service.create(insuranceData as HealthInsuranceCreate)
+      : this.service.update(this.selectedInsurance!.id, insuranceData as HealthInsuranceUpdate);
+
+    request.subscribe({
+      next: (result: HealthInsuranceRead) => {
+        this.formLoading = false;
+        this.showForm = false;
+        this.loadInsurances();
+        this.logger.info(`Obra social ${this.formMode === 'create' ? 'creada' : 'actualizada'} correctamente`);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.formLoading = false;
+        this.handleError(error, `Error al ${this.formMode === 'create' ? 'crear' : 'actualizar'} la obra social`);
+      }
+    });
   }
 
   onFormCancel(): void {
     this.showForm = false;
+    this.selectedInsurance = null;
+    this.logger.debug('Form cancelled');
   }
 
-  private handleError(error: HttpErrorResponse, fallback: string): void {
+  closeViewDialog(): void {
+    this.viewDialogOpen = false;
+    this.viewDialogData = {};
+  }
+
+  private handleError(error: HttpErrorResponse, defaultMessage: string): void {
     this.logger.error('Error en HealthInsuranceListComponent:', error);
-    this.error = error.error?.detail || error.message || fallback;
+    this.error = error.error?.detail || error.message || defaultMessage;
   }
 }
