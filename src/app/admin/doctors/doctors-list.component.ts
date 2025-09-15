@@ -1,11 +1,20 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SectionHeaderComponent, ActionButton } from '../section-header/section-header.component';
+import {
+  SectionHeaderComponent,
+  ActionButton,
+} from '../section-header/section-header.component';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { ErrorMessageComponent } from '../error-message/error-message.component';
-import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog/view-dialog.component';
+import {
+  ViewDialogComponent,
+  ViewDialogColumn,
+} from '../../shared/view-dialog/view-dialog.component';
 import { DataTableComponent } from '../../shared/data-table/data-table.component';
-import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
+import {
+  EntityFormComponent,
+  FormField,
+} from '../../shared/entity-form/entity-form.component';
 import { DoctorService } from '../../services/doctor/doctor.service';
 import { ScheduleService } from '../../services/schedule/schedule.service';
 import { SpecialityService } from '../../services/speciality/speciality.service';
@@ -17,27 +26,15 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { AssignDoctorScheduleComponent } from '../schedules/assign-doctor-schedule.component';
-import { Doctor, DoctorCreate, DoctorUpdateResponse, MedicalSchedule, DoctorStatus } from '../../services/interfaces/doctor.interfaces';
+import {
+  Doctor,
+  DoctorCreate,
+  DoctorUpdateResponse,
+  MedicalSchedule,
+  DoctorStatus,
+} from '../../services/interfaces/doctor.interfaces';
 import { Specialty } from '../../services/interfaces/hospital.interfaces';
-
-interface ExtendedDoctor extends Doctor {
-  specialityName?: string;
-  scheduleNames: string;
-}
-
-interface DoctorFormData {
-  username: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  password?: string;
-  dni: string;
-  telephone: string;
-  specialityId: string;
-  address: string;
-  bloodType: string;
-  doctor_state: DoctorStatus;
-}
+import { NotificationService } from '../../core/notification';
 
 @Component({
   selector: 'app-doctor-list',
@@ -60,19 +57,20 @@ export class DoctorListComponent implements OnInit {
   private doctorService = inject(DoctorService);
   private scheduleService = inject(ScheduleService);
   private specialityService = inject(SpecialityService);
+  private notificationService = inject(NotificationService);
   private logger = inject(LoggerService);
   private dialog = inject(MatDialog);
 
-  doctors: ExtendedDoctor[] = [];
+  doctors: Doctor[] = [];
   schedules: MedicalSchedule[] = [];
   specialities: Specialty[] = [];
   loading = false;
   showForm = false;
   formMode: 'create' | 'edit' = 'create';
-  selectedDoctor: ExtendedDoctor | null = null;
+  selectedDoctor: Doctor | null = null;
   formLoading = false;
   error: string | null = null;
-  
+
   viewDialogOpen = false;
   viewDialogData: any = {};
   viewDialogTitle = '';
@@ -83,48 +81,97 @@ export class DoctorListComponent implements OnInit {
       icon: 'link',
       variant: 'success',
       ariaLabel: 'Asociar horario a doctor',
-      onClick: () => this.openAssignScheduleDialog()
+      onClick: () => this.openAssignScheduleDialog(),
     },
     {
       label: 'Nuevo Doctor',
       icon: 'add',
       variant: 'primary',
       ariaLabel: 'Agregar nuevo doctor',
-      onClick: () => this.onAddNew()
-    }
+      onClick: () => this.onAddNew(),
+    },
   ];
 
   private readonly passwordPattern =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
 
   private baseFormFields: FormField[] = [
-    { key: 'username', label: 'Nombre de usuario', type: 'text', required: false },
+    {
+      key: 'username',
+      label: 'Nombre de usuario',
+      type: 'text',
+      required: false,
+    },
     { key: 'first_name', label: 'Nombre', type: 'text', required: true },
     { key: 'last_name', label: 'Apellido', type: 'text', required: true },
-    { key: 'email', label: 'Email', type: 'email', required: true, validators: [Validators.email] },
-    { key: 'password', label: 'Contraseña', type: 'password', required: false, validators: [Validators.minLength(8), Validators.pattern(this.passwordPattern)] },
+    {
+      key: 'email',
+      label: 'Email',
+      type: 'email',
+      required: true,
+      validators: [Validators.email],
+    },
+    {
+      key: 'password',
+      label: 'Contraseña',
+      type: 'password',
+      required: false,
+      validators: [
+        Validators.minLength(8),
+        Validators.pattern(this.passwordPattern),
+      ],
+    },
     { key: 'dni', label: 'DNI', type: 'text', required: true },
     { key: 'telephone', label: 'Teléfono', type: 'text', required: true },
-    { key: 'specialityId', label: 'Especialidad', type: 'select', required: true, options: [] },
+    {
+      key: 'specialityId',
+      label: 'Especialidad',
+      type: 'select',
+      required: true,
+      options: [],
+    },
     { key: 'address', label: 'Dirección', type: 'text', required: false },
-    { key: 'bloodType', label: 'Tipo de sangre', type: 'select', required: false, options: [
-      { value: 'A+', label: 'A+' }, { value: 'A-', label: 'A-' }, { value: 'B+', label: 'B+' },
-      { value: 'B-', label: 'B-' }, { value: 'AB+', label: 'AB+' }, { value: 'AB-', label: 'AB-' },
-      { value: 'O+', label: 'O+' }, { value: 'O-', label: 'O-' },
-    ] },
-    { key: 'doctor_state', label: 'Estado', type: 'select', required: true, options: [
-      { value: DoctorStatus.AVAILABLE, label: 'Disponible' },
-      { value: DoctorStatus.BUSY, label: 'En consulta' },
-      { value: DoctorStatus.OFFLINE, label: 'Fuera de servicio' },
-    ] },
+    {
+      key: 'bloodType',
+      label: 'Tipo de sangre',
+      type: 'select',
+      required: false,
+      options: [
+        { value: 'A+', label: 'A+' },
+        { value: 'A-', label: 'A-' },
+        { value: 'B+', label: 'B+' },
+        { value: 'B-', label: 'B-' },
+        { value: 'AB+', label: 'AB+' },
+        { value: 'AB-', label: 'AB-' },
+        { value: 'O+', label: 'O+' },
+        { value: 'O-', label: 'O-' },
+      ],
+    },
+    {
+      key: 'doctor_state',
+      label: 'Estado',
+      type: 'select',
+      required: true,
+      options: [
+        { value: DoctorStatus.AVAILABLE, label: 'Disponible' },
+        { value: DoctorStatus.BUSY, label: 'En consulta' },
+        { value: DoctorStatus.OFFLINE, label: 'Fuera de servicio' },
+      ],
+    },
   ];
 
   get formFields(): FormField[] {
     if (this._formFields.length === 0 || this.formMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
-        required: field.key === 'password' ? this.formMode === 'create' : field.required,
-        validators: field.key === 'password' && this.formMode === 'edit' ? [] : field.validators || [],
+        required:
+          field.key === 'password'
+            ? this.formMode === 'create'
+            : field.required,
+        validators:
+          field.key === 'password' && this.formMode === 'edit'
+            ? []
+            : field.validators || [],
       }));
     }
     return this._formFields;
@@ -133,23 +180,47 @@ export class DoctorListComponent implements OnInit {
   private _formFields: FormField[] = [];
 
   tableColumns = [
-    { key: 'first_name', label: 'Nombre', format: (value?: string) => value || 'N/A' },
-    { key: 'last_name', label: 'Apellido', format: (value?: string) => value || 'N/A' },
+    {
+      key: 'first_name',
+      label: 'Nombre',
+      format: (value?: string) => value || 'N/A',
+    },
+    {
+      key: 'last_name',
+      label: 'Apellido',
+      format: (value?: string) => value || 'N/A',
+    },
     { key: 'dni', label: 'DNI' },
     { key: 'address', label: 'Dirección' },
     { key: 'blood_type', label: 'Tipo de Sangre' },
     { key: 'email', label: 'Email' },
-    { key: 'telephone', label: 'Teléfono', format: (value?: string) => value || 'N/A' },
+    {
+      key: 'telephone',
+      label: 'Teléfono',
+      format: (value?: string) => value || 'N/A',
+    },
     { key: 'specialityName', label: 'Especialidad' },
-    { key: 'doctor_state', label: 'Estado', format: (value?: DoctorStatus) => {
-      switch (value) {
-        case DoctorStatus.AVAILABLE: return 'Disponible';
-        case DoctorStatus.BUSY: return 'En consulta';
-        case DoctorStatus.OFFLINE: return 'Fuera de servicio';
-        default: return 'N/A';
-      }
-    }},
-    { key: 'is_active', label: 'Activo', format: (value: boolean) => (value ? 'Sí' : 'No') },
+    {
+      key: 'doctor_state',
+      label: 'Estado',
+      format: (value?: DoctorStatus) => {
+        switch (value) {
+          case DoctorStatus.AVAILABLE:
+            return 'Disponible';
+          case DoctorStatus.BUSY:
+            return 'En consulta';
+          case DoctorStatus.OFFLINE:
+            return 'Fuera de servicio';
+          default:
+            return 'N/A';
+        }
+      },
+    },
+    {
+      key: 'is_active',
+      label: 'Activo',
+      format: (value: boolean) => (value ? 'Sí' : 'No'),
+    },
   ];
 
   viewDialogColumns: ViewDialogColumn[] = [
@@ -161,19 +232,27 @@ export class DoctorListComponent implements OnInit {
     { key: 'address', label: 'Dirección' },
     { key: 'blood_type', label: 'Tipo de Sangre' },
     { key: 'specialityName', label: 'Especialidad' },
-    { key: 'doctor_state', label: 'Estado', format: (value?: DoctorStatus) => this.formatDoctorStatus(value) },
+    {
+      key: 'doctor_state',
+      label: 'Estado',
+      format: (value?: DoctorStatus) => this.formatDoctorStatus(value),
+    },
     { key: 'scheduleNames', label: 'Horarios' },
-    { key: 'is_active', label: 'Activo', format: (value: boolean) => (value ? 'Sí' : 'No') },
+    {
+      key: 'is_active',
+      label: 'Activo',
+      format: (value: boolean) => (value ? 'Sí' : 'No'),
+    },
   ];
 
   private daysMap: { [key: string]: string } = {
-    'Sunday': 'Domingo',
-    'Monday': 'Lunes',
-    'Tuesday': 'Martes',
-    'Wednesday': 'Miércoles',
-    'Thursday': 'Jueves',
-    'Friday': 'Viernes',
-    'Saturday': 'Sábado'
+    Sunday: 'Domingo',
+    Monday: 'Lunes',
+    Tuesday: 'Martes',
+    Wednesday: 'Miércoles',
+    Thursday: 'Jueves',
+    Friday: 'Viernes',
+    Saturday: 'Sábado',
   };
 
   ngOnInit(): void {
@@ -187,29 +266,32 @@ export class DoctorListComponent implements OnInit {
     forkJoin({
       doctors: this.doctorService.getDoctors(),
       specialities: this.specialityService.getSpecialities(),
-      schedules: this.scheduleService.getSchedules()
+      schedules: this.scheduleService.getSchedules(),
     }).subscribe({
       next: (result) => {
         this.schedules = result.schedules;
         this.specialities = result.specialities;
         this.doctors = result.doctors.map((doctor) => {
-          const associatedSchedules = this.schedules.filter(s => s.doctors?.includes(doctor.id));
-          const scheduleNames = associatedSchedules.length > 0
-            ? associatedSchedules.map(s => `${this.daysMap[s.day] || s.day} ${s.start_time}-${s.end_time}`).join(', ')
-            : 'N/A';
+          const associatedSchedules = this.schedules.filter((s) =>
+            s.doctors?.includes(doctor.id)
+          );
           return {
             ...doctor,
             is_active: doctor.is_active ?? false,
-            specialityName: result.specialities.find((s) => s.id === doctor.speciality_id)?.name || 'N/A',
-            scheduleNames
+            specialityName:
+              result.specialities.find((s) => s.id === doctor.speciality_id)
+                ?.name || 'N/A',
           };
         });
-        const specialityFieldIndex = this.baseFormFields.findIndex((f) => f.key === 'specialityId');
+        const specialityFieldIndex = this.baseFormFields.findIndex(
+          (f) => f.key === 'specialityId'
+        );
         if (specialityFieldIndex !== -1) {
-          this.baseFormFields[specialityFieldIndex].options = this.specialities.map((s) => ({
-            value: s.id.toString(),
-            label: s.name,
-          }));
+          this.baseFormFields[specialityFieldIndex].options =
+            this.specialities.map((s) => ({
+              value: s.id.toString(),
+              label: s.name,
+            }));
           this._formFields = [];
         }
         this.loading = false;
@@ -221,7 +303,7 @@ export class DoctorListComponent implements OnInit {
     });
   }
 
-  openAssignScheduleDialog(doctor?: ExtendedDoctor): void {
+  openAssignScheduleDialog(doctor?: Doctor): void {
     if (!this.doctors.length || !this.schedules.length) {
       this.error = 'No hay doctores o horarios disponibles para asignar.';
       return;
@@ -231,21 +313,28 @@ export class DoctorListComponent implements OnInit {
       data: {
         context: 'doctor',
         doctorId: doctor?.id,
-        doctors: this.doctors.filter(d => d.is_active),
-        schedules: this.schedules 
+        doctors: this.doctors.filter((d) => d.is_active),
+        schedules: this.schedules,
       },
-      width: '500px'
+      width: '500px',
     });
 
-    dialogRef.afterClosed().subscribe((result: { success?: boolean; error?: string } | undefined) => {
-      if (result?.success) {
-        this.error = null;
-        this.logger.info('Horario asociado a doctor correctamente');
-        this.loadData(); 
-      } else if (result?.error) {
-        this.error = result.error;
-      }
-    });
+    dialogRef
+      .afterClosed()
+      .subscribe(
+        (result: { success?: boolean; error?: string } | undefined) => {
+          if (result?.success) {
+            this.error = null;
+            this.notificationService.success(
+              'Horario asignado correctamente.',
+              { duration: 5000 }
+            );
+            this.loadData();
+          } else if (result?.error) {
+            this.error = result.error;
+          }
+        }
+      );
   }
 
   onAddNew(): void {
@@ -254,7 +343,7 @@ export class DoctorListComponent implements OnInit {
     this.showForm = true;
   }
 
-  onEdit(doctor: ExtendedDoctor): void {
+  onEdit(doctor: Doctor): void {
     this.formMode = 'edit';
     this.selectedDoctor = {
       ...doctor,
@@ -264,18 +353,24 @@ export class DoctorListComponent implements OnInit {
       email: doctor.email || '',
       dni: doctor.dni || '',
       telephone: doctor.telephone || '',
-      speciality_id: doctor.speciality_id ? doctor.speciality_id.toString() : '',
+      speciality_id: doctor.speciality_id
+        ? doctor.speciality_id.toString()
+        : '',
       address: doctor.address || '',
       blood_type: doctor.blood_type || '',
       doctor_state: doctor.doctor_state || DoctorStatus.AVAILABLE,
-      scheduleNames: doctor.scheduleNames
     };
     this.showForm = true;
   }
 
-  onDelete(doctor: ExtendedDoctor): void {
+  onDelete(doctor: Doctor): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Eliminar Doctor', message: `¿Está seguro de eliminar al doctor "${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}"?` },
+      data: {
+        title: 'Eliminar Doctor',
+        message: `¿Está seguro de eliminar al doctor "${
+          doctor.first_name || 'N/A'
+        } ${doctor.last_name || 'N/A'}"?`,
+      },
     });
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
@@ -285,10 +380,36 @@ export class DoctorListComponent implements OnInit {
           next: () => {
             this.doctors = this.doctors.filter((d) => d.id !== doctor.id);
             this.loading = false;
-            this.logger.info(`Doctor "${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}" eliminado correctamente`);
+            this.logger.info(
+              `Doctor "${doctor.first_name || 'N/A'} ${
+                doctor.last_name || 'N/A'
+              }" eliminado correctamente`
+            );
+            this.notificationService.success('¡Doctor eliminado con éxito!', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
           },
           error: (error: HttpErrorResponse) => {
-            this.handleError(error, `Error al eliminar al doctor "${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}"`);
+            this.handleError(
+              error,
+              `Error al eliminar al doctor "${doctor.first_name || 'N/A'} ${
+                doctor.last_name || 'N/A'
+              }"`
+            );
+            this.notificationService.error(
+              '¡Ocurrió un error al eliminar el doctor!',
+              {
+                duration: 7000,
+                action: {
+                  label: 'Cerrar',
+                  action: () => this.notificationService.dismissAll(),
+                },
+              }
+            );
             this.loading = false;
           },
         });
@@ -296,9 +417,11 @@ export class DoctorListComponent implements OnInit {
     });
   }
 
-  onView(doctor: ExtendedDoctor): void {
+  onView(doctor: Doctor): void {
     this.viewDialogData = doctor;
-    this.viewDialogTitle = `Doctor: ${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}`;
+    this.viewDialogTitle = `Doctor: ${doctor.first_name || 'N/A'} ${
+      doctor.last_name || 'N/A'
+    }`;
     this.viewDialogOpen = true;
     this.logger.debug('Opening view dialog for doctor', doctor);
   }
@@ -310,141 +433,74 @@ export class DoctorListComponent implements OnInit {
 
   private formatDoctorStatus(status?: DoctorStatus): string {
     switch (status) {
-      case DoctorStatus.AVAILABLE: return 'Disponible';
-      case DoctorStatus.BUSY: return 'En consulta';
-      case DoctorStatus.OFFLINE: return 'Fuera de servicio';
-      default: return 'N/A';
+      case DoctorStatus.AVAILABLE:
+        return 'Disponible';
+      case DoctorStatus.BUSY:
+        return 'En consulta';
+      case DoctorStatus.OFFLINE:
+        return 'Fuera de servicio';
+      default:
+        return 'N/A';
     }
   }
 
-  onFormSubmit(formData: DoctorFormData): void {
-    if (!formData.specialityId) {
-      this.error = 'Por favor, selecciona una especialidad válida.';
-      this.formLoading = false;
-      return;
-    }
-    if (this.formMode === 'create' && !formData.password) {
-      this.error = 'La contraseña es requerida para crear un doctor.';
-      this.formLoading = false;
-      return;
-    }
-    if (formData.password && !this.passwordPattern.test(formData.password)) {
-      this.error = 'La contraseña debe tener al menos 8 caracteres, incluyendo una letra minúscula, una mayúscula, un número y un carácter especial (@$!%*?&#).';
-      this.formLoading = false;
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      this.error = 'Por favor, ingresa un correo electrónico válido.';
-      this.formLoading = false;
-      return;
-    }
-    if (!formData.dni) {
-      this.error = 'El DNI es requerido.';
-      this.formLoading = false;
-      return;
-    }
-    if (!formData.doctor_state || !Object.values(DoctorStatus).includes(formData.doctor_state)) {
-      this.error = 'Por favor, selecciona un estado válido (Disponible, En consulta, Fuera de servicio).';
-      this.formLoading = false;
-      return;
-    }
-
-    const action = this.formMode === 'create' ? 'crear' : 'editar';
+  onFormSubmit(formData: Partial<Doctor>): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: { title: `${action.charAt(0).toUpperCase() + action.slice(1)} Doctor`, message: `¿Está seguro de ${action} al doctor "${formData.first_name} ${formData.last_name}"?` },
+      data: {
+        title:
+          this.formMode === 'create' ? 'Crear Doctor' : 'Actualizar Doctor',
+        message: `¿Está seguro de ${
+          this.formMode === 'create' ? 'crear' : 'actualizar'
+        } este doctor?`,
+      },
     });
 
-    dialogRef.afterClosed().subscribe((result: boolean) => {
-      if (!result) return;
+    const request =
+      this.formMode === 'create'
+        ? this.doctorService.createDoctor(formData as DoctorCreate)
+        : this.doctorService.updateDoctor(this.selectedDoctor!.id, formData);
 
-      this.formLoading = true;
-      this.error = null;
-
-      if (this.formMode === 'create') {
-        const doctorData: DoctorCreate = {
-          username: formData.username || '',
-          email: formData.email,
-          password: formData.password!,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          dni: formData.dni,
-          telephone: formData.telephone,
-          speciality_id: formData.specialityId,
-          address: formData.address || '',
-          blood_type: formData.bloodType || '',
-          doctor_state: formData.doctor_state,
-        };
-        this.logger.debug('doctor:', doctorData)
-        this.doctorService.createDoctor(doctorData).subscribe({
-          next: (newDoctor: Doctor) => {
-            const doctorWithSpeciality: ExtendedDoctor = {
-              ...newDoctor,
-              specialityName: this.specialities.find((s) => s.id === newDoctor.speciality_id)?.name || 'N/A',
-              scheduleNames: 'N/A',
-            };
-            this.doctors.push(doctorWithSpeciality);
-            this.formLoading = false;
-            this.showForm = false;
-            this.logger.info(`Doctor "${newDoctor.first_name || 'N/A'} ${newDoctor.last_name || 'N/A'}" creado correctamente`);
-          },
-          error: (error: HttpErrorResponse) => {
-            this.handleError(error, 'Error al crear el doctor');
-            this.formLoading = false;
-          },
-        });
-      } else if (this.selectedDoctor) {
-        const updateData: Partial<DoctorCreate> = {
-          username: formData.username || undefined,
-          first_name: formData.first_name || undefined,
-          last_name: formData.first_name || undefined,
-          telephone: formData.telephone || undefined,
-          email: formData.email || undefined,
-          doctor_state: formData.doctor_state,
-        };
-
-        const currentDoctor = this.selectedDoctor;
-        
-        this.logger.debug('doctor actual data:', currentDoctor)
-        this.doctorService.updateDoctor(currentDoctor.id, updateData).subscribe({
-          next: (updatedFields: DoctorUpdateResponse) => {
-            const doctorWithSpeciality: ExtendedDoctor = {
-              ...currentDoctor,
-              ...updatedFields,
-              id: currentDoctor.id,
-              speciality_id: currentDoctor.speciality_id,
-              specialityName: currentDoctor.specialityName,
-              scheduleNames: currentDoctor.scheduleNames,
-            };
-
-            const index = this.doctors.findIndex((d) => d.id === currentDoctor.id);
-            if (index !== -1) {
-              this.doctors[index] = doctorWithSpeciality;
-            }
-
-            if (formData.specialityId !== currentDoctor.speciality_id) {
-              this.doctorService.updateDoctorSpeciality(currentDoctor.id, formData.specialityId).subscribe({
-                next: (updatedWithSpeciality: Doctor) => {
-                  doctorWithSpeciality.speciality_id = updatedWithSpeciality.speciality_id;
-                  doctorWithSpeciality.specialityName = this.specialities.find((s) => s.id === updatedWithSpeciality.speciality_id)?.name || 'N/A';
-                  this.doctors[index] = doctorWithSpeciality;
-                },
-                error: (error: HttpErrorResponse) => this.handleError(error, 'Error al actualizar la especialidad'),
-              });
-            }
-
-            this.formLoading = false;
-            this.showForm = false;
-            this.logger.info(`Doctor "${updatedFields.first_name || 'N/A'} ${updatedFields.last_name || 'N/A'}" actualizado correctamente`);
-          },
-          error: (error: HttpErrorResponse) => {
-            this.handleError(error, 'Error al actualizar el doctor');
-            this.formLoading = false;
-          },
-        });
-      } else {
-        this.error = 'No se seleccionó un doctor para editar.';
+    forkJoin({
+      dialogResult: dialogRef.afterClosed(),
+      requestResult: request,
+    }).subscribe({
+      next: ({ dialogResult, requestResult }) => {
         this.formLoading = false;
-      }
+        this.showForm = false;
+        this.notificationService.success(
+          `¡Doctor ${
+            this.formMode === 'create' ? 'creado' : 'actualizado'
+          } con éxito!`,
+          {
+            duration: 7000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          }
+        );
+      },
+      error: (error: HttpErrorResponse) => {
+        this.handleError(
+          error,
+          `Error al ${
+            this.formMode === 'create' ? 'crear' : 'actualizar'
+          } el doctor`
+        );
+        this.notificationService.error(
+          `Ocurrió un error al ${
+            this.formMode === 'create' ? 'crear' : 'actualizar'
+          } el doctor!`,
+          {
+            duration: 7000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          }
+        );
+        this.formLoading = false;
+      },
     });
   }
 
@@ -452,17 +508,22 @@ export class DoctorListComponent implements OnInit {
     this.showForm = false;
   }
 
-  onBanEvent(event: ExtendedDoctor): void {
+  onBanEvent(event: Doctor): void {
     this.onBan(event);
   }
 
-  onUnbanEvent(event: ExtendedDoctor): void {
+  onUnbanEvent(event: Doctor): void {
     this.onUnban(event);
   }
 
-  onBan(doctor: ExtendedDoctor): void {
+  onBan(doctor: Doctor): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Banear Doctor', message: `¿Está seguro de banear al doctor "${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}"?` },
+      data: {
+        title: 'Banear Doctor',
+        message: `¿Está seguro de banear al doctor "${
+          doctor.first_name || 'N/A'
+        } ${doctor.last_name || 'N/A'}"?`,
+      },
     });
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
@@ -470,12 +531,23 @@ export class DoctorListComponent implements OnInit {
         this.loading = true;
         this.doctorService.banDoctor(doctor.id).subscribe({
           next: () => {
-            this.doctors = this.doctors.map((d) => (d.id === doctor.id ? { ...d, is_active: false } : d));
+            this.doctors = this.doctors.map((d) =>
+              d.id === doctor.id ? { ...d, is_active: false } : d
+            );
             this.loading = false;
-            this.logger.info(`Doctor "${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}" baneado correctamente`);
+            this.logger.info(
+              `Doctor "${doctor.first_name || 'N/A'} ${
+                doctor.last_name || 'N/A'
+              }" baneado correctamente`
+            );
           },
           error: (error: HttpErrorResponse) => {
-            this.handleError(error, `Error al banear al doctor "${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}"`);
+            this.handleError(
+              error,
+              `Error al banear al doctor "${doctor.first_name || 'N/A'} ${
+                doctor.last_name || 'N/A'
+              }"`
+            );
             this.loading = false;
           },
         });
@@ -483,9 +555,14 @@ export class DoctorListComponent implements OnInit {
     });
   }
 
-  onUnban(doctor: ExtendedDoctor): void {
+  onUnban(doctor: Doctor): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Desbanear Doctor', message: `¿Está seguro de desbanear al doctor "${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}"?` },
+      data: {
+        title: 'Desbanear Doctor',
+        message: `¿Está seguro de desbanear al doctor "${
+          doctor.first_name || 'N/A'
+        } ${doctor.last_name || 'N/A'}"?`,
+      },
     });
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
@@ -493,12 +570,23 @@ export class DoctorListComponent implements OnInit {
         this.loading = true;
         this.doctorService.unbanDoctor(doctor.id).subscribe({
           next: () => {
-            this.doctors = this.doctors.map((d) => (d.id === doctor.id ? { ...d, is_active: true } : d));
+            this.doctors = this.doctors.map((d) =>
+              d.id === doctor.id ? { ...d, is_active: true } : d
+            );
             this.loading = false;
-            this.logger.info(`Doctor "${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}" desbaneado correctamente`);
+            this.logger.info(
+              `Doctor "${doctor.first_name || 'N/A'} ${
+                doctor.last_name || 'N/A'
+              }" desbaneado correctamente`
+            );
           },
           error: (error: HttpErrorResponse) => {
-            this.handleError(error, `Error al desbanear al doctor "${doctor.first_name || 'N/A'} ${doctor.last_name || 'N/A'}"`);
+            this.handleError(
+              error,
+              `Error al desbanear al doctor "${doctor.first_name || 'N/A'} ${
+                doctor.last_name || 'N/A'
+              }"`
+            );
             this.loading = false;
           },
         });
@@ -512,12 +600,18 @@ export class DoctorListComponent implements OnInit {
     if (error.status === 422 && error.error?.detail) {
       const details = error.error.detail;
       if (Array.isArray(details)) {
-        errorMessage = details.map((err: any) => `${err.loc.join('.')} (${err.type}): ${err.msg}`).join('; ');
+        errorMessage = details
+          .map((err: any) => `${err.loc.join('.')} (${err.type}): ${err.msg}`)
+          .join('; ');
       } else {
         errorMessage = details || defaultMessage;
       }
     } else {
-      errorMessage = error.error?.detail || error.error?.message || error.message || defaultMessage;
+      errorMessage =
+        error.error?.detail ||
+        error.error?.message ||
+        error.message ||
+        defaultMessage;
     }
     this.error = errorMessage;
   }

@@ -34,7 +34,7 @@ import { DEPARTMENTS, DOCTORS, NEWS, FAQS, SPECIALTIES, STATS, HERO } from './da
     FaqComponent,
     CtaComponent,
   ]
-})
+})    
 export class HomeComponent {
   departments = DEPARTMENTS;
   doctors = DOCTORS;

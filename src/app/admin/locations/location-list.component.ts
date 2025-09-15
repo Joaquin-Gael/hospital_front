@@ -30,6 +30,7 @@ import { Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
+import { NotificationService } from '../../core/notification';
 
 interface ExtendedLocation extends Location {
   departmentCount?: number;
@@ -61,6 +62,7 @@ export class LocationListComponent implements OnInit {
   private locationService = inject(LocationService);
   private logger = inject(LoggerService);
   private dialog = inject(MatDialog);
+  private notificationService = inject(NotificationService);
 
   locations: ExtendedLocation[] = [];
   selectedLocation: ExtendedLocation | null = null;
@@ -189,6 +191,16 @@ export class LocationListComponent implements OnInit {
           next: () => {
             this.locations = this.locations.filter((l) => l.id !== location.id);
             this.loading = false;
+            this.notificationService.success(
+              '¡Ubicación eliminada con éxito!',
+              {
+                duration: 7000,
+                action: {
+                  label: 'Cerrar',
+                  action: () => this.notificationService.dismissAll(),
+                },
+              }
+            );
             this.logger.info(
               `Ubicación "${location.name}" eliminada correctamente`
             );
@@ -221,11 +233,23 @@ export class LocationListComponent implements OnInit {
       next: (result: Location) => {
         this.formLoading = false;
         this.showForm = false;
-        this.loadLocations(); // Recarga la lista
+        this.loadLocations();
         this.logger.info(
           `Ubicación ${
             this.formMode === 'create' ? 'creada' : 'actualizada'
           } correctamente`
+        );
+        this.notificationService.success(
+          `¡Ubicación ${
+            this.formMode === 'create' ? 'creada' : 'actualizada'
+          } con éxito!`,
+          {
+            duration: 6000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          }
         );
       },
       error: (error: HttpErrorResponse) => {
@@ -235,6 +259,18 @@ export class LocationListComponent implements OnInit {
           `Error al ${
             this.formMode === 'create' ? 'crear' : 'actualizar'
           } la ubicación`
+        );
+        this.notificationService.error(
+          `¡Ocurrió un error al ${
+            this.formMode === 'create' ? 'crear' : 'actualizar'
+          } la ubicación!`,
+          {
+            duration: 8000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          }
         );
       },
     });

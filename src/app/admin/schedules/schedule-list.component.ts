@@ -214,7 +214,7 @@ export class ScheduleListComponent implements OnInit {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Eliminar Horario',
-        message: `¿Está seguro de eliminar el horario "${this.getDayLabel(schedule.day)} ${schedule.start_time}-${schedule.end_time}"?`
+        message: `¿Está seguro de eliminar el siguiente horario?`
       }
     });
 

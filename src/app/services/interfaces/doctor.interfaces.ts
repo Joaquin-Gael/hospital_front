@@ -21,7 +21,6 @@ export interface Doctor {
   last_login?: string; 
   date_joined: string; 
   address?: string;
-  is_banned?: boolean;
 }
 
 export interface DoctorCreate {
