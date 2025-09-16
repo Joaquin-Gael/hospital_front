@@ -8,13 +8,21 @@ import { LoggerService } from '../../../services/core/logger.service';
 import { NotificationService } from '../../../core/notification';
 import { Router } from '@angular/router';
 import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
+import { 
+  ViewDialogComponent, 
+  ViewDialogColumn 
+} from '../../../shared/view-dialog/view-dialog.component';
 
 @Component({
   selector: 'app-history',
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.scss'],
   standalone: true,
-  imports: [CommonModule, LoadingSpinnerComponent],
+  imports: [
+    CommonModule, 
+    LoadingSpinnerComponent,
+    ViewDialogComponent
+  ],
 })
 export class HistoryComponent implements OnInit, OnDestroy {
   @Input() appointments: AppointmentViewModel[] = [];
@@ -32,6 +40,29 @@ export class HistoryComponent implements OnInit, OnDestroy {
   localLoading: boolean = true;
   error: string | null = null;
   private readonly destroy$ = new Subject<void>();
+
+  // View dialog properties (siguiendo el patrón del ViewDialogComponent real)
+  viewDialogOpen = false;
+  viewDialogItem: any = {};
+  viewDialogTitle = '';
+
+  // Configuración de columnas para el ViewDialog
+  viewDialogColumns: ViewDialogColumn[] = [
+    { key: 'reason', label: 'Motivo' },
+    { 
+      key: 'date', 
+      label: 'Fecha',
+      format: (value: string) => this.formatShortDate(value)
+    },
+    { key: 'time', label: 'Hora' },
+    { key: 'specialty', label: 'Especialidad' },
+    { key: 'doctorName', label: 'Médico' },
+    { 
+      key: 'state', 
+      label: 'Estado',
+      format: (value: string) => this.getStateText(value)
+    },
+  ];
 
   ngOnInit(): void {
     if (this.appointments.length > 0) {
@@ -110,6 +141,16 @@ export class HistoryComponent implements OnInit, OnDestroy {
     return date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' });
   }
 
+  formatFullDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('es-AR', { 
+      weekday: 'long',
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  }
+
   // Método para mapear estados a texto mostrado en el template
   getStateText(state: string): string {
     switch (state) {
@@ -117,17 +158,36 @@ export class HistoryComponent implements OnInit, OnDestroy {
         return 'Completada';
       case 'cancelled':
         return 'Cancelada';
-      default:
+      case 'confirmed':
+        return 'Confirmada';
+      case 'pending':
         return 'Pendiente';
+      default:
+        return 'Estado desconocido';
     }
   }
 
+  // Implementación del ViewDialog (usando la interfaz correcta del componente)
   onViewDetails(appointment: AppointmentViewModel): void {
-    this.notificationService.info('Ver detalles próximamente disponible');
+    this.viewDialogItem = appointment;
+    this.viewDialogTitle = `Detalles de la Cita - ${appointment.specialty}`;
+    this.viewDialogOpen = true;
+    this.logger.debug('Opening view dialog for appointment', appointment);
+    
+    // Emitir el evento para compatibilidad con componentes padre
+    this.viewDetails.emit(appointment);
+  }
+
+  closeViewDialog(): void {
+    this.viewDialogOpen = false;
+    this.viewDialogItem = {};
   }
 
   onDownloadReceipt(appointment: AppointmentViewModel): void {
     this.notificationService.info('Descarga de comprobante próximamente disponible');
+    
+    // Emitir el evento para compatibilidad con componentes padre
+    this.downloadReceipt.emit(appointment);
   }
 
   trackById(index: number, item: AppointmentViewModel): string {

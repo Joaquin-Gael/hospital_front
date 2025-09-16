@@ -72,4 +72,15 @@
       </div>
     }
   }
+
+  <!-- ViewDialog para mostrar detalles de la cita -->
+  @if (viewDialogOpen) {
+    <app-view-dialog
+      [isOpen]="viewDialogOpen"
+      [title]="viewDialogTitle"
+      [item]="viewDialogItem"
+      [columns]="viewDialogColumns"
+      (close)="closeViewDialog()">
+    </app-view-dialog>
+  }
 </section>

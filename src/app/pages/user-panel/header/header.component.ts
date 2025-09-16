@@ -51,6 +51,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.activeSection = 'edit-profile';
     } else if (url.includes('/profile')) {
       this.activeSection = 'profile';
+    } else if (url.includes('/change-password')){
+      this.activeSection = 'change-password'
     } else {
       this.activeSection = 'appointments';
     }

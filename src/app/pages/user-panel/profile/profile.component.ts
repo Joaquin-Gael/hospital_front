@@ -121,8 +121,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   onChangePassword(): void {
-    this.notificationService.info('Cambio de contraseña próximamente disponible');
-    //this.router.navigate(['/user_panel/change-password']);
+    this.router.navigate(['/user_panel/change-password']);
   }
 
   onImageError(): void {
