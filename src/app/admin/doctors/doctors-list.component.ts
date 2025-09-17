@@ -271,34 +271,34 @@ export class DoctorListComponent implements OnInit {
       next: (result) => {
         this.schedules = result.schedules;
         this.specialities = result.specialities;
-        this.doctors = result.doctors.map((doctor) => {
-          const associatedSchedules = this.schedules.filter((s) =>
-            s.doctors?.includes(doctor.id)
-          );
+        
+        this.doctors = result.doctors.map((doctor) => {      
           return {
             ...doctor,
             is_active: doctor.is_active ?? false,
-            specialityName:
-              result.specialities.find((s) => s.id === doctor.speciality_id)
-                ?.name || 'N/A',
-          };
+            specialityName: result.specialities.find((s) => s.id === doctor.speciality_id)?.name || 'N/A',
+          }
         });
+        
         const specialityFieldIndex = this.baseFormFields.findIndex(
           (f) => f.key === 'specialityId'
         );
         if (specialityFieldIndex !== -1) {
-          this.baseFormFields[specialityFieldIndex].options =
-            this.specialities.map((s) => ({
+          this.baseFormFields[specialityFieldIndex].options = this.specialities.map(
+            (s) => ({
               value: s.id.toString(),
               label: s.name,
-            }));
-          this._formFields = [];
+            })
+          );
+          this._formFields = []; // Reset para forzar recalculación
         }
+        
         this.loading = false;
       },
-      error: (error: HttpErrorResponse) => {
-        this.handleError(error, 'Error al cargar los datos');
+      error: (error) => {
+        this.error = 'Error al cargar los datos. Intenta nuevamente.';
         this.loading = false;
+        this.logger.error('Failed to load doctors, specialities or schedules', error);
       },
     });
   }
@@ -341,6 +341,7 @@ export class DoctorListComponent implements OnInit {
     this.formMode = 'create';
     this.selectedDoctor = null;
     this.showForm = true;
+    this.logger.debug('Opening form for new doctor');
   }
 
   onEdit(doctor: Doctor): void {
@@ -361,6 +362,7 @@ export class DoctorListComponent implements OnInit {
       doctor_state: doctor.doctor_state || DoctorStatus.AVAILABLE,
     };
     this.showForm = true;
+    this.logger.debug('Opening form for editing doctor', doctor);
   }
 
   onDelete(doctor: Doctor): void {
@@ -447,48 +449,61 @@ export class DoctorListComponent implements OnInit {
   onFormSubmit(formData: Partial<Doctor>): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title:
-          this.formMode === 'create' ? 'Crear Doctor' : 'Actualizar Doctor',
+        title: this.formMode === 'create' ? 'Crear Doctor' : 'Actualizar Doctor',
         message: `¿Está seguro de ${
           this.formMode === 'create' ? 'crear' : 'actualizar'
         } este doctor?`,
       },
     });
 
-    const request =
-      this.formMode === 'create'
-        ? this.doctorService.createDoctor(formData as DoctorCreate)
-        : this.doctorService.updateDoctor(this.selectedDoctor!.id, formData);
+    const request = this.formMode === 'create'
+      ? this.doctorService.createDoctor(formData as DoctorCreate)
+      : this.doctorService.updateDoctor(this.selectedDoctor!.id, formData);
 
+    // Usar forkJoin para manejar ambos observables de manera limpia
     forkJoin({
       dialogResult: dialogRef.afterClosed(),
-      requestResult: request,
+      requestResult: request
     }).subscribe({
       next: ({ dialogResult, requestResult }) => {
-        this.formLoading = false;
-        this.showForm = false;
-        this.notificationService.success(
-          `¡Doctor ${
-            this.formMode === 'create' ? 'creado' : 'actualizado'
-          } con éxito!`,
-          {
-            duration: 7000,
-            action: {
-              label: 'Cerrar',
-              action: () => this.notificationService.dismissAll(),
-            },
-          }
-        );
+        if (dialogResult) {
+          // Solo si el usuario confirmó, procesamos el resultado
+          this.formLoading = false;
+          this.showForm = false;
+          this.selectedDoctor = null;
+          this.loadData();
+          
+          this.logger.info(
+            `Doctor ${this.formMode === 'create' ? 'created' : 'updated'} successfully`
+          );
+          
+          this.notificationService.success(
+            `¡Doctor ${
+              this.formMode === 'create' ? 'creado' : 'actualizado'
+            } con éxito!`,
+            {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            }
+          );
+        } else {
+          // Usuario canceló, solo limpiamos el loading
+          this.formLoading = false;
+        }
       },
       error: (error: HttpErrorResponse) => {
-        this.handleError(
-          error,
-          `Error al ${
-            this.formMode === 'create' ? 'crear' : 'actualizar'
-          } el doctor`
-        );
+        this.formLoading = false;
+        this.error = `Error al ${
+          this.formMode === 'create' ? 'crear' : 'actualizar'
+        } el doctor. Intenta nuevamente.`;
+        
+        this.logger.error(`Failed to ${this.formMode} doctor`, error);
+        
         this.notificationService.error(
-          `Ocurrió un error al ${
+          `¡Ocurrió un error al ${
             this.formMode === 'create' ? 'crear' : 'actualizar'
           } el doctor!`,
           {
@@ -499,13 +514,18 @@ export class DoctorListComponent implements OnInit {
             },
           }
         );
-        this.formLoading = false;
       },
     });
+
+    // Activamos el loading inmediatamente
+    this.formLoading = true;
+    this.error = null;
   }
 
   onFormCancel(): void {
     this.showForm = false;
+    this.selectedDoctor = null;
+    this.logger.debug('Form cancelled');
   }
 
   onBanEvent(event: Doctor): void {
@@ -535,6 +555,16 @@ export class DoctorListComponent implements OnInit {
               d.id === doctor.id ? { ...d, is_active: false } : d
             );
             this.loading = false;
+            this.notificationService.success(
+              '¡Doctor baneado con éxito!',
+              {
+                duration: 7000,
+                action: {
+                  label: 'Cerrar',
+                  action: () => this.notificationService.dismissAll(),
+                },
+              }
+            );
             this.logger.info(
               `Doctor "${doctor.first_name || 'N/A'} ${
                 doctor.last_name || 'N/A'
@@ -547,6 +577,16 @@ export class DoctorListComponent implements OnInit {
               `Error al banear al doctor "${doctor.first_name || 'N/A'} ${
                 doctor.last_name || 'N/A'
               }"`
+            );
+            this.notificationService.error(
+              '¡Ocurrió un error al banear el doctor!',
+              {
+                duration: 7000,
+                action: {
+                  label: 'Cerrar',
+                  action: () => this.notificationService.dismissAll(),
+                },
+              }
             );
             this.loading = false;
           },
@@ -574,6 +614,16 @@ export class DoctorListComponent implements OnInit {
               d.id === doctor.id ? { ...d, is_active: true } : d
             );
             this.loading = false;
+            this.notificationService.success(
+              '¡Doctor desbaneado con éxito!',
+              {
+                duration: 7000,
+                action: {
+                  label: 'Cerrar',
+                  action: () => this.notificationService.dismissAll(),
+                },
+              }
+            );
             this.logger.info(
               `Doctor "${doctor.first_name || 'N/A'} ${
                 doctor.last_name || 'N/A'
@@ -586,6 +636,16 @@ export class DoctorListComponent implements OnInit {
               `Error al desbanear al doctor "${doctor.first_name || 'N/A'} ${
                 doctor.last_name || 'N/A'
               }"`
+            );
+            this.notificationService.error(
+              '¡Ocurrió un error al desbanear el doctor!',
+              {
+                duration: 7000,
+                action: {
+                  label: 'Cerrar',
+                  action: () => this.notificationService.dismissAll(),
+                },
+              }
             );
             this.loading = false;
           },

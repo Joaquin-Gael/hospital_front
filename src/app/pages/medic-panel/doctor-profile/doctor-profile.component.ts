@@ -83,7 +83,7 @@ export class DoctorProfileComponent implements OnInit, OnDestroy {
   }
 
   private calculateStatus(doctor: Doctor | null): DoctorStatus {
-    if (!doctor || doctor.is_banned || !doctor.doctor_state) {
+    if (!doctor || !doctor.doctor_state) {
       return DoctorStatus.OFFLINE;
     }
     return DoctorStatus.AVAILABLE;

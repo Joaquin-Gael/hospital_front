@@ -122,6 +122,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'change-password',
+        loadComponent: () =>
+          import('./pages/user-panel/change-password-form/change-password-form.component').then(
+            (m) => m.ChangePasswordFormComponent
+          )
+      },
+      {
         path: 'edit-profile',
         loadComponent: () =>
           import('./pages/user-panel/edit-profile/edit-profile.component').then(
