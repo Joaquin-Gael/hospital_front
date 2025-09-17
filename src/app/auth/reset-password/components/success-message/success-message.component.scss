@@ -1,0 +1,69 @@
+@use '../../../../layout/styles/_media-queries.scss' as *;
+@use '../../../../layout/styles/_mixins.scss' as *;
+@use '../../styles/reset-password-shared.scss' as *;
+@use 'sass:color';
+
+.success-message {
+  text-align: center;
+  padding: 40px 20px;
+  
+  @include mobile-only {
+    padding: 32px 16px;
+  }
+
+  &__icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -10%) 100%);
+    color: white;
+    font-size: 48px;
+    margin: 0 auto 32px auto;
+    
+    @include flex-center;
+    @include mobile-only {
+      width: 80px;
+      height: 80px;
+      font-size: 36px;
+      margin-bottom: 24px;
+    }
+  }
+
+  &__title {
+    font-size: 28px;
+    font-weight: 700;
+    color: $text-color;
+    margin: 0 0 20px 0;
+    
+    @include mobile-only {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+  }
+
+  &__description {
+    font-size: 16px;
+    color: $text-light;
+    line-height: 1.6;
+    margin: 0 0 40px 0;
+    
+    @include mobile-only {
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+  }
+}
+
+.success-actions {
+  gap: 16px;
+  
+  @include flex-inline(16px, center, center);
+  @include mobile-only {
+    flex-direction: column;
+    gap: 12px;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

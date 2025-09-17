@@ -33,6 +33,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   showPassword = false;
   isSubmitting = false;
+  showEmailValidationError = false; 
 
   readonly loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -56,7 +57,6 @@ export class LoginComponent implements OnInit, OnDestroy {
           return;
         }
 
-        // 🔍 Aquí se manda al backend
         this.authService.decode(codeSecret).pipe(takeUntil(this.destroy$)).subscribe({
           next: () => {
             this.logger.debug('Token decodificado exitosamente');
@@ -71,7 +71,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           },
         });
 
-        return; // Salimos del método, no seguimos con login manual
+        return; 
       } catch (e) {
         this.logger.error('Error al extraer el código secreto:', e);
       }
@@ -83,6 +83,14 @@ export class LoginComponent implements OnInit, OnDestroy {
     } else if (this.authService.isLoggedIn()) {
       this.router.navigateByUrl('/home');
     }
+
+    this.loginForm.get('email')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.showEmailValidationError) {
+          this.showEmailValidationError = false;
+        }
+      });
   }
 
   togglePassword(): void {
@@ -92,6 +100,39 @@ export class LoginComponent implements OnInit, OnDestroy {
   onLoginGoogle(): void {
     this.logger.debug('Iniciando login con Google');
     this.authService.oauthLogin('google');
+  }
+
+  onForgotPassword(event: Event): void {
+    event.preventDefault(); 
+
+    const emailControl = this.loginForm.get('email');
+    const emailValue = emailControl?.value?.trim();
+
+    if (!emailValue || emailControl?.invalid) {
+      this.showEmailValidationError = true;
+      emailControl?.markAsTouched();
+      
+      setTimeout(() => {
+        const emailInput = document.getElementById('email');
+        emailInput?.focus();
+      }, 100);
+
+      this.notificationService.error(
+        'Por favor, ingresa un email válido antes de continuar con el restablecimiento de contraseña.',
+        {
+          duration: 4000,
+          action: {
+            label: 'Cerrar',
+            action: () => this.notificationService.dismissAll(),
+          },
+        }
+      );
+      return;
+    }
+
+    this.storage.setTempResetEmail(emailValue);
+    this.logger.info('Email guardado para reset de contraseña:', emailValue);
+    this.router.navigate(['/recovery-password']);
   }
 
   onLogin(): void {

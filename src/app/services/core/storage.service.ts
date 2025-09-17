@@ -7,6 +7,7 @@ export class StorageService {
   private readonly ACCESS_TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly STORAGE_KEY_EMAIL = 'rememberEmail';
+  private readonly TEMP_RESET_EMAIL_KEY = 'temp_reset_email'; 
   private readonly SCOPES_KEY = 'scopes';
 
   getAccessToken(): string | null {
@@ -42,6 +43,31 @@ export class StorageService {
     localStorage.removeItem(this.STORAGE_KEY_EMAIL);
   }
 
+  setTempResetEmail(email: string): void {
+    try {
+      sessionStorage.setItem(this.TEMP_RESET_EMAIL_KEY, email);
+    } catch (error) {
+      console.warn('No se pudo guardar el email temporal en sessionStorage:', error);
+    }
+  }
+
+  getTempResetEmail(): string | null {
+    try {
+      return sessionStorage.getItem(this.TEMP_RESET_EMAIL_KEY);
+    } catch (error) {
+      console.warn('No se pudo leer el email temporal desde sessionStorage:', error);
+      return null;
+    }
+  }
+
+  removeTempResetEmail(): void {
+    try {
+      sessionStorage.removeItem(this.TEMP_RESET_EMAIL_KEY);
+    } catch (error) {
+      console.warn('No se pudo eliminar el email temporal desde sessionStorage:', error);
+    }
+  }
+
   setItem(key: string, value: string): void {
     localStorage.setItem(key, value);
   }
@@ -58,5 +84,10 @@ export class StorageService {
     this.removeTokens();
     this.removeRememberEmail();
     this.removeItem(this.SCOPES_KEY);
+    this.clearAllTempData();
+  }
+
+  clearAllTempData(): void {
+    this.removeTempResetEmail();
   }
 }

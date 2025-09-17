@@ -1,0 +1,140 @@
+@use '../../../../layout/styles/_media-queries.scss' as *;
+@use '../../../../layout/styles/_mixins.scss' as *;
+@use '../../styles/reset-password-shared.scss' as *;
+@use 'sass:color';
+
+.code-verification {
+  &__header {
+    text-align: center;
+    margin-bottom: 40px;
+    
+    @include mobile-only {
+      margin-bottom: 32px;
+    }
+  }
+
+  &__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $primary-color 0%, color.adjust($primary-color, $lightness: -10%) 100%);
+    color: white;
+    font-size: 36px;
+    margin: 0 auto 24px auto;
+    
+    @include flex-center;
+    @include mobile-only {
+      width: 64px;
+      height: 64px;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+  }
+
+  &__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: $text-color;
+    margin: 0 0 16px 0;
+    
+    @include mobile-only {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+  }
+
+  &__description {
+    font-size: 16px;
+    color: $text-light;
+    line-height: 1.6;
+    margin: 0;
+    
+    @include mobile-only {
+      font-size: 14px;
+    }
+  }
+}
+
+.code-input {
+  gap: 12px;
+  justify-content: center;
+  margin: 16px 0;
+  
+  @include flex-inline(12px, center, center);
+  @include mobile-only {
+    gap: 8px;
+  }
+
+  &__digit {
+    width: 56px;
+    height: 56px;
+    border: 2px solid $border-color;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: $text-color;
+    background: white;
+    transition: $transition;
+    
+    @include mobile-only {
+      width: 48px;
+      height: 48px;
+      font-size: 18px;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    &--error {
+      border-color: $danger-color;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+  }
+}
+
+.verification-timer {
+  text-align: center;
+  margin: 24px 0;
+  
+  @include mobile-only {
+    margin: 20px 0;
+  }
+
+  &__countdown {
+    font-size: 14px;
+    color: $text-light;
+    
+    @include flex-inline(8px, center, center);
+    @include mobile-only {
+      font-size: 13px;
+    }
+  }
+
+  &__resend {
+    background: none;
+    border: none;
+    color: $primary-color;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    
+    @include flex-inline(8px, center, center);
+    @include mobile-only {
+      font-size: 13px;
+    }
+
+    &:hover {
+      color: color.adjust($primary-color, $lightness: -10%);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}

@@ -39,14 +39,14 @@
           formControlName="email" 
           placeholder="ejemplo@correo.com"
           class="form-input"
-          [class.form-input--error]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
+          [class.form-input--error]="(loginForm.get('email')?.touched && loginForm.get('email')?.invalid) || showEmailValidationError"
         >
-        @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
+        @if ((loginForm.get('email')?.touched && loginForm.get('email')?.invalid) || showEmailValidationError) {
           <div class="error-message">
-            @if (loginForm.get('email')?.errors?.['required']) {
-              <span>El email es requerido</span>
+            @if (loginForm.get('email')?.errors?.['required'] || showEmailValidationError) {
+              <span>El email es requerido para continuar</span>
             }
-            @if (loginForm.get('email')?.errors?.['email']) {
+            @if (loginForm.get('email')?.errors?.['email'] && !loginForm.get('email')?.errors?.['required']) {
               <span>Ingrese un email válido</span>
             }
           </div>
@@ -115,7 +115,8 @@
           <input type="checkbox" formControlName="remember">
           <span class="checkbox-text">Recordarme</span>
         </label>
-        <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+        <!-- Enlace modificado para manejar validación -->
+        <a href="#" class="forgot-password" (click)="onForgotPassword($event)">¿Olvidaste tu contraseña?</a>
       </div>
 
       <button 

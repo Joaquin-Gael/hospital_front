@@ -64,6 +64,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./auth/login/login.component').then((m) => m.LoginComponent),
       },
+      {
+        path: 'recovery-password',
+        loadComponent: () =>
+          import('./auth/reset-password/containers/reset-password-flow.container').then((m) => m.ResetPasswordFlowContainer)
+      },
     ],
   },
 
@@ -124,9 +129,14 @@ export const routes: Routes = [
       {
         path: 'change-password',
         loadComponent: () =>
-          import('./pages/user-panel/change-password-form/change-password-form.component').then(
-            (m) => m.ChangePasswordFormComponent
+          import('./pages/user-panel/change-password/containers/change-password.container').then(
+            (m) => m.ChangePasswordContainer
           )
+      },
+      {
+        path: 'recovery-password',
+        loadComponent: () =>
+          import('./auth/reset-password/containers/reset-password-flow.container').then((m) => m.ResetPasswordFlowContainer)
       },
       {
         path: 'edit-profile',
