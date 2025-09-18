@@ -58,3 +58,7 @@ export interface DecodeResponse {
 export interface ScopesResponse {
   scopes: string[];
 }
+
+export interface RecoverPasswordPetition {
+  email: string;
+}

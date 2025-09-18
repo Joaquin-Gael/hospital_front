@@ -5,7 +5,7 @@ import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
 import { USER_ENDPOINTS } from './user-endpoints';
-import { UserRead, UserCreate, UserUpdate, UserDelete } from '../interfaces/user.interfaces';
+import { UserRead, UserCreate, UserUpdate, UserDelete, RecoverPasswordPetition } from '../interfaces/user.interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -122,6 +122,12 @@ export class UserService {
     return this.apiService.patch<{ user: UserRead; message: string }>(USER_ENDPOINTS.UNBAN(userId), {}).pipe(
       map(response => response.user),
       catchError(error => this.handleError('Unban user', error))
+    );
+  }
+
+  petitionRecoverPassword(email: string): Observable<RecoverPasswordPetition> {
+    return this.apiService.post<RecoverPasswordPetition>(USER_ENDPOINTS.RECOVER_PASSWORD, email).pipe(
+      catchError(error => this.handleError('Petition recover password', error))
     );
   }
 
