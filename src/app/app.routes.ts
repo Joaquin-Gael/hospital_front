@@ -22,6 +22,11 @@ export const routes: Routes = [
           import('./pages/legal/privacy/privacy.component').then((m) => m.PrivacyComponent)
       },
       {
+        path: 'terminos',
+        loadComponent: () =>
+          import('./pages/legal/terms-and-conditions/terms-and-conditions.component').then((m) => m.TermsAndConditionsComponent)
+      },
+      {
         path: 'contact',
         loadComponent: () =>
           import('./pages/contact/contact.component').then(
