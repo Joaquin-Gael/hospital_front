@@ -17,6 +17,11 @@ export const routes: Routes = [
           import('./pages/home/home.component').then((m) => m.HomeComponent),
       },
       {
+        path: 'privacidad',
+        loadComponent: () =>
+          import('./pages/privacy/privacy.component').then((m) => m.PrivacyComponent)
+      },
+      {
         path: 'contact',
         loadComponent: () =>
           import('./pages/contact/contact.component').then(
