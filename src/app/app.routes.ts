@@ -19,7 +19,7 @@ export const routes: Routes = [
       {
         path: 'privacidad',
         loadComponent: () =>
-          import('./pages/privacy/privacy.component').then((m) => m.PrivacyComponent)
+          import('./pages/legal/privacy/privacy.component').then((m) => m.PrivacyComponent)
       },
       {
         path: 'contact',
