@@ -67,3 +67,14 @@ export interface DniVerification {
 export interface RecoverPasswordPetition {
   email: string;
 }
+
+export interface CodeVerification  {
+  email: string;
+  code: string;
+}
+
+export interface UpdatePassword {
+  email: string;
+  code: string;
+  new_password: string;
+}

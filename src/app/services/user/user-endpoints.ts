@@ -7,5 +7,7 @@ export const USER_ENDPOINTS = {
   BAN: (userId: string) => `users/ban/${userId}`,
   UNBAN: (userId: string) => `users/unban/${userId}`,
   RECOVER_PASSWORD: 'users/update/petition/password',
-  VERIFY_DNI: 'users/verify/dni'
+  VERIFY_DNI: 'users/verify/dni',
+  VERIFY_CODE: 'usersupdate/verify/code',
+  UPDATE_PASSWORD: 'users/update/confirm/password',
 } as const;

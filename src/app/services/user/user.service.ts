@@ -5,7 +5,7 @@ import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
 import { USER_ENDPOINTS } from './user-endpoints';
-import { UserRead, UserCreate, UserUpdate, UserDelete, RecoverPasswordPetition, DniVerification } from '../interfaces/user.interfaces';
+import { UserRead, UserCreate, UserUpdate, UserDelete, RecoverPasswordPetition, DniVerification, CodeVerification, UpdatePassword } from '../interfaces/user.interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -142,6 +142,41 @@ export class UserService {
     formData.append('back', file2, file2.name);
     return this.apiService.post<DniVerification>(USER_ENDPOINTS.VERIFY_DNI, formData).pipe(
       catchError(error => this.handleError('Verify DNI', error))
+    );
+  }
+
+  /**
+   * Verifica el código recibido por correo
+   * @param email Correo del usuario
+   * @param code Código de verificación
+   * @returns Observable con la respuesta 
+  */
+  verifyCode(email: string, code: string): Observable<CodeVerification> {
+    const body = `email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`;
+    return this.apiService.post<CodeVerification>(
+      USER_ENDPOINTS.VERIFY_CODE,
+      body,
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    ).pipe(
+      catchError(error => this.handleError('Verify code', error))
+    );
+  }
+
+  /**
+   * Actualiza la contraseña del usuario
+   * @param email Correo del usuario
+   * @param code Código de verificación
+   * @param newPassword Nueva contraseña
+   * @returns Observable con la respuesta 
+   */ 
+  updatePassword(email: string, code: string, newPassword: string): Observable<UpdatePassword> {
+    const body = `email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}&new_password=${encodeURIComponent(newPassword)}`;
+    return this.apiService.post<UpdatePassword>(
+      USER_ENDPOINTS.UPDATE_PASSWORD,
+      body,
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    ).pipe(
+      catchError(error => this.handleError('Update password', error))
     );
   }
 
