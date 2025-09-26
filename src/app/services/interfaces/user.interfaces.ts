@@ -63,3 +63,7 @@ export interface DniVerification {
   front: File,
   back: File,
 }
+
+export interface RecoverPasswordPetition {
+  email: string;
+}
