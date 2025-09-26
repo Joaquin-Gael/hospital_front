@@ -58,3 +58,8 @@ export interface DecodeResponse {
 export interface ScopesResponse {
   scopes: string[];
 }
+
+export interface DniVerification {
+  front: File,
+  back: File,
+}

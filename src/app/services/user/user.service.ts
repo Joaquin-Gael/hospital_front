@@ -5,7 +5,7 @@ import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
 import { USER_ENDPOINTS } from './user-endpoints';
-import { UserRead, UserCreate, UserUpdate, UserDelete } from '../interfaces/user.interfaces';
+import { UserRead, UserCreate, UserUpdate, UserDelete, DniVerification } from '../interfaces/user.interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -122,6 +122,21 @@ export class UserService {
     return this.apiService.patch<{ user: UserRead; message: string }>(USER_ENDPOINTS.UNBAN(userId), {}).pipe(
       map(response => response.user),
       catchError(error => this.handleError('Unban user', error))
+    );
+  }
+
+
+  /** 
+  * Verifica el DNI de un usuario.
+  * @param file archivo a subir
+  * @returns Observable con los archivos subidos
+  */
+  verifyDni(file1: File, file2: File): Observable<DniVerification> {
+    const formData = new FormData();
+    formData.append('front', file1, file1.name);
+    formData.append('back', file2, file2.name);
+    return this.apiService.post<DniVerification>(USER_ENDPOINTS.VERIFY_DNI, formData).pipe(
+      catchError(error => this.handleError('Verify DNI', error))
     );
   }
 

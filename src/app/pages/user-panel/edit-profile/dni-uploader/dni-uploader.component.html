@@ -7,54 +7,106 @@
     <p class="dni-uploader__description">
       Sube las imágenes del frente y dorso de tu DNI para completar la verificación de identidad.
     </p>
+    
+    <!-- Progress bar PRO -->
+    @if (hasFiles()) {
+      <div class="dni-uploader__progress">
+        <div class="dni-uploader__progress-bar">
+          <div 
+            class="dni-uploader__progress-fill"
+            [style.width.%]="uploadProgress()">
+          </div>
+        </div>
+        <span class="dni-uploader__progress-text">{{ uploadProgress() }}% completado</span>
+      </div>
+    }
   </div>
 
   <div class="dni-uploader__content">
+    <!-- Información adicional -->
+    <div class="dni-uploader__info">
+      <div class="dni-uploader__tips">
+        <h5 class="dni-uploader__tips-title">
+          <i class="material-icons">lightbulb</i>
+          Consejos para mejores resultados
+        </h5>
+        <ul class="dni-uploader__tips-list">
+          <li>Asegúrate de que la imagen esté bien iluminada</li>
+          <li>Evita reflejos y sombras sobre el documento</li>
+          <li>Mantén el DNI completamente visible en la imagen</li>
+          <li>Usa una superficie plana y contraste adecuado</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="dni-uploader__container">
       <!-- Zona de frente del DNI -->
       <div class="dni-uploader__section">
-        <h4 class="dni-uploader__section-title">Frente del DNI</h4>
+        <h4 class="dni-uploader__section-title">
+          Frente del DNI
+          @if (frontDni()?.isValid) {
+            <i class="material-icons dni-uploader__section-check">check_circle</i>
+          }
+        </h4>
         
         <div 
           class="dni-uploader__dropzone"
-          [class.dni-uploader__dropzone--dragging]="isDraggingFront"
-          [class.dni-uploader__dropzone--error]="frontDni && !frontDni.isValid"
-          [class.dni-uploader__dropzone--success]="frontDni && frontDni.isValid"
+          [class.dni-uploader__dropzone--dragging]="isDraggingFront()"
+          [class.dni-uploader__dropzone--error]="frontDni() && !frontDni()!.isValid"
+          [class.dni-uploader__dropzone--success]="frontDni()?.isValid"
+          [class.dni-uploader__dropzone--disabled]="isSubmitting()"
           (dragover)="onDragOverFront($event)"
           (dragleave)="onDragLeaveFront($event)"
           (drop)="onDropFront($event)"
-          (click)="triggerFileInput('front')">
+          (click)="triggerFileInput('front')"
+          (keydown)="onKeydown($event, 'front')"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="frontDni() ? 'Cambiar imagen del frente' : 'Subir imagen del frente'">
           
-          @if (!frontDni) {
+          @if (!frontDni()) {
             <div class="dni-uploader__dropzone-content">
               <i class="material-icons dni-uploader__icon">upload_file</i>
               <p class="dni-uploader__dropzone-text">
                 <strong>Haz clic aquí</strong> o arrastra la imagen del frente
               </p>
               <p class="dni-uploader__dropzone-subtext">
-                JPEG o PNG, máximo 5MB
+                JPEG, PNG o WebP, máximo 5MB
               </p>
             </div>
           } @else {
             <div class="dni-uploader__preview">
-              @if (frontDni.isValid && frontDni.preview) {
+              @if (frontDni()!.isValid && frontDni()!.preview) {
                 <img 
-                  [src]="frontDni.preview" 
+                  [src]="frontDni()!.preview" 
                   alt="Preview frente DNI"
                   class="dni-uploader__preview-image"
+                  loading="lazy"
                 />
+                <div class="dni-uploader__file-info">
+                  <span class="dni-uploader__file-name">{{ frontDni()!.file.name }}</span>
+                  <span class="dni-uploader__file-size">{{ getFileSize(frontDni()) }}</span>
+                </div>
               }
-              @if (!frontDni.isValid) {
+              @if (!frontDni()!.isValid) {
                 <div class="dni-uploader__preview-error">
                   <i class="material-icons dni-uploader__error-icon">warning</i>
-                  <p class="dni-uploader__error-text">{{ frontDni.errorMessage }}</p>
+                  <p class="dni-uploader__error-text">{{ frontDni()!.errorMessage }}</p>
+                  <button 
+                    type="button"
+                    class="dni-uploader__retry-btn"
+                    (click)="triggerFileInput('front'); $event.stopPropagation()">
+                    Intentar de nuevo
+                  </button>
                 </div>
               }
               <button 
                 type="button"
                 class="dni-uploader__remove-btn"
                 (click)="removeFile('front'); $event.stopPropagation()"
-                title="Eliminar imagen">
+                [disabled]="isSubmitting()"
+                title="Eliminar imagen"
+                aria-label="Eliminar imagen del frente">
                 <i class="material-icons">close</i>
               </button>
             </div>
@@ -65,55 +117,80 @@
           type="file" 
           id="front-file-input"
           class="dni-uploader__file-input"
-          accept=".jpg,.jpeg,.png"
+          accept=".jpg,.jpeg,.png,.webp"
+          [disabled]="isSubmitting()"
           (change)="onFileSelected($event, 'front')"
+          aria-hidden="true"
         />
       </div>
 
       <!-- Zona de dorso del DNI -->
       <div class="dni-uploader__section">
-        <h4 class="dni-uploader__section-title">Dorso del DNI</h4>
+        <h4 class="dni-uploader__section-title">
+          Dorso del DNI
+          @if (backDni()?.isValid) {
+            <i class="material-icons dni-uploader__section-check">check_circle</i>
+          }
+        </h4>
         
         <div 
           class="dni-uploader__dropzone"
-          [class.dni-uploader__dropzone--dragging]="isDraggingBack"
-          [class.dni-uploader__dropzone--error]="backDni && !backDni.isValid"
-          [class.dni-uploader__dropzone--success]="backDni && backDni.isValid"
+          [class.dni-uploader__dropzone--dragging]="isDraggingBack()"
+          [class.dni-uploader__dropzone--error]="backDni() && !backDni()!.isValid"
+          [class.dni-uploader__dropzone--success]="backDni()?.isValid"
+          [class.dni-uploader__dropzone--disabled]="isSubmitting()"
           (dragover)="onDragOverBack($event)"
           (dragleave)="onDragLeaveBack($event)"
           (drop)="onDropBack($event)"
-          (click)="triggerFileInput('back')">
+          (click)="triggerFileInput('back')"
+          (keydown)="onKeydown($event, 'back')"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="backDni() ? 'Cambiar imagen del dorso' : 'Subir imagen del dorso'">
           
-          @if (!backDni) {
+          @if (!backDni()) {
             <div class="dni-uploader__dropzone-content">
               <i class="material-icons dni-uploader__icon">upload_file</i>
               <p class="dni-uploader__dropzone-text">
                 <strong>Haz clic aquí</strong> o arrastra la imagen del dorso
               </p>
               <p class="dni-uploader__dropzone-subtext">
-                JPEG o PNG, máximo 5MB
+                JPEG, PNG o WebP, máximo 5MB
               </p>
             </div>
           } @else {
             <div class="dni-uploader__preview">
-              @if (backDni.isValid && backDni.preview) {
+              @if (backDni()!.isValid && backDni()!.preview) {
                 <img 
-                  [src]="backDni.preview" 
+                  [src]="backDni()!.preview" 
                   alt="Preview dorso DNI"
                   class="dni-uploader__preview-image"
+                  loading="lazy"
                 />
+                <div class="dni-uploader__file-info">
+                  <span class="dni-uploader__file-name">{{ backDni()!.file.name }}</span>
+                  <span class="dni-uploader__file-size">{{ getFileSize(backDni()) }}</span>
+                </div>
               }
-              @if (!backDni.isValid) {
+              @if (!backDni()!.isValid) {
                 <div class="dni-uploader__preview-error">
                   <i class="material-icons dni-uploader__error-icon">warning</i>
-                  <p class="dni-uploader__error-text">{{ backDni.errorMessage }}</p>
+                  <p class="dni-uploader__error-text">{{ backDni()!.errorMessage }}</p>
+                  <button 
+                    type="button"
+                    class="dni-uploader__retry-btn"
+                    (click)="triggerFileInput('back'); $event.stopPropagation()">
+                    Intentar de nuevo
+                  </button>
                 </div>
               }
               <button 
                 type="button"
                 class="dni-uploader__remove-btn"
                 (click)="removeFile('back'); $event.stopPropagation()"
-                title="Eliminar imagen">
+                [disabled]="isSubmitting()"
+                title="Eliminar imagen"
+                aria-label="Eliminar imagen del dorso">
                 <i class="material-icons">close</i>
               </button>
             </div>
@@ -124,40 +201,76 @@
           type="file" 
           id="back-file-input"
           class="dni-uploader__file-input"
-          accept=".jpg,.jpeg,.png"
+          accept=".jpg,.jpeg,.png,.webp"
+          [disabled]="isSubmitting()"
           (change)="onFileSelected($event, 'back')"
+          aria-hidden="true"
         />
       </div>
     </div>
 
-    <!-- Botón de envío -->
+    <!-- Botón de envío y estados -->
     <div class="dni-uploader__actions">
       <button 
         type="button"
         class="dni-uploader__submit-btn"
-        [class.dni-uploader__submit-btn--disabled]="!canSubmit"
-        [disabled]="!canSubmit"
-        (click)="onSubmit()">
-        @if (isSubmitting) {
-          <i class="material-icons">hourglass_top</i>
-        } @else {
-          <i class="material-icons">cloud_upload</i>
-        }
-        {{ isSubmitting ? 'Enviando...' : 'Enviar para verificación' }}
+        [class.dni-uploader__submit-btn--disabled]="!canSubmit()"
+        [class.dni-uploader__submit-btn--loading]="isSubmitting()"
+        [disabled]="!canSubmit() || isSubmitting()"
+        (click)="onSubmit()"
+        [attr.aria-busy]="isSubmitting()">
+        
+        <span class="dni-uploader__submit-btn-content">
+          @if (isSubmitting()) {
+            <i class="material-icons dni-uploader__submit-spinner">hourglass_top</i>
+          } @else {
+            <i class="material-icons">cloud_upload</i>
+          }
+          {{ isSubmitting() ? 'Enviando...' : 'Enviar para verificación' }}
+        </span>
       </button>
       
-      @if (frontDni?.isValid && backDni?.isValid) {
-        <p class="dni-uploader__status">
+      <!-- Estados dinámicos -->
+      @if (canSubmit() && !isSubmitting()) {
+        <div class="dni-uploader__status dni-uploader__status--success">
           <i class="material-icons">check_circle</i>
-          Ambas imágenes están listas para enviar
-        </p>
+          <span>Ambas imágenes están listas para enviar</span>
+        </div>
       }
       
-      @if (!canSubmit && (frontDni || backDni)) {
-        <p class="dni-uploader__status dni-uploader__status--warning">
-          {{ !frontDni ? 'Falta la imagen del frente' : !backDni ? 'Falta la imagen del dorso' : 'Verifica que las imágenes sean válidas' }}
-        </p>
+      @if (!canSubmit() && hasFiles() && !isSubmitting()) {
+        <div class="dni-uploader__status dni-uploader__status--warning">
+          <i class="material-icons">warning</i>
+          <span>
+            @if (!frontDni()) {
+              Falta la imagen del frente
+            } @else if (!backDni()) {
+              Falta la imagen del dorso  
+            } @else if (!frontDni()?.isValid || !backDni()?.isValid) {
+              Verifica que las imágenes sean válidas
+            }
+          </span>
+        </div>
+      }
+
+      @if (isSubmitting()) {
+        <div class="dni-uploader__status dni-uploader__status--info">
+          <i class="material-icons">upload</i>
+          <span>Verificando documentos...</span>
+        </div>
+      }
+
+      <!-- Botón de retry si hay error -->
+      @if (!canSubmit() && hasFiles() && (frontDni()?.errorMessage || backDni()?.errorMessage)) {
+        <button 
+          type="button"
+          class="dni-uploader__retry-all-btn"
+          (click)="retryUpload()">
+          <i class="material-icons">refresh</i>
+          Reintentar verificación
+        </button>
       }
     </div>
+
   </div>
 </div>

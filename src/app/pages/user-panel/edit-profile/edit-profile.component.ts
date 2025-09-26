@@ -331,6 +331,10 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       'DNI enviado correctamente para verificación',
       {
         duration: 5000,
+        action: {
+          label: 'Cerrar',
+          action: () => this.notificationService.dismissAll(),
+        },
       }
     );
   }
