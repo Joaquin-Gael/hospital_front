@@ -1,12 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
-import { AbstractControl, ValidationErrors } from '@angular/forms';
-import { PasswordStrength } from '../types/reset-password.types';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { UserService } from '../../../services/user/user.service';
 import { LoggerService } from '../../../services/core/logger.service';
+import { StorageService } from '../../../services/core/storage.service';
 
-export interface PasswordResetResponse {
-  success: boolean;
+export interface ResetPasswordResponse {
   message: string;
+  success: boolean;
   sessionsClosed?: boolean;
 }
 
@@ -14,85 +15,128 @@ export interface PasswordResetResponse {
   providedIn: 'root'
 })
 export class PasswordService {
+  private readonly userService = inject(UserService);
   private readonly logger = inject(LoggerService);
+  private readonly storage = inject(StorageService);
 
-  resetPassword(
-    newPassword: string, 
-    closeOtherSessions: boolean
-  ): Observable<PasswordResetResponse> {
-    this.logger.info('Restableciendo contraseña', { closeOtherSessions });
+  /**
+   * Restablece la contraseña del usuario
+   * @param newPassword Nueva contraseña
+   * @param closeOtherSessions Si cerrar otras sesiones (por ahora no usado en backend)
+   * @returns Observable con respuesta del restablecimiento
+   */
+  resetPassword(newPassword: string, closeOtherSessions: boolean = false): Observable<ResetPasswordResponse> {
+    const email = this.storage.getTempResetEmail();
+    const code = this.storage.getItem('verification_code'); // Asumimos que guardamos el código verificado
     
-    return of({
-      success: true,
-      message: 'Contraseña restablecida correctamente',
-      sessionsClosed: closeOtherSessions
-    }).pipe(delay(2000));
-  }
-
-  changePassword(
-    currentPassword: string,
-    newPassword: string
-  ): Observable<PasswordResetResponse> {
-    this.logger.info('Cambiando contraseña');
-    
-    // Simular validación de contraseña actual y cambio
-    return of({
-      success: true,
-      message: 'Contraseña cambiada correctamente'
-    }).pipe(delay(2000));
-  }
-
-  calculatePasswordStrength(password: string): PasswordStrength {
-    const criteria = [
-      { test: /[a-z]/.test(password), points: 1 }, // minúsculas
-      { test: /[A-Z]/.test(password), points: 1 }, // mayúsculas
-      { test: /[0-9]/.test(password), points: 1 }, // números
-      { test: /[!@#$%^&*(),.?":{}|<>]/.test(password), points: 1 }, // símbolos
-      { test: password.length >= 8, points: 1 }, // longitud mínima
-      { test: password.length >= 12, points: 1 }, // longitud buena
-      { test: !/(.)\1{2,}/.test(password), points: 1 }, // no repetición
-      { test: !/123|abc|qwe|password/i.test(password), points: 1 } // no patrones comunes
-    ];
-
-    const score = criteria.reduce((total, criterion) => {
-      return total + (criterion.test ? criterion.points : 0);
-    }, 0);
-
-    if (score <= 2) {
-      return { level: 'weak', percentage: 25, text: 'Muy débil' };
-    } else if (score <= 4) {
-      return { level: 'fair', percentage: 50, text: 'Débil' };
-    } else if (score <= 6) {
-      return { level: 'good', percentage: 75, text: 'Buena' };
-    } else {
-      return { level: 'strong', percentage: 100, text: 'Muy segura' };
-    }
-  }
-
-  passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    if (!value) return null;
-
-    const hasUpperCase = /[A-Z]/.test(value);
-    const hasLowerCase = /[a-z]/.test(value);
-    const hasNumeric = /[0-9]/.test(value);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-    const hasMinLength = value.length >= 8;
-
-    const validConditions = [hasUpperCase, hasLowerCase, hasNumeric, hasSpecialChar, hasMinLength];
-    const validCount = validConditions.filter(condition => condition).length;
-
-    return validCount < 3 ? { weakPassword: true } : null;
-  }
-
-  passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-    const newPassword = control.get('newPassword')?.value;
-    const confirmPassword = control.get('confirmPassword')?.value;
-
-    if (newPassword && confirmPassword && newPassword !== confirmPassword) {
-      return { passwordMismatch: true };
+    if (!email) {
+      throw new Error('No se encontró email para restablecer contraseña. Reinicia el proceso.');
     }
 
-    return null;
+    if (!code) {
+      throw new Error('No se encontró código de verificación. Verifica tu código primero.');
+    }
+
+    this.logger.info(`Restableciendo contraseña para ${this.maskEmail(email)}`);
+
+    return this.userService.updatePassword(email, code, newPassword).pipe(
+      map(response => {
+        this.logger.info('Respuesta de restablecimiento de contraseña:', response);
+        
+        // Limpiar datos temporales después del éxito
+        this.storage.removeItem('verification_code');
+        
+        return {
+          message: response.message || 'Contraseña restablecida exitosamente',
+          success: response.success || true,
+          sessionsClosed: closeOtherSessions // Por ahora lo devolvemos como se solicitó
+        };
+      })
+    );
+  }
+
+  /**
+   * Valida la fortaleza de una contraseña
+   * @param password Contraseña a validar
+   * @returns Objeto con información de fortaleza
+   */
+  validatePasswordStrength(password: string): {
+    level: 'weak' | 'fair' | 'good' | 'strong';
+    percentage: number;
+    text: string;
+    criteria: {
+      length: boolean;
+      uppercase: boolean;
+      lowercase: boolean;
+      numbers: boolean;
+      symbols: boolean;
+    };
+  } {
+    const criteria = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      numbers: /\d/.test(password),
+      symbols: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+
+    const score = Object.values(criteria).filter(Boolean).length;
+    
+    let level: 'weak' | 'fair' | 'good' | 'strong';
+    let percentage: number;
+    let text: string;
+
+    switch (score) {
+      case 0:
+      case 1:
+        level = 'weak';
+        percentage = 20;
+        text = 'Muy débil';
+        break;
+      case 2:
+        level = 'weak';
+        percentage = 40;
+        text = 'Débil';
+        break;
+      case 3:
+        level = 'fair';
+        percentage = 60;
+        text = 'Regular';
+        break;
+      case 4:
+        level = 'good';
+        percentage = 80;
+        text = 'Buena';
+        break;
+      case 5:
+        level = 'strong';
+        percentage = 100;
+        text = 'Muy fuerte';
+        break;
+      default:
+        level = 'weak';
+        percentage = 20;
+        text = 'Muy débil';
+    }
+
+    return {
+      level,
+      percentage,
+      text,
+      criteria
+    };
+  }
+
+  private maskEmail(email: string): string {
+    if (!email || !email.includes('@')) return email;
+    
+    const [local, domain] = email.split('@');
+    
+    if (local.length <= 2) {
+      return `${local}***@${domain}`;
+    }
+    
+    const maskedLocal = local.substring(0, 2) + '*'.repeat(Math.max(1, local.length - 3)) + local.slice(-1);
+    return `${maskedLocal}@${domain}`;
   }
 }
