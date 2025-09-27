@@ -15,7 +15,7 @@ import { Subject, interval, takeUntil } from 'rxjs';
         </div>
         <h2 class="code-verification__title">Verificar código</h2>
         <p class="code-verification__description">
-          Ingresa el código de {{ codeLength }} dígitos que enviamos a tu {{ methodName }}
+          Ingresa el código de {{ codeLength }} caracteres que enviamos a tu {{ methodName }}
         </p>
       </div>
 
@@ -26,18 +26,18 @@ import { Subject, interval, takeUntil } from 'rxjs';
             <span class="form-field__required">*</span>
           </label>
           <div class="code-input">
-            @for (digit of codeDigits; track $index) {
+            @for (char of codeChars; track $index) {
               <input
                 type="text"
                 class="code-input__digit"
                 [class.code-input__digit--error]="hasError"
                 maxlength="1"
                 autocomplete="one-time-code"
-                [formControlName]="'digit' + $index"
-                (input)="onDigitInput($event, $index)"
-                (keydown)="onDigitKeydown($event, $index)"
+                [formControlName]="'char' + $index"
+                (input)="onCharInput($event, $index)"
+                (keydown)="onCharKeydown($event, $index)"
                 (paste)="onCodePaste($event, $index)"
-                #digitInput
+                #charInput
               />
             }
           </div>
@@ -115,7 +115,7 @@ export class CodeVerificationComponent implements OnInit, OnDestroy {
   @Output() goBack = new EventEmitter<void>();
 
   verificationForm!: FormGroup;
-  codeDigits: string[] = [];
+  codeChars: string[] = [];
   hasError = false;
   errorMessage = '';
   timeLeft = 0;
@@ -131,25 +131,25 @@ export class CodeVerificationComponent implements OnInit, OnDestroy {
   }
 
   private initializeForm(): void {
-    const digitControls: { [key: string]: FormControl } = {};
-    this.codeDigits = new Array(this.codeLength).fill('');
+    const charControls: { [key: string]: FormControl } = {};
+    this.codeChars = new Array(this.codeLength).fill('');
     
     for (let i = 0; i < this.codeLength; i++) {
-      digitControls[`digit${i}`] = new FormControl('', [
+      charControls[`char${i}`] = new FormControl('', [
         Validators.required, 
-        Validators.pattern(/^\d$/)
+        Validators.pattern(/^[A-Za-z0-9]$/) // Alfanumérico: letras y números
       ]);
     }
-    this.verificationForm = this.fb.group(digitControls);
+    this.verificationForm = this.fb.group(charControls);
   }
 
-  onDigitInput(event: any, index: number): void {
-    const value = event.target.value;
-    const digitKey = `digit${index}`;
+  onCharInput(event: any, index: number): void {
+    const value = event.target.value; // Mantener el caso original
+    const charKey = `char${index}`;
     
-    if (value && /^\d$/.test(value)) {
-      this.verificationForm.get(digitKey)?.setValue(value);
-      this.codeDigits[index] = value;
+    if (value && /^[A-Za-z0-9]$/.test(value)) {
+      this.verificationForm.get(charKey)?.setValue(value);
+      this.codeChars[index] = value;
       
       // Auto-focus next input
       if (index < this.codeLength - 1) {
@@ -159,14 +159,14 @@ export class CodeVerificationComponent implements OnInit, OnDestroy {
         }
       }
     } else {
-      this.verificationForm.get(digitKey)?.setValue('');
-      this.codeDigits[index] = '';
+      this.verificationForm.get(charKey)?.setValue('');
+      this.codeChars[index] = '';
     }
 
     this.hasError = false;
   }
 
-  onDigitKeydown(event: KeyboardEvent, index: number): void {
+  onCharKeydown(event: KeyboardEvent, index: number): void {
     const target = event.target as HTMLInputElement;
     
     if (event.key === 'Backspace' && !target.value && index > 0) {
@@ -174,8 +174,8 @@ export class CodeVerificationComponent implements OnInit, OnDestroy {
       if (prevInput) {
         prevInput.focus();
         prevInput.value = '';
-        this.verificationForm.get(`digit${index - 1}`)?.setValue('');
-        this.codeDigits[index - 1] = '';
+        this.verificationForm.get(`char${index - 1}`)?.setValue('');
+        this.codeChars[index - 1] = '';
       }
     }
   }
@@ -183,21 +183,21 @@ export class CodeVerificationComponent implements OnInit, OnDestroy {
   onCodePaste(event: ClipboardEvent, index: number): void {
     event.preventDefault();
     const pastedData = event.clipboardData?.getData('text/plain') || '';
-    const digits = pastedData.replace(/\D/g, '').slice(0, this.codeLength);
+    const chars = pastedData.replace(/[^A-Za-z0-9]/g, '').slice(0, this.codeLength); // Mantener caso original
 
-    digits.split('').forEach((digit, i) => {
+    chars.split('').forEach((char, i) => {
       if (i < this.codeLength) {
-        this.verificationForm.get(`digit${i}`)?.setValue(digit);
-        this.codeDigits[i] = digit;
+        this.verificationForm.get(`char${i}`)?.setValue(char);
+        this.codeChars[i] = char;
         
         const input = (event.target as HTMLElement).parentElement!.children[i] as HTMLInputElement;
         if (input) {
-          input.value = digit;
+          input.value = char;
         }
       }
     });
 
-    const nextIndex = Math.min(digits.length, this.codeLength - 1);
+    const nextIndex = Math.min(chars.length, this.codeLength - 1);
     const nextInput = (event.target as HTMLElement).parentElement!.children[nextIndex] as HTMLInputElement;
     if (nextInput) {
       nextInput.focus();
@@ -207,7 +207,7 @@ export class CodeVerificationComponent implements OnInit, OnDestroy {
   onVerifyCode(): void {
     if (this.verificationForm.invalid || this.isLoading) return;
 
-    const code = this.codeDigits.join('');
+    const code = this.codeChars.join('');
     this.codeVerified.emit(code);
   }
 
@@ -223,7 +223,7 @@ export class CodeVerificationComponent implements OnInit, OnDestroy {
     this.hasError = true;
     this.errorMessage = message;
     this.verificationForm.reset();
-    this.codeDigits.fill('');
+    this.codeChars.fill('');
   }
 
   private startTimer(seconds: number): void {
@@ -241,7 +241,7 @@ export class CodeVerificationComponent implements OnInit, OnDestroy {
     this.startTimer(seconds);
     this.hasError = false;
     this.verificationForm.reset();
-    this.codeDigits.fill('');
+    this.codeChars.fill('');
   }
 
   formatTime(seconds: number): string {

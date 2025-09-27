@@ -62,3 +62,20 @@ export const PROGRESS_STEPS: ProgressStep[] = [
   { id: 3, label: 'Contraseña' },
   { id: 4, label: 'Confirmación' }
 ];
+
+export interface ResetPasswordResponse {
+  message: string;
+  success: boolean;
+  sessionsClosed?: boolean;
+}
+
+export interface CodeResponse {
+  message: string;
+  success: boolean;
+}
+
+export interface VerifyResponse {
+  message: string;
+  success: boolean;
+  valid: boolean;
+}

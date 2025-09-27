@@ -4,17 +4,7 @@ import { map } from 'rxjs/operators';
 import { UserService } from '../../../services/user/user.service';
 import { LoggerService } from '../../../services/core/logger.service';
 import { StorageService } from '../../../services/core/storage.service';
-
-export interface CodeResponse {
-  message: string;
-  success: boolean;
-}
-
-export interface VerifyResponse {
-  message: string;
-  success: boolean;
-  valid: boolean;
-}
+import { CodeResponse, VerifyResponse } from '../types/reset-password.types';
 
 @Injectable({
   providedIn: 'root'
@@ -44,8 +34,9 @@ export class VerificationService {
     return this.userService.petitionRecoverPassword(contact).pipe(
       map(response => {
         this.logger.info('Respuesta del servidor al enviar código:', response);
+        // Como RecoverPasswordPetition solo tiene email, asumimos éxito
         return {
-          message: response.message || 'Código enviado exitosamente',
+          message: 'Código enviado exitosamente',
           success: true
         };
       })
@@ -83,10 +74,15 @@ export class VerificationService {
     return this.userService.verifyCode(email, code).pipe(
       map(response => {
         this.logger.info('Respuesta de verificación de código:', response);
+        
+        // Guardar el código verificado para uso posterior en password reset
+        this.storage.setItem('verification_code', code);
+        
+        // Como CodeVerification solo tiene email y code, asumimos éxito si no hay error
         return {
-          message: response.message || 'Código verificado exitosamente',
-          success: response.success || true,
-          valid: response.success || true
+          message: 'Código verificado exitosamente',
+          success: true,
+          valid: true
         };
       })
     );

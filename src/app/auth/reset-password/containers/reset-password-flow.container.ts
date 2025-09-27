@@ -92,6 +92,15 @@ import { SuccessMessageComponent } from '../components/success-message/success-m
 
         @if (userProfile) {
           <div class="step-content" [class.step-content--loading]="isLoading">
+            <!-- Mensaje de error específico -->
+            @if (errorMessage && currentStep === 'new-password') {
+              <div class="error-container">
+                <div class="error-message">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <p>{{ errorMessage }}</p>
+                </div>
+              </div>
+            }
             
             @switch (currentStep) {
               @case ('method-selection') {
@@ -196,6 +205,7 @@ export class ResetPasswordFlowContainer implements OnInit, OnDestroy {
   isLoading = false;
   isResending = false;
   sessionsClosed = false;
+  errorMessage: string | null = null; // Nueva propiedad para mensajes de error
 
   progressSteps = PROGRESS_STEPS;
 
@@ -296,11 +306,13 @@ export class ResetPasswordFlowContainer implements OnInit, OnDestroy {
   handleMethodSelection(method: 'email' | 'phone'): void {
     if (!this.userProfile) {
       this.logger.error('No hay perfil de usuario disponible');
+      this.errorMessage = 'No se encontró información del usuario. Por favor, reinicia el proceso.';
       return;
     }
 
     this.selectedMethod = method;
     this.isLoading = true;
+    this.errorMessage = null; // Limpiar errores anteriores
 
     const contact = method === 'email' ? this.userProfile.email! : this.userProfile.phone!;
 
@@ -316,12 +328,14 @@ export class ResetPasswordFlowContainer implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.logger.error('Error enviando código', error);
+          this.errorMessage = 'Error al enviar el código de verificación. Por favor, intenta de nuevo.';
         }
       });
   }
 
   handleCodeVerification(code: string): void {
     this.isLoading = true;
+    this.errorMessage = null; // Limpiar errores anteriores
 
     this.verificationService.verifyCode(code, this.selectedMethod!)
       .pipe(
@@ -335,7 +349,7 @@ export class ResetPasswordFlowContainer implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.logger.error('Error verificando código', error);
-          this.codeVerificationComponent.setError('Código incorrecto. Verifica e inténtalo de nuevo.');
+          this.codeVerificationComponent.setError('Código incorrecto o expirado. Verifica e inténtalo de nuevo.');
         }
       });
   }
@@ -343,10 +357,12 @@ export class ResetPasswordFlowContainer implements OnInit, OnDestroy {
   handleResendCode(): void {
     if (!this.userProfile) {
       this.logger.error('No hay perfil de usuario disponible para reenvío');
+      this.errorMessage = 'No se encontró información del usuario. Por favor, reinicia el proceso.';
       return;
     }
 
     this.isResending = true;
+    this.errorMessage = null; // Limpiar errores anteriores
     
     const contact = this.selectedMethod === 'email' 
       ? this.userProfile.email! 
@@ -360,16 +376,18 @@ export class ResetPasswordFlowContainer implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.logger.info('Código reenviado exitosamente', response);
-          this.codeVerificationComponent.resetTimer(60);
+          this.codeVerificationComponent.resetTimer(600); // 10 minutos
         },
         error: (error) => {
           this.logger.error('Error reenviando código', error);
+          this.errorMessage = 'Error al reenviar el código. Por favor, intenta de nuevo.';
         }
       });
   }
 
   handlePasswordReset(data: PasswordResetData): void {
     this.isLoading = true;
+    this.errorMessage = null; // Limpiar errores anteriores
 
     this.passwordService.resetPassword(data.newPassword, data.closeOtherSessions)
       .pipe(
@@ -382,9 +400,26 @@ export class ResetPasswordFlowContainer implements OnInit, OnDestroy {
           this.sessionsClosed = response.sessionsClosed || false;
           this.currentStep = 'success';
           this.storage.removeTempResetEmail();
+          this.storage.removeItem('verification_code');
         },
         error: (error) => {
           this.logger.error('Error restableciendo contraseña', error);
+          // Manejo de errores específicos
+          let errorMessage = 'Ocurrió un error al restablecer la contraseña. Por favor, intenta de nuevo.';
+          
+          if (error.status === 400) {
+            if (error.error?.message.includes('code')) {
+              errorMessage = 'El código de verificación es inválido o ha expirado.';
+            } else if (error.error?.message.includes('password')) {
+              errorMessage = 'La contraseña no cumple con los requisitos de seguridad.';
+            }
+          } else if (error.status === 401) {
+            errorMessage = 'No autorizado. Por favor, verifica tu identidad nuevamente.';
+          } else if (error.status === 500) {
+            errorMessage = 'Error en el servidor. Intenta de nuevo más tarde.';
+          }
+
+          this.errorMessage = errorMessage;
         }
       });
   }

@@ -125,8 +125,18 @@ export class UserService {
     );
   }
 
+  /**
+   * Pedimos un código de verificación para restablecer contraseña, se envia al correo
+   * @param email 
+   * @returns Observable con la respuesta
+   */
   petitionRecoverPassword(email: string): Observable<RecoverPasswordPetition> {
-    return this.apiService.post<RecoverPasswordPetition>(USER_ENDPOINTS.RECOVER_PASSWORD, email).pipe(
+    const body = `email=${encodeURIComponent(email)}`;
+    return this.apiService.post<RecoverPasswordPetition>(
+      USER_ENDPOINTS.RECOVER_PASSWORD, 
+      body,
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    ).pipe(
       catchError(error => this.handleError('Petition recover password', error))
     );
   }
