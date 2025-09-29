@@ -49,7 +49,6 @@ export class AuthService {
     return null;
   }
 
-  // Tries multiple candidate names for CSRF cookie
   private getCsrfTokenFromCookies(): string | null {
     const candidates = ['csrf_token', 'csrftoken', 'csrf'];
     for (const name of candidates) {
@@ -59,7 +58,6 @@ export class AuthService {
     return null;
   }
 
-  // header builder for sensitive endpoints (refresh/logout)
   private getHeadersForSensitive(csrf: boolean = false): HttpHeaders {
     if (!csrf) return new HttpHeaders();
     const csrfToken = this.getCsrfTokenFromCookies();
@@ -151,7 +149,6 @@ export class AuthService {
     );
   }
 
-  // Tries multiple cookie names to find access token
   getAccessTokenFromCookie(): string {
     const candidates = ['access_token', 'accessToken', 'access'];
     for (const n of candidates) {

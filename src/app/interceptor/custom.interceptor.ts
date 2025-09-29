@@ -64,7 +64,7 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const clonedReq = req.clone({
-    withCredentials: !isPublic,
+    withCredentials: true,
     headers
   });
 
