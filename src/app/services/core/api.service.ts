@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpBackend } from '@angular/common/http';
 import { Observable, ReplaySubject, throwError } from 'rxjs';
 import { catchError, switchMap, tap, shareReplay, map } from 'rxjs/operators';
 import { LoggerService } from './logger.service';
+import { HttpOptions } from '../interfaces/auth.interfaces';
 
 /**
  * Service to handle HTTP requests to the backend API, encapsulating URL construction
@@ -13,21 +14,20 @@ import { LoggerService } from './logger.service';
 })
 export class ApiService {
   private baseUrl = 'http://127.0.0.1:8000';
-  private baseWsUrl = 'ws://127.0.0.1:8000'; 
+  private baseWsUrl = 'ws://127.0.0.1:8000';
   private uuidSubject = new ReplaySubject<string>(1);
   private uuid$ = this.uuidSubject.asObservable();
   private uuidLoaded$!: Observable<string>;
   private readonly logger = inject(LoggerService);
-  constructor(private http: HttpClient) {
+  private rawHttp: HttpClient;
+
+  constructor(private http: HttpClient, private httpBackend: HttpBackend) {
+    this.rawHttp = new HttpClient(this.httpBackend);
     this.fetchUuid();
   }
 
-  /**
-   * Fetches the UUID prefix from the backend and updates the ReplaySubject.
-   * Caches the result to avoid multiple requests.
-   */
   private fetchUuid(): void {
-    this.uuidLoaded$ = this.http
+    this.uuidLoaded$ = this.rawHttp
       .get<{ id_prefix_api_secret: string }>(`${this.baseUrl}/id_prefix_api_secret/`)
       .pipe(
         tap((response) => {
@@ -36,15 +36,14 @@ export class ApiService {
         }),
         map((response) => response.id_prefix_api_secret),
         catchError((err) => {
-          console.error('Error fetching UUID:', err);
+          this.logger.error('Error fetching UUID:', err);
           return throwError(() => new Error('No se pudo cargar el UUID de la API'));
         }),
         shareReplay(1)
       );
 
-    // Subscribe to ensure the UUID is fetched immediately
     this.uuidLoaded$.subscribe({
-      error: (err) => console.error('UUID loading failed:', err),
+      error: (err) => this.logger.error('UUID loading failed:', err),
     });
   }
 
@@ -61,7 +60,7 @@ export class ApiService {
         return `${this.baseUrl}/${uuid}/${cleanEndpoint}`;
       }),
       catchError((err) => {
-        console.error('Error building URL:', err);
+        this.logger.error('Error building URL:', err);
         return throwError(() => err);
       })
     );
@@ -79,7 +78,7 @@ export class ApiService {
         return `${this.baseWsUrl}/${uuid}/${cleanEndpoint}`;
       }),
       catchError((err) => {
-        console.error('Error building WebSocket URL:', err);
+        this.logger.error('Error building WebSocket URL:', err);
         return throwError(() => err);
       })
     );
@@ -88,14 +87,17 @@ export class ApiService {
   /**
    * Performs a GET request to the specified endpoint.
    * @param endpoint The API endpoint.
-   * @param options Optional HTTP options (e.g., query parameters).
+   * @param options Optional HTTP options.
    * @returns Observable of the response data.
    */
-  get<T>(endpoint: string, options?: { headers?: HttpHeaders | { [header: string]: string | string[] }, params?: HttpParams }): Observable<T> {
+  get<T>(endpoint: string, options?: HttpOptions): Observable<T> {
     return this.buildUrl(endpoint).pipe(
-      switchMap((url) => this.http.get<T>(url, options)),
+      switchMap((url) => this.http.get<T>(url, {
+        ...options,
+        withCredentials: options?.withCredentials ?? true  // Default true para auth
+      })),
       catchError((err) => {
-        console.error(`Error in GET ${endpoint}:`, err);
+        this.logger.error(`Error in GET ${endpoint}:`, err);
         return throwError(() => new Error(`Error al obtener datos de ${endpoint}`));
       })
     );
@@ -105,14 +107,17 @@ export class ApiService {
    * Performs a POST request to the specified endpoint.
    * @param endpoint The API endpoint.
    * @param payload The request body.
-   * @param options Optional HTTP options (e.g., query parameters).
+   * @param options Optional HTTP options.
    * @returns Observable of the response data.
    */
-  post<T>(endpoint: string, payload: any, options?: { headers?: HttpHeaders | { [header: string]: string | string[] }, params?: HttpParams }): Observable<T> {
+  post<T>(endpoint: string, payload: any, options?: HttpOptions): Observable<T> {
     return this.buildUrl(endpoint).pipe(
-      switchMap((url) => this.http.post<T>(url, payload, options)),
+      switchMap((url) => this.http.post<T>(url, payload, {
+        ...options,
+        withCredentials: options?.withCredentials ?? true
+      })),
       catchError((err) => {
-        console.error(`Error in POST ${endpoint}:`, err);
+        this.logger.error(`Error in POST ${endpoint}:`, err);
         return throwError(() => new Error(`Error al enviar datos a ${endpoint}`));
       })
     );
@@ -122,14 +127,17 @@ export class ApiService {
    * Performs a PUT request to the specified endpoint.
    * @param endpoint The API endpoint.
    * @param payload The request body.
-   * @param options Optional HTTP options (e.g., query parameters).
+   * @param options Optional HTTP options.
    * @returns Observable of the response data.
    */
-  put<T>(endpoint: string, payload: any, options?: { params?: HttpParams }): Observable<T> {
+  put<T>(endpoint: string, payload: any, options?: HttpOptions): Observable<T> {
     return this.buildUrl(endpoint).pipe(
-      switchMap((url) => this.http.put<T>(url, payload, options)),
+      switchMap((url) => this.http.put<T>(url, payload, {
+        ...options,
+        withCredentials: options?.withCredentials ?? true
+      })),
       catchError((err) => {
-        console.error(`Error in PUT ${endpoint}:`, err);
+        this.logger.error(`Error in PUT ${endpoint}:`, err);
         return throwError(() => new Error(`Error al actualizar datos en ${endpoint}`));
       })
     );
@@ -138,14 +146,17 @@ export class ApiService {
   /**
    * Performs a DELETE request to the specified endpoint.
    * @param endpoint The API endpoint.
-   * @param options Optional HTTP options (e.g., query parameters).
+   * @param options Optional HTTP options.
    * @returns Observable of the response data.
    */
-  delete<T>(endpoint: string, options?: { params?: HttpParams }): Observable<T> {
+  delete<T>(endpoint: string, options?: HttpOptions): Observable<T> {
     return this.buildUrl(endpoint).pipe(
-      switchMap((url) => this.http.delete<T>(url, options)),
+      switchMap((url) => this.http.delete<T>(url, {
+        ...options,
+        withCredentials: options?.withCredentials ?? true
+      })),
       catchError((err) => {
-        console.error(`Error in DELETE ${endpoint}:`, err);
+        this.logger.error(`Error in DELETE ${endpoint}:`, err);
         return throwError(() => new Error(`Error al eliminar datos en ${endpoint}`));
       })
     );
@@ -155,14 +166,17 @@ export class ApiService {
    * Performs a PATCH request to the specified endpoint.
    * @param endpoint The API endpoint.
    * @param payload The request body.
-   * @param options Optional HTTP options (e.g., query parameters).
+   * @param options Optional HTTP options.
    * @returns Observable of the response data.
    */
-  patch<T>(endpoint: string, payload: any, options?: { headers?: HttpHeaders | { [header: string]: string | string[] }, params?: HttpParams }): Observable<T> {
+  patch<T>(endpoint: string, payload: any, options?: HttpOptions): Observable<T> {
     return this.buildUrl(endpoint).pipe(
-      switchMap((url) => this.http.patch<T>(url, payload, options)),
+      switchMap((url) => this.http.patch<T>(url, payload, {
+        ...options,
+        withCredentials: options?.withCredentials ?? true
+      })),
       catchError((err) => {
-        console.error(`Error in PATCH ${endpoint}:`, err);
+        this.logger.error(`Error in PATCH ${endpoint}:`, err);
         return throwError(() => new Error(`Error al modificar datos en ${endpoint}`));
       })
     );

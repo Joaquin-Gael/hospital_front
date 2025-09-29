@@ -7,7 +7,7 @@ import { DoctorService } from '../../../services/doctor/doctor.service';
 import { SpecialityService } from '../../../services/speciality/speciality.service'; 
 import { LoggerService } from '../../../services/core/logger.service';
 import { StorageService } from '../../../services/core/storage.service';
-import { AuthService } from '../../../services/auth/auth.service';
+import { AuthService } from '../../../services/auth/auth.service';  // Ya está
 import { PanelUiComponent } from '../panel-ui/panel-ui.component';
 import { DoctorDataService } from './doctor-data.service';
 import { NotificationService } from '../../../core/notification';
@@ -37,7 +37,7 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    if (!this.storageService.getAccessToken()) {
+    if (!this.authService.getAccessTokenFromCookie()) {
       this.logger.info('No auth token found, redirecting to /login');
       this.router.navigate(['/login']);
       return;
@@ -89,7 +89,7 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
       if (result){
         this.authService.logout().pipe(takeUntil(this.destroy$)).subscribe({
           next: () => {
-            this.storageService.clearStorage();
+            this.storageService.clearStorage();  // Limpia emails/scopes extras
             this.notificationService.success('Sesión cerrada correctamente', {
               duration: 4000,
               action: {

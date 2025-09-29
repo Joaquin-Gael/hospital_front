@@ -1,9 +1,7 @@
-import { Component, OnInit, OnDestroy, HostListener, inject } from '@angular/core';
+import { Component, OnInit, HostListener, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Subscription, combineLatest, of } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
-import { StorageService } from '../../services/core/storage.service'
 
 @Component({
   selector: 'app-navbar',
@@ -12,26 +10,27 @@ import { StorageService } from '../../services/core/storage.service'
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
-export class NavbarComponent implements OnInit, OnDestroy {
-  private subscriptions: Subscription = new Subscription();
+export class NavbarComponent implements OnInit {
   isMenuOpen = false;
   scrolled = false;
-  navItems: any[] = [];
+
+  navItems = computed(() => {
+    const isLoggedIn = this.authService.loginStatus$(); 
+    const scopes = this.authService.scopes$();       
+    return this.getNavItems(isLoggedIn, scopes);
+  });
 
   constructor(private authService: AuthService) {}
 
   ngOnInit() {
-    this.subscriptions.add(
-      combineLatest([this.authService.loginStatus$, of(this.authService.getStoredScopes())]).subscribe(
-        ([isLoggedIn, scopes]) => {
-          this.navItems = this.getNavItems(isLoggedIn, scopes);
-        }
-      )
-    );
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
+    if (this.authService.isLoggedIn()) {
+      this.authService.getScopes().subscribe({
+        next: (scopes) => {
+          this.authService.setScopes(scopes);
+        },
+        error: () => this.authService.setLoggedIn(false)
+      });
+    }
   }
 
   getNavItems(isLoggedIn: boolean, scopes: string[]): any[] {
@@ -40,7 +39,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       { label: 'Contacto', route: '/contact' },
     ];
     if (isLoggedIn) {
-      let accountRoute = '/user_panel'; 
+      let accountRoute = '/user_panel';
       if (scopes.includes('doc')) {
         accountRoute = '/medic_panel';
       } else if (scopes.includes('admin')) {
@@ -64,6 +63,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  trackByLabel(index: number, item: any) {
+    return item.label;
   }
 
   @HostListener('window:scroll', [])

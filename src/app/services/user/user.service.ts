@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ApiService } from '../core/api.service';
@@ -11,18 +11,18 @@ import { UserRead, UserCreate, UserUpdate, UserDelete, RecoverPasswordPetition, 
   providedIn: 'root',
 })
 export class UserService {
-  constructor(
-    private readonly apiService: ApiService,
-    private readonly logger: LoggerService,
-    private readonly storage: StorageService
-  ) {}
+  private readonly apiService = inject(ApiService);
+  private readonly logger = inject(LoggerService);
+  private readonly storage = inject(StorageService);
 
   /**
    * Obtiene la lista de usuarios.
    * @returns Observable con la lista de usuarios.
    */
   getUsers(): Observable<UserRead[]> {
-    return this.apiService.get<UserRead[]>(USER_ENDPOINTS.USERS).pipe(
+    return this.apiService.get<UserRead[]>(USER_ENDPOINTS.USERS, {
+      withCredentials: true  // Auth required
+    }).pipe(
       map(response => response || []),
       catchError(error => this.handleError('Get users', error))
     );
@@ -34,7 +34,9 @@ export class UserService {
    * @returns Observable con los datos del usuario.
    */
   getUserById(userId: string): Observable<UserRead> {
-    return this.apiService.get<UserRead>(USER_ENDPOINTS.USER_BY_ID(userId)).pipe(
+    return this.apiService.get<UserRead>(USER_ENDPOINTS.USER_BY_ID(userId), {
+      withCredentials: true
+    }).pipe(
       catchError(error => this.handleError('Get user by ID', error))
     );
   }
@@ -60,7 +62,9 @@ export class UserService {
 
     this.logger.debug('Creating user with data:', formData);
     
-    return this.apiService.post<UserRead>(USER_ENDPOINTS.ADD, formData).pipe(
+    return this.apiService.post<UserRead>(USER_ENDPOINTS.ADD, formData, {
+      withCredentials: true
+    }).pipe(
       catchError(error => this.handleError('Create user', error))
     );
   }
@@ -85,7 +89,9 @@ export class UserService {
     if (user.img_profile instanceof File) {
       formData.append('img_profile', user.img_profile, user.img_profile.name);
     }
-    return this.apiService.patch<UserRead>(USER_ENDPOINTS.UPDATE(userId), formData).pipe(
+    return this.apiService.patch<UserRead>(USER_ENDPOINTS.UPDATE(userId), formData, {
+      withCredentials: true
+    }).pipe(
       catchError(error => this.handleError(`Update user ${userId}`, error))
     );
   }
@@ -96,7 +102,9 @@ export class UserService {
    * @returns Observable con la respuesta de eliminación.
    */
   deleteUser(userId: string): Observable<UserDelete> {
-    return this.apiService.delete<UserDelete>(USER_ENDPOINTS.DELETE(userId)).pipe(
+    return this.apiService.delete<UserDelete>(USER_ENDPOINTS.DELETE(userId), {
+      withCredentials: true
+    }).pipe(
       catchError(error => this.handleError('Delete user', error))
     );
   }
@@ -107,7 +115,9 @@ export class UserService {
    * @returns Observable con los datos del usuario baneado.
    */
   banUser(userId: string): Observable<UserRead> {
-    return this.apiService.patch<{ user: UserRead; message: string }>(USER_ENDPOINTS.BAN(userId), {}).pipe(
+    return this.apiService.patch<{ user: UserRead; message: string }>(USER_ENDPOINTS.BAN(userId), {}, {
+      withCredentials: true
+    }).pipe(
       map(response => response.user),
       catchError(error => this.handleError('Ban user', error))
     );
@@ -119,7 +129,9 @@ export class UserService {
    * @returns Observable con los datos del usuario desbaneado.
    */
   unbanUser(userId: string): Observable<UserRead> {
-    return this.apiService.patch<{ user: UserRead; message: string }>(USER_ENDPOINTS.UNBAN(userId), {}).pipe(
+    return this.apiService.patch<{ user: UserRead; message: string }>(USER_ENDPOINTS.UNBAN(userId), {}, {
+      withCredentials: true
+    }).pipe(
       map(response => response.user),
       catchError(error => this.handleError('Unban user', error))
     );
@@ -135,7 +147,7 @@ export class UserService {
     return this.apiService.post<RecoverPasswordPetition>(
       USER_ENDPOINTS.RECOVER_PASSWORD, 
       body,
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }  // Pública, sin withCredentials
     ).pipe(
       catchError(error => this.handleError('Petition recover password', error))
     );
@@ -210,7 +222,7 @@ export class UserService {
           break;
         case 401:
           errorMessage = this.formatErrorDetail(httpError.error?.detail) ?? 'Unauthorized access';
-          this.storage.clearStorage();
+          this.storage.clearScopes();  
           break;
         case 403:
           errorMessage = this.formatErrorDetail(httpError.error?.detail) ?? 'Forbidden action';

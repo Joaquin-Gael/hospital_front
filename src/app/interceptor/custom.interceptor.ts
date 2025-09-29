@@ -1,82 +1,105 @@
-import { HttpInterceptorFn } from '@angular/common/http';
-import { inject, Injector } from '@angular/core';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError, BehaviorSubject } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth/auth.service';
-import { TokenUserResponse } from '../services/interfaces/user.interfaces';
 import { LoggerService } from '../services/core/logger.service';
 import { StorageService } from '../services/core/storage.service';
 
 const PUBLIC_ENDPOINTS = [
   '/users/add',
+  '/auth/login',
   '/auth/doc/login',
   '/id_prefix_api_secret/',
   'medic/chat/',
-  '/auth/refresh'
 ];
 
-let isRefreshing = false
-const refreshSubject = new BehaviorSubject<string | null>(null);
+const SENSITIVE_ENDPOINTS = ['/auth/refresh', '/auth/logout'];
+
+let isRefreshing = false;
+
+function readCookie(name: string): string | null {
+  const value = `; ${document.cookie || ''}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+}
+
+function getCsrfTokenFromCookies(): string | null {
+  const candidates = ['csrf_token', 'csrftoken', 'csrf'];
+  for (const name of candidates) {
+    const v = readCookie(name);
+    if (v) return v;
+  }
+  return null;
+}
+
+function isEndpointMatch(url: string, endpoints: string[]): boolean {
+  return endpoints.some(endpoint => url.endsWith(endpoint));
+}
 
 export const customInterceptor: HttpInterceptorFn = (req, next) => {
   const logger = inject(LoggerService);
   const router = inject(Router);
-  const storage = inject(StorageService)
-  const injector = inject(Injector);
-  const isPublic = PUBLIC_ENDPOINTS.some(endpoint => req.url.includes(endpoint));
+  const authService = inject(AuthService);
+  const storage = inject(StorageService);
 
-  const accessToken = storage.getAccessToken()
-  const refreshToken = storage.getRefreshToken()
-  
+  const isPublic = isEndpointMatch(req.url, PUBLIC_ENDPOINTS);
+  const isSensitive = isEndpointMatch(req.url, SENSITIVE_ENDPOINTS);
 
-  if (isPublic || !accessToken) {
-    return next(req);
+  let headers = req.headers;
+
+  const accessTokenFromCookie = authService.getAccessTokenFromCookie();
+  if (accessTokenFromCookie && !isPublic && !isSensitive) {
+    headers = headers.set('Authorization', `Bearer ${accessTokenFromCookie}`);
+  }
+
+  if (isSensitive) {
+    const csrfToken = getCsrfTokenFromCookies();
+    if (csrfToken) {
+      headers = headers.set('X-CSRF-Token', csrfToken);
+    } else {
+      logger.debug('CSRF token not found in cookies for sensitive request', req.url);
+    }
   }
 
   const clonedReq = req.clone({
-    setHeaders: {
-      Authorization: `Bearer ${accessToken}`
-    }
+    withCredentials: !isPublic,
+    headers
   });
 
   return next(clonedReq).pipe(
-    catchError((error) => {
-      if (error.status === 401) {
-        const authService = injector.get(AuthService);
-        if (!isRefreshing){
+    catchError((error: HttpErrorResponse) => {
+      const status = error.status;
+
+      if (status === 401 && !isPublic) {
+        if (!isRefreshing) {
           isRefreshing = true;
           return authService.refreshToken().pipe(
-            switchMap((response: TokenUserResponse) => {
-              const newClonedReq = req.clone({
-                setHeaders: {
-                  Authorization: `Bearer ${response.access_token}` 
-                }
-              });
-              return next(newClonedReq);
+            switchMap(() => {
+              isRefreshing = false;
+              const newToken = authService.getAccessTokenFromCookie();
+              let newHeaders = req.headers;
+              if (newToken) {
+                newHeaders = newHeaders.set('Authorization', `Bearer ${newToken}`);
+              }
+              return next(req.clone({
+                withCredentials: true,
+                headers: newHeaders
+              }));
             }),
             catchError((refreshError) => {
-              isRefreshing = false
-              storage.removeTokens()
+              isRefreshing = false;
+              storage.clearScopes();
               router.navigate(['/home']);
-              console.error('Error al refrescar el token:', refreshError.message);
+              logger.error('Error al refrescar el token:', refreshError);
               return throwError(() => new Error('Sesión expirada, por favor iniciá sesión nuevamente.'));
             })
           );
+        } else {
+          return throwError(() => error);
         }
-      } else {
-        return refreshSubject.pipe(
-          filter(token => token!= null),
-          take(1),
-          switchMap((newToken) => {
-            const newClonedReq = req.clone({
-              setHeaders: { Authorization: `Bearer ${newToken}`}
-            });
-            return next(newClonedReq)
-          })
-        )
       }
-      
       logger.error(`Error en la petición ${req.url}:`, error.message);
       return throwError(() => error);
     })

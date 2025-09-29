@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap, switchMap } from 'rxjs/operators';
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
@@ -13,7 +13,7 @@ import {
 } from '../interfaces/user.interfaces';
 import { Auth } from '../interfaces/hospital.interfaces';
 import { TokenDoctorsResponse } from '../interfaces/doctor.interfaces';
-import { HttpParams } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -23,32 +23,67 @@ export class AuthService {
   private readonly storage = inject(StorageService);
   private readonly logger = inject(LoggerService);
 
-  private loginStatusSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
-  loginStatus$ = this.loginStatusSubject.asObservable();
+  private loginStatusSignal = signal<boolean>(false);
+  loginStatus$ = computed(() => this.loginStatusSignal());
+
+  private scopesSignal = signal<string[]>(this._loadScopesFromStorage());
+  scopes$ = computed(() => this.scopesSignal());
+
+  private _loadScopesFromStorage(): string[] {
+    const s = this.storage.getItem('scopes');
+    return s ? JSON.parse(s) : [];
+  }
+
+  setLoggedIn(status: boolean): void {
+    this.loginStatusSignal.set(status);
+  }
 
   isLoggedIn(): boolean {
-    return !!this.storage.getAccessToken();
+    return this.loginStatus$();
+  }
+
+  private readCookie(name: string): string | null {
+    const cookies = `; ${document.cookie || ''}`;
+    const parts = cookies.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+    return null;
+  }
+
+  // Tries multiple candidate names for CSRF cookie
+  private getCsrfTokenFromCookies(): string | null {
+    const candidates = ['csrf_token', 'csrftoken', 'csrf'];
+    for (const name of candidates) {
+      const v = this.readCookie(name);
+      if (v) return v;
+    }
+    return null;
+  }
+
+  // header builder for sensitive endpoints (refresh/logout)
+  private getHeadersForSensitive(csrf: boolean = false): HttpHeaders {
+    if (!csrf) return new HttpHeaders();
+    const csrfToken = this.getCsrfTokenFromCookies();
+    return csrfToken ? new HttpHeaders().set('X-CSRF-Token', csrfToken) : new HttpHeaders();
   }
 
   login(credentials: Auth): Observable<TokenUserResponse> {
-    let params = new HttpParams()
-      .set('email', credentials.email)
-      .set('password', credentials.password);
+    const formData = new FormData();
+    formData.append('email', credentials.email);
+    formData.append('password', credentials.password);
     return this.apiService
-      .post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, params.toString(), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      .post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, formData, {
+        withCredentials: true
       })
       .pipe(
         switchMap((response) => {
-          this.storage.setAccessToken(response.access_token);
-          this.storage.setRefreshToken(response.refresh_token);
-          this.loginStatusSubject.next(true);
-          // Obtener y guardar scopes después del login
-          return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
+          this.setLoggedIn(true);
+          return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES, {
+            withCredentials: true
+          }).pipe(
             tap((scopesResponse) => {
               this.setScopes(scopesResponse.scopes);
             }),
-            map(() => response), // Devolvemos la respuesta original
+            map(() => response),
             catchError(() => {
               this.setScopes([]);
               return of(response);
@@ -68,16 +103,15 @@ export class AuthService {
   exchangeCodeForToken(code: string): Observable<TokenUserResponse> {
     const url = 'http://127.0.0.1:8000/api/oauth/google';
     this.logger.debug(`Intercambiando código en: ${url}`);
-    return this.apiService.post<TokenUserResponse>(url, { code }).pipe(
+    return this.apiService.post<TokenUserResponse>(url, { code }, {
+      withCredentials: true
+    }).pipe(
       switchMap((response) => {
         this.logger.debug('Token recibido:', response.access_token);
-        this.storage.setAccessToken(response.access_token);
-        if (response.refresh_token) {
-          this.storage.setRefreshToken(response.refresh_token);
-        }
-        this.loginStatusSubject.next(true);
-        // Obtener y guardar scopes después del login
-        return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
+        this.setLoggedIn(true);
+        return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES, {
+          withCredentials: true
+        }).pipe(
           tap((scopesResponse) => {
             this.setScopes(scopesResponse.scopes);
           }),
@@ -94,13 +128,15 @@ export class AuthService {
 
   decode(code: string): Observable<DecodeResponse> {
     this.logger.debug('Decodificando código secreto');
-    return this.apiService.post<DecodeResponse>(AUTH_ENDPOINTS.DECODE, { code }).pipe(
+    return this.apiService.post<DecodeResponse>(AUTH_ENDPOINTS.DECODE, { code }, {
+      withCredentials: true
+    }).pipe(
       switchMap((response) => {
         this.logger.debug('Access token recibido:', response.access_token);
-        this.storage.setAccessToken(response.access_token);
-        this.loginStatusSubject.next(true);
-        // Obtener y guardar scopes después del login
-        return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
+        this.setLoggedIn(true);
+        return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES, {
+          withCredentials: true
+        }).pipe(
           tap((scopesResponse) => {
             this.setScopes(scopesResponse.scopes);
           }),
@@ -115,34 +151,35 @@ export class AuthService {
     );
   }
 
-  storeAccessToken(accessToken: string): Observable<void> {
-    this.logger.debug('Almacenando access_token:', accessToken);
-    this.storage.setAccessToken(accessToken);
-    const storedToken = this.storage.getAccessToken();
-    if (!storedToken) {
-      this.logger.error('No se pudo almacenar el access_token');
-      return throwError(() => new Error('No se pudo almacenar el access_token'));
+  // Tries multiple cookie names to find access token
+  getAccessTokenFromCookie(): string {
+    const candidates = ['access_token', 'accessToken', 'access'];
+    for (const n of candidates) {
+      const v = this.readCookie(n);
+      if (v) return v;
     }
-    this.logger.debug('Token almacenado correctamente:', storedToken);
-    this.loginStatusSubject.next(true);
+    return '';
+  }
+
+  storeAccessToken(accessToken: string): Observable<void> {
+    this.setLoggedIn(true);
     return of(undefined);
   }
 
   doctorLogin(credentials: Auth): Observable<TokenDoctorsResponse> {
-    let params = new HttpParams()
-      .set('email', credentials.email)
-      .set('password', credentials.password);
+    const formData = new FormData();
+    formData.append('email', credentials.email);
+    formData.append('password', credentials.password);
     return this.apiService
-      .post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, params.toString(), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      .post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, formData, {
+        withCredentials: true
       })
       .pipe(
         switchMap((response) => {
-          this.storage.setAccessToken(response.access_token);
-          this.storage.setRefreshToken(response.refresh_token);
-          this.loginStatusSubject.next(true);
-          // Obtener y guardar scopes después del login
-          return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
+          this.setLoggedIn(true);
+          return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES, {
+            withCredentials: true
+          }).pipe(
             tap((scopesResponse) => {
               this.setScopes(scopesResponse.scopes);
             }),
@@ -161,7 +198,9 @@ export class AuthService {
     if (!this.isLoggedIn()) {
       return of(null);
     }
-    return this.apiService.get<{ user: UserRead }>(AUTH_ENDPOINTS.ME).pipe(
+    return this.apiService.get<{ user: UserRead }>(AUTH_ENDPOINTS.ME, {
+      withCredentials: true
+    }).pipe(
       map((response) => response?.user ?? null),
       catchError(() => of(null))
     );
@@ -169,59 +208,59 @@ export class AuthService {
 
   logout(): Observable<void> {
     if (!this.isLoggedIn()) {
-      this.storage.clearStorage();
-      this.loginStatusSubject.next(false);
+      this.storage.clearScopes();
+      this.setLoggedIn(false);
       return of(undefined);
     }
-    return this.apiService.delete<void>(AUTH_ENDPOINTS.LOGOUT).pipe(
+    return this.apiService.delete<void>(AUTH_ENDPOINTS.LOGOUT, {
+      withCredentials: true,
+      headers: this.getHeadersForSensitive(true)
+    }).pipe(
       tap(() => {
-        this.storage.clearStorage();
-        this.loginStatusSubject.next(false);
+        this.storage.clearScopes();
+        this.setLoggedIn(false);
+        this.setScopes([]);
       }),
       catchError(() => {
-        this.storage.clearStorage();
-        this.loginStatusSubject.next(false);
+        this.storage.clearScopes();
+        this.setLoggedIn(false);
+        this.setScopes([]);
         return of(undefined);
       })
     );
   }
 
   refreshToken(): Observable<TokenUserResponse> {
-    const refreshToken = this.storage.getRefreshToken();
-    if (!refreshToken) {
-      this.storage.clearStorage();
-      this.loginStatusSubject.next(false);
-      this.logger.error('No refresh token available ')
-    }
-
-    const options = {
-      headers: { Authorization: `Bearer ${refreshToken}` }
-    }
-
-    return this.apiService.get<TokenUserResponse>(AUTH_ENDPOINTS.REFRESH, options).pipe(
+    return this.apiService.get<TokenUserResponse>(AUTH_ENDPOINTS.REFRESH, {
+      withCredentials: true,
+      headers: this.getHeadersForSensitive(true)
+    }).pipe(
       tap((response) => {
-        this.storage.setAccessToken(response.access_token);
-        this.storage.setRefreshToken(response.refresh_token);
-        this.loginStatusSubject.next(true);
+        this.setLoggedIn(true);
       }),
-      catchError((error) => this.handleError('Refresh token', error))
+      catchError((error) => {
+        this.setLoggedIn(false);
+        return this.handleError('Refresh token', error);
+      })
     );
   }
 
   getScopes(): Observable<string[]> {
-    return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
+    return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES, {
+      withCredentials: true
+    }).pipe(
       map((response) => response.scopes),
       catchError(() => of([]))
     );
   }
 
   setScopes(scopes: string[]): void {
-    this.storage.setItem('scopes', JSON.stringify(scopes));
+    this.scopesSignal.set(scopes || []);
+    this.storage.setItem('scopes', JSON.stringify(scopes || []));
   }
 
   getStoredScopes(): string[] {
-    const scopes = this.storage.getItem('scopes');
-    return scopes ? JSON.parse(scopes) : [];
+    return this.scopesSignal();
   }
 
   private handleError(operation: string, error: unknown): Observable<never> {
@@ -247,8 +286,9 @@ export class AuthService {
         case 401:
         case 404:
           errorMessage = httpError.error?.detail ?? 'Credenciales inválidas';
-          this.storage.clearStorage();
-          this.loginStatusSubject.next(false);
+          this.storage.clearScopes();
+          this.setLoggedIn(false);
+          this.setScopes([]);
           break;
         case 403:
           errorMessage = httpError.error?.detail ?? 'Acción no permitida';
