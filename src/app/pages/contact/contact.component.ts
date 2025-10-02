@@ -49,7 +49,6 @@ export class ContactComponent implements OnInit {
       message: this.contactForm.value.message
     };
 
-    // Reemplaza estos IDs con los tuyos de EmailJS
     emailjs.send('service_qzsm4us', 'template_l9000wu', templateParams)
       .then((response) => {
         console.log('SUCCESS!', response.status, response.text);
