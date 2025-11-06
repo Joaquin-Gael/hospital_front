@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HealthInsuranceManagerComponent } from './health-insurance-manager.component';
+import { API_TOKEN_MOCKS } from '../../../../testing/api-token.mocks';
 
 describe('HealthInsuranceManagerComponent', () => {
   let component: HealthInsuranceManagerComponent;
@@ -8,7 +9,8 @@ describe('HealthInsuranceManagerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HealthInsuranceManagerComponent]
+      imports: [HealthInsuranceManagerComponent],
+      providers: [...API_TOKEN_MOCKS]
     })
     .compileComponents();
 

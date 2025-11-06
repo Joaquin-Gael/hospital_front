@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ProfileFormComponent } from './profile-form.component';
+import { API_TOKEN_MOCKS } from '../../../../testing/api-token.mocks';
 
 describe('ProfileFormComponent', () => {
   let component: ProfileFormComponent;
@@ -8,7 +9,8 @@ describe('ProfileFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProfileFormComponent]
+      imports: [ProfileFormComponent],
+      providers: [...API_TOKEN_MOCKS]
     })
     .compileComponents();
 
