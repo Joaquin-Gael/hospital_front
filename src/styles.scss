@@ -8,27 +8,60 @@
 /* Reset and base styles */
 /* CSS Custom Properties for Hero */
 :root {
-  /* Colors */
-  --primary: #0077b6;
-  --secondary: #00b4d8;
-  --accent: #90e0ef;
-  --success: #22c55e;
+  /* Brand Colors */
+  --primary: #3b82f6;
+  --secondary: #2563eb;
+  --accent: #fbbf24;
+  --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
   --medical-green: #10b981;
   --emergency-red: #dc2626;
 
+  /* Extended Palette */
+  --color-primary: var(--primary);
+  --color-primary-hover: #2563eb;
+  --color-primary-light: #dbeafe;
+  --color-primary-dark: #1e40af;
+  --color-accent: var(--accent);
+  --color-accent-hover: #f59e0b;
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: #3b82f6;
+
   /* Text Colors */
-  --text-primary: #1f2937;
-  --text-secondary: #6b7280;
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
   --text-light: #9ca3af;
   --text-white: #ffffff;
   --text-shadow: rgba(0, 0, 0, 0.1);
   --text-shadow-strong: rgba(0, 0, 0, 0.3);
 
+  /* Surfaces */
+  --surface-primary: #ffffff;
+  --surface-secondary: #f7fafc;
+  --surface-input: #ffffff;
+  --surface-hover: rgba(59, 130, 246, 0.05);
+
+  /* Borders */
+  --border-strong: #e2e8f0;
+  --border-subtle: #f1f5f9;
+
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #0077b6 0%, #00b4d8 50%, #90e0ef 100%);
-  --gradient-hero: linear-gradient(135deg, rgba(0, 119, 182, 0.1) 0%, rgba(0, 180, 216, 0.05) 100%);
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  --gradient-hero: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 15%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary) 5%, transparent) 100%
+  );
+  --gradient-interactive: linear-gradient(
+    90deg,
+    var(--color-primary) 0%,
+    var(--color-info) 50%,
+    var(--color-accent) 100%
+  );
 
   /* Border Radius */
   --border-radius-sm: 0.375rem;
@@ -37,6 +70,10 @@
   --border-radius-xl: 1rem;
 
   /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-input: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
   --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.15);
   --shadow-glass-strong: 0 12px 40px rgba(31, 38, 135, 0.25);
   --shadow-medical: 0 10px 40px rgba(0, 119, 182, 0.15);
@@ -46,6 +83,14 @@
   --shadow-btn-success-hover: 0 8px 24px rgba(34, 197, 94, 0.4);
   --shadow-btn-emergency: 0 4px 12px rgba(239, 68, 68, 0.3);
   --shadow-btn-emergency-hover: 0 8px 24px rgba(239, 68, 68, 0.4);
+
+  /* Motion */
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Focus */
+  --focus-ring: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  --focus-ring-strong: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  --text-on-primary: #ffffff;
 }
 
 /* Reset and base styles */
