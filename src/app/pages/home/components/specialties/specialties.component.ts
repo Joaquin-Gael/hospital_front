@@ -13,9 +13,12 @@ interface Specialty {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section class="specialties-section">
+    <section
+      class="specialties-section"
+      [attr.aria-labelledby]="headingId"
+    >
       <div class="section-header">
-        <h2>Especialidades Médicas</h2>
+        <h2 [attr.id]="headingId">Especialidades Médicas</h2>
         <p class="section-description">Contamos con especialistas en todas las áreas de la medicina para brindarle la mejor atención</p>
       </div>
       
@@ -34,4 +37,5 @@ interface Specialty {
 })
 export class SpecialtiesComponent {
   @Input() specialties: Specialty[] = [];
+  @Input() headingId = 'home-specialties-heading';
 }

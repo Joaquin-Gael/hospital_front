@@ -12,7 +12,14 @@ interface Stat {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section class="stats-section">
+    <section
+      class="stats-section"
+      [attr.aria-labelledby]="headingId"
+    >
+      <header class="stats-header">
+        <h2 [id]="headingId">{{ headingText }}</h2>
+      </header>
+
       <div class="stats-container">
         <div class="stat-item" *ngFor="let stat of stats">
           <div class="stat-icon">
@@ -30,4 +37,6 @@ interface Stat {
 })
 export class StatsComponent {
   @Input() stats: Stat[] = [];
+  @Input() headingId = 'home-stats-heading';
+  @Input() headingText = 'Resultados destacados';
 }
