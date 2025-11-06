@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { UpdateAppointmentComponent } from './update-appointment.component';
+import { API_TOKEN_MOCKS } from '../../../testing/api-token.mocks';
 
 describe('UpdateAppointmentComponent', () => {
   let component: UpdateAppointmentComponent;
@@ -8,7 +9,8 @@ describe('UpdateAppointmentComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UpdateAppointmentComponent]
+      imports: [UpdateAppointmentComponent],
+      providers: [...API_TOKEN_MOCKS]
     })
     .compileComponents();
 

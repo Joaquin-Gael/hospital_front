@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DataTableComponent, TableColumn } from './data-table.component';
+import { API_TOKEN_MOCKS } from '../../testing/api-token.mocks';
 
 describe('DataTableComponent', () => {
   type TableRow = { name: string; email: string; is_active: boolean };
@@ -21,6 +22,7 @@ describe('DataTableComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DataTableComponent],
+      providers: [...API_TOKEN_MOCKS],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DataTableComponent);
