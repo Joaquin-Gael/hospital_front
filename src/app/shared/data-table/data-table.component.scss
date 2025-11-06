@@ -1,14 +1,12 @@
-@use "sass:color";
 @use "../../layout/styles/_mixins.scss" as *;
 @use "../../layout/styles/_media-queries.scss" as *;
-@use "../../admin/styles/_vars.scss" as *;
 
 .data-table {
-  background: $bg-primary;
+  background: var(--surface-primary);
   border-radius: 20px;
-  box-shadow: $shadow-lg;
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
-  border: 1px solid $border-light;
+  border: 1px solid var(--border-subtle);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -19,12 +17,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(
-      90deg,
-      $primary-color 0%,
-      $info-color 50%,
-      $accent-color 100%
-    );
+    background: var(--gradient-interactive);
     border-radius: 20px 20px 0 0;
   }
   @include mobile-only {
@@ -32,8 +25,8 @@
   }
   &__header {
     padding: 24px 32px;
-    background: $bg-secondary;
-    border-bottom: 1px solid $border-light;
+    background: var(--surface-secondary);
+    border-bottom: 1px solid var(--border-subtle);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -46,12 +39,7 @@
       left: 10%;
       right: 10%;
       height: 1px;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        $border-color,
-        transparent
-      );
+      background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
     }
     @include mobile-only {
       padding: 16px 20px;
@@ -62,11 +50,11 @@
     .data-table__results {
       font-size: 0.95rem;
       font-weight: 600;
-      color: $text-secondary;
-      background: $bg-primary;
+      color: var(--text-secondary);
+      background: var(--surface-primary);
       border-radius: 9999px;
       padding: 8px 16px;
-      border: 1px solid $border-light;
+      border: 1px solid var(--border-subtle);
       white-space: nowrap;
     }
   }
@@ -79,36 +67,36 @@
       right: 16px;
       top: 50%;
       transform: translateY(-50%);
-      color: $text-muted;
+      color: var(--text-muted);
       font-size: 20px;
-      transition: $transition-smooth;
+      transition: var(--transition-smooth);
     }
   }
   &__search-input {
     width: 100%;
     padding: 14px 48px 14px 20px;
-    border: 2px solid $border-light;
+    border: 2px solid var(--border-subtle);
     border-radius: 50px;
     font-size: 0.95rem;
     font-weight: 500;
-    background: $bg-input;
-    color: $text-primary;
-    transition: $transition-smooth;
+    background: var(--surface-input);
+    color: var(--text-primary);
+    transition: var(--transition-smooth);
     &::placeholder {
-      color: $text-muted;
+      color: var(--text-muted);
       font-weight: 400;
     }
     &:focus {
       outline: none;
-      border-color: $primary-color;
-      box-shadow: $shadow-input;
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-input);
       transform: translateY(-1px);
       ~ .material-icons {
-        color: $primary-color;
+        color: var(--color-primary);
       }
     }
     &:hover:not(:focus) {
-      border-color: color.adjust($border-light, $lightness: -5%);
+      border-color: var(--border-strong);
     }
   }
   &__content {
@@ -136,33 +124,33 @@
         text-align: left;
         padding: 16px 16px 8px;
         font-weight: 600;
-        color: $text-muted;
+        color: var(--text-muted);
         font-size: 0.9rem;
       }
       th,
       td {
         padding: 16px;
         text-align: left;
-        border-bottom: 1px solid $border-light;
+        border-bottom: 1px solid var(--border-subtle);
         vertical-align: middle;
       }
       th {
-        background: $bg-secondary;
+        background: var(--surface-secondary);
         font-weight: 500;
-        color: $text-primary;
+        color: var(--text-primary);
         position: sticky;
         top: 0;
         z-index: 1;
         white-space: nowrap;
       }
       .data-row {
-        transition: $transition-smooth;
+        transition: var(--transition-smooth);
         &:nth-child(even) {
-          background: rgba(59, 130, 246, 0.02);
+          background: color-mix(in srgb, var(--color-primary) 4%, transparent);
         }
         &:hover {
-          background: $bg-hover;
-          box-shadow: $shadow-sm;
+          background: var(--surface-hover);
+          box-shadow: var(--shadow-sm);
         }
       }
       .data-cell {
@@ -171,7 +159,7 @@
         text-overflow: ellipsis;
         max-width: 300px;
         font-weight: 500;
-        color: $text-secondary;
+        color: var(--text-secondary);
       }
       .actions-column {
         width: 150px;
@@ -186,7 +174,7 @@
       .empty-cell {
         text-align: center;
         padding: 40px;
-        color: $text-muted;
+        color: var(--text-muted);
         @include flex-column;
       }
       .loading-cell {
@@ -199,9 +187,9 @@
           border-radius: 9999px;
           background: linear-gradient(
             90deg,
-            rgba($text-muted, 0.1) 0%,
-            rgba($text-muted, 0.2) 50%,
-            rgba($text-muted, 0.1) 100%
+            color-mix(in srgb, var(--text-muted) 10%, transparent) 0%,
+            color-mix(in srgb, var(--text-muted) 20%, transparent) 50%,
+            color-mix(in srgb, var(--text-muted) 10%, transparent) 100%
           );
           background-size: 200% 100%;
           animation: shimmer 1.2s ease-in-out infinite;
@@ -220,8 +208,8 @@
   }
   &__pagination {
     padding: 24px 32px;
-    background: $bg-secondary;
-    border-top: 1px solid $border-light;
+    background: var(--surface-secondary);
+    border-top: 1px solid var(--border-subtle);
     gap: 16px;
     @include flex-center;
     @include mobile-only {
@@ -232,20 +220,20 @@
     }
   }
   .pagination-button {
-    background: $bg-primary;
-    border: 1px solid $border-light;
+    background: var(--surface-primary);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 10px;
     cursor: pointer;
     min-width: 44px;
     min-height: 44px;
-    transition: $transition-smooth;
+    transition: var(--transition-smooth);
     @include flex-center;
     &:hover:not(:disabled) {
-      background: $primary-light;
-      border-color: $primary-color;
+      background: color-mix(in srgb, var(--color-primary-light) 40%, var(--surface-primary));
+      border-color: var(--color-primary);
       transform: translateY(-2px);
-      box-shadow: $shadow-md;
+      box-shadow: var(--shadow-md);
     }
     &:disabled {
       opacity: 0.5;
@@ -253,21 +241,21 @@
     }
     .material-icons {
       font-size: 20px;
-      color: $text-secondary;
+      color: var(--text-secondary);
     }
     &:focus-visible {
-      outline: 3px solid rgba($primary-color, 0.4);
+      outline: 3px solid var(--focus-ring-strong);
       outline-offset: 2px;
     }
   }
   .pagination-info {
     font-size: 0.95rem;
     font-weight: 600;
-    color: $text-primary;
+    color: var(--text-primary);
     padding: 8px 16px;
-    background: $bg-primary;
+    background: var(--surface-primary);
     border-radius: 20px;
-    border: 1px solid $border-light;
+    border: 1px solid var(--border-subtle);
   }
   .pagination-pages {
     display: flex;
@@ -275,99 +263,104 @@
     align-items: center;
   }
   .pagination-chip {
-    border: 1px solid $border-light;
-    background: $bg-primary;
-    color: $text-secondary;
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-primary);
+    color: var(--text-secondary);
     border-radius: 9999px;
     padding: 8px 14px;
     min-width: 40px;
     cursor: pointer;
     font-weight: 600;
-    transition: $transition-smooth;
+    transition: var(--transition-smooth);
     &:hover {
-      border-color: $primary-color;
-      color: $primary-color;
+      border-color: var(--color-primary);
+      color: var(--color-primary);
     }
     &--active,
     &[aria-current='page'] {
-      background: $primary-color;
-      color: white;
-      border-color: $primary-color;
-      box-shadow: $shadow-md;
+      background: var(--color-primary);
+      color: var(--text-on-primary);
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-md);
     }
     &:focus-visible {
-      outline: 3px solid rgba($primary-color, 0.4);
+      outline: 3px solid var(--focus-ring-strong);
       outline-offset: 2px;
     }
   }
   .action-button {
-    background: $bg-primary;
-    border: 1px solid $border-light;
+    background: var(--surface-primary);
+    border: 1px solid var(--border-subtle);
     cursor: pointer;
     padding: 8px;
     border-radius: 12px;
     min-width: 40px;
     min-height: 40px;
-    transition: $transition-smooth;
+    transition: var(--transition-smooth);
     opacity: 0.7;
     transform: scale(0.95);
     @include flex-center;
     &:hover {
       opacity: 1;
       transform: scale(1.05) translateY(-2px);
-      box-shadow: $shadow-md;
+      box-shadow: var(--shadow-md);
     }
     .material-icons {
       font-size: 18px;
-      transition: $transition-smooth;
+      transition: var(--transition-smooth);
+      color: var(--text-secondary);
+    }
+    &:focus-visible {
+      outline: 3px solid var(--focus-ring-strong);
+      outline-offset: 2px;
     }
     &.view-button {
-      border-color: color.adjust($info-color, $alpha: -0.7);
+      border-color: color-mix(in srgb, var(--color-info) 30%, transparent);
       &:hover {
-        background: color.adjust($info-color, $alpha: -0.9);
-        border-color: $info-color;
+        background: color-mix(in srgb, var(--color-info) 15%, var(--surface-primary));
+        border-color: var(--color-info);
         .material-icons {
-          color: $info-color;
+          color: var(--color-info);
         }
       }
     }
     &.edit-button {
-      border-color: color.adjust($primary-color, $alpha: -0.7);
+      border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
       &:hover {
-        background: $primary-light;
-        border-color: $primary-color;
+        background: color-mix(in srgb, var(--color-primary-light) 40%, var(--surface-primary));
+        border-color: var(--color-primary);
         .material-icons {
-          color: $primary-color;
+          color: var(--color-primary);
         }
       }
     }
     &.delete-button {
-      border-color: color.adjust($error-color, $alpha: -0.7);
+      border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
       &:hover {
-        background: color.adjust($error-color, $alpha: -0.9);
-        border-color: $error-color;
+        background: color-mix(in srgb, var(--color-error) 12%, var(--surface-primary));
+        border-color: var(--color-error);
         .material-icons {
-          color: $error-color;
+          color: var(--color-error);
         }
       }
     }
     &.ban-button {
-      border-color: color.adjust($error-color, $alpha: -0.7);
+      border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
       &:hover {
-        background: color.adjust($error-color, $alpha: -0.9);
-        border-color: $error-color;
+        background: color-mix(in srgb, var(--color-error) 12%, var(--surface-primary));
+        border-color: var(--color-error);
         .material-icons {
-          color: $error-color;
+          color: var(--color-error);
         }
       }
     }
     &.unban-button {
-      border-color: color.adjust($success-color, $alpha: -0.7);
+      border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
       &:hover {
-        background: color.adjust($success-color, $alpha: -0.9);
-        border-color: $success-color;
+        background: color-mix(in srgb, var(--color-success) 12%, var(--surface-primary));
+        border-color: var(--color-success);
         .material-icons {
-          color: $success-color;
+          color: var(--color-success);
         }
       }
     }
@@ -377,7 +370,7 @@
     height: 30px;
     border: 3px solid rgba(0, 0, 0, 0.1);
     border-radius: 50%;
-    border-top-color: $primary-color;
+    border-top-color: var(--color-primary);
     animation: spin 1s ease-in-out infinite;
   }
   .visually-hidden {
