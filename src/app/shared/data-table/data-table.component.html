@@ -1,5 +1,9 @@
-<div class="data-table">
-  <!-- Header -->
+<div
+  class="data-table"
+  [class.data-table--compact]="isCompactMode()"
+>
+  <p class="visually-hidden" aria-live="polite">{{ statusMessage() }}</p>
+
   <div class="data-table__header">
     @if (searchEnabled) {
       <div class="data-table__search">
@@ -10,92 +14,115 @@
           (input)="updateSearch($event)"
           class="data-table__search-input"
         />
-        <span class="material-icons">search</span>
+        <span class="material-icons" aria-hidden="true">search</span>
       </div>
     }
+    <span class="data-table__results" aria-live="polite">
+      {{ statusMessage() }}
+    </span>
   </div>
 
-  <!-- Content -->
-  <div class="data-table__content" [class.loading]="loading">
+  <div
+    class="data-table__content"
+    [class.loading]="loading"
+    [attr.aria-busy]="loading"
+    aria-live="polite"
+  >
     <table>
+      <caption>{{ tableCaption() }}</caption>
       <thead>
         <tr>
           @for (column of columns; track column.key) {
-            <th>{{ column.label }}</th>
+            <th scope="col" aria-sort="none">{{ column.label }}</th>
           }
-          <th class="actions-column">Acciones</th>
+          <th scope="col" class="actions-column" aria-sort="none">Acciones</th>
         </tr>
       </thead>
 
       <tbody>
-        @if (loading) {
-          <tr>
-            <td [attr.colspan]="columns.length + 1" class="loading-cell">
-              <div class="loading-spinner"></div>
-              Cargando datos...
-            </td>
-          </tr>
-        } @else if (paginatedData.length === 0) {
-          <tr>
-            <td [attr.colspan]="columns.length + 1" class="empty-cell">
-              No se encontraron datos
-            </td>
-          </tr>
-        } @else {
-          @for (item of paginatedData; track $index) {
-            <tr class="data-row">
-              @for (column of columns; track column.key) {
-                <td class="data-cell">
-                  @if (!column.format) {
-                    {{ item[column.key] || 'N/A' }}
-                  } @else {
-                    {{ column.format(item[column.key]) || 'N/A' }}
+        @defer (when !loading) {
+          @if (paginatedData().length === 0) {
+            <tr>
+              <td [attr.colspan]="columns.length + 1" class="empty-cell">
+                No se encontraron datos
+              </td>
+            </tr>
+          } @else {
+            @for (item of paginatedData(); track $index) {
+              <tr class="data-row">
+                @for (column of columns; track column.key) {
+                  <td class="data-cell">
+                    @if (!column.format) {
+                      {{ item[column.key] || 'N/A' }}
+                    } @else {
+                      {{ column.format(item[column.key]) || 'N/A' }}
+                    }
+                  </td>
+                }
+
+                <td class="actions-cell">
+                  <button
+                    type="button"
+                    class="action-button view-button"
+                    (click)="onView(item)"
+                    aria-label="Ver detalles"
+                  >
+                    <span class="material-icons" aria-hidden="true">visibility</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="action-button edit-button"
+                    (click)="onEdit(item)"
+                    aria-label="Editar"
+                  >
+                    <span class="material-icons" aria-hidden="true">edit</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="action-button delete-button"
+                    (click)="onDelete(item)"
+                    aria-label="Eliminar"
+                  >
+                    <span class="material-icons" aria-hidden="true">delete</span>
+                  </button>
+
+                  @if (showBanUnban && item['is_active']) {
+                    <button
+                      type="button"
+                      class="action-button ban-button"
+                      (click)="onBan(item)"
+                      aria-label="Banear"
+                    >
+                      <span class="material-icons" aria-hidden="true">block</span>
+                    </button>
+                  } @else if (showBanUnban && !item['is_active']) {
+                    <button
+                      type="button"
+                      class="action-button unban-button"
+                      (click)="onUnban(item)"
+                      aria-label="Desbanear"
+                    >
+                      <span class="material-icons" aria-hidden="true">check_circle</span>
+                    </button>
                   }
                 </td>
+              </tr>
+            }
+          }
+        } @loading {
+          @for (skeleton of skeletonRows(); track skeleton) {
+            <tr class="skeleton-row">
+              @for (column of columns; track column.key) {
+                <td>
+                  <span class="skeleton skeleton-text" aria-hidden="true"></span>
+                </td>
               }
-
               <td class="actions-cell">
-                <button
-                  type="button"
-                  class="action-button view-button"
-                  (click)="onView(item)"
-                  aria-label="Ver detalles">
-                  <span class="material-icons">visibility</span>
-                </button>
-
-                <button
-                  type="button"
-                  class="action-button edit-button"
-                  (click)="onEdit(item)"
-                  aria-label="Editar">
-                  <span class="material-icons">edit</span>
-                </button>
-
-                <button
-                  type="button"
-                  class="action-button delete-button"
-                  (click)="onDelete(item)"
-                  aria-label="Eliminar">
-                  <span class="material-icons">delete</span>
-                </button>
-
-                @if (showBanUnban && item['is_active']) {
-                  <button
-                    type="button"
-                    class="action-button ban-button"
-                    (click)="onBan(item)"
-                    aria-label="Banear">
-                    <span class="material-icons">block</span>
-                  </button>
-                } @else if (showBanUnban && !item['is_active']) {
-                  <button
-                    type="button"
-                    class="action-button unban-button"
-                    (click)="onUnban(item)"
-                    aria-label="Desbanear">
-                    <span class="material-icons">check_circle</span>
-                  </button>
-                }
+                <span class="skeleton skeleton-icon" aria-hidden="true"></span>
+                <span class="skeleton skeleton-icon" aria-hidden="true"></span>
+                <span class="skeleton skeleton-icon" aria-hidden="true"></span>
               </td>
             </tr>
           }
@@ -104,27 +131,38 @@
     </table>
   </div>
 
-  <!-- Pagination -->
-  @if (pagination && totalPages > 1) {
-    <div class="data-table__pagination">
+  @if (pagination && totalPages() > 1) {
+    <div class="data-table__pagination" role="navigation" aria-label="Paginación de la tabla">
       <button
-        [disabled]="currentPage === 1"
-        (click)="changePage(currentPage - 1)"
+        class="pagination-button"
+        [disabled]="currentPage() === 1"
+        (click)="changePage(currentPage() - 1)"
         aria-label="Página anterior"
-        class="pagination-button">
-        <span class="material-icons">chevron_left</span>
+      >
+        <span class="material-icons" aria-hidden="true">chevron_left</span>
       </button>
 
-      <span class="pagination-info">
-        Página {{ currentPage }} de {{ totalPages }}
-      </span>
+      <div class="pagination-pages">
+        @for (page of pageNumbers(); track page) {
+          <button
+            type="button"
+            class="pagination-chip"
+            [class.pagination-chip--active]="page === currentPage()"
+            (click)="changePage(page)"
+            [attr.aria-current]="page === currentPage() ? 'page' : null"
+          >
+            {{ page }}
+          </button>
+        }
+      </div>
 
       <button
-        [disabled]="currentPage === totalPages"
-        (click)="changePage(currentPage + 1)"
+        class="pagination-button"
+        [disabled]="currentPage() === totalPages()"
+        (click)="changePage(currentPage() + 1)"
         aria-label="Página siguiente"
-        class="pagination-button">
-        <span class="material-icons">chevron_right</span>
+      >
+        <span class="material-icons" aria-hidden="true">chevron_right</span>
       </button>
     </div>
   }
