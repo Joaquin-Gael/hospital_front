@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -6,9 +6,12 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section class="platform-section">
+    <section
+      class="platform-section"
+      [attr.aria-labelledby]="headingId"
+    >
       <div class="section-header">
-        <h2>Servicios Destacados</h2>
+        <h2 [attr.id]="headingId">Servicios Destacados</h2>
         <p class="section-description">Conoce nuestros servicios especializados diseñados para cubrir todas tus necesidades de salud</p>
       </div>
 
@@ -96,6 +99,7 @@ import { CommonModule } from '@angular/common';
 })
 export class ServiceTabsComponent {
   activeTab = 'emergencies';
+  @Input() headingId = 'home-service-tabs-heading';
 
   setActiveTab(tab: string) {
     this.activeTab = tab;

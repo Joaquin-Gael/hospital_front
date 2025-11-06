@@ -13,9 +13,12 @@ interface Department {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section class="services-section" aria-labelledby="services-heading">
+    <section
+      class="services-section"
+      [attr.aria-labelledby]="headingId"
+    >
       <div class="section-header">
-        <h2 id="services-heading">Nuestros Servicios</h2>
+        <h2 [attr.id]="headingId">Nuestros Servicios</h2>
         <p class="section-description">Ofrecemos una amplia gama de servicios médicos con los más altos estándares de calidad</p>
       </div>
       
@@ -36,4 +39,5 @@ interface Department {
 })
 export class ServicesComponent {
   @Input() departments: Department[] = [];
+  @Input() headingId = 'home-services-heading';
 }
