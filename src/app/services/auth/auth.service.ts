@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, of, throwError, startWith } from 'rxjs';
 import { catchError, map, tap, switchMap } from 'rxjs/operators';
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
@@ -13,7 +13,8 @@ import {
 } from '../interfaces/user.interfaces';
 import { Auth } from '../interfaces/hospital.interfaces';
 import { TokenDoctorsResponse } from '../interfaces/doctor.interfaces';
-import { HttpParams } from '@angular/common/http';
+import { HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { API_BASE_URL } from '../core/api.tokens';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +23,7 @@ export class AuthService {
   private readonly apiService = inject(ApiService);
   private readonly storage = inject(StorageService);
   private readonly logger = inject(LoggerService);
+  private readonly apiBaseUrl = inject(API_BASE_URL);
 
   private loginStatusSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
   loginStatus$ = this.loginStatusSubject.asObservable();
@@ -40,66 +42,29 @@ export class AuthService {
       })
       .pipe(
         switchMap((response) => {
-          const accessStored = this.storage.setAccessToken(response.access_token);
-          const refreshStored = this.storage.setRefreshToken(response.refresh_token);
-
-          if (!accessStored || !refreshStored) {
-            this.logger.warn('Tokens could not be stored after login');
-          }
-
-          this.loginStatusSubject.next(true);
-          // Obtener y guardar scopes después del login
-          return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
-            tap((scopesResponse) => {
-              this.setScopes(scopesResponse.scopes);
-            }),
-            map(() => response), // Devolvemos la respuesta original
-            catchError(() => {
-              this.setScopes([]);
-              return of(response);
-            })
-          );
+          this.persistSessionTokens(response.access_token, response.refresh_token, 'login');
+          return this.hydrateScopes(response);
         }),
-        catchError((error) => this.handleError('User Login', error))
+        catchError((error: HttpErrorResponse) => this.handleError('User Login', error))
       );
   }
 
   oauthLogin(service: string): void {
-    const url = `http://127.0.0.1:8000${AUTH_ENDPOINTS.OAUTH_LOGIN(service)}`;
+    const url = `${this.apiBaseUrl}${AUTH_ENDPOINTS.OAUTH_LOGIN(service)}`;
     this.logger.debug(`Redirigiendo a OAuth para ${service}: ${url}`);
     window.location.href = url;
   }
 
   exchangeCodeForToken(code: string): Observable<TokenUserResponse> {
-    const url = 'http://127.0.0.1:8000/api/oauth/google';
+    const url = `${this.apiBaseUrl}/api/oauth/google`;
     this.logger.debug(`Intercambiando código en: ${url}`);
     return this.apiService.post<TokenUserResponse>(url, { code }).pipe(
       switchMap((response) => {
         this.logger.debug('Token recibido:', response.access_token);
-        const accessStored = this.storage.setAccessToken(response.access_token);
-        if (response.refresh_token) {
-          const refreshStored = this.storage.setRefreshToken(response.refresh_token);
-          if (!refreshStored) {
-            this.logger.warn('Refresh token could not be stored after OAuth login');
-          }
-        }
-        if (!accessStored) {
-          this.logger.warn('Access token could not be stored after OAuth login');
-        }
-        this.loginStatusSubject.next(true);
-        // Obtener y guardar scopes después del login
-        return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
-          tap((scopesResponse) => {
-            this.setScopes(scopesResponse.scopes);
-          }),
-          map(() => response),
-          catchError(() => {
-            this.setScopes([]);
-            return of(response);
-          })
-        );
+        this.persistSessionTokens(response.access_token, response.refresh_token, 'OAuth login');
+        return this.hydrateScopes(response);
       }),
-      catchError((error) => this.handleError('OAuth Code Exchange', error))
+      catchError((error: HttpErrorResponse) => this.handleError('OAuth Code Exchange', error))
     );
   }
 
@@ -108,24 +73,10 @@ export class AuthService {
     return this.apiService.post<DecodeResponse>(AUTH_ENDPOINTS.DECODE, { code }).pipe(
       switchMap((response) => {
         this.logger.debug('Access token recibido:', response.access_token);
-        const stored = this.storage.setAccessToken(response.access_token);
-        if (!stored) {
-          this.logger.warn('Access token could not be stored after code decode');
-        }
-        this.loginStatusSubject.next(true);
-        // Obtener y guardar scopes después del login
-        return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
-          tap((scopesResponse) => {
-            this.setScopes(scopesResponse.scopes);
-          }),
-          map(() => response),
-          catchError(() => {
-            this.setScopes([]);
-            return of(response);
-          })
-        );
+        this.persistSessionTokens(response.access_token, null, 'code decode');
+        return this.hydrateScopes(response);
       }),
-      catchError((error) => this.handleError('Decode Code', error))
+      catchError((error: HttpErrorResponse) => this.handleError('Decode Code', error))
     );
   }
 
@@ -139,7 +90,7 @@ export class AuthService {
     const storedToken = this.storage.getAccessToken();
     this.logger.debug('Token almacenado correctamente:', storedToken);
     this.loginStatusSubject.next(true);
-    return of(undefined);
+    return of(void 0);
   }
 
   doctorLogin(credentials: Auth): Observable<TokenDoctorsResponse> {
@@ -152,27 +103,10 @@ export class AuthService {
       })
       .pipe(
         switchMap((response) => {
-          const accessStored = this.storage.setAccessToken(response.access_token);
-          const refreshStored = this.storage.setRefreshToken(response.refresh_token);
-
-          if (!accessStored || !refreshStored) {
-            this.logger.warn('Tokens could not be stored after doctor login');
-          }
-
-          this.loginStatusSubject.next(true);
-          // Obtener y guardar scopes después del login
-          return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
-            tap((scopesResponse) => {
-              this.setScopes(scopesResponse.scopes);
-            }),
-            map(() => response),
-            catchError(() => {
-              this.setScopes([]);
-              return of(response);
-            })
-          );
+          this.persistSessionTokens(response.access_token, response.refresh_token, 'doctor login');
+          return this.hydrateScopes(response);
         }),
-        catchError((error) => this.handleError('Doctor Login', error))
+        catchError((error: HttpErrorResponse) => this.handleError('Doctor Login', error))
       );
   }
 
@@ -188,19 +122,18 @@ export class AuthService {
 
   logout(): Observable<void> {
     if (!this.isLoggedIn()) {
-      this.storage.clearStorage();
-      this.loginStatusSubject.next(false);
-      return of(undefined);
+      this.clearSession();
+      return of(void 0);
     }
     return this.apiService.delete<void>(AUTH_ENDPOINTS.LOGOUT).pipe(
       tap(() => {
-        this.storage.clearStorage();
-        this.loginStatusSubject.next(false);
+        this.clearSession();
       }),
-      catchError(() => {
-        this.storage.clearStorage();
-        this.loginStatusSubject.next(false);
-        return of(undefined);
+      map(() => void 0),
+      catchError((error) => {
+        this.logger.warn('Logout request failed', error);
+        this.clearSession();
+        return of(void 0);
       })
     );
   }
@@ -208,8 +141,7 @@ export class AuthService {
   refreshToken(): Observable<TokenUserResponse> {
     const refreshToken = this.storage.getRefreshToken();
     if (!refreshToken) {
-      this.storage.clearStorage();
-      this.loginStatusSubject.next(false);
+      this.clearSession();
       this.logger.error('No refresh token available ')
     }
 
@@ -219,16 +151,9 @@ export class AuthService {
 
     return this.apiService.get<TokenUserResponse>(AUTH_ENDPOINTS.REFRESH, options).pipe(
       tap((response) => {
-        const accessStored = this.storage.setAccessToken(response.access_token);
-        const refreshStored = this.storage.setRefreshToken(response.refresh_token);
-
-        if (!accessStored || !refreshStored) {
-          this.logger.warn('Tokens could not be stored after refresh');
-        }
-
-        this.loginStatusSubject.next(true);
+        this.persistSessionTokens(response.access_token, response.refresh_token, 'refresh');
       }),
-      catchError((error) => this.handleError('Refresh token', error))
+      catchError((error: HttpErrorResponse) => this.handleError('Refresh token', error))
     );
   }
 
@@ -251,38 +176,81 @@ export class AuthService {
     return scopes ? JSON.parse(scopes) : [];
   }
 
-  private handleError(operation: string, error: unknown): Observable<never> {
+  private hydrateScopes<T>(response: T): Observable<T> {
+    return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
+      tap({
+        next: (scopesResponse) => {
+          this.setScopes(scopesResponse.scopes);
+        },
+        error: () => {
+          this.setScopes([]);
+        },
+      }),
+      map(() => response),
+      startWith(response),
+      catchError(() => EMPTY)
+    );
+  }
+
+  private persistSessionTokens(accessToken: string, refreshToken: string | null | undefined, context: string): void {
+    const accessStored = this.storage.setAccessToken(accessToken);
+    let refreshStored = true;
+
+    if (refreshToken) {
+      refreshStored = this.storage.setRefreshToken(refreshToken);
+    }
+
+    if (!accessStored || !refreshStored) {
+      this.logger.warn(`Tokens could not be stored after ${context}`);
+    }
+
+    this.loginStatusSubject.next(true);
+  }
+
+  private clearSession(): void {
+    this.storage.clearStorage();
+    this.loginStatusSubject.next(false);
+  }
+
+  private extractErrorDetail(payload: unknown): string | undefined {
+    if (typeof payload === 'string') {
+      return payload;
+    }
+
+    if (payload && typeof payload === 'object') {
+      if ('detail' in payload && typeof (payload as { detail: unknown }).detail === 'string') {
+        return (payload as { detail: string }).detail;
+      }
+
+      if ('message' in payload && typeof (payload as { message: unknown }).message === 'string') {
+        return (payload as { message: string }).message;
+      }
+    }
+
+    return undefined;
+  }
+
+  private handleError(operation: string, error: HttpErrorResponse): Observable<never> {
     this.logger.error(`${operation} failed`, error);
 
+    const backendMessage = this.extractErrorDetail(error.error);
     let errorMessage = 'Ocurrió un error inesperado';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    } else if (
-      typeof error === 'object' &&
-      error !== null &&
-      'status' in error
-    ) {
-      const httpError = error as {
-        status: number;
-        error?: { detail?: string };
-      };
-      switch (httpError.status) {
-        case 400:
-          errorMessage =
-            httpError.error?.detail ?? 'Datos de solicitud inválidos';
-          break;
-        case 401:
-        case 404:
-          errorMessage = httpError.error?.detail ?? 'Credenciales inválidas';
-          this.storage.clearStorage();
-          this.loginStatusSubject.next(false);
-          break;
-        case 403:
-          errorMessage = httpError.error?.detail ?? 'Acción no permitida';
-          break;
-        default:
-          errorMessage = httpError.error?.detail ?? 'Error del servidor';
-      }
+
+    switch (error.status) {
+      case 400:
+        errorMessage = backendMessage ?? 'Datos de solicitud inválidos';
+        break;
+      case 401:
+      case 403:
+        errorMessage = backendMessage ?? 'Credenciales inválidas';
+        this.clearSession();
+        break;
+      case 404:
+        errorMessage = backendMessage ?? 'Recurso no encontrado';
+        break;
+      default:
+        errorMessage = backendMessage ?? 'Error del servidor';
+        break;
     }
 
     return throwError(() => new Error(errorMessage));
