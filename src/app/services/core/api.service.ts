@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, defer, firstValueFrom, throwError } from 'rxjs';
+import { Observable, defer, firstValueFrom, throwError, of } from 'rxjs';
 import { catchError, switchMap, tap, shareReplay, map } from 'rxjs/operators';
 import { LoggerService } from './logger.service';
 import { API_BASE_URL, API_WS_BASE_URL } from './api.tokens';
@@ -52,6 +52,10 @@ export class ApiService {
    * @returns Observable of the constructed URL.
    */
   private buildUrl(endpoint: string): Observable<string> {
+    if (/^https?:\/\//i.test(endpoint)) {
+      return of(endpoint);
+    }
+
     return this.uuid$.pipe(
       map((uuid) => {
         // Remove leading/trailing slashes to avoid malformed URLs
