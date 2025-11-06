@@ -40,8 +40,13 @@ export class AuthService {
       })
       .pipe(
         switchMap((response) => {
-          this.storage.setAccessToken(response.access_token);
-          this.storage.setRefreshToken(response.refresh_token);
+          const accessStored = this.storage.setAccessToken(response.access_token);
+          const refreshStored = this.storage.setRefreshToken(response.refresh_token);
+
+          if (!accessStored || !refreshStored) {
+            this.logger.warn('Tokens could not be stored after login');
+          }
+
           this.loginStatusSubject.next(true);
           // Obtener y guardar scopes después del login
           return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
@@ -71,9 +76,15 @@ export class AuthService {
     return this.apiService.post<TokenUserResponse>(url, { code }).pipe(
       switchMap((response) => {
         this.logger.debug('Token recibido:', response.access_token);
-        this.storage.setAccessToken(response.access_token);
+        const accessStored = this.storage.setAccessToken(response.access_token);
         if (response.refresh_token) {
-          this.storage.setRefreshToken(response.refresh_token);
+          const refreshStored = this.storage.setRefreshToken(response.refresh_token);
+          if (!refreshStored) {
+            this.logger.warn('Refresh token could not be stored after OAuth login');
+          }
+        }
+        if (!accessStored) {
+          this.logger.warn('Access token could not be stored after OAuth login');
         }
         this.loginStatusSubject.next(true);
         // Obtener y guardar scopes después del login
@@ -97,7 +108,10 @@ export class AuthService {
     return this.apiService.post<DecodeResponse>(AUTH_ENDPOINTS.DECODE, { code }).pipe(
       switchMap((response) => {
         this.logger.debug('Access token recibido:', response.access_token);
-        this.storage.setAccessToken(response.access_token);
+        const stored = this.storage.setAccessToken(response.access_token);
+        if (!stored) {
+          this.logger.warn('Access token could not be stored after code decode');
+        }
         this.loginStatusSubject.next(true);
         // Obtener y guardar scopes después del login
         return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
@@ -117,12 +131,12 @@ export class AuthService {
 
   storeAccessToken(accessToken: string): Observable<void> {
     this.logger.debug('Almacenando access_token:', accessToken);
-    this.storage.setAccessToken(accessToken);
-    const storedToken = this.storage.getAccessToken();
-    if (!storedToken) {
+    const stored = this.storage.setAccessToken(accessToken);
+    if (!stored) {
       this.logger.error('No se pudo almacenar el access_token');
       return throwError(() => new Error('No se pudo almacenar el access_token'));
     }
+    const storedToken = this.storage.getAccessToken();
     this.logger.debug('Token almacenado correctamente:', storedToken);
     this.loginStatusSubject.next(true);
     return of(undefined);
@@ -138,8 +152,13 @@ export class AuthService {
       })
       .pipe(
         switchMap((response) => {
-          this.storage.setAccessToken(response.access_token);
-          this.storage.setRefreshToken(response.refresh_token);
+          const accessStored = this.storage.setAccessToken(response.access_token);
+          const refreshStored = this.storage.setRefreshToken(response.refresh_token);
+
+          if (!accessStored || !refreshStored) {
+            this.logger.warn('Tokens could not be stored after doctor login');
+          }
+
           this.loginStatusSubject.next(true);
           // Obtener y guardar scopes después del login
           return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
@@ -200,8 +219,13 @@ export class AuthService {
 
     return this.apiService.get<TokenUserResponse>(AUTH_ENDPOINTS.REFRESH, options).pipe(
       tap((response) => {
-        this.storage.setAccessToken(response.access_token);
-        this.storage.setRefreshToken(response.refresh_token);
+        const accessStored = this.storage.setAccessToken(response.access_token);
+        const refreshStored = this.storage.setRefreshToken(response.refresh_token);
+
+        if (!accessStored || !refreshStored) {
+          this.logger.warn('Tokens could not be stored after refresh');
+        }
+
         this.loginStatusSubject.next(true);
       }),
       catchError((error) => this.handleError('Refresh token', error))
@@ -216,7 +240,10 @@ export class AuthService {
   }
 
   setScopes(scopes: string[]): void {
-    this.storage.setItem('scopes', JSON.stringify(scopes));
+    const stored = this.storage.setItem('scopes', JSON.stringify(scopes));
+    if (!stored) {
+      this.logger.warn('Scopes could not be stored');
+    }
   }
 
   getStoredScopes(): string[] {
