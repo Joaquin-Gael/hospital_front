@@ -18,38 +18,42 @@ class MockStorageService {
     return this.accessToken;
   }
 
-  setAccessToken(token: string): void {
+  setAccessToken(token: string): boolean {
     this.accessToken = token;
+    return true;
   }
 
   getRefreshToken(): string | null {
     return this.refreshToken;
   }
 
-  setRefreshToken(token: string): void {
+  setRefreshToken(token: string): boolean {
     this.refreshToken = token;
+    return true;
   }
 
-  removeTokens(): void {
+  removeTokens(): boolean {
     this.accessToken = null;
     this.refreshToken = null;
+    return true;
   }
 
-  clearStorage(): void {
+  clearStorage(): boolean {
     this.clearStorageCalls += 1;
     this.removeTokens();
+    return true;
   }
 
-  setItem(): void {}
+  setItem(): boolean { return true; }
   getItem(): string | null { return null; }
-  removeItem(): void {}
-  setRememberEmail(): void {}
+  removeItem(): boolean { return true; }
+  setRememberEmail(): boolean { return true; }
   getRememberEmail(): string | null { return null; }
-  removeRememberEmail(): void {}
-  setTempResetEmail(): void {}
+  removeRememberEmail(): boolean { return true; }
+  setTempResetEmail(): boolean { return true; }
   getTempResetEmail(): string | null { return null; }
-  removeTempResetEmail(): void {}
-  clearAllTempData(): void {}
+  removeTempResetEmail(): boolean { return true; }
+  clearAllTempData(): boolean { return true; }
 }
 
 class MockLoggerService {
