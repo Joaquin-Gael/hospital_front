@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { Observable, ReplaySubject, throwError } from 'rxjs';
+import { HttpClient, HttpParams, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, defer, firstValueFrom, throwError } from 'rxjs';
 import { catchError, switchMap, tap, shareReplay, map } from 'rxjs/operators';
 import { LoggerService } from './logger.service';
+import { API_BASE_URL, API_WS_BASE_URL } from './api.tokens';
 
 /**
  * Service to handle HTTP requests to the backend API, encapsulating URL construction
@@ -12,40 +13,37 @@ import { LoggerService } from './logger.service';
   providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl = 'http://127.0.0.1:8000';
-  private baseWsUrl = 'ws://127.0.0.1:8000'; 
-  private uuidSubject = new ReplaySubject<string>(1);
-  private uuid$ = this.uuidSubject.asObservable();
-  private uuidLoaded$!: Observable<string>;
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = inject(API_BASE_URL);
+  private readonly baseWsUrl = inject(API_WS_BASE_URL);
   private readonly logger = inject(LoggerService);
-  constructor(private http: HttpClient) {
-    this.fetchUuid();
+  private readonly uuid$ = this.createUuidStream();
+
+  /**
+   * Exposes the cached UUID as a promise for consumers that require a one-time value.
+   */
+  getUuid(): Promise<string> {
+    return firstValueFrom(this.uuid$);
   }
 
   /**
-   * Fetches the UUID prefix from the backend and updates the ReplaySubject.
-   * Caches the result to avoid multiple requests.
+   * Creates a cold observable that retrieves and caches the UUID prefix from the backend.
    */
-  private fetchUuid(): void {
-    this.uuidLoaded$ = this.http
-      .get<{ id_prefix_api_secret: string }>(`${this.baseUrl}/id_prefix_api_secret/`)
-      .pipe(
-        tap((response) => {
-          this.logger.debug('UUID fetched:', response.id_prefix_api_secret);
-          this.uuidSubject.next(response.id_prefix_api_secret);
-        }),
-        map((response) => response.id_prefix_api_secret),
-        catchError((err) => {
-          console.error('Error fetching UUID:', err);
-          return throwError(() => new Error('No se pudo cargar el UUID de la API'));
-        }),
-        shareReplay(1)
-      );
-
-    // Subscribe to ensure the UUID is fetched immediately
-    this.uuidLoaded$.subscribe({
-      error: (err) => console.error('UUID loading failed:', err),
-    });
+  private createUuidStream(): Observable<string> {
+    return defer(() =>
+      this.http.get<{ id_prefix_api_secret: string }>(`${this.baseUrl}/id_prefix_api_secret/`)
+    ).pipe(
+      tap((response) => {
+        this.logger.debug('UUID fetched', response.id_prefix_api_secret);
+      }),
+      map((response) => response.id_prefix_api_secret),
+      catchError((err) => {
+        const errorResponse = this.toHttpErrorResponse(err, 'No se pudo cargar el UUID de la API');
+        this.logger.error('Error fetching UUID', errorResponse);
+        return throwError(() => errorResponse);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
   }
 
   /**
@@ -54,15 +52,16 @@ export class ApiService {
    * @returns Observable of the constructed URL.
    */
   private buildUrl(endpoint: string): Observable<string> {
-    return this.uuidLoaded$.pipe(
+    return this.uuid$.pipe(
       map((uuid) => {
         // Remove leading/trailing slashes to avoid malformed URLs
         const cleanEndpoint = endpoint.replace(/^\/+|\/+$/g, '');
         return `${this.baseUrl}/${uuid}/${cleanEndpoint}`;
       }),
       catchError((err) => {
-        console.error('Error building URL:', err);
-        return throwError(() => err);
+        const errorResponse = this.toHttpErrorResponse(err, `Error al construir la URL para ${endpoint}`);
+        this.logger.error('Error building URL', errorResponse);
+        return throwError(() => errorResponse);
       })
     );
   }
@@ -73,14 +72,15 @@ export class ApiService {
    * @returns Observable of the constructed WebSocket URL.
    */
   public buildWsUrl(endpoint: string): Observable<string> {
-    return this.uuidLoaded$.pipe(
+    return this.uuid$.pipe(
       map((uuid) => {
         const cleanEndpoint = endpoint.replace(/^\/+|\/+$/g, '');
         return `${this.baseWsUrl}/${uuid}/${cleanEndpoint}`;
       }),
       catchError((err) => {
-        console.error('Error building WebSocket URL:', err);
-        return throwError(() => err);
+        const errorResponse = this.toHttpErrorResponse(err, `Error al construir la URL de WebSocket para ${endpoint}`);
+        this.logger.error('Error building WebSocket URL', errorResponse);
+        return throwError(() => errorResponse);
       })
     );
   }
@@ -95,8 +95,9 @@ export class ApiService {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.get<T>(url, options)),
       catchError((err) => {
-        console.error(`Error in GET ${endpoint}:`, err);
-        return throwError(() => new Error(`Error al obtener datos de ${endpoint}`));
+        const errorResponse = this.toHttpErrorResponse(err, `Error al obtener datos de ${endpoint}`);
+        this.logger.error(`Error in GET ${endpoint}`, errorResponse);
+        return throwError(() => errorResponse);
       })
     );
   }
@@ -112,8 +113,9 @@ export class ApiService {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.post<T>(url, payload, options)),
       catchError((err) => {
-        console.error(`Error in POST ${endpoint}:`, err);
-        return throwError(() => new Error(`Error al enviar datos a ${endpoint}`));
+        const errorResponse = this.toHttpErrorResponse(err, `Error al enviar datos a ${endpoint}`);
+        this.logger.error(`Error in POST ${endpoint}`, errorResponse);
+        return throwError(() => errorResponse);
       })
     );
   }
@@ -129,8 +131,9 @@ export class ApiService {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.put<T>(url, payload, options)),
       catchError((err) => {
-        console.error(`Error in PUT ${endpoint}:`, err);
-        return throwError(() => new Error(`Error al actualizar datos en ${endpoint}`));
+        const errorResponse = this.toHttpErrorResponse(err, `Error al actualizar datos en ${endpoint}`);
+        this.logger.error(`Error in PUT ${endpoint}`, errorResponse);
+        return throwError(() => errorResponse);
       })
     );
   }
@@ -145,8 +148,9 @@ export class ApiService {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.delete<T>(url, options)),
       catchError((err) => {
-        console.error(`Error in DELETE ${endpoint}:`, err);
-        return throwError(() => new Error(`Error al eliminar datos en ${endpoint}`));
+        const errorResponse = this.toHttpErrorResponse(err, `Error al eliminar datos en ${endpoint}`);
+        this.logger.error(`Error in DELETE ${endpoint}`, errorResponse);
+        return throwError(() => errorResponse);
       })
     );
   }
@@ -162,9 +166,22 @@ export class ApiService {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.patch<T>(url, payload, options)),
       catchError((err) => {
-        console.error(`Error in PATCH ${endpoint}:`, err);
-        return throwError(() => new Error(`Error al modificar datos en ${endpoint}`));
+        const errorResponse = this.toHttpErrorResponse(err, `Error al modificar datos en ${endpoint}`);
+        this.logger.error(`Error in PATCH ${endpoint}`, errorResponse);
+        return throwError(() => errorResponse);
       })
     );
+  }
+
+  private toHttpErrorResponse(err: unknown, statusText: string): HttpErrorResponse {
+    if (err instanceof HttpErrorResponse) {
+      return err;
+    }
+
+    return new HttpErrorResponse({
+      error: err,
+      status: typeof err === 'object' && err !== null && 'status' in err ? (err as { status: number }).status : 0,
+      statusText,
+    });
   }
 }

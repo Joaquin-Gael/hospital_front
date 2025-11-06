@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ErrorMessageComponent } from './error-message.component';
+import { API_TOKEN_MOCKS } from '../../testing/api-token.mocks';
 
 describe('ErrorMessageComponent', () => {
   let component: ErrorMessageComponent;
@@ -8,7 +9,8 @@ describe('ErrorMessageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ErrorMessageComponent]
+      imports: [ErrorMessageComponent],
+      providers: [...API_TOKEN_MOCKS]
     })
     .compileComponents();
 

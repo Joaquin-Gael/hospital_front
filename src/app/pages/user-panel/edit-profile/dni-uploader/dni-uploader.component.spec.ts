@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DniUploaderComponent } from './dni-uploader.component';
+import { API_TOKEN_MOCKS } from '../../../../testing/api-token.mocks';
 
 describe('DniUploaderComponent', () => {
   let component: DniUploaderComponent;
@@ -8,7 +9,8 @@ describe('DniUploaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DniUploaderComponent]
+      imports: [DniUploaderComponent],
+      providers: [...API_TOKEN_MOCKS]
     })
     .compileComponents();
 
