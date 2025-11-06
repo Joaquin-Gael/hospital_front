@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -6,9 +6,12 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section class="cta-section">
+    <section
+      class="cta-section"
+      [attr.aria-labelledby]="headingId"
+    >
       <div class="cta-content">
-        <h2>Su Salud es Nuestra Prioridad</h2>
+        <h2 [attr.id]="headingId">Su Salud es Nuestra Prioridad</h2>
         <p>Agende una cita con nuestros especialistas y experimente atención médica de excelencia</p>
         <div class="cta-buttons">
           <button class="btn-primary">
@@ -25,4 +28,6 @@ import { CommonModule } from '@angular/common';
   `,
   styleUrls: ['./cta.component.scss']
 })
-export class CtaComponent {}
+export class CtaComponent {
+  @Input() headingId = 'home-cta-heading';
+}

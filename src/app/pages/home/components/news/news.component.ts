@@ -14,9 +14,12 @@ interface News {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section class="news-section">
+    <section
+      class="news-section"
+      [attr.aria-labelledby]="headingId"
+    >
       <div class="section-header">
-        <h2>Noticias y Eventos</h2>
+        <h2 [attr.id]="headingId">Noticias y Eventos</h2>
         <p class="section-description">Mantente informado sobre las últimas novedades de nuestro hospital</p>
       </div>
       
@@ -39,4 +42,5 @@ interface News {
 })
 export class NewsComponent {
   @Input() news: News[] = [];
+  @Input() headingId = 'home-news-heading';
 }

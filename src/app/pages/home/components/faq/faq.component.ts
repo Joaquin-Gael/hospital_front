@@ -14,9 +14,12 @@ interface FAQ {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section class="faq-section">
+    <section
+      class="faq-section"
+      [attr.aria-labelledby]="headingId"
+    >
       <div class="section-header">
-        <h2>Preguntas Frecuentes</h2>
+        <h2 [attr.id]="headingId">Preguntas Frecuentes</h2>
         <p class="section-description">Respuestas a las consultas más comunes sobre nuestros servicios</p>
       </div>
       
@@ -51,6 +54,7 @@ interface FAQ {
 })
 export class FaqComponent {
   @Input() faqs: FAQ[] = [];
+  @Input() headingId = 'home-faq-heading';
 
   toggleFaq(faq: FAQ) {
     faq.isOpen = !faq.isOpen;
