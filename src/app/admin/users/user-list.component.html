@@ -16,7 +16,7 @@
   <div class="user-section__form-container">
     <app-entity-form
       [fields]="formFields"
-      [initialData]="selectedUser"
+      [initialData]="formInitialData"
       [title]="formMode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario'"
       [submitLabel]="
         formMode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario'

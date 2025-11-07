@@ -16,6 +16,7 @@ import {
 } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
+  EntityFormPayload,
   FormField,
 } from '../../shared/entity-form/entity-form.component';
 import { HealthInsuranceService } from '../../services/health_insarunce/health-insurance.service';
@@ -51,6 +52,10 @@ type HealthInsuranceFormValues = HealthInsuranceCreate;
   templateUrl: './health-insurance-list.component.html',
   styleUrls: ['./health-insurance-list.component.scss'],
 })
+type HealthInsuranceFormValues =
+  EntityFormPayload &
+  HealthInsuranceCreate;
+
 export class HealthInsuranceListComponent implements OnInit {
   private service = inject(HealthInsuranceService);
   private logger = inject(LoggerService);
@@ -253,16 +258,18 @@ export class HealthInsuranceListComponent implements OnInit {
     this.formLoading = true;
     this.error = null;
 
+    const discount = Number(formData.discount);
+
     const createPayload: HealthInsuranceCreate = {
       name: formData.name,
-      description: formData.description,
-      discount: formData.discount,
+      description: formData.description ?? '',
+      discount,
     };
 
     const updatePayload: HealthInsuranceUpdate = {
       name: formData.name,
-      description: formData.description,
-      discount: formData.discount,
+      description: formData.description ?? '',
+      discount,
     };
 
     const request =
