@@ -33,7 +33,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { NotificationService } from '../../core/notification';
 
-type HealthInsuranceFormValues = HealthInsuranceCreate;
+type HealthInsuranceFormValues = HealthInsuranceCreate & EntityFormPayload;
 
 @Component({
   selector: 'app-health-insurance-list',
@@ -52,9 +52,6 @@ type HealthInsuranceFormValues = HealthInsuranceCreate;
   templateUrl: './health-insurance-list.component.html',
   styleUrls: ['./health-insurance-list.component.scss'],
 })
-type HealthInsuranceFormValues =
-  EntityFormPayload &
-  HealthInsuranceCreate;
 
 export class HealthInsuranceListComponent implements OnInit {
   private service = inject(HealthInsuranceService);

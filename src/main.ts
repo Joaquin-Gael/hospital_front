@@ -1,4 +1,4 @@
-import { EnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
+import { createEnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
@@ -10,7 +10,7 @@ bootstrapApplication(AppComponent, appConfig).catch((error) => {
 });
 
 function forwardBootstrapError(error: unknown): void {
-  const injector = EnvironmentInjector.create(appConfig.providers ?? []);
+  const injector = createEnvironmentInjector(appConfig.providers ?? []);
 
   try {
     runInInjectionContext(injector, () => {

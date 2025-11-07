@@ -264,7 +264,7 @@
                       <div class="form-field__progress-bar">
                         <div
                           class="form-field__progress-fill"
-                          [style.width.%]="uploadProgress()[field.key] ?? 0"
+                          [style.width.%]="uploadProgress()[field.key]"
                         ></div>
                       </div>
                       <span class="form-field__progress-text">{{ uploadProgress()[field.key] | number:'1.0-0' }}%</span>
