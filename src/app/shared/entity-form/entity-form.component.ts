@@ -16,14 +16,12 @@ import {
 } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import {
-  AbstractControl,
-  FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
   ValidatorFn,
   Validators,
+  ɵNullableFormControls,
 } from "@angular/forms"
 import { LoggerService } from "../../services/core/logger.service"
 
@@ -72,9 +70,7 @@ export interface FormField<
 
 export type EntityFormFileSelection = Record<string, File>
 
-type EntityFormGroupControls<TPayload extends EntityFormPayload> = {
-  [K in keyof TPayload & string]: FormControl<TPayload[K] | null>
-}
+type EntityFormGroupControls<TPayload extends EntityFormPayload> = ɵNullableFormControls<TPayload>
 
 @Component({
   selector: "app-entity-form",
@@ -114,7 +110,6 @@ export class EntityFormComponent<
   private readonly uploadTimers = new Map<string, ReturnType<typeof setInterval>>()
 
   constructor(
-    private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     private logger: LoggerService,
   ) {}
@@ -151,9 +146,9 @@ export class EntityFormComponent<
 
   /** Método que anuncia el foco en un campo */
   announceFocus(fieldKey: keyof TPayload & string): void {
-    const control = this.form.get(fieldKey) as AbstractControl<TPayload[typeof fieldKey] | null> | null
+    const control = this.form.controls[fieldKey]
     const fieldLabel = this.getFieldLabel(fieldKey)
-    const controlValue = control?.value
+    const controlValue = control.value
     this.focusAnnouncement.set(
       controlValue === null || controlValue === undefined || controlValue === ""
         ? `${fieldLabel} enfocado`
@@ -163,27 +158,11 @@ export class EntityFormComponent<
   }
 
   private initForm(): void {
-    const formControls = {} as Partial<EntityFormGroupControls<TPayload>>
     const data: Partial<TPayload> = this.initialData ? { ...this.initialData } : {}
 
-    this.fields.forEach((field) => {
-      const validators: ValidatorFn[] = []
-      if (field.required) {
-        validators.push(Validators.required)
-      }
-      if (field.validators?.length) {
-        validators.push(...field.validators)
-      }
+    const formControls = this.buildFormControls(data)
 
-      let value = (data[field.key] ?? field.defaultValue ?? null) as TPayload[typeof field.key] | null
-      if (field.type === "select" && value == null && field.options?.length) {
-        value = field.options[0].value
-      }
-
-      formControls[field.key] = this.fb.control<TPayload[typeof field.key] | null>(value, validators) as EntityFormGroupControls<TPayload>[typeof field.key]
-    })
-
-    this.form = this.fb.group(formControls as EntityFormGroupControls<TPayload>)
+    this.form = new FormGroup<EntityFormGroupControls<TPayload>>(formControls)
 
     this.logger.debug("Formulario inicializado", this.form.getRawValue())
   }
@@ -195,6 +174,11 @@ export class EntityFormComponent<
     }
     const formValue = this.form.getRawValue()
 
+    if (!this.isPayload(formValue)) {
+      this.logger.error("El formulario contiene claves desconocidas", formValue)
+      return
+    }
+
     if (this.selectedImage) {
       this.imageSelected.emit(this.selectedImage)
     }
@@ -202,7 +186,6 @@ export class EntityFormComponent<
     if (Object.keys(this.selectedFiles).length > 0) {
       this.filesSelected.emit({ ...this.selectedFiles })
     }
-
     this.formSubmit.emit(formValue)
   }
 
@@ -430,7 +413,7 @@ export class EntityFormComponent<
   }
 
   getErrorId(key: string): string | null {
-    const control = this.form.get(key) as AbstractControl<unknown> | null
+    const control = this.form.get(key)
     if (control?.errors) {
       const firstError = Object.keys(control.errors)[0]
       return `${key}-error-${firstError}`
@@ -439,7 +422,7 @@ export class EntityFormComponent<
   }
 
   getErrorMessages(key: string): { id: string; message: string }[] {
-    const control = this.form.get(key) as AbstractControl<unknown> | null
+    const control = this.form.get(key)
     if (!control?.errors) return []
 
     const messages: Record<string, string> = {
@@ -461,5 +444,84 @@ export class EntityFormComponent<
 
   private getFieldLabel(fieldKey: string): string {
     return this.fields.find((field) => field.key === fieldKey)?.label ?? fieldKey
+  }
+
+  private buildFormControls(data: Partial<TPayload>): EntityFormGroupControls<TPayload> {
+    const controls: Record<string, FormControl<FormFieldValue | null>> = {}
+
+    this.fields.forEach((field) => {
+      const validators = this.resolveValidators(field)
+      const value = this.resolveControlValue(field, data)
+
+      controls[field.key] = new FormControl<TPayload[typeof field.key] | null>(
+        { value, disabled: field.readonly ?? false },
+        validators,
+      )
+    })
+
+    if (!this.areControlsForFields(controls)) {
+      throw new Error("La configuración del formulario no coincide con los campos proporcionados")
+    }
+
+    return controls
+  }
+
+  private resolveValidators(field: FormField<TPayload>): ValidatorFn[] {
+    const validators: ValidatorFn[] = []
+    if (field.required) {
+      validators.push(Validators.required)
+    }
+    if (field.validators?.length) {
+      validators.push(...field.validators)
+    }
+    return validators
+  }
+
+  private resolveControlValue(
+    field: FormField<TPayload>,
+    data: Partial<TPayload>,
+  ): TPayload[typeof field.key] | null {
+    const dataValue = data[field.key]
+    if (dataValue !== undefined && dataValue !== null) {
+      return dataValue
+    }
+
+    const defaultValue = field.defaultValue
+    if (defaultValue !== undefined && defaultValue !== null) {
+      return defaultValue
+    }
+
+    if (field.type === "select" && field.options?.length) {
+      return field.options[0].value
+    }
+
+    return null
+  }
+
+  private areControlsForFields(
+    controls: Record<string, FormControl<FormFieldValue | null>>,
+  ): controls is EntityFormGroupControls<TPayload> {
+    const fieldKeys = new Set(this.fields.map((field) => field.key))
+    const controlKeys = Object.keys(controls)
+
+    return (
+      controlKeys.length === fieldKeys.size &&
+      controlKeys.every((key) => fieldKeys.has(key)) &&
+      this.fields.every((field) => Object.prototype.hasOwnProperty.call(controls, field.key))
+    )
+  }
+
+  private isPayload(value: unknown): value is TPayload {
+    if (!this.isRecord(value)) {
+      return false
+    }
+
+    const fieldKeys = new Set(this.fields.map((field) => field.key))
+
+    return Object.keys(value).every((key) => fieldKeys.has(key))
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null
   }
 }
