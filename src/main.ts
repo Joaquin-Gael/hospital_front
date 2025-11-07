@@ -1,23 +1,16 @@
-import { createEnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
-import { LoggerService } from './app/services/core/logger.service';
 
 bootstrapApplication(AppComponent, appConfig).catch((error) => {
-  forwardBootstrapError(error);
+  logCriticalError('Application bootstrap failed', error);
   throw error;
 });
 
-function forwardBootstrapError(error: unknown): void {
-  const injector = createEnvironmentInjector(appConfig.providers ?? []);
-
-  try {
-    runInInjectionContext(injector, () => {
-      const logger = inject(LoggerService);
-      logger.error('Error during application bootstrap', error);
-    });
-  } finally {
-    injector.destroy();
-  }
+/**
+ * Logger de emergencia para errores críticos que ocurren antes
+ * de que el sistema de DI esté disponible
+ */
+function logCriticalError(message: string, error: unknown): void {
+  console.error(`[CRITICAL] ${message}`, error);
 }
