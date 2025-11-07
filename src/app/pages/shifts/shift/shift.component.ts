@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Router } from '@angular/router';
 import { ServiceService } from '../../../services/service/service.service';
@@ -14,7 +14,7 @@ import { AuthService } from '../../../services/auth/auth.service';
 import { NotificationService } from '../../../core/notification';
 import { MedicalScheduleDaysResponse, Service, MedicalScheduleCreate } from '../../../services/interfaces/hospital.interfaces';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
-import { TurnState, TurnCreate, PayTurnResponse } from '../../../services/interfaces/appointment.interfaces';
+import { TurnState, TurnCreate } from '../../../services/interfaces/appointment.interfaces';
 import { HealthInsuranceRead } from '../../../services/interfaces/health-insurance.interfaces';
 import { ReasonOption } from '../interfaces/appointment.interfaces';
 import { StepIndicatorComponent } from '../step-indicator/step-indicator.component';
@@ -24,6 +24,8 @@ import { TimeSelectionComponent } from '../time-selection/time-selection.compone
 import { AppointmentSummaryComponent } from '../appointment-summary/appointment-summary.component';
 import { NavigationButtonsComponent } from '../navigation-buttons/navigation-buttons.component';
 import { HealthInsuranceSelectionComponent } from '../health-insarunce-selection/health-insarunce-selection.component';
+import { CashesService } from '../../../services/cashes/cashes.service';
+import { PayTurnWithCashResponse } from '../../../services/interfaces/cashes.interfaces';
 
 @Component({
   selector: 'app-appointment-scheduler',
@@ -72,6 +74,7 @@ export class ShiftsComponent implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
+  private cashesService = inject(CashesService);
 
   // Data properties
   services: Service[] = [];
@@ -104,6 +107,7 @@ export class ShiftsComponent implements OnInit {
     this.initForm();
     this.watchFormChanges();
     this.loadCurrentUser();
+    this.handleStripeCallback();
   }
 
   private loadCurrentUser(): void {
@@ -539,12 +543,12 @@ export class ShiftsComponent implements OnInit {
     this.logger.debug('Datos del turno enviados:', turnData);
 
     this.appointmentService.createTurn(turnData).subscribe({
-      next: (response: PayTurnResponse) => {
+      next: (response: PayTurnWithCashResponse) => {
         this.logger.debug('Turno creado:', response);
         if (response.payment_url) {
           this.notificationService.success('Turno creado con éxito. Redirigiendo al pago...', { duration: 5000 });
           if (isPlatformBrowser(this.platformId)) {
-            window.location.href = response.payment_url; 
+            window.location.href = response.payment_url;
           }
         } else {
           this.notificationService.success('Turno creado con éxito', { duration: 5000 });
@@ -569,6 +573,50 @@ export class ShiftsComponent implements OnInit {
       currency: 'COP',
       minimumFractionDigits: 0
     }).format(price);
+  }
+
+  private handleStripeCallback(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const search = window.location.search;
+    if (!search) {
+      return;
+    }
+
+    const params = new HttpParams({ fromString: search.replace(/^\?/, '') });
+    const callback = this.cashesService.parseSuccessCallback(params);
+
+    if (!callback.redirectStatus) {
+      return;
+    }
+
+    this.logger.info('Stripe redirect detected', callback);
+
+    switch (callback.redirectStatus) {
+      case 'succeeded':
+        this.notificationService.success('Pago confirmado. ¡Gracias por tu reserva!', {
+          duration: 5000
+        });
+        break;
+      case 'failed':
+      case 'canceled':
+        this.notificationService.error('El pago no se pudo completar. Puedes intentar nuevamente.', {
+          duration: 5000
+        });
+        break;
+      default:
+        this.notificationService.info(
+          'Estado del pago recibido. Verifica tu historial para más detalles.',
+          { duration: 5000 }
+        );
+        break;
+    }
+
+    const url = new URL(window.location.href);
+    url.search = '';
+    window.history.replaceState({}, document.title, url.toString());
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
