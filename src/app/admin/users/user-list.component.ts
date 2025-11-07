@@ -491,7 +491,7 @@ export class UserListComponent implements OnInit, OnDestroy {
           dni: formData.dni,
           telephone: formData.telephone || undefined,
           address: formData.address || undefined,
-          blood_type: formData.blood_type || undefined,
+          blood_type: formData.blood_type || '',
           health_insurance: healthInsuranceId ? [healthInsuranceId] : [],
         };
 
