@@ -21,7 +21,6 @@ import {
   ReactiveFormsModule,
   ValidatorFn,
   Validators,
-  ɵNullableFormControls,
 } from "@angular/forms"
 import { LoggerService } from "../../services/core/logger.service"
 
@@ -70,7 +69,9 @@ export interface FormField<
 
 export type EntityFormFileSelection = Record<string, File>
 
-type EntityFormGroupControls<TPayload extends EntityFormPayload> = ɵNullableFormControls<TPayload>
+type EntityFormGroupControls<TPayload extends EntityFormPayload> = {
+  [K in keyof TPayload]: FormControl<TPayload[K] | null>
+}
 
 @Component({
   selector: "app-entity-form",
@@ -447,13 +448,15 @@ export class EntityFormComponent<
   }
 
   private buildFormControls(data: Partial<TPayload>): EntityFormGroupControls<TPayload> {
-    const controls: Record<string, FormControl<FormFieldValue | null>> = {}
+    const controls: Partial<EntityFormGroupControls<TPayload>> = {}
 
     this.fields.forEach((field) => {
       const validators = this.resolveValidators(field)
       const value = this.resolveControlValue(field, data)
 
-      controls[field.key] = new FormControl<TPayload[typeof field.key] | null>(
+      const key = field.key as keyof TPayload
+
+      controls[key] = new FormControl<TPayload[typeof key] | null>(
         { value, disabled: field.readonly ?? false },
         validators,
       )
@@ -463,7 +466,7 @@ export class EntityFormComponent<
       throw new Error("La configuración del formulario no coincide con los campos proporcionados")
     }
 
-    return controls
+    return controls as EntityFormGroupControls<TPayload>
   }
 
   private resolveValidators(field: FormField<TPayload>): ValidatorFn[] {
@@ -499,10 +502,10 @@ export class EntityFormComponent<
   }
 
   private areControlsForFields(
-    controls: Record<string, FormControl<FormFieldValue | null>>,
+    controls: Partial<EntityFormGroupControls<TPayload>>,
   ): controls is EntityFormGroupControls<TPayload> {
     const fieldKeys = new Set(this.fields.map((field) => field.key))
-    const controlKeys = Object.keys(controls)
+    const controlKeys = Object.keys(controls as Record<string, unknown>)
 
     return (
       controlKeys.length === fieldKeys.size &&
