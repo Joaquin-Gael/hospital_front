@@ -1,7 +1,11 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
+import {
+  EntityFormComponent,
+  EntityFormPayload,
+  FormField,
+} from '../../shared/entity-form/entity-form.component';
 import { DoctorService } from '../../services/doctor/doctor.service';
 import { ScheduleService } from '../../services/schedule/schedule.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,10 +20,10 @@ interface AssignData {
   schedules: MedicalSchedule[];
 }
 
-interface AssignFormValues {
+type AssignFormValues = EntityFormPayload & {
   doctorId: string;
   scheduleId: string;
-}
+};
 
 @Component({
   selector: 'app-assign-doctor-schedule',

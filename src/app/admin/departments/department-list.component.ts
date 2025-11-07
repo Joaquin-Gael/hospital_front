@@ -16,6 +16,7 @@ import {
 } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
+  EntityFormPayload,
   FormField,
 } from '../../shared/entity-form/entity-form.component';
 import { DepartmentService } from '../../services/department/department.service';
@@ -52,6 +53,8 @@ type DepartmentFormValues = DepartmentCreate;
   templateUrl: './department-list.component.html',
   styleUrls: ['./department-list.component.scss'],
 })
+type DepartmentFormValues = EntityFormPayload & DepartmentCreate;
+
 export class DepartmentListComponent implements OnInit {
   private departmentService = inject(DepartmentService);
   private logger = inject(LoggerService);
@@ -251,12 +254,24 @@ export class DepartmentListComponent implements OnInit {
     this.formLoading = true;
     this.error = null;
 
+    const createPayload: DepartmentCreate = {
+      name: formData.name,
+      description: formData.description?.toString() ?? '',
+      location_id: formData.location_id,
+    };
+
+    const updatePayload: DepartmentUpdate = {
+      name: formData.name,
+      description: formData.description?.toString() ?? '',
+      location_id: formData.location_id,
+    };
+
     const request =
       this.formMode === 'create'
-        ? this.departmentService.addDepartment(formData)
+        ? this.departmentService.addDepartment(createPayload)
         : this.departmentService.updateDepartment(
             this.selectedDepartment!.id,
-            { ...formData } as DepartmentUpdate
+            updatePayload
           );
 
     request.subscribe({
