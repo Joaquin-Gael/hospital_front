@@ -14,7 +14,7 @@
     <div class="doctor-section__form-container">
       <app-entity-form
         [fields]="formFields"
-        [initialData]="selectedDoctor"
+        [initialData]="formInitialData"
         [mode]="formMode"
         [title]="formMode === 'create' ? 'Nuevo Doctor' : 'Editar Doctor'"
         [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"

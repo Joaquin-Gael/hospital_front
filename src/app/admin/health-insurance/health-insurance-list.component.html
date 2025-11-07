@@ -14,7 +14,7 @@
     <div class="health-insurance-section__form-container">
       <app-entity-form
         [fields]="formFields"
-        [initialData]="selectedInsurance"
+        [initialData]="formInitialData"
         [title]="formMode === 'create' ? 'Nueva Obra Social' : 'Editar Obra Social'"
         [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
         [loading]="formLoading"
