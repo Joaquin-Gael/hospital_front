@@ -1,29 +1,79 @@
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
-  type OnInit,
   Output,
-  ChangeDetectionStrategy,
-  type OnChanges,
-  type SimpleChanges,
-   ChangeDetectorRef,
-  type ElementRef,
   ViewChildren,
+  type ElementRef,
+  type OnChanges,
+  type OnInit,
+  type OnDestroy,
   type QueryList,
+  type SimpleChanges,
+  signal,
 } from "@angular/core"
 import { CommonModule } from "@angular/common"
-import { FormBuilder,  FormGroup, ReactiveFormsModule, Validators } from "@angular/forms"
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from "@angular/forms"
+import { LoggerService } from "../../services/core/logger.service"
 
-export interface FormField {
-  key: string
+export type FormFieldType =
+  | "text"
+  | "number"
+  | "email"
+  | "password"
+  | "textarea"
+  | "select"
+  | "checkbox"
+  | "date"
+  | "file"
+
+export type FormFieldValue =
+  | string
+  | number
+  | boolean
+  | Date
+  | File
+  | string[]
+  | null
+  | undefined
+
+export type EntityFormPayload = Record<string, FormFieldValue>
+
+export interface FormFieldOption<TValue> {
+  value: TValue
   label: string
-  type: "text" | "number" | "email" | "password" | "textarea" | "select" | "checkbox" | "date" | "file"
+}
+
+export interface FormField<
+  TPayload extends EntityFormPayload,
+  TKey extends keyof TPayload & string = keyof TPayload & string,
+> {
+  key: TKey
+  label: string
+  type: FormFieldType
   required?: boolean
-  options?: { value: any; label: string }[]
-  validators?: any[]
-  defaultValue?: any
+  options?: FormFieldOption<TPayload[TKey]>[]
+  validators?: ValidatorFn[]
+  defaultValue?: TPayload[TKey]
   readonly?: boolean
+  placeholder?: string
+}
+
+export type EntityFormFileSelection = Record<string, File>
+
+type EntityFormGroupControls<TPayload extends EntityFormPayload> = {
+  [K in keyof TPayload & string]: FormControl<TPayload[K] | null>
 }
 
 @Component({
@@ -34,36 +84,48 @@ export interface FormField {
   styleUrls: ["./entity-form.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EntityFormComponent implements OnInit, OnChanges {
-  @Input() fields: FormField[] = []
-  @Input() initialData: any = null
+export class EntityFormComponent<
+  TPayload extends EntityFormPayload = EntityFormPayload,
+> implements OnInit, OnChanges, OnDestroy {
+  @Input() fields: FormField<TPayload>[] = []
+  @Input() initialData: Partial<TPayload> | null = null
   @Input() mode: "create" | "edit" = "create"
   @Input() title = "Formulario"
   @Input() submitLabel = "Guardar"
   @Input() loading = false
   @Input() enableImageUpload = false
-  @Output() formSubmit = new EventEmitter<any>()
+  @Output() formSubmit = new EventEmitter<TPayload>()
   @Output() formCancel = new EventEmitter<void>()
   @Output() imageSelected = new EventEmitter<File>()
-  @Output() filesSelected = new EventEmitter<{ [key: string]: File }>()
+  @Output() filesSelected = new EventEmitter<EntityFormFileSelection>()
 
   @ViewChildren("fileInput") fileInputs!: QueryList<ElementRef<HTMLInputElement>>
 
-  form!: FormGroup
+  form!: FormGroup<EntityFormGroupControls<TPayload>>
   selectedImage: File | null = null
 
-  selectedFiles: { [key: string]: File } = {}
-  isDragOver: { [key: string]: boolean } = {}
-  uploadProgress: { [key: string]: number } = {}
-  private dragCounter: { [key: string]: number } = {}
+  selectedFiles: EntityFormFileSelection = {}
+  isDragOver: Record<string, boolean> = {}
+  readonly uploadProgress = signal<Record<string, number>>({})
+  private readonly dragCounter: Record<string, number> = {}
+  readonly focusAnnouncement = signal("")
+  readonly fileStatusAnnouncement = signal("")
+  readonly uploadStatusAnnouncement = signal("")
+  private readonly uploadTimers = new Map<string, ReturnType<typeof setInterval>>()
 
   constructor(
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
+    private logger: LoggerService,
   ) {}
 
   ngOnInit(): void {
     this.initForm()
+  }
+
+  ngOnDestroy(): void {
+    this.uploadTimers.forEach((timer) => clearInterval(timer))
+    this.uploadTimers.clear()
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -77,54 +139,53 @@ export class EntityFormComponent implements OnInit, OnChanges {
     }
   }
 
-  private isEqual(obj1: any, obj2: any): boolean {
+  private isEqual<T>(obj1: T, obj2: T): boolean {
     if (obj1 === obj2) return true
     if (!obj1 || !obj2) return false
     return JSON.stringify(obj1) === JSON.stringify(obj2)
   }
 
   hasFileFields(): boolean {
-    return this.fields.some(field => field.type === 'file')
+    return this.fields.some((field) => field.type === "file")
   }
 
-  /** Método que loggea el foco en un campo */
-  logFocus(fieldKey: string): void {
-    const control = this.form.get(fieldKey)
-    console.log(`Focus en ${fieldKey}`, "valor:", control?.value, "válido:", control?.valid)
+  /** Método que anuncia el foco en un campo */
+  announceFocus(fieldKey: keyof TPayload & string): void {
+    const control = this.form.get(fieldKey) as AbstractControl<TPayload[typeof fieldKey] | null> | null
+    const fieldLabel = this.getFieldLabel(fieldKey)
+    const controlValue = control?.value
+    this.focusAnnouncement.set(
+      controlValue === null || controlValue === undefined || controlValue === ""
+        ? `${fieldLabel} enfocado`
+        : `${fieldLabel} enfocado. Valor actual: ${controlValue}`,
+    )
+    this.logger.debug(`Campo ${fieldKey} enfocado`, controlValue)
   }
 
   private initForm(): void {
-    const formControls: Record<string, any> = {}
-    const data = this.initialData ? { ...this.initialData } : {}
+    const formControls = {} as Partial<EntityFormGroupControls<TPayload>>
+    const data: Partial<TPayload> = this.initialData ? { ...this.initialData } : {}
 
     this.fields.forEach((field) => {
-      const validators = (field.required ?? false) ? [Validators.required] : []
-      if (field.validators) {
+      const validators: ValidatorFn[] = []
+      if (field.required) {
+        validators.push(Validators.required)
+      }
+      if (field.validators?.length) {
         validators.push(...field.validators)
       }
 
-      let value = data[field.key] ?? field.defaultValue ?? ""
-      if (field.type === "select" && (value === "" || value === null) && field.options?.length) {
+      let value = (data[field.key] ?? field.defaultValue ?? null) as TPayload[typeof field.key] | null
+      if (field.type === "select" && value == null && field.options?.length) {
         value = field.options[0].value
       }
 
-      formControls[field.key] = [value, validators]
+      formControls[field.key] = this.fb.control<TPayload[typeof field.key] | null>(value, validators) as EntityFormGroupControls<TPayload>[typeof field.key]
     })
 
-    if (this.form) {
-      Object.keys(formControls).forEach((key) => {
-        const control = this.form.get(key)
-        if (control) {
-          control.setValue(formControls[key][0], { emitEvent: false })
-          control.setValidators(formControls[key][1])
-          control.updateValueAndValidity({ emitEvent: false })
-        }
-      })
-    } else {
-      this.form = this.fb.group(formControls)
-    }
+    this.form = this.fb.group(formControls as EntityFormGroupControls<TPayload>)
 
-    console.log("Formulario inicializado con valores:", this.form.value)
+    this.logger.debug("Formulario inicializado", this.form.getRawValue())
   }
 
   onSubmit(): void {
@@ -132,14 +193,14 @@ export class EntityFormComponent implements OnInit, OnChanges {
       this.markFormGroupTouched(this.form)
       return
     }
-    const formValue = this.form.value
+    const formValue = this.form.getRawValue()
 
     if (this.selectedImage) {
       this.imageSelected.emit(this.selectedImage)
     }
 
     if (Object.keys(this.selectedFiles).length > 0) {
-      this.filesSelected.emit(this.selectedFiles)
+      this.filesSelected.emit({ ...this.selectedFiles })
     }
 
     this.formSubmit.emit(formValue)
@@ -154,6 +215,8 @@ export class EntityFormComponent implements OnInit, OnChanges {
     if (input.files && input.files.length > 0) {
       this.selectedImage = input.files[0]
       this.imageSelected.emit(this.selectedImage)
+      this.fileStatusAnnouncement.set(`Imagen ${this.selectedImage.name} seleccionada`)
+      this.logger.info("Imagen seleccionada", this.selectedImage.name)
     }
   }
 
@@ -195,8 +258,9 @@ export class EntityFormComponent implements OnInit, OnChanges {
       if (file.type.startsWith("image/")) {
         this.handleFileSelection(file, fieldKey)
       } else {
-        console.warn("Solo se permiten archivos de imagen")
-        // Aquí podrías mostrar un mensaje de error al usuario
+        const fieldLabel = this.getFieldLabel(fieldKey)
+        this.logger.warn("Intento de cargar un archivo no soportado", file.type)
+        this.fileStatusAnnouncement.set(`Solo se permiten archivos de imagen para ${fieldLabel}`)
       }
     }
 
@@ -215,7 +279,9 @@ export class EntityFormComponent implements OnInit, OnChanges {
     // Validaciones adicionales
     const maxSize = 5 * 1024 * 1024 // 5MB
     if (file.size > maxSize) {
-      console.warn("El archivo es demasiado grande. Máximo 5MB.")
+      const fieldLabel = this.getFieldLabel(fieldKey)
+      this.logger.warn("Archivo demasiado grande", { fieldKey, size: file.size })
+      this.fileStatusAnnouncement.set(`El archivo es demasiado grande. Máximo 5MB para ${fieldLabel}.`)
       return
     }
 
@@ -231,31 +297,56 @@ export class EntityFormComponent implements OnInit, OnChanges {
     // Simular progreso de carga (opcional)
     this.simulateUploadProgress(fieldKey)
 
-    console.log(`Archivo seleccionado para ${fieldKey}:`, file.name, file.size)
+    const fieldLabel = this.getFieldLabel(fieldKey)
+    this.fileStatusAnnouncement.set(`Archivo ${file.name} listo para subir en ${fieldLabel}`)
+    this.logger.info(`Archivo seleccionado para ${fieldKey}`, {
+      name: file.name,
+      size: file.size,
+    })
     this.cdr.markForCheck()
   }
 
   private simulateUploadProgress(fieldKey: string): void {
     // Esto es solo para demostración. En una app real,
     // el progreso vendría del servicio de upload
-    this.uploadProgress[fieldKey] = 0
+    this.uploadProgress.update((current) => ({ ...current, [fieldKey]: 0 }))
 
+    const fieldLabel = this.getFieldLabel(fieldKey)
     const interval = setInterval(() => {
-      this.uploadProgress[fieldKey] += Math.random() * 30
+      this.uploadProgress.update((current) => {
+        const nextValue = Math.min(100, (current[fieldKey] ?? 0) + Math.random() * 30)
+        const updated = { ...current, [fieldKey]: nextValue }
+        this.uploadStatusAnnouncement.set(
+          `Carga de ${fieldLabel} en ${Math.round(nextValue)} por ciento`,
+        )
+        return updated
+      })
 
-      if (this.uploadProgress[fieldKey] >= 100) {
-        this.uploadProgress[fieldKey] = 100
-        clearInterval(interval)
-
-        // Limpiar el progreso después de un momento
+      if ((this.uploadProgress()[fieldKey] ?? 0) >= 100) {
+        const timer = this.uploadTimers.get(fieldKey)
+        if (timer) {
+          clearInterval(timer)
+          this.uploadTimers.delete(fieldKey)
+        }
+        this.uploadStatusAnnouncement.set(`Carga de ${fieldLabel} completada`)
         setTimeout(() => {
-          delete this.uploadProgress[fieldKey]
+          this.uploadProgress.update((current) => {
+            const updated = { ...current }
+            delete updated[fieldKey]
+            return updated
+          })
           this.cdr.markForCheck()
         }, 1000)
       }
 
       this.cdr.markForCheck()
     }, 200)
+
+    const previousTimer = this.uploadTimers.get(fieldKey)
+    if (previousTimer) {
+      clearInterval(previousTimer)
+    }
+    this.uploadTimers.set(fieldKey, interval)
   }
 
   triggerFileInput(fieldKey: string): void {
@@ -270,8 +361,18 @@ export class EntityFormComponent implements OnInit, OnChanges {
     event.preventDefault()
     event.stopPropagation()
 
+    const removedFile = this.selectedFiles[fieldKey]
     delete this.selectedFiles[fieldKey]
-    delete this.uploadProgress[fieldKey]
+    this.uploadProgress.update((current) => {
+      const updated = { ...current }
+      delete updated[fieldKey]
+      return updated
+    })
+    const timer = this.uploadTimers.get(fieldKey)
+    if (timer) {
+      clearInterval(timer)
+      this.uploadTimers.delete(fieldKey)
+    }
 
     // Limpiar el input file
     const fileInput = this.fileInputs.find((input) => input.nativeElement.id === fieldKey)
@@ -281,11 +382,13 @@ export class EntityFormComponent implements OnInit, OnChanges {
     }
 
     // Si era el archivo principal, limpiarlo también
-    if (this.selectedImage === this.selectedFiles[fieldKey]) {
+    if (this.selectedImage && removedFile && this.selectedImage === removedFile) {
       this.selectedImage = null
     }
 
-    console.log(`Archivo removido de ${fieldKey}`)
+    const fieldLabel = this.getFieldLabel(fieldKey)
+    this.fileStatusAnnouncement.set(`Archivo eliminado de ${fieldLabel}`)
+    this.logger.info(`Archivo removido de ${fieldKey}`)
     this.cdr.markForCheck()
   }
 
@@ -302,8 +405,8 @@ export class EntityFormComponent implements OnInit, OnChanges {
   private markFormGroupTouched(formGroup: FormGroup): void {
     Object.values(formGroup.controls).forEach((control) => {
       control.markAsTouched()
-      if ((control as any).controls) {
-        this.markFormGroupTouched(control as FormGroup)
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control)
       }
     })
   }
@@ -313,11 +416,11 @@ export class EntityFormComponent implements OnInit, OnChanges {
     return control ? control.touched && control.hasError(errorName) : false
   }
 
-  trackByField(index: number, field: FormField): string {
+  trackByField(index: number, field: FormField<TPayload>): string {
     return field.key
   }
 
-  getPlaceholder(field: any): string {
+  getPlaceholder(field: FormField<TPayload>): string {
     return field.placeholder ?? ""
   }
 
@@ -327,7 +430,7 @@ export class EntityFormComponent implements OnInit, OnChanges {
   }
 
   getErrorId(key: string): string | null {
-    const control = this.form.get(key)
+    const control = this.form.get(key) as AbstractControl<unknown> | null
     if (control?.errors) {
       const firstError = Object.keys(control.errors)[0]
       return `${key}-error-${firstError}`
@@ -336,10 +439,10 @@ export class EntityFormComponent implements OnInit, OnChanges {
   }
 
   getErrorMessages(key: string): { id: string; message: string }[] {
-    const control = this.form.get(key)
+    const control = this.form.get(key) as AbstractControl<unknown> | null
     if (!control?.errors) return []
 
-    const messages: { [error: string]: string } = {
+    const messages: Record<string, string> = {
       required: "Este campo es obligatorio",
       email: "Ingrese un email válido",
       minlength: `Mínimo ${control.errors["minlength"]?.requiredLength} caracteres`,
@@ -354,5 +457,9 @@ export class EntityFormComponent implements OnInit, OnChanges {
       id: `${key}-error-${error}`,
       message: messages[error] ?? "Error desconocido",
     }))
+  }
+
+  private getFieldLabel(fieldKey: string): string {
+    return this.fields.find((field) => field.key === fieldKey)?.label ?? fieldKey
   }
 }

@@ -6,6 +6,20 @@
 .entity-form {
   max-width: 900px;
   margin: 0 auto;
+  position: relative;
+
+  &__sr-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    border: 0;
+    white-space: nowrap;
+  }
 
   &__loading {
     padding: 80px 20px;

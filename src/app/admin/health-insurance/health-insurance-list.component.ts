@@ -49,6 +49,8 @@ import { NotificationService } from '../../core/notification';
   templateUrl: './health-insurance-list.component.html',
   styleUrls: ['./health-insurance-list.component.scss'],
 })
+type HealthInsuranceFormValues = HealthInsuranceCreate;
+
 export class HealthInsuranceListComponent implements OnInit {
   private service = inject(HealthInsuranceService);
   private logger = inject(LoggerService);
@@ -103,7 +105,7 @@ export class HealthInsuranceListComponent implements OnInit {
     },
   ];
 
-  baseFormFields: FormField[] = [
+  baseFormFields: FormField<HealthInsuranceFormValues>[] = [
     {
       key: 'name',
       label: 'Nombre',
@@ -131,7 +133,7 @@ export class HealthInsuranceListComponent implements OnInit {
     },
   ];
 
-  get formFields(): FormField[] {
+  get formFields(): FormField<HealthInsuranceFormValues>[] {
     if (this._formFields.length === 0 || this.formMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
@@ -140,7 +142,8 @@ export class HealthInsuranceListComponent implements OnInit {
     return this._formFields;
   }
 
-  private _formFields: FormField[] = [];
+  private _formFields: FormField<HealthInsuranceFormValues>[] = [];
+  formInitialData: Partial<HealthInsuranceFormValues> | null = null;
 
   ngOnInit(): void {
     this.loadInsurances();
@@ -168,6 +171,7 @@ export class HealthInsuranceListComponent implements OnInit {
   onAddNew(): void {
     this.formMode = 'create';
     this.selectedInsurance = null;
+    this.formInitialData = null;
     this.showForm = true;
     this.logger.debug('Opening form for new health insurance');
   }
@@ -175,6 +179,11 @@ export class HealthInsuranceListComponent implements OnInit {
   onEdit(insurance: HealthInsuranceRead): void {
     this.formMode = 'edit';
     this.selectedInsurance = insurance;
+    this.formInitialData = {
+      name: insurance.name,
+      description: insurance.description,
+      discount: insurance.discount,
+    };
     this.showForm = true;
     this.logger.debug('Opening form for editing health insurance', insurance);
   }
@@ -240,22 +249,36 @@ export class HealthInsuranceListComponent implements OnInit {
     });
   }
 
-  onFormSubmit(formData: Partial<HealthInsuranceRead>): void {
+  onFormSubmit(formData: HealthInsuranceFormValues): void {
     this.formLoading = true;
     this.error = null;
 
+    const createPayload: HealthInsuranceCreate = {
+      name: formData.name,
+      description: formData.description,
+      discount: formData.discount,
+    };
+
+    const updatePayload: HealthInsuranceUpdate = {
+      name: formData.name,
+      description: formData.description,
+      discount: formData.discount,
+    };
+
     const request =
       this.formMode === 'create'
-        ? this.service.create(formData as HealthInsuranceCreate)
+        ? this.service.create(createPayload)
         : this.service.update(
             this.selectedInsurance!.id,
-            formData as HealthInsuranceUpdate
+            updatePayload
           );
 
     request.subscribe({
       next: () => {
         this.formLoading = false;
         this.showForm = false;
+        this.selectedInsurance = null;
+        this.formInitialData = null;
         this.loadInsurances();
         this.logger.info(
           `Obra social ${
@@ -302,6 +325,7 @@ export class HealthInsuranceListComponent implements OnInit {
   onFormCancel(): void {
     this.showForm = false;
     this.selectedInsurance = null;
+    this.formInitialData = null;
     this.logger.debug('Form cancelled');
   }
 

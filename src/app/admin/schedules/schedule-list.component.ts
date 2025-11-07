@@ -112,7 +112,7 @@ export class ScheduleListComponent implements OnInit {
     { key: 'end_time', label: 'Hora Fin' },
   ];
 
-  private baseFormFields: FormField[] = [
+  private baseFormFields: FormField<ScheduleFormData>[] = [
     {
       key: 'day',
       label: 'Día de la semana',
@@ -139,8 +139,8 @@ export class ScheduleListComponent implements OnInit {
 
   initialData: Partial<ScheduleFormData> = {};
 
-  private _formFields: FormField[] = [];
-  get formFields(): FormField[] {
+  private _formFields: FormField<ScheduleFormData>[] = [];
+  get formFields(): FormField<ScheduleFormData>[] {
     if (this._formFields.length === 0) {
       this._formFields = [...this.baseFormFields];
     }

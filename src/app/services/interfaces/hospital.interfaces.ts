@@ -51,12 +51,14 @@ name: string;
 description: string;
 price: number;
 specialty_id: string; // UUID
+icon_code?: string;
 }
 export interface ServiceUpdate {
 name?: string;
 description?: string;
 price?: number;
 specialty_id: string; // UUID
+icon_code?: string;
 }
 export interface ServiceDelete {
 id: string; // UUID

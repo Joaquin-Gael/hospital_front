@@ -1,4 +1,7 @@
 <div class="entity-form">
+  <div class="entity-form__sr-status" aria-live="polite">{{ focusAnnouncement() }}</div>
+  <div class="entity-form__sr-status" aria-live="assertive">{{ fileStatusAnnouncement() }}</div>
+  <div class="entity-form__sr-status" aria-live="polite">{{ uploadStatusAnnouncement() }}</div>
   @if (loading) {
     <div class="entity-form__loading">
       <div class="loading-spinner"></div>
@@ -123,7 +126,7 @@
                   [required]="field.required ?? false"
                   [attr.aria-required]="field.required ?? false"
                   [attr.readonly]="field.readonly ? true : null"
-                  (focus)="logFocus(field.key)"
+                  (focus)="announceFocus(field.key)"
                 />
               }
 
@@ -140,7 +143,7 @@
                   [required]="field.required ?? false"
                   [attr.aria-required]="field.required ?? false"
                   [attr.readonly]="field.readonly ? true : null"
-                  (focus)="logFocus(field.key)"
+                  (focus)="announceFocus(field.key)"
                 ></textarea>
               }
 
@@ -155,7 +158,7 @@
                   [attr.aria-describedby]="getErrorId(field.key)"
                   [required]="field.required ?? false"
                   [attr.aria-required]="field.required ?? false"
-                  (focus)="logFocus(field.key)"
+                  (focus)="announceFocus(field.key)"
                 >
                   <option value="" disabled>Seleccione una opción</option>
                   @for (option of field.options; track option.value) {
@@ -172,7 +175,7 @@
                     [id]="field.key"
                     [formControlName]="field.key"
                     class="form-field__checkbox"
-                    (focus)="logFocus(field.key)"
+                    (focus)="announceFocus(field.key)"
                   />
                   <label [for]="field.key" class="form-field__checkbox-label">
                     {{ field.label }}
@@ -256,15 +259,15 @@
                     </button>
                   }
 
-                  @if (uploadProgress[field.key] !== undefined) {
-                    <div class="form-field__upload-progress">
+                  @if (uploadProgress()[field.key] !== undefined) {
+                    <div class="form-field__upload-progress" role="status" aria-live="polite">
                       <div class="form-field__progress-bar">
                         <div
                           class="form-field__progress-fill"
-                          [style.width.%]="uploadProgress[field.key]"
+                          [style.width.%]="uploadProgress()[field.key] ?? 0"
                         ></div>
                       </div>
-                      <span class="form-field__progress-text">{{ uploadProgress[field.key] }}%</span>
+                      <span class="form-field__progress-text">{{ uploadProgress()[field.key] | number:'1.0-0' }}%</span>
                     </div>
                   }
                 </div>

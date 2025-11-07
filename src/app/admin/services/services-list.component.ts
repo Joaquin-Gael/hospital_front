@@ -52,6 +52,14 @@ import { NotificationService } from '../../core/notification';
   templateUrl: './services-list.component.html',
   styleUrls: ['./services-list.component.scss'],
 })
+interface ServiceFormValues {
+  name: string;
+  description: string;
+  price: number;
+  icon_code: string;
+  specialty_id: string;
+}
+
 export class ServiceListComponent implements OnInit {
   private serviceService = inject(ServiceService);
   private logger = inject(LoggerService);
@@ -107,7 +115,7 @@ export class ServiceListComponent implements OnInit {
     { key: 'associatedSpecialtyName', label: 'Especialidad' },
   ];
 
-  baseFormFields: FormField[] = [
+  baseFormFields: FormField<ServiceFormValues>[] = [
     {
       key: 'name',
       label: 'Nombre',
@@ -149,7 +157,7 @@ export class ServiceListComponent implements OnInit {
     },
   ];
 
-  get formFields(): FormField[] {
+  get formFields(): FormField<ServiceFormValues>[] {
     if (this._formFields.length === 0 || this.formMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
@@ -158,7 +166,8 @@ export class ServiceListComponent implements OnInit {
     return this._formFields;
   }
 
-  private _formFields: FormField[] = [];
+  private _formFields: FormField<ServiceFormValues>[] = [];
+  formInitialData: Partial<ServiceFormValues> | null = null;
 
   ngOnInit(): void {
     this.loadData();
@@ -205,6 +214,7 @@ export class ServiceListComponent implements OnInit {
   onAddNew(): void {
     this.formMode = 'create';
     this.selectedService = null;
+    this.formInitialData = null;
     this.showForm = true;
     this.logger.debug('Opening form for new service');
   }
@@ -212,6 +222,13 @@ export class ServiceListComponent implements OnInit {
   onEdit(service: Service): void {
     this.formMode = 'edit';
     this.selectedService = service;
+    this.formInitialData = {
+      name: service.name ?? '',
+      description: service.description ?? '',
+      price: service.price,
+      icon_code: service.icon_code ?? '',
+      specialty_id: service.specialty_id,
+    };
     this.showForm = true;
     this.logger.debug('Opening form for editing service', service);
   }
@@ -272,22 +289,39 @@ export class ServiceListComponent implements OnInit {
     });
   }
 
-  onFormSubmit(formData: Partial<Service>): void {
+  onFormSubmit(formData: ServiceFormValues): void {
     this.formLoading = true;
     this.error = null;
 
+    const createPayload: ServiceCreate = {
+      name: formData.name,
+      description: formData.description,
+      price: formData.price,
+      specialty_id: formData.specialty_id,
+      icon_code: formData.icon_code,
+    };
+
+    const updatePayload: ServiceUpdate = {
+      name: formData.name,
+      description: formData.description,
+      price: formData.price,
+      specialty_id: formData.specialty_id,
+      icon_code: formData.icon_code,
+    };
+
     const request =
       this.formMode === 'create'
-        ? this.serviceService.createService(formData as ServiceCreate)
+        ? this.serviceService.createService(createPayload)
         : this.serviceService.updateService(
             this.selectedService!.id.toString(),
-            formData as ServiceUpdate
+            updatePayload
           );
 
     request.subscribe({
       next: () => {
         this.formLoading = false;
         this.showForm = false;
+        this.formInitialData = null;
         this.loadData();
         this.logger.info(
           `Servicio ${
@@ -334,6 +368,7 @@ export class ServiceListComponent implements OnInit {
   onFormCancel(): void {
     this.showForm = false;
     this.selectedService = null;
+    this.formInitialData = null;
     this.logger.debug('Form cancelled');
   }
 

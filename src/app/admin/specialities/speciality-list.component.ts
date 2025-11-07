@@ -254,22 +254,36 @@ export class SpecialityListComponent implements OnInit {
     });
   }
 
-  onFormSubmit(formData: Partial<Specialty>): void {
+  onFormSubmit(formData: SpecialityFormValues): void {
     this.formLoading = true;
     this.error = null;
 
+    const createPayload: SpecialtyCreate = {
+      name: formData.name,
+      description: formData.description,
+      department_id: formData.department_id,
+    };
+
+    const updatePayload: SpecialtyUpdate = {
+      name: formData.name,
+      description: formData.description,
+      department_id: formData.department_id,
+    };
+
     const request =
       this.formMode === 'create'
-        ? this.specialityService.addSpeciality(formData as SpecialtyCreate)
+        ? this.specialityService.addSpeciality(createPayload)
         : this.specialityService.updateSpeciality(
             this.selectedSpeciality!.id,
-            formData as SpecialtyUpdate
+            updatePayload
           );
 
     request.subscribe({
       next: () => {
         this.formLoading = false;
         this.showForm = false;
+        this.selectedSpeciality = null;
+        this.formInitialData = null;
         this.loadData();
         this.logger.info(
           `Especialidad ${
@@ -316,6 +330,7 @@ export class SpecialityListComponent implements OnInit {
   onFormCancel(): void {
     this.showForm = false;
     this.selectedSpeciality = null;
+    this.formInitialData = null;
     this.logger.debug('Form cancelled');
   }
 

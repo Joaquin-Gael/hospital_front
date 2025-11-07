@@ -29,12 +29,27 @@ import { AssignDoctorScheduleComponent } from '../schedules/assign-doctor-schedu
 import {
   Doctor,
   DoctorCreate,
+  DoctorUpdate,
   DoctorUpdateResponse,
   MedicalSchedule,
   DoctorStatus,
 } from '../../services/interfaces/doctor.interfaces';
 import { Specialty } from '../../services/interfaces/hospital.interfaces';
 import { NotificationService } from '../../core/notification';
+
+interface DoctorFormValues {
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  dni: string;
+  telephone: string;
+  specialityId: string;
+  address: string;
+  bloodType: string;
+  doctor_state: DoctorStatus;
+}
 
 @Component({
   selector: 'app-doctor-list',
@@ -95,7 +110,7 @@ export class DoctorListComponent implements OnInit {
   private readonly passwordPattern =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
 
-  private baseFormFields: FormField[] = [
+  private baseFormFields: FormField<DoctorFormValues>[] = [
     {
       key: 'username',
       label: 'Nombre de usuario',
@@ -152,6 +167,7 @@ export class DoctorListComponent implements OnInit {
       label: 'Estado',
       type: 'select',
       required: true,
+      defaultValue: DoctorStatus.AVAILABLE,
       options: [
         { value: DoctorStatus.AVAILABLE, label: 'Disponible' },
         { value: DoctorStatus.BUSY, label: 'En consulta' },
@@ -160,7 +176,7 @@ export class DoctorListComponent implements OnInit {
     },
   ];
 
-  get formFields(): FormField[] {
+  get formFields(): FormField<DoctorFormValues>[] {
     if (this._formFields.length === 0 || this.formMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
@@ -177,7 +193,8 @@ export class DoctorListComponent implements OnInit {
     return this._formFields;
   }
 
-  private _formFields: FormField[] = [];
+  private _formFields: FormField<DoctorFormValues>[] = [];
+  formInitialData: Partial<DoctorFormValues> | null = null;
 
   tableColumns = [
     {
@@ -340,26 +357,26 @@ export class DoctorListComponent implements OnInit {
   onAddNew(): void {
     this.formMode = 'create';
     this.selectedDoctor = null;
+    this.formInitialData = null;
     this.showForm = true;
     this.logger.debug('Opening form for new doctor');
   }
 
   onEdit(doctor: Doctor): void {
     this.formMode = 'edit';
-    this.selectedDoctor = {
-      ...doctor,
-      username: doctor.username || '',
-      first_name: doctor.first_name || '',
-      last_name: doctor.last_name || '',
-      email: doctor.email || '',
-      dni: doctor.dni || '',
-      telephone: doctor.telephone || '',
-      speciality_id: doctor.speciality_id
-        ? doctor.speciality_id.toString()
-        : '',
-      address: doctor.address || '',
-      blood_type: doctor.blood_type || '',
-      doctor_state: doctor.doctor_state || DoctorStatus.AVAILABLE,
+    this.selectedDoctor = doctor;
+    this.formInitialData = {
+      username: doctor.username ?? '',
+      first_name: doctor.first_name ?? '',
+      last_name: doctor.last_name ?? '',
+      email: doctor.email ?? '',
+      password: '',
+      dni: doctor.dni ?? '',
+      telephone: doctor.telephone ?? '',
+      specialityId: doctor.speciality_id ?? '',
+      address: doctor.address ?? '',
+      bloodType: doctor.blood_type ?? '',
+      doctor_state: doctor.doctor_state ?? DoctorStatus.AVAILABLE,
     };
     this.showForm = true;
     this.logger.debug('Opening form for editing doctor', doctor);
@@ -446,7 +463,7 @@ export class DoctorListComponent implements OnInit {
     }
   }
 
-  onFormSubmit(formData: Partial<Doctor>): void {
+  onFormSubmit(formData: DoctorFormValues): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: this.formMode === 'create' ? 'Crear Doctor' : 'Actualizar Doctor',
@@ -456,9 +473,34 @@ export class DoctorListComponent implements OnInit {
       },
     });
 
+    const createPayload: DoctorCreate = {
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+      first_name: formData.first_name || undefined,
+      last_name: formData.last_name || undefined,
+      dni: formData.dni || undefined,
+      telephone: formData.telephone || undefined,
+      speciality_id: formData.specialityId,
+      blood_type: formData.bloodType || undefined,
+      doctor_state: formData.doctor_state || undefined,
+      address: formData.address || undefined,
+    };
+
+    const updatePayload: Partial<DoctorUpdate> = {
+      username: formData.username,
+      first_name: formData.first_name || undefined,
+      last_name: formData.last_name || undefined,
+      telephone: formData.telephone || undefined,
+      email: formData.email,
+      speciality_id: formData.specialityId || undefined,
+      address: formData.address || undefined,
+      doctor_state: formData.doctor_state || undefined,
+    };
+
     const request = this.formMode === 'create'
-      ? this.doctorService.createDoctor(formData as DoctorCreate)
-      : this.doctorService.updateDoctor(this.selectedDoctor!.id, formData);
+      ? this.doctorService.createDoctor(createPayload)
+      : this.doctorService.updateDoctor(this.selectedDoctor!.id, updatePayload);
 
     // Usar forkJoin para manejar ambos observables de manera limpia
     forkJoin({
@@ -471,6 +513,7 @@ export class DoctorListComponent implements OnInit {
           this.formLoading = false;
           this.showForm = false;
           this.selectedDoctor = null;
+          this.formInitialData = null;
           this.loadData();
           
           this.logger.info(
@@ -525,6 +568,7 @@ export class DoctorListComponent implements OnInit {
   onFormCancel(): void {
     this.showForm = false;
     this.selectedDoctor = null;
+    this.formInitialData = null;
     this.logger.debug('Form cancelled');
   }
 

@@ -23,6 +23,10 @@ import { LocationService } from '../../services/location/location.service';
 import { LoggerService } from '../../services/core/logger.service';
 import { Department } from '../../services/interfaces/hospital.interfaces';
 import { Location as LocationModel } from '../../services/interfaces/hospital.interfaces';
+import {
+  DepartmentCreate,
+  DepartmentUpdate,
+} from '../../services/interfaces/hospital.interfaces';
 import { Validators } from '@angular/forms';
 import { NotificationService } from '../../core/notification';
 import { forkJoin } from 'rxjs';
@@ -46,6 +50,8 @@ import { HttpErrorResponse } from '@angular/common/http';
   templateUrl: './department-list.component.html',
   styleUrls: ['./department-list.component.scss'],
 })
+type DepartmentFormValues = DepartmentCreate;
+
 export class DepartmentListComponent implements OnInit {
   private departmentService = inject(DepartmentService);
   private logger = inject(LoggerService);
@@ -90,7 +96,7 @@ export class DepartmentListComponent implements OnInit {
     //key: 'created_at', label: 'Fecha de Creación' },
   ];
 
-  baseFormFields: FormField[] = [
+  baseFormFields: FormField<DepartmentFormValues>[] = [
     {
       key: 'name',
       label: 'Nombre del Departamento',
@@ -118,7 +124,7 @@ export class DepartmentListComponent implements OnInit {
     },
   ];
 
-  get formFields(): FormField[] {
+  get formFields(): FormField<DepartmentFormValues>[] {
     if (this._formFields.length === 0 || this.formMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
@@ -127,7 +133,8 @@ export class DepartmentListComponent implements OnInit {
     return this._formFields;
   }
 
-  private _formFields: FormField[] = [];
+  private _formFields: FormField<DepartmentFormValues>[] = [];
+  formInitialData: Partial<DepartmentFormValues> | null = null;
 
   ngOnInit(): void {
     this.loadData();
@@ -174,6 +181,7 @@ export class DepartmentListComponent implements OnInit {
   onAddNew(): void {
     this.formMode = 'create';
     this.selectedDepartment = null;
+    this.formInitialData = null;
     this.showForm = true;
     this.logger.debug('Opening form for new department');
   }
@@ -181,6 +189,11 @@ export class DepartmentListComponent implements OnInit {
   onEdit(department: Department): void {
     this.formMode = 'edit';
     this.selectedDepartment = department;
+    this.formInitialData = {
+      name: department.name,
+      description: department.description,
+      location_id: department.location_id,
+    };
     this.showForm = true;
     this.logger.debug('Opening form for editing department', department);
   }
@@ -234,16 +247,16 @@ export class DepartmentListComponent implements OnInit {
     });
   }
 
-  onFormSubmit(formData: Partial<Department>): void {
+  onFormSubmit(formData: DepartmentFormValues): void {
     this.formLoading = true;
     this.error = null;
 
     const request =
       this.formMode === 'create'
-        ? this.departmentService.addDepartment(formData as Department)
+        ? this.departmentService.addDepartment(formData)
         : this.departmentService.updateDepartment(
             this.selectedDepartment!.id,
-            formData
+            { ...formData } as DepartmentUpdate
           );
 
     request.subscribe({
@@ -251,6 +264,7 @@ export class DepartmentListComponent implements OnInit {
         this.formLoading = false;
         this.showForm = false;
         this.selectedDepartment = null;
+        this.formInitialData = null;
         this.loadData();
         this.logger.info(
           `Department ${
@@ -295,6 +309,7 @@ export class DepartmentListComponent implements OnInit {
   onFormCancel(): void {
     this.showForm = false;
     this.selectedDepartment = null;
+    this.formInitialData = null;
     this.logger.debug('Form cancelled');
   }
 
