@@ -72,6 +72,7 @@ export class ServiceListComponent implements OnInit {
   error: string | null = null;
   showForm = false;
   formMode: 'create' | 'edit' = 'create';
+  lastFormMode: 'create' | 'edit' | null = null;
 
   // View dialog
   viewDialogOpen = false;
@@ -155,10 +156,11 @@ export class ServiceListComponent implements OnInit {
   ];
 
   get formFields(): FormField<ServiceFormValues>[] {
-    if (this._formFields.length === 0 || this.formMode !== this.formMode) {
+    if (this._formFields.length === 0 || this.lastFormMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
       }));
+      this.lastFormMode = this.formMode;
     }
     return this._formFields;
   }
@@ -197,6 +199,7 @@ export class ServiceListComponent implements OnInit {
               value: s.id.toString(),
               label: s.name,
             }));
+          this._formFields = [];
           this.loading = false;
         }
         this.loading = false;
