@@ -69,6 +69,7 @@ export class HealthInsuranceListComponent implements OnInit {
   error: string | null = null;
   showForm = false;
   formMode: 'create' | 'edit' = 'create';
+  lastFormMode: 'create' | 'edit' | null = null;
 
   // View dialog
   viewDialogOpen = false;
@@ -139,10 +140,11 @@ export class HealthInsuranceListComponent implements OnInit {
   ];
 
   get formFields(): FormField<HealthInsuranceFormValues>[] {
-    if (this._formFields.length === 0 || this.formMode !== this.formMode) {
+    if (this._formFields.length === 0 || this.lastFormMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
       }));
+      this.lastFormMode = this.formMode;
     }
     return this._formFields;
   }
