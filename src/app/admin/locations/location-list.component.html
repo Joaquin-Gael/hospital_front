@@ -16,7 +16,7 @@
   <div class="location-section__form-container">
     <app-entity-form
       [fields]="formFields"
-      [initialData]="selectedLocation"
+      [initialData]="formInitialData"
       [title]="formMode === 'create' ? 'Nueva Ubicación' : 'Editar Ubicación'"
       [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
       [loading]="formLoading"

@@ -16,6 +16,11 @@ interface AssignData {
   schedules: MedicalSchedule[];
 }
 
+interface AssignFormValues {
+  doctorId: string;
+  scheduleId: string;
+}
+
 @Component({
   selector: 'app-assign-doctor-schedule',
   standalone: true,
@@ -89,7 +94,7 @@ export class AssignDoctorScheduleComponent {
   loading = false;
   error: string | null = null;
   title: string;
-  formFields: FormField[] = [];
+  formFields: FormField<AssignFormValues>[] = [];
 
   constructor(
     private dialogRef: MatDialogRef<AssignDoctorScheduleComponent>,
@@ -144,7 +149,7 @@ export class AssignDoctorScheduleComponent {
     return daysMap[englishDay] || englishDay;
   }
 
-  onSubmit(formData: { doctorId: string; scheduleId: string }): void {
+  onSubmit(formData: AssignFormValues): void {
     if (this.data.doctorId && formData.doctorId !== this.data.doctorId) {
       this.error = 'El ID del doctor no coincide con el contexto seleccionado.';
       this.loading = false;

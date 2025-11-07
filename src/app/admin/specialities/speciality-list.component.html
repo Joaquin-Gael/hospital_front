@@ -14,7 +14,7 @@
     <div class="speciality-section__form-container">
       <app-entity-form
         [fields]="formFields"
-        [initialData]="selectedSpeciality"
+        [initialData]="formInitialData"
         [title]="formMode === 'create' ? 'Nueva Especialidad' : 'Editar Especialidad'"
         [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
         [loading]="formLoading"
