@@ -32,6 +32,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { NotificationService } from '../../core/notification';
 
+type HealthInsuranceFormValues = HealthInsuranceCreate;
+
 @Component({
   selector: 'app-health-insurance-list',
   standalone: true,
@@ -49,8 +51,6 @@ import { NotificationService } from '../../core/notification';
   templateUrl: './health-insurance-list.component.html',
   styleUrls: ['./health-insurance-list.component.scss'],
 })
-type HealthInsuranceFormValues = HealthInsuranceCreate;
-
 export class HealthInsuranceListComponent implements OnInit {
   private service = inject(HealthInsuranceService);
   private logger = inject(LoggerService);
