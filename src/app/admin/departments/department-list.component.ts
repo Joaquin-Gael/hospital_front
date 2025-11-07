@@ -35,6 +35,8 @@ import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 
+type DepartmentFormValues = DepartmentCreate;
+
 @Component({
   selector: 'app-department-list',
   standalone: true,

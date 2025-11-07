@@ -33,6 +33,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { NotificationService } from '../../core/notification';
 
+type HealthInsuranceFormValues = HealthInsuranceCreate;
+
 @Component({
   selector: 'app-health-insurance-list',
   standalone: true,
