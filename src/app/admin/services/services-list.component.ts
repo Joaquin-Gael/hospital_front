@@ -16,6 +16,7 @@ import {
 } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
+  EntityFormPayload,
   FormField,
 } from '../../shared/entity-form/entity-form.component';
 import { ServiceService } from '../../services/service/service.service';
@@ -35,6 +36,9 @@ import { SpecialityService } from '../../services/speciality/speciality.service'
 import { forkJoin } from 'rxjs';
 import { NotificationService } from '../../core/notification';
 
+type ServiceFormValues = EntityFormPayload &
+  ServiceCreate;
+
 @Component({
   selector: 'app-service-list',
   standalone: true,
@@ -52,13 +56,6 @@ import { NotificationService } from '../../core/notification';
   templateUrl: './services-list.component.html',
   styleUrls: ['./services-list.component.scss'],
 })
-interface ServiceFormValues {
-  name: string;
-  description: string;
-  price: number;
-  icon_code: string;
-  specialty_id: string;
-}
 
 export class ServiceListComponent implements OnInit {
   private serviceService = inject(ServiceService);
@@ -293,20 +290,22 @@ export class ServiceListComponent implements OnInit {
     this.formLoading = true;
     this.error = null;
 
+    const price = Number(formData.price);
+
     const createPayload: ServiceCreate = {
       name: formData.name,
-      description: formData.description,
-      price: formData.price,
+      description: formData.description ?? '',
+      price,
       specialty_id: formData.specialty_id,
-      icon_code: formData.icon_code,
+      icon_code: formData.icon_code ?? '',
     };
 
     const updatePayload: ServiceUpdate = {
       name: formData.name,
-      description: formData.description,
-      price: formData.price,
+      description: formData.description ?? '',
+      price,
       specialty_id: formData.specialty_id,
-      icon_code: formData.icon_code,
+      icon_code: formData.icon_code ?? '',
     };
 
     const request =

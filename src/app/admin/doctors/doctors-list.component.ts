@@ -13,6 +13,7 @@ import {
 import { DataTableComponent } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
+  EntityFormPayload,
   FormField,
 } from '../../shared/entity-form/entity-form.component';
 import { DoctorService } from '../../services/doctor/doctor.service';
@@ -37,19 +38,19 @@ import {
 import { Specialty } from '../../services/interfaces/hospital.interfaces';
 import { NotificationService } from '../../core/notification';
 
-interface DoctorFormValues {
+type DoctorFormValues = EntityFormPayload & {
   username: string;
   first_name: string;
   last_name: string;
   email: string;
-  password: string;
+  password?: string | null;
   dni: string;
-  telephone: string;
+  telephone?: string | null;
   specialityId: string;
-  address: string;
-  bloodType: string;
-  doctor_state: DoctorStatus;
-}
+  address?: string | null;
+  bloodType?: string | null;
+  doctor_state?: DoctorStatus;
+};
 
 @Component({
   selector: 'app-doctor-list',
@@ -473,15 +474,17 @@ export class DoctorListComponent implements OnInit {
       },
     });
 
+    const specialityId = formData.specialityId?.toString() ?? '';
+
     const createPayload: DoctorCreate = {
       username: formData.username,
       email: formData.email,
-      password: formData.password,
+      password: formData.password ?? '',
       first_name: formData.first_name || undefined,
       last_name: formData.last_name || undefined,
       dni: formData.dni || undefined,
       telephone: formData.telephone || undefined,
-      speciality_id: formData.specialityId,
+      speciality_id: specialityId,
       blood_type: formData.bloodType || undefined,
       doctor_state: formData.doctor_state || undefined,
       address: formData.address || undefined,
@@ -493,7 +496,7 @@ export class DoctorListComponent implements OnInit {
       last_name: formData.last_name || undefined,
       telephone: formData.telephone || undefined,
       email: formData.email,
-      speciality_id: formData.specialityId || undefined,
+      speciality_id: specialityId || undefined,
       address: formData.address || undefined,
       doctor_state: formData.doctor_state || undefined,
     };

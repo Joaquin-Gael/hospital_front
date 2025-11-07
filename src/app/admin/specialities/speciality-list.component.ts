@@ -16,6 +16,7 @@ import {
 } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
+  EntityFormPayload,
   FormField,
 } from '../../shared/entity-form/entity-form.component';
 import { SpecialityService } from '../../services/speciality/speciality.service';
@@ -34,6 +35,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { NotificationService } from '../../core/notification';
 import { forkJoin } from 'rxjs';
+
+type SpecialityFormValues = EntityFormPayload & SpecialtyCreate;
 
 @Component({
   selector: 'app-speciality-list',
@@ -95,7 +98,7 @@ export class SpecialityListComponent implements OnInit {
     { key: 'associatedDepartmentName', label: 'Departamento' },
   ];
 
-  baseFormFields: FormField[] = [
+  baseFormFields: FormField<SpecialityFormValues>[] = [
     {
       key: 'name',
       label: 'Nombre',
@@ -123,7 +126,7 @@ export class SpecialityListComponent implements OnInit {
     },
   ];
 
-  get formFields(): FormField[] {
+  get formFields(): FormField<SpecialityFormValues>[] {
     if (this._formFields.length === 0 || this.formMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
@@ -132,7 +135,8 @@ export class SpecialityListComponent implements OnInit {
     return this._formFields;
   }
 
-  private _formFields: FormField[] = [];
+  private _formFields: FormField<SpecialityFormValues>[] = [];
+  formInitialData: Partial<SpecialityFormValues> | null = null;
 
   ngOnInit(): void {
     this.loadData();
@@ -182,6 +186,7 @@ export class SpecialityListComponent implements OnInit {
   onAddNew(): void {
     this.formMode = 'create';
     this.selectedSpeciality = null;
+    this.formInitialData = null;
     this.showForm = true;
     this.logger.debug('Opening form for new speciality');
   }
@@ -189,6 +194,11 @@ export class SpecialityListComponent implements OnInit {
   onEdit(speciality: Specialty): void {
     this.formMode = 'edit';
     this.selectedSpeciality = speciality;
+    this.formInitialData = {
+      name: speciality.name ?? '',
+      description: speciality.description ?? '',
+      department_id: speciality.department_id ?? '',
+    };
     this.showForm = true;
     this.logger.debug('Opening form for editing speciality', speciality);
   }
@@ -260,13 +270,13 @@ export class SpecialityListComponent implements OnInit {
 
     const createPayload: SpecialtyCreate = {
       name: formData.name,
-      description: formData.description,
+      description: formData.description ?? '',
       department_id: formData.department_id,
     };
 
     const updatePayload: SpecialtyUpdate = {
       name: formData.name,
-      description: formData.description,
+      description: formData.description ?? '',
       department_id: formData.department_id,
     };
 

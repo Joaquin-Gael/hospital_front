@@ -16,6 +16,7 @@ import {
 } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
+  EntityFormPayload,
   FormField,
 } from '../../shared/entity-form/entity-form.component';
 import { LocationService } from '../../services/location/location.service';
@@ -36,10 +37,7 @@ interface ExtendedLocation extends Location {
   departmentCount?: number;
 }
 
-interface LocationFormData {
-  name: string;
-  description: string;
-}
+type LocationFormValues = EntityFormPayload & LocationCreate;
 
 @Component({
   selector: 'app-location-list',
@@ -66,7 +64,7 @@ export class LocationListComponent implements OnInit {
 
   locations: ExtendedLocation[] = [];
   selectedLocation: ExtendedLocation | null = null;
-  formInitialData: Partial<LocationFormData> | null = null;
+  formInitialData: Partial<LocationFormValues> | null = null;
   loading = false;
   formLoading = false;
   error: string | null = null;
@@ -110,7 +108,7 @@ export class LocationListComponent implements OnInit {
     },
   ];
 
-  formFields: FormField<LocationFormData>[] = [
+  formFields: FormField<LocationFormValues>[] = [
     {
       key: 'name',
       label: 'Nombre',
@@ -223,18 +221,18 @@ export class LocationListComponent implements OnInit {
     });
   }
 
-  onFormSubmit(formData: LocationFormData): void {
+  onFormSubmit(formData: LocationFormValues): void {
     this.formLoading = true;
     this.error = null;
 
     const createPayload: LocationCreate = {
       name: formData.name,
-      description: formData.description,
+      description: formData.description ?? '',
     };
 
     const updatePayload: LocationUpdate = {
       name: formData.name,
-      description: formData.description,
+      description: formData.description ?? '',
       location_id: this.selectedLocation?.id ?? '',
     };
 

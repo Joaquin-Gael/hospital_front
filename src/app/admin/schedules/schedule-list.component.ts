@@ -5,7 +5,11 @@ import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-sp
 import { ErrorMessageComponent } from '../error-message/error-message.component';
 import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog/view-dialog.component';
 import { DataTableComponent } from '../../shared/data-table/data-table.component';
-import { EntityFormComponent, FormField } from '../../shared/entity-form/entity-form.component';
+import {
+  EntityFormComponent,
+  EntityFormPayload,
+  FormField,
+} from '../../shared/entity-form/entity-form.component';
 import { ScheduleService } from '../../services/schedule/schedule.service';
 import { DoctorService } from '../../services/doctor/doctor.service';
 import { LoggerService } from '../../services/core/logger.service';
@@ -23,11 +27,11 @@ interface ExtendedSchedule extends MedicalSchedule {
   doctorName: string;
 }
 
-interface ScheduleFormData {
+type ScheduleFormValues = EntityFormPayload & {
   day: string;
   startTime: string;
   endTime: string;
-}
+};
 
 @Component({
   selector: 'app-schedule-list',
@@ -112,7 +116,7 @@ export class ScheduleListComponent implements OnInit {
     { key: 'end_time', label: 'Hora Fin' },
   ];
 
-  private baseFormFields: FormField<ScheduleFormData>[] = [
+  private baseFormFields: FormField<ScheduleFormValues>[] = [
     {
       key: 'day',
       label: 'Día de la semana',
@@ -137,10 +141,10 @@ export class ScheduleListComponent implements OnInit {
     }
   ];
 
-  initialData: Partial<ScheduleFormData> = {};
+  formInitialData: Partial<ScheduleFormValues> | null = null;
 
-  private _formFields: FormField<ScheduleFormData>[] = [];
-  get formFields(): FormField<ScheduleFormData>[] {
+  private _formFields: FormField<ScheduleFormValues>[] = [];
+  get formFields(): FormField<ScheduleFormValues>[] {
     if (this._formFields.length === 0) {
       this._formFields = [...this.baseFormFields];
     }
@@ -248,7 +252,7 @@ export class ScheduleListComponent implements OnInit {
     this.viewDialogData = {};
   }
 
-  onFormSubmit(formData: ScheduleFormData): void {
+  onFormSubmit(formData: ScheduleFormValues): void {
     if (!this.validateTimes(formData.startTime, formData.endTime)) {
       this.error = 'La hora de fin debe ser posterior a la hora de inicio.';
       return;
@@ -321,18 +325,19 @@ export class ScheduleListComponent implements OnInit {
 
   onFormCancel(): void {
     this.showForm = false;
+    this.formInitialData = null;
   }
 
   private updateInitialData(): void {
     if (this.formMode === 'edit' && this.selectedSchedule) {
       const dayIndex = this.englishDays.indexOf(this.selectedSchedule.day);
-      this.initialData = {
+      this.formInitialData = {
         day: dayIndex >= 0 ? dayIndex.toString() : '',
         startTime: this.selectedSchedule.start_time,
         endTime: this.selectedSchedule.end_time
       };
     } else {
-      this.initialData = {};
+      this.formInitialData = null;
     }
   }
 
