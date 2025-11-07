@@ -34,6 +34,8 @@ import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 
+type DepartmentFormValues = DepartmentCreate;
+
 @Component({
   selector: 'app-department-list',
   standalone: true,
@@ -50,8 +52,6 @@ import { HttpErrorResponse } from '@angular/common/http';
   templateUrl: './department-list.component.html',
   styleUrls: ['./department-list.component.scss'],
 })
-type DepartmentFormValues = DepartmentCreate;
-
 export class DepartmentListComponent implements OnInit {
   private departmentService = inject(DepartmentService);
   private logger = inject(LoggerService);

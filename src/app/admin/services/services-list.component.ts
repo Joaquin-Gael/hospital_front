@@ -35,6 +35,14 @@ import { SpecialityService } from '../../services/speciality/speciality.service'
 import { forkJoin } from 'rxjs';
 import { NotificationService } from '../../core/notification';
 
+interface ServiceFormValues {
+  name: string;
+  description: string;
+  price: number;
+  icon_code: string;
+  specialty_id: string;
+}
+
 @Component({
   selector: 'app-service-list',
   standalone: true,
@@ -52,14 +60,6 @@ import { NotificationService } from '../../core/notification';
   templateUrl: './services-list.component.html',
   styleUrls: ['./services-list.component.scss'],
 })
-interface ServiceFormValues {
-  name: string;
-  description: string;
-  price: number;
-  icon_code: string;
-  specialty_id: string;
-}
-
 export class ServiceListComponent implements OnInit {
   private serviceService = inject(ServiceService);
   private logger = inject(LoggerService);
