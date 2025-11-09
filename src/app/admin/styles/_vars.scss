@@ -1,39 +1,51 @@
 // Sistema de colores premium
-$primary-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-$primary-color: #3b82f6;
-$primary-hover: #2563eb;
-$primary-light: #dbeafe;
-$primary-dark: #1e40af;
+$primary-gradient: var(--gradient-primary);
+$primary-strong-gradient: var(--gradient-primary-strong);
+$primary-color: var(--color-primary);
+$primary-hover: var(--color-primary-hover);
+$primary-light: var(--color-primary-light);
+$primary-dark: var(--color-primary-dark);
 
-$secondary-color: #f8fafc;
-$accent-color: #fbbf24;
-$accent-hover: #f59e0b;
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$error-color: #ef4444;
-$info-color: #3b82f6;
+$secondary-color: var(--color-secondary);
+$accent-color: var(--color-accent);
+$accent-hover: var(--color-accent-hover);
+$success-color: var(--color-success);
+$warning-color: var(--color-warning);
+$error-color: var(--color-error);
+$info-color: var(--color-info);
 
-$text-primary: #1a202c;
-$text-secondary: #4a5568;
-$text-muted: #718096;
-$text-white: #ffffff;
+$text-primary: var(--text-primary);
+$text-secondary: var(--text-secondary);
+$text-muted: var(--text-muted);
+$text-white: var(--text-white);
 
-$bg-primary: #ffffff;
-$bg-secondary: #f7fafc;
-$bg-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-$bg-glass: rgba(255, 255, 255, 0.95);
-$bg-input: #ffffff;
-$bg-hover: rgba(59, 130, 246, 0.05);
+$bg-primary: var(--surface-primary);
+$bg-secondary: var(--surface-secondary);
+$bg-gradient: var(--gradient-hero);
+$bg-glass: var(--surface-glass);
+$bg-input: var(--surface-input);
+$bg-hover: var(--surface-hover);
 
-$border-color: #e2e8f0;
-$border-light: #f1f5f9;
-$border-focus: #3b82f6;
+$border-color: var(--border-strong);
+$border-light: var(--border-subtle);
+$border-focus: var(--border-focus);
+$border-primary-soft: var(--border-primary-soft);
+$border-primary-strong: var(--border-primary-strong);
+$border-danger-soft: var(--border-danger-soft);
+$border-danger-strong: var(--border-danger-strong);
 
-$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-$shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-$shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.37);
-$shadow-input: 0 0 0 3px rgba(59, 130, 246, 0.1);
+$layer-primary-soft: var(--layer-primary-soft);
+$layer-primary-strong: var(--layer-primary-strong);
+$layer-danger-soft: var(--layer-danger-soft);
+$layer-danger-strong: var(--layer-danger-strong);
+
+$shadow-sm: var(--shadow-sm);
+$shadow-md: var(--shadow-md);
+$shadow-lg: var(--shadow-lg);
+$shadow-glass: var(--shadow-glass);
+$shadow-input: var(--shadow-input);
+
+$sidebar-gradient: var(--gradient-sidebar);
 
 $sidebar-width: 280px;
 $sidebar-collapsed-width: 80px;

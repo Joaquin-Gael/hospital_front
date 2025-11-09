@@ -12,7 +12,7 @@
   
   &__sidebar {
     width: $sidebar-width;
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    background: $sidebar-gradient;
     color: rgba(255, 255, 255, 0.9);
     position: fixed;
     top: 0;
@@ -55,7 +55,7 @@
       width: 40px;
       height: 40px;
       border-radius: 10px;
-      background: linear-gradient(135deg, $primary-color 0%, color.adjust($primary-color, $lightness: -10%) 100%);
+      background: $primary-strong-gradient;
       @include flex-center;
 
       svg {
@@ -193,9 +193,9 @@
     border: 2px solid transparent;
 
     &:hover {
-      background: rgba(59, 130, 246, 0.15);
+      background: $layer-primary-soft;
       color: rgba(255, 255, 255, 0.95);
-      border-color: rgba(59, 130, 246, 0.3);
+      border-color: $border-primary-soft;
       transform: translateX(4px);
 
       .admin-panel__nav-icon svg {
@@ -205,10 +205,10 @@
     }
 
     &--active {
-      background: rgba(59, 130, 246, 0.2);
+      background: $layer-primary-strong;
       color: white;
       font-weight: 600;
-      border-color: rgba(59, 130, 246, 0.4);
+      border-color: $border-primary-strong;
       transform: translateX(4px);
 
       &::before {
@@ -281,7 +281,7 @@
     width: 100%;
     padding: 16px 20px;
     border-radius: 12px;
-    color: #ef4444;
+    color: $error-color;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -293,8 +293,8 @@
     @include flex-inline(16px);
 
     &:hover {
-      background: rgba(239, 68, 68, 0.15);
-      border-color: rgba(239, 68, 68, 0.3);
+      background: $layer-danger-soft;
+      border-color: $border-danger-soft;
       transform: translateY(-2px);
 
       svg {
@@ -307,7 +307,7 @@
     }
 
     svg {
-      color: #ef4444;
+      color: $error-color;
       width: 20px;
       height: 20px;
       stroke-width: 2;
