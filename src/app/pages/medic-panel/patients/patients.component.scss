@@ -1,5 +1,6 @@
 @use 'sass:color';
 @use '../styles/_variables.scss' as vars;
+@use '../../../layout/styles/_media-queries.scss' as media;
 
 .patients-page {
   height: 100%;
@@ -63,12 +64,12 @@
     border: 1px solid vars.$border-color;
     border-radius: vars.$border-radius-md;
     font-size: 0.9rem;
-    transition: all 0.2s ease;
-    
+    transition: var(--transition-smooth);
+
     &:focus {
       outline: none;
       border-color: vars.$primary-color;
-      box-shadow: 0 0 0 2px rgba(vars.$primary-color, 0.1);
+      box-shadow: 0 0 0 3px var(--focus-ring);
     }
   }
   
@@ -111,6 +112,7 @@
       &:focus {
         outline: none;
         border-color: vars.$primary-color;
+        box-shadow: 0 0 0 3px var(--focus-ring);
       }
     }
   }
@@ -146,6 +148,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: box-shadow var(--transition-smooth), transform var(--transition-smooth);
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
 }
 
 .patients-table-wrapper {
@@ -156,7 +164,7 @@
 .patients-table {
   width: 100%;
   border-collapse: collapse;
-  
+
   th, td {
     padding: 1rem;
     text-align: left;
@@ -178,24 +186,34 @@
     
     &.sortable-column {
       cursor: pointer;
-      transition: background-color 0.2s;
-      
-      &:hover {
+      transition: color var(--transition-smooth), background-color var(--transition-smooth);
+
+      &:hover,
+      &:focus-visible {
         background-color: color.adjust(vars.$background-color, $lightness: -3%);
+        color: vars.$text-primary;
+        outline: none;
       }
     }
   }
-  
+
   tbody tr {
-    transition: background-color 0.2s;
+    transition:
+      background-color var(--transition-smooth),
+      box-shadow var(--transition-smooth),
+      transform var(--transition-smooth);
     cursor: pointer;
-    
+    box-shadow: none;
+
     &:hover {
       background-color: rgba(vars.$primary-color, 0.05);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(58, 134, 255, 0.12);
     }
-    
+
     &.selected {
       background-color: rgba(vars.$primary-color, 0.1);
+      animation: pulse 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
     }
   }
 }
@@ -224,6 +242,7 @@
   font-weight: 600;
   font-size: 1rem;
   flex-shrink: 0;
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
 }
 
 .patient-info {
@@ -319,21 +338,62 @@
   padding: 0.75rem 1rem;
   border-radius: vars.$border-radius-md;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: var(--transition-smooth);
   cursor: pointer;
   font-size: 0.9rem;
   border: none;
   gap: 0.5rem;
-  
+  box-shadow: none;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
   &--primary {
     background-color: vars.$primary-color;
     color: white;
-    
+    box-shadow: var(--shadow-btn-primary, 0 12px 24px rgba(58, 134, 255, 0.24));
+
     &:hover {
       background-color: color.adjust(vars.$primary-color, $lightness: -5%);
+      box-shadow: var(--shadow-btn-primary-hover, 0 16px 32px rgba(58, 134, 255, 0.32));
+    }
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 3px var(--focus-ring),
+        var(--shadow-btn-primary-hover, 0 16px 32px rgba(58, 134, 255, 0.32));
     }
   }
-  
+
+  &--secondary {
+    background-color: color.adjust(vars.$secondary-color, $lightness: 32%);
+    color: vars.$secondary-color;
+    border: 1px solid color.adjust(vars.$secondary-color, $lightness: -6%);
+    box-shadow: 0 10px 24px rgba(67, 97, 238, 0.15);
+
+    &:hover {
+      background-color: color.adjust(vars.$secondary-color, $lightness: 22%);
+      color: white;
+      box-shadow: 0 14px 30px rgba(67, 97, 238, 0.25);
+    }
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 3px var(--focus-ring),
+        0 14px 30px rgba(67, 97, 238, 0.25);
+    }
+  }
+
   &--icon {
     width: 2.25rem;
     height: 2.25rem;
@@ -341,23 +401,33 @@
     border-radius: vars.$border-radius-md;
     background-color: transparent;
     color: vars.$text-secondary;
-    
+    transition: var(--transition-smooth);
+
     &:hover {
       background-color: color.adjust(vars.$background-color, $lightness: -5%);
       color: vars.$primary-color;
     }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
   }
-  
+
   &--sm {
     font-size: 0.8125rem;
     padding: 0.5rem 0.75rem;
-    
+
     &.btn--icon {
       width: 2rem;
       height: 2rem;
-      size: 8px;
     }
   }
+}
+
+.patients-table tbody tr:hover .patient-avatar,
+.patients-table tbody tr.selected .patient-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 10px 22px rgba(58, 134, 255, 0.18);
 }
 
 .icon-search, .icon-plus, .icon-chevron-up, .icon-chevron-down,
@@ -417,4 +487,17 @@
   border-top-color: vars.$primary-color;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+@include media.reduce-motion {
+  .patients-table-container,
+  .patients-table tbody tr,
+  .patients-table tbody tr.selected,
+  .patients-table tbody tr:hover,
+  .btn,
+  .patient-avatar {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
 }
