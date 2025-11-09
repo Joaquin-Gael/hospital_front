@@ -155,10 +155,9 @@
 
         @include mq.nav-mobile {
           display: none;
-        }
-      }
-    }
   }
+  }
+}
 
   &-links {
     display: flex;
