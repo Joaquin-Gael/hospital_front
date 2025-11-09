@@ -3,77 +3,158 @@
 @use '../styles/_mixins.scss' as mix;
 
 .navbar {
+  --navbar-vertical-padding: clamp(1rem, 2.5vw, 1.75rem);
+  --navbar-offset: calc(#{var.$navbar-height} + var(--navbar-vertical-padding) * 2);
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: var.$navbar-height;
-  background: #1f2937;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid hsla(195, 85%, 45%, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  padding: var(--navbar-vertical-padding) 0;
+  display: flex;
+  justify-content: center;
+  background: transparent;
   z-index: var.$navbar-z-index;
-  transition: var.$navbar-transition;
-  
+  transition: padding 0.45s ease, background 0.45s ease, box-shadow 0.45s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% -120px, rgba(99, 102, 241, 0.25), transparent 60%);
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
+  }
+
   &.scrolled {
-    height: var.$navbar-mobile-height;
-    background: rgba(255, 255, 255, 0.98);
-    border-bottom: 1px solid hsla(195, 85%, 45%, 0.15);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    
-    .navbar-links {
-      @include mq.nav-mobile {
-        top: var.$navbar-mobile-height;
+    --navbar-vertical-padding: clamp(0.65rem, 2vw, 1rem);
+    --navbar-offset: calc(#{var.$navbar-mobile-height} + var(--navbar-vertical-padding) * 2);
+    padding: var(--navbar-vertical-padding) 0;
+
+    &::before {
+      opacity: 0.2;
+    }
+  }
+
+  &-surface {
+    position: relative;
+    width: min(1100px, calc(100% - clamp(1.5rem, 6vw, 4.5rem)));
+    border-radius: 999px;
+    background: rgba(17, 24, 39, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    padding: clamp(0.45rem, 1vw, 0.85rem) clamp(1rem, 2.4vw, 2.5rem);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    box-shadow: 0 32px 64px rgba(30, 64, 175, 0.22), 0 18px 30px rgba(15, 23, 42, 0.4);
+    transition: transform 0.45s ease, background 0.45s ease, border-color 0.45s ease,
+      box-shadow 0.45s ease;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -160px;
+      background: radial-gradient(circle at top, rgba(139, 92, 246, 0.35), transparent 65%);
+      filter: blur(30px);
+      opacity: 0.85;
+      transition: opacity 0.45s ease;
+      pointer-events: none;
+    }
+
+    @include mq.nav-mobile {
+      width: calc(100% - 1.5rem);
+      border-radius: 28px;
+      padding: 0.75rem 1rem;
+      overflow: visible;
+    }
+  }
+
+  &.scrolled {
+    .navbar-surface {
+      background: rgba(17, 24, 39, 0.92);
+      border-color: rgba(129, 140, 248, 0.3);
+      box-shadow: 0 22px 42px rgba(15, 23, 42, 0.55);
+      transform: translateY(-6px) scale(0.995);
+
+      &::before {
+        opacity: 0.65;
       }
     }
   }
 
   &-container {
-    height: 100%;
-    @include mix.flex-between;
-    @include mq.nav-container;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(0.75rem, 2.5vw, 1.5rem);
   }
 
   &-logo {
     a {
       display: flex;
       align-items: center;
+      gap: clamp(0.65rem, 2vw, 1.25rem);
       text-decoration: none;
       transition: var.$navbar-transition;
-      
+      padding: 0.25rem;
+      border-radius: calc(var.$navbar-radius * 1.5);
+
       &:hover {
-        transform: scale(1.02) translateY(-1px);
+        transform: translateY(-1px);
       }
-      
+
       @include mix.focus-ring-nav;
-      
+
       .logo-image {
-        height: 100px;
+        height: clamp(44px, 5vw, 56px);
         width: auto;
-        margin-right: 12px;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        filter: drop-shadow(0 6px 16px rgba(30, 64, 175, 0.25));
         transition: var.$navbar-transition;
-        
+
         @include mq.mobile-only {
           height: 40px;
-          margin-right: 8px;
         }
       }
-      
-      .logo-text {
+
+      .logo-detail {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+
+        @include mq.mobile-only {
+          display: none;
+        }
+      }
+
+      .logo-name {
         font-family: var.$font-family-logo;
-        font-size: var.$font-size-logo;
-        font-weight: var.$font-weight-bold;
-        color: var.$navbar-text-dark;
-        letter-spacing: var.$letter-spacing;
-        background: linear-gradient(135deg, var.$navbar-primary 0%, var.$navbar-primary-hover 100%);
+        font-size: clamp(1.05rem, 2.1vw, 1.45rem);
+        font-weight: var.$font-weight-semibold;
+        letter-spacing: 0.02em;
+        background: linear-gradient(120deg, #e0f2fe 0%, #bfdbfe 40%, #60a5fa 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text;
-        
-        @include mq.mobile-only {
-          font-size: calc(var.$font-size-logo * 0.85);
+      }
+
+      .logo-badge {
+        align-self: flex-start;
+        padding: 0.18rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #c7d2fe;
+        background: rgba(79, 70, 229, 0.18);
+        border: 1px solid rgba(129, 140, 248, 0.28);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+        @include mq.nav-mobile {
+          display: none;
         }
       }
     }
@@ -82,153 +163,164 @@
   &-links {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    @include mq.nav-spacing-responsive;
-    
+    gap: clamp(0.4rem, 1.5vw, 0.85rem);
+    padding: 0.2rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid transparent;
+    transition: background 0.35s ease, border-color 0.35s ease;
+
     a {
       font-family: var.$font-family-base;
-      font-size: var.$font-size-nav;
+      font-size: clamp(0.9rem, 1.6vw, 1.05rem);
       text-decoration: none;
       font-weight: var.$font-weight-medium;
       position: relative;
-      padding: 12px 20px;
-      border-radius: var.$navbar-radius;
-      transition: var.$navbar-transition;
-      letter-spacing: var.$letter-spacing;
+      padding: 0.65rem 1.15rem;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+      color: rgba(226, 232, 240, 0.92);
+      transition: transform 0.3s ease, color 0.3s ease;
+      z-index: 0;
+      overflow: hidden;
       @include mix.focus-ring-nav;
 
-      // Estilo base para todos los links
-      color: var.$navbar-text;
-      
-      // Efecto hover insano para links generales
-      &:hover {
-        color: var.$navbar-primary;
-        background: var.$navbar-hover-gradient;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
-        
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(135deg, hsla(195, 85%, 45%, 0.1) 0%, hsla(195, 85%, 55%, 0.1) 100%);
-          border-radius: var.$navbar-radius;
-          z-index: -1;
-          animation: pulse-border 0.6s ease-out;
-        }
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgba(129, 140, 248, 0.4), rgba(56, 189, 248, 0.15));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
       }
-      
-      &.active {
-        color: var.$navbar-primary;
-        font-weight: var.$font-weight-semibold;
-        background: var.$navbar-active-bg;
-        box-shadow: 0 4px 12px hsla(195, 85%, 45%, 0.2);
-        
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -2;
+      }
+
+      &:hover {
+        color: var.$white;
+        transform: translateY(-2px);
+
+        &::before {
+          opacity: 1;
+        }
+
         &::after {
-          content: '';
-          position: absolute;
-          bottom: -8px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 30px;
-          height: 3px;
-          background: linear-gradient(90deg, var.$navbar-primary 0%, var.$navbar-primary-hover 100%);
-          border-radius: 2px;
-          box-shadow: 0 2px 8px hsla(195, 85%, 45%, 0.3);
+          opacity: 1;
         }
       }
 
-      // Estilo específico para "Iniciar Sesión" y "Registrarse" cuando no autenticado
-      &[routerLink="/login"],
-      &[routerLink="/register"] {
-        background: linear-gradient(135deg, #4b5eaa 0%, #2a4370 100%);
+      &.active {
         color: var.$white;
         font-weight: var.$font-weight-semibold;
-        
-        &:hover {
-          background: linear-gradient(135deg, #3a4886 0%, #1d2f50 100%);
-          transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 12px 30px rgba(74, 94, 170, 0.4);
-          
-          &::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-            left: 100%;
-          }
+
+        &::before {
+          opacity: 1;
         }
-        
+
+        &::after {
+          opacity: 1;
+          border-color: rgba(191, 219, 254, 0.55);
+        }
+
+        &::marker {
+          content: none;
+        }
+      }
+
+      &[routerLink="/login"],
+      &[routerLink="/register"] {
+        background: linear-gradient(135deg, #6366f1 0%, #7c3aed 45%, #8b5cf6 100%);
+        color: var.$white;
+        box-shadow: 0 16px 34px rgba(79, 70, 229, 0.35);
+
+        &::before,
+        &::after {
+          opacity: 0;
+        }
+
+        &:hover {
+          transform: translateY(-3px) scale(1.02);
+        }
+
         &:active {
-          transform: translateY(-1px) scale(0.98);
+          transform: translateY(-1px) scale(0.99);
         }
       }
     }
-    
+
     @include mq.nav-mobile {
       position: fixed;
-      top: var.$navbar-height;
+      top: var(--navbar-offset);
       left: 0;
       width: 100%;
       flex-direction: column;
-      background: #1f2937;
-      backdrop-filter: blur(20px);
-      padding: 30px 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      align-items: stretch;
+      gap: 0.85rem;
+      padding: 2.75rem 1.75rem 2rem;
+      border-radius: 0;
+      background: rgba(15, 23, 42, 0.98);
+      border: none;
+      box-shadow: 0 28px 65px rgba(15, 23, 42, 0.45);
       transform: translateY(-100%);
       opacity: 0;
       visibility: hidden;
       transition: var.$navbar-transition;
       z-index: calc(var.$navbar-z-index - 1);
-      
+
       &.open {
         transform: translateY(0);
         opacity: 1;
         visibility: visible;
       }
-      
+
       a {
         width: 100%;
-        text-align: center;
-        padding: 18px 24px;
-        margin: 4px 0;
-        border-bottom: 1px solid hsla(195, 85%, 45%, 0.1);
-        font-size: 1.1rem;
-        
-        &:last-child {
-          border-bottom: none;
-        }
-        
-        &.active::after {
-          bottom: 8px;
-          width: 60px;
-          left: 50%;
-          transform: translateX(-50%);
+        text-align: left;
+        padding: 1rem 1.25rem;
+        margin: 0;
+        border-radius: 18px;
+        font-size: 1.05rem;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+
+        &::after {
+          opacity: 1;
+          border-color: rgba(99, 102, 241, 0.2);
         }
 
-        // Estilo móvil para "Iniciar Sesión" y "Registrarse"
+        &.active::after {
+          border-color: rgba(191, 219, 254, 0.4);
+        }
+
         &[routerLink="/login"],
         &[routerLink="/register"] {
-          background: linear-gradient(135deg, #4b5eaa 0%, #2a4370 100%);
+          text-align: center;
+          border: none;
+        }
+      }
+    }
+  }
+
+  &.scrolled {
+    .navbar-links {
+      background: rgba(15, 23, 42, 0.65);
+      border-color: rgba(148, 163, 184, 0.28);
+
+      a {
+        color: rgba(226, 232, 240, 0.95);
+
+        &.active {
           color: var.$white;
-          font-weight: var.$font-weight-semibold;
-          
-          &:hover {
-            background: linear-gradient(135deg, #3a4886 0%, #1d2f50 100%);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 30px rgba(74, 94, 170, 0.4);
-          }
-          
-          &:active {
-            transform: translateY(-1px) scale(0.98);
-          }
         }
       }
     }
@@ -237,22 +329,26 @@
   &-menu-toggle {
     display: none;
     cursor: pointer;
-    background: none;
-    border: none;
+    background: rgba(148, 163, 184, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.25);
     padding: 8px;
-    border-radius: var.$navbar-radius;
+    border-radius: 14px;
     transition: var.$navbar-transition;
+    color: var.$white;
     @include mix.focus-ring-nav;
-    
+
     &:hover {
-      background: var.$navbar-hover-bg;
-      transform: scale(1.05);
+      background: rgba(99, 102, 241, 0.2);
+      transform: translateY(-1px);
+      border-color: rgba(129, 140, 248, 0.45);
     }
-    
+
     @include mq.nav-mobile {
-      display: block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
-    
+
     .menu-icon {
       width: 28px;
       height: 22px;
@@ -260,27 +356,27 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      
+
       span {
         display: block;
         height: 3px;
         width: 100%;
-        background: var.$navbar-text-dark;
+        background: #e2e8f0;
         border-radius: 2px;
         transition: var.$navbar-transition;
       }
-      
+
       &.open {
         span {
           &:nth-child(1) {
             transform: translateY(9.5px) rotate(45deg);
           }
-          
+
           &:nth-child(2) {
             opacity: 0;
             transform: scale(0);
           }
-          
+
           &:nth-child(3) {
             transform: translateY(-9.5px) rotate(-45deg);
           }
@@ -289,7 +385,6 @@
     }
   }
 
-  // Estados adicionales para accesibilidad
   @include mq.reduce-motion {
     &, * {
       transition: none !important;
@@ -299,10 +394,10 @@
 
   @include mq.high-contrast {
     border-bottom: 3px solid var.$navbar-text-dark;
-    
+
     .navbar-links a {
       border: 2px solid transparent;
-      
+
       &:focus {
         border-color: var.$navbar-focus-color;
       }
@@ -312,7 +407,7 @@
   &-overlay {
     z-index: var.$navbar-overlay-z-index;
     @include mix.mobile-overlay(var.$navbar-height);
-    
+
     &.scrolled {
       @include mix.mobile-overlay(var.$navbar-mobile-height);
     }
@@ -367,51 +462,104 @@
 }
 
 .navbar.transparent {
-  background: transparent;
-  backdrop-filter: none;
-  box-shadow: none;
-  border-bottom: none;
-  
+  &::before {
+    opacity: 0;
+  }
+
+  .navbar-surface {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+
+    &::before {
+      opacity: 0;
+    }
+  }
+
   &.scrolled {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    box-shadow: var.$navbar-shadow;
-    border-bottom: 1px solid hsla(195, 85%, 45%, 0.1);
+    .navbar-surface {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(148, 163, 184, 0.25);
+      box-shadow: var.$navbar-shadow;
+    }
   }
 }
 
 // Modo oscuro mejorado
 @include mq.dark-mode {
   .navbar {
-    background: rgba(17, 24, 39, 0.95);
-    border-bottom: 1px solid hsla(195, 85%, 45%, 0.2);
-    
+    &::before {
+      opacity: 0.5;
+    }
+
+    .navbar-surface {
+      background: rgba(10, 15, 30, 0.88);
+      border-color: rgba(129, 140, 248, 0.32);
+      box-shadow: 0 32px 72px rgba(17, 24, 39, 0.55);
+
+      &::before {
+        opacity: 0.9;
+      }
+    }
+
     &.scrolled {
-      background: rgba(17, 24, 39, 0.98);
-      border-bottom: 1px solid hsla(195, 85%, 45%, 0.3);
-    }
-    
-    .navbar-logo .logo-text {
-      background: linear-gradient(135deg, hsl(195, 85%, 45%) 0%, hsl(195, 85%, 55%) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .navbar-links a {
-      color: #e5e7eb;
-      
-      &:hover {
-        color: hsl(195, 85%, 45%);
-        background: hsla(195, 85%, 45%, 0.15);
+      .navbar-surface {
+        background: rgba(10, 15, 30, 0.95);
+        border-color: rgba(129, 140, 248, 0.38);
       }
-      
-      &.active {
-        color: hsl(195, 85%, 45%);
-        background: hsla(195, 85%, 45%, 0.15);
+    }
+
+    .navbar-logo {
+      .logo-name {
+        background: linear-gradient(120deg, #c7d2fe 0%, #93c5fd 45%, #60a5fa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
-    
-    .navbar-menu-toggle .menu-icon span {
-      background: #e5e7eb;
+
+      .logo-badge {
+        color: #e0e7ff;
+        background: rgba(79, 70, 229, 0.32);
+        border-color: rgba(129, 140, 248, 0.45);
+      }
+    }
+
+    .navbar-links {
+      background: rgba(15, 23, 42, 0.6);
+      border-color: rgba(99, 102, 241, 0.22);
+
+      a {
+        color: rgba(226, 232, 240, 0.92);
+
+        &::after {
+          border-color: rgba(99, 102, 241, 0.22);
+        }
+
+        &:hover {
+          color: #f8fafc;
+        }
+
+        &.active {
+          color: #f8fafc;
+
+          &::after {
+            border-color: rgba(191, 219, 254, 0.48);
+          }
+        }
+
+        &[routerLink="/login"],
+        &[routerLink="/register"] {
+          box-shadow: 0 18px 40px rgba(99, 102, 241, 0.45);
+        }
+      }
+    }
+
+    .navbar-menu-toggle {
+      background: rgba(30, 64, 175, 0.25);
+      border-color: rgba(99, 102, 241, 0.3);
+
+      .menu-icon span {
+        background: #f8fafc;
+      }
     }
   }
 }
