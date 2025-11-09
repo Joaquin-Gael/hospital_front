@@ -1,7 +1,7 @@
-@use 'sass:color';
 @use '../../admin/styles/_vars.scss' as *;
 @use '../../layout/styles/_mixins.scss' as *;
 @use '../../layout/styles/_media-queries.scss' as *;
+@use '../../../styles/color-utils' as color-utils;
 
 .admin-panel {
   display: flex;
@@ -10,9 +10,9 @@
   background: $bg-secondary;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
-  $hospital-blue: color.mix(#1b6fa8, $primary-color, 65%);
-  $hospital-blue-strong: color.scale($hospital-blue, $lightness: -14%);
-  $hospital-blue-soft: color.scale($hospital-blue, $lightness: 12%);
+  $hospital-blue: unquote('color-mix(in srgb, #1b6fa8 65%, ' + $primary-color + ' 35%)');
+  $hospital-blue-strong: color-utils.adjust($hospital-blue, $lightness: -14%);
+  $hospital-blue-soft: color-utils.adjust($hospital-blue, $lightness: 12%);
 
   &__sidebar {
     width: $sidebar-width;

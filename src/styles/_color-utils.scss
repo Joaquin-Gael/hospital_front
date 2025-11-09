@@ -1,0 +1,60 @@
+@use 'sass:color';
+@use 'sass:math';
+@use 'sass:meta';
+
+/// Adjusts a theme color regardless of whether it is a Sass color or a CSS custom property.
+/// When a Sass color is provided the native `color.adjust` implementation is used.
+/// For CSS custom properties the function falls back to `color-mix` so that adjustments
+/// happen at runtime without breaking the build.
+@function adjust($value, $lightness: null, $alpha: null) {
+  @if meta.type-of($value) == 'color' {
+    @return color.adjust($value, $lightness: $lightness, $alpha: $alpha);
+  }
+
+  $result: $value;
+
+  @if $lightness != null and $lightness != 0 {
+    @if meta.type-of($lightness) != 'number' {
+      @error 'The lightness parameter must be a number.';
+    }
+
+    @if unit($lightness) != '%' {
+      @error 'Lightness adjustments for CSS variables must be provided in percentages.';
+    }
+
+    $amount: abs($lightness);
+
+    @if $amount > 100% {
+      $amount: 100%;
+    }
+
+    $base: 100% - $amount;
+    $mix-color: if($lightness > 0, white, black);
+    $result: unquote('color-mix(in srgb, ' + $value + ' ' + $base + ', ' + $mix-color + ' ' + $amount + ')');
+  }
+
+  @if $alpha != null and $alpha != 0 {
+    @if meta.type-of($alpha) != 'number' {
+      @error 'The alpha parameter must be a number.';
+    }
+
+    $alpha-amount: abs($alpha);
+
+    @if unit($alpha-amount) == '%' {
+      $alpha-amount: math.div($alpha-amount, 100%);
+    }
+
+    @if $alpha-amount > 1 {
+      $alpha-amount: 1;
+    }
+
+    $base-alpha: 1 - $alpha-amount;
+    $base-percent: math.percentage($base-alpha);
+    $alpha-percent: math.percentage($alpha-amount);
+    $result: unquote(
+      'color-mix(in srgb, ' + $result + ' ' + $base-percent + ', transparent ' + $alpha-percent + ')'
+    );
+  }
+
+  @return $result;
+}
