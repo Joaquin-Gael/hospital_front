@@ -399,17 +399,19 @@
     
     .navbar-links a {
       color: #e5e7eb;
-      
+
       &:hover {
         color: hsl(195, 85%, 45%);
         background: hsla(195, 85%, 45%, 0.15);
       }
-      
+
       &.active {
         color: hsl(195, 85%, 45%);
         background: hsla(195, 85%, 45%, 0.15);
       }
-    
+
+    }
+
     .navbar-menu-toggle .menu-icon span {
       background: #e5e7eb;
     }
