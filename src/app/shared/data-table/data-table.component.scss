@@ -207,37 +207,61 @@
     }
   }
   &__pagination {
-    padding: 24px 32px;
-    background: var(--surface-secondary);
-    border-top: 1px solid var(--border-subtle);
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 16px;
-    @include flex-center;
+    padding: 20px 24px;
+    background: color-mix(in srgb, var(--surface-secondary) 92%, var(--surface-primary));
+    border-top: 1px solid var(--border-subtle);
+    box-shadow: 0 -8px 24px color-mix(in srgb, var(--text-shadow) 35%, transparent);
+    backdrop-filter: blur(12px);
+    align-items: center;
+    justify-items: stretch;
     @include mobile-only {
       padding: 16px 20px;
+      gap: 12px;
+      .pagination-button {
+        width: 100%;
+      }
+      .pagination-pages {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    @include tablet-up {
+      grid-template-columns: auto 1fr auto;
+      justify-items: center;
     }
     @include tablet-only {
       padding: 20px 24px;
     }
   }
   .pagination-button {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    padding: 10px;
+    background: color-mix(in srgb, var(--color-primary) 6%, var(--surface-primary));
+    border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+    border-radius: 14px;
+    padding: 10px 12px;
     cursor: pointer;
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 42px;
+    min-height: 42px;
     transition: var(--transition-smooth);
     @include flex-center;
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--color-primary) 12%, transparent);
     &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--color-primary-light) 40%, var(--surface-primary));
-      border-color: var(--color-primary);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
+      background: color-mix(in srgb, var(--color-primary) 14%, var(--surface-primary));
+      border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px color-mix(in srgb, var(--color-primary) 22%, transparent);
     }
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      box-shadow: none;
     }
     .material-icons {
       font-size: 20px;
@@ -261,108 +285,148 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
   }
   .pagination-chip {
-    border: 1px solid var(--border-subtle);
-    background: var(--surface-primary);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 4%, var(--surface-primary));
     color: var(--text-secondary);
     border-radius: 9999px;
     padding: 8px 14px;
-    min-width: 40px;
+    min-width: 38px;
     cursor: pointer;
     font-weight: 600;
     transition: var(--transition-smooth);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 10%, transparent);
     &:hover {
-      border-color: var(--color-primary);
+      border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
       color: var(--color-primary);
+      box-shadow: 0 6px 14px color-mix(in srgb, var(--color-primary) 22%, transparent);
     }
     &--active,
     &[aria-current='page'] {
       background: var(--color-primary);
       color: var(--text-on-primary);
       border-color: var(--color-primary);
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 10px 24px color-mix(in srgb, var(--color-primary) 35%, transparent);
     }
     &:focus-visible {
       outline: 3px solid var(--focus-ring-strong);
       outline-offset: 2px;
     }
   }
+  .status-indicator {
+    --status-color: var(--text-secondary);
+    --status-surface: color-mix(in srgb, var(--status-color) 10%, var(--surface-secondary));
+    --status-border: color-mix(in srgb, var(--status-color) 28%, transparent);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1;
+    color: color-mix(in srgb, var(--status-color) 70%, var(--text-primary));
+    background: var(--status-surface);
+    border: 1px solid var(--status-border);
+    text-transform: capitalize;
+    letter-spacing: 0.01em;
+    transition: var(--transition-smooth);
+    &::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--status-color);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--status-color) 20%, transparent);
+    }
+  }
+  .status--alta {
+    --status-color: var(--color-success);
+    --status-surface: color-mix(in srgb, var(--color-success) 12%, var(--surface-primary));
+    --status-border: color-mix(in srgb, var(--color-success) 35%, transparent);
+  }
+  .status--estable {
+    --status-color: var(--color-info);
+    --status-surface: color-mix(in srgb, var(--color-info) 10%, var(--surface-primary));
+    --status-border: color-mix(in srgb, var(--color-info) 32%, transparent);
+  }
+  .status--observacion {
+    --status-color: var(--color-warning);
+    --status-surface: color-mix(in srgb, var(--color-warning) 14%, var(--surface-primary));
+    --status-border: color-mix(in srgb, var(--color-warning) 35%, transparent);
+  }
+  .status--critico {
+    --status-color: var(--color-error);
+    --status-surface: color-mix(in srgb, var(--color-error) 12%, var(--surface-primary));
+    --status-border: color-mix(in srgb, var(--color-error) 38%, transparent);
+  }
+  .status--pendiente {
+    --status-color: var(--color-secondary);
+    --status-surface: color-mix(in srgb, var(--color-secondary) 12%, var(--surface-primary));
+    --status-border: color-mix(in srgb, var(--color-secondary) 34%, transparent);
+  }
   .action-button {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-subtle);
+    --action-color: var(--text-secondary);
+    --action-surface: var(--surface-primary);
+    --action-border: var(--border-subtle);
+    --action-shadow: 0 4px 12px rgba(15, 58, 70, 0.12);
+    background: var(--action-surface);
+    border: 1px solid var(--action-border);
     cursor: pointer;
     padding: 8px;
     border-radius: 12px;
     min-width: 40px;
     min-height: 40px;
     transition: var(--transition-smooth);
-    opacity: 0.7;
-    transform: scale(0.95);
+    opacity: 0.85;
+    transform: scale(0.97);
     @include flex-center;
     &:hover {
       opacity: 1;
-      transform: scale(1.05) translateY(-2px);
-      box-shadow: var(--shadow-md);
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: var(--action-shadow);
+      background: color-mix(in srgb, var(--action-color) 8%, var(--action-surface));
     }
     .material-icons {
       font-size: 18px;
       transition: var(--transition-smooth);
-      color: var(--text-secondary);
+      color: var(--action-color);
     }
     &:focus-visible {
       outline: 3px solid var(--focus-ring-strong);
       outline-offset: 2px;
     }
+    &.action--ver,
     &.view-button {
-      border-color: color-mix(in srgb, var(--color-info) 30%, transparent);
-      &:hover {
-        background: color-mix(in srgb, var(--color-info) 15%, var(--surface-primary));
-        border-color: var(--color-info);
-        .material-icons {
-          color: var(--color-info);
-        }
-      }
+      --action-color: var(--color-success);
+      --action-surface: color-mix(in srgb, var(--color-success) 15%, var(--surface-primary));
+      --action-border: color-mix(in srgb, var(--color-success) 38%, transparent);
+      --action-shadow: 0 8px 18px color-mix(in srgb, var(--color-success) 26%, transparent);
     }
+    &.action--editar,
     &.edit-button {
-      border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
-      &:hover {
-        background: color-mix(in srgb, var(--color-primary-light) 40%, var(--surface-primary));
-        border-color: var(--color-primary);
-        .material-icons {
-          color: var(--color-primary);
-        }
-      }
+      --action-color: var(--color-warning);
+      --action-surface: color-mix(in srgb, var(--color-warning) 18%, var(--surface-primary));
+      --action-border: color-mix(in srgb, var(--color-warning) 40%, transparent);
+      --action-shadow: 0 8px 18px color-mix(in srgb, var(--color-warning) 24%, transparent);
     }
-    &.delete-button {
-      border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
-      &:hover {
-        background: color-mix(in srgb, var(--color-error) 12%, var(--surface-primary));
-        border-color: var(--color-error);
-        .material-icons {
-          color: var(--color-error);
-        }
-      }
-    }
+    &.action--eliminar,
+    &.delete-button,
     &.ban-button {
-      border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
-      &:hover {
-        background: color-mix(in srgb, var(--color-error) 12%, var(--surface-primary));
-        border-color: var(--color-error);
-        .material-icons {
-          color: var(--color-error);
-        }
-      }
+      --action-color: var(--color-error);
+      --action-surface: color-mix(in srgb, var(--color-error) 16%, var(--surface-primary));
+      --action-border: color-mix(in srgb, var(--color-error) 42%, transparent);
+      --action-shadow: 0 8px 18px color-mix(in srgb, var(--color-error) 28%, transparent);
     }
     &.unban-button {
-      border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
-      &:hover {
-        background: color-mix(in srgb, var(--color-success) 12%, var(--surface-primary));
-        border-color: var(--color-success);
-        .material-icons {
-          color: var(--color-success);
-        }
-      }
+      --action-color: var(--color-success);
+      --action-surface: color-mix(in srgb, var(--color-success) 12%, var(--surface-primary));
+      --action-border: color-mix(in srgb, var(--color-success) 34%, transparent);
+      --action-shadow: 0 8px 18px color-mix(in srgb, var(--color-success) 24%, transparent);
     }
   }
   .loading-spinner {
