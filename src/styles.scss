@@ -329,13 +329,13 @@ button {
   cursor: pointer;
   border: none;
   outline: none;
-  transition: all 0.3s ease;
-  
+  transition: var(--transition-smooth);
+
   &:focus-visible {
-    outline: 2px solid vars.$primary-color;
-    outline-offset: 2px;
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring);
   }
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
