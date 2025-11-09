@@ -20,8 +20,21 @@
     transform: translateX(0);
   }
 
+  @include nav-mobile {
+    width: min(88vw, 320px);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(18px);
+    border-right: 1px solid rgba($primary-color, 0.12);
+    border-radius: 0 24px 24px 0;
+    box-shadow: 0 28px 48px rgba(15, 23, 42, 0.24);
+  }
+
   &.open {
     transform: translateX(0);
+
+    @include nav-mobile {
+      box-shadow: 0 32px 56px rgba(15, 23, 42, 0.28);
+    }
   }
 
   &__header {
@@ -38,6 +51,11 @@
 
     @include tablet-only {
       padding: 0 20px;
+    }
+
+    @include nav-mobile {
+      border-bottom-color: rgba($primary-color, 0.08);
+      background: transparent;
     }
   }
 
@@ -104,6 +122,16 @@
     @include desktop-up {
       display: none;
     }
+
+    @include nav-mobile {
+      background-color: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba($primary-color, 0.2);
+
+      &:hover {
+        background-color: rgba($primary-color, 0.1);
+        color: $primary-color;
+      }
+    }
   }
 
   &__user {
@@ -116,6 +144,12 @@
 
     @include tablet-only {
       padding: 18px 20px;
+    }
+
+    @include nav-mobile {
+      border-bottom-color: rgba($primary-color, 0.08);
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(2px);
     }
   }
 
@@ -242,6 +276,10 @@
     @include tablet-only {
       padding: 18px 14px;
     }
+
+    @include nav-mobile {
+      padding: 20px 18px 24px;
+    }
   }
 
   &__menu {
@@ -313,6 +351,10 @@
       min-height: 40px;
     }
 
+    @include nav-mobile {
+      padding-inline: 14px 48px;
+    }
+
     @include tablet-only {
       padding: 11px 14px;
       font-size: 13px;
@@ -363,6 +405,12 @@
     @include tablet-only {
       padding: 14px;
     }
+
+    @include nav-mobile {
+      border-top-color: rgba($primary-color, 0.08);
+      padding: 20px 18px 24px;
+      background: transparent;
+    }
   }
 
   &__footer-btn {
@@ -401,6 +449,10 @@
       padding: 10px 12px;
       font-size: 13px;
       min-height: 40px;
+    }
+
+    @include nav-mobile {
+      padding-inline: 14px 48px;
     }
 
     @include tablet-only {
@@ -463,12 +515,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(15, 23, 42, 0.55);
   z-index: 999;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(8px);
 
   &.visible {
     opacity: 1;
