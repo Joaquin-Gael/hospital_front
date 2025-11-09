@@ -8,59 +8,87 @@
 /* Reset and base styles */
 /* CSS Custom Properties for Hero */
 :root {
-  /* Brand Colors */
-  --primary: #3b82f6;
-  --secondary: #2563eb;
-  --accent: #fbbf24;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --medical-green: #10b981;
-  --emergency-red: #dc2626;
+  color-scheme: light;
 
-  /* Extended Palette */
-  --color-primary: var(--primary);
-  --color-primary-hover: #2563eb;
-  --color-primary-light: #dbeafe;
-  --color-primary-dark: #1e40af;
-  --color-accent: var(--accent);
-  --color-accent-hover: #f59e0b;
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-error: var(--error);
-  --color-info: #3b82f6;
+  /* Brand Palette */
+  --color-primary: #0f9bae;
+  --color-primary-hover: #0c7f8f;
+  --color-primary-light: #c9eef2;
+  --color-primary-dark: #0a5f70;
+  --color-secondary: #1b4965;
+  --color-secondary-hover: #163b52;
+  --color-secondary-light: #d6e6f0;
+  --color-secondary-dark: #0f2d40;
+  --color-accent: #ffc857;
+  --color-accent-hover: #f2b642;
+  --color-success: #2f9d8f;
+  --color-warning: #f4a259;
+  --color-error: #d62839;
+  --color-info: #207ab7;
+
+  /* Legacy aliases */
+  --primary: var(--color-primary);
+  --secondary: var(--color-secondary);
+  --accent: var(--color-accent);
+  --success: var(--color-success);
+  --warning: var(--color-warning);
+  --error: var(--color-error);
 
   /* Text Colors */
-  --text-primary: #1a202c;
-  --text-secondary: #4a5568;
-  --text-muted: #718096;
-  --text-light: #9ca3af;
+  --text-primary: #12303b;
+  --text-secondary: #315159;
+  --text-muted: #5c7c83;
   --text-white: #ffffff;
-  --text-shadow: rgba(0, 0, 0, 0.1);
-  --text-shadow-strong: rgba(0, 0, 0, 0.3);
+  --text-inverse: #ecf4f6;
+  --text-shadow: rgba(16, 39, 51, 0.16);
+  --text-shadow-strong: rgba(16, 39, 51, 0.32);
+  --text-sidebar-primary: rgba(255, 255, 255, 0.9);
+  --text-sidebar-muted: rgba(255, 255, 255, 0.7);
 
   /* Surfaces */
+  --surface-canvas: #f3f9fb;
   --surface-primary: #ffffff;
-  --surface-secondary: #f7fafc;
+  --surface-secondary: #e6f1f4;
+  --surface-elevated: #d4e5ea;
   --surface-input: #ffffff;
-  --surface-hover: rgba(59, 130, 246, 0.05);
+  --surface-hover: color-mix(in srgb, var(--color-primary) 8%, var(--surface-primary) 92%);
+  --surface-glass: color-mix(in srgb, var(--surface-primary) 95%, transparent);
+  --surface-sidebar: color-mix(in srgb, var(--color-secondary) 88%, black);
+  --surface-topbar: #ffffff;
+  --surface-backdrop: rgba(9, 35, 44, 0.55);
+  --surface-primary-dark: #0b1f28;
 
   /* Borders */
-  --border-strong: #e2e8f0;
-  --border-subtle: #f1f5f9;
+  --border-strong: #c7d8dd;
+  --border-subtle: #e1edf0;
+  --border-focus: color-mix(in srgb, var(--color-primary) 60%, transparent);
+  --border-primary-soft: color-mix(in srgb, var(--color-primary) 25%, transparent);
+  --border-primary-strong: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  --border-danger-soft: color-mix(in srgb, var(--color-error) 25%, transparent);
+  --border-danger-strong: color-mix(in srgb, var(--color-error) 40%, transparent);
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  --gradient-primary-strong: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 90%, white) 0%,
+    color-mix(in srgb, var(--color-primary) 70%, var(--color-secondary)) 100%
+  );
   --gradient-hero: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--color-primary) 15%, transparent) 0%,
-    color-mix(in srgb, var(--color-primary) 5%, transparent) 100%
+    color-mix(in srgb, var(--color-primary) 35%, white) 0%,
+    color-mix(in srgb, var(--color-secondary) 25%, white) 100%
   );
   --gradient-interactive: linear-gradient(
     90deg,
     var(--color-primary) 0%,
     var(--color-info) 50%,
     var(--color-accent) 100%
+  );
+  --gradient-sidebar: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-secondary) 80%, black) 0%,
+    color-mix(in srgb, var(--color-secondary) 92%, black) 100%
   );
 
   /* Border Radius */
@@ -69,28 +97,147 @@
   --border-radius-lg: 0.75rem;
   --border-radius-xl: 1rem;
 
+  /* Elevation & Layers */
+  --layer-primary-soft: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  --layer-primary-strong: color-mix(in srgb, var(--color-primary) 32%, transparent);
+  --layer-danger-soft: color-mix(in srgb, var(--color-error) 18%, transparent);
+  --layer-danger-strong: color-mix(in srgb, var(--color-error) 32%, transparent);
+
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 2px rgba(15, 58, 70, 0.08);
+  --shadow-md: 0 8px 24px rgba(15, 58, 70, 0.12);
+  --shadow-lg: 0 24px 48px rgba(15, 58, 70, 0.16);
   --shadow-input: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
-  --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.15);
-  --shadow-glass-strong: 0 12px 40px rgba(31, 38, 135, 0.25);
-  --shadow-medical: 0 10px 40px rgba(0, 119, 182, 0.15);
-  --shadow-btn-primary: 0 4px 12px rgba(0, 119, 182, 0.3);
-  --shadow-btn-primary-hover: 0 8px 24px rgba(0, 119, 182, 0.4);
-  --shadow-btn-success: 0 4px 12px rgba(34, 197, 94, 0.3);
-  --shadow-btn-success-hover: 0 8px 24px rgba(34, 197, 94, 0.4);
-  --shadow-btn-emergency: 0 4px 12px rgba(239, 68, 68, 0.3);
-  --shadow-btn-emergency-hover: 0 8px 24px rgba(239, 68, 68, 0.4);
+  --shadow-glass: 0 12px 40px rgba(16, 39, 51, 0.14);
+  --shadow-glass-strong: 0 18px 54px rgba(16, 39, 51, 0.2);
+  --shadow-medical: 0 20px 45px rgba(15, 78, 101, 0.18);
+  --shadow-btn-primary: 0 12px 24px color-mix(in srgb, var(--color-primary) 35%, transparent);
+  --shadow-btn-primary-hover: 0 16px 30px color-mix(in srgb, var(--color-primary) 45%, transparent);
+  --shadow-btn-success: 0 12px 24px color-mix(in srgb, var(--color-success) 35%, transparent);
+  --shadow-btn-success-hover: 0 16px 30px color-mix(in srgb, var(--color-success) 45%, transparent);
+  --shadow-btn-emergency: 0 12px 24px color-mix(in srgb, var(--color-error) 35%, transparent);
+  --shadow-btn-emergency-hover: 0 16px 30px color-mix(in srgb, var(--color-error) 45%, transparent);
 
   /* Motion */
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Focus */
-  --focus-ring: color-mix(in srgb, var(--color-primary) 35%, transparent);
-  --focus-ring-strong: color-mix(in srgb, var(--color-primary) 55%, transparent);
-  --text-on-primary: #ffffff;
+  --focus-ring: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  --focus-ring-strong: color-mix(in srgb, var(--color-primary) 60%, transparent);
+  --text-on-primary: #f0f8fa;
+}
+
+@mixin dark-theme {
+  color-scheme: dark;
+
+  --color-primary: #5bd0d6;
+  --color-primary-hover: #40c1c8;
+  --color-primary-light: #89e4e7;
+  --color-primary-dark: #1c9095;
+  --color-secondary: #5c95c9;
+  --color-secondary-hover: #467dad;
+  --color-secondary-light: #81b1da;
+  --color-secondary-dark: #346086;
+  --color-accent: #f4c86c;
+  --color-accent-hover: #e3b55c;
+  --color-success: #4ac1b3;
+  --color-warning: #f2a669;
+  --color-error: #f0717b;
+  --color-info: #5aa9e6;
+
+  /* Legacy aliases */
+  --primary: var(--color-primary);
+  --secondary: var(--color-secondary);
+  --accent: var(--color-accent);
+  --success: var(--color-success);
+  --warning: var(--color-warning);
+  --error: var(--color-error);
+
+  --text-primary: #e6f2f4;
+  --text-secondary: #b4ccd2;
+  --text-muted: #7c949b;
+  --text-white: #ffffff;
+  --text-inverse: #08232d;
+  --text-shadow: rgba(1, 11, 16, 0.3);
+  --text-shadow-strong: rgba(1, 11, 16, 0.45);
+  --text-sidebar-primary: rgba(233, 245, 247, 0.92);
+  --text-sidebar-muted: rgba(233, 245, 247, 0.68);
+
+  --surface-canvas: #051821;
+  --surface-primary: #0b1f28;
+  --surface-secondary: #132b35;
+  --surface-elevated: #1b3944;
+  --surface-input: #132b35;
+  --surface-hover: color-mix(in srgb, var(--color-primary) 16%, var(--surface-primary) 84%);
+  --surface-glass: color-mix(in srgb, var(--surface-primary) 70%, transparent);
+  --surface-sidebar: color-mix(in srgb, var(--color-secondary) 60%, #06131a);
+  --surface-topbar: #0f262f;
+  --surface-backdrop: rgba(0, 12, 18, 0.65);
+  --surface-primary-dark: #0b1f28;
+
+  --border-strong: #1f3a44;
+  --border-subtle: #10262f;
+  --border-focus: color-mix(in srgb, var(--color-primary) 65%, transparent);
+  --border-primary-soft: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  --border-primary-strong: color-mix(in srgb, var(--color-primary) 50%, transparent);
+  --border-danger-soft: color-mix(in srgb, var(--color-error) 35%, transparent);
+  --border-danger-strong: color-mix(in srgb, var(--color-error) 50%, transparent);
+
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  --gradient-primary-strong: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 80%, var(--surface-primary)) 0%,
+    color-mix(in srgb, var(--color-secondary) 70%, var(--surface-primary)) 100%
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 55%, var(--surface-primary)) 0%,
+    color-mix(in srgb, var(--color-secondary) 45%, var(--surface-primary)) 100%
+  );
+  --gradient-interactive: linear-gradient(
+    90deg,
+    var(--color-primary) 0%,
+    var(--color-info) 50%,
+    var(--color-accent) 100%
+  );
+  --gradient-sidebar: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-secondary) 65%, #040c12) 0%,
+    color-mix(in srgb, var(--color-secondary) 80%, #040c12) 100%
+  );
+
+  --layer-primary-soft: color-mix(in srgb, var(--color-primary) 28%, transparent);
+  --layer-primary-strong: color-mix(in srgb, var(--color-primary) 42%, transparent);
+  --layer-danger-soft: color-mix(in srgb, var(--color-error) 28%, transparent);
+  --layer-danger-strong: color-mix(in srgb, var(--color-error) 42%, transparent);
+
+  --shadow-sm: 0 1px 2px rgba(3, 15, 21, 0.4);
+  --shadow-md: 0 12px 32px rgba(2, 12, 18, 0.45);
+  --shadow-lg: 0 24px 60px rgba(2, 12, 18, 0.55);
+  --shadow-input: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  --shadow-glass: 0 16px 40px rgba(2, 12, 18, 0.5);
+  --shadow-glass-strong: 0 20px 60px rgba(2, 12, 18, 0.6);
+  --shadow-medical: 0 22px 48px rgba(4, 28, 38, 0.55);
+  --shadow-btn-primary: 0 16px 30px color-mix(in srgb, var(--color-primary) 45%, transparent);
+  --shadow-btn-primary-hover: 0 20px 36px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  --shadow-btn-success: 0 16px 30px color-mix(in srgb, var(--color-success) 45%, transparent);
+  --shadow-btn-success-hover: 0 20px 36px color-mix(in srgb, var(--color-success) 55%, transparent);
+  --shadow-btn-emergency: 0 16px 30px color-mix(in srgb, var(--color-error) 45%, transparent);
+  --shadow-btn-emergency-hover: 0 20px 36px color-mix(in srgb, var(--color-error) 55%, transparent);
+
+  --focus-ring: color-mix(in srgb, var(--color-primary) 60%, transparent);
+  --focus-ring-strong: color-mix(in srgb, var(--color-primary) 75%, transparent);
+  --text-on-primary: #05222b;
+}
+
+[data-theme='dark'] {
+  @include dark-theme;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include dark-theme;
+  }
 }
 
 /* Reset and base styles */
@@ -134,7 +281,7 @@ a {
   
   &:hover {
     text-decoration: underline;
-    color: color.adjust(vars.$primary-color, $lightness: -10%);
+    color: color-mix(in srgb, vars.$primary-color 90%, black);
   }
   
   &:focus {
@@ -207,7 +354,7 @@ input, textarea, select {
   &:focus {
     outline: none;
     border-color: vars.$primary-color;
-    box-shadow: 0 0 0 2px color.adjust(vars.$primary-color, $alpha: -0.8);
+    box-shadow: 0 0 0 2px color-mix(in srgb, vars.$primary-color 20%, transparent);
   }
 }
 
@@ -353,19 +500,19 @@ input, textarea, select {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: color.adjust(vars.$text-color-light, $alpha: -0.7);
+  background: color-mix(in srgb, vars.$text-color-light 30%, transparent);
   border-radius: 4px;
   transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: color.adjust(vars.$text-color-light, $alpha: -0.5);
+  background: color-mix(in srgb, vars.$text-color-light 50%, transparent);
 }
 
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: color.adjust(vars.$text-color-light, $alpha: -0.7) transparent;
+  scrollbar-color: color-mix(in srgb, vars.$text-color-light 30%, transparent) transparent;
 }
 
 /* Responsive utilities */
@@ -484,15 +631,5 @@ input, textarea, select {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text-white: #f8f9fa;
-    //--text-primary: #e9ecef;
-    --text-secondary: #adb5bd;
-    --text-light: #6c757d;
   }
 }
