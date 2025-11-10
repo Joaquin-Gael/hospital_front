@@ -1,3 +1,5 @@
+@use '../../../styles/_color-utils.scss';
+
 // Sistema de colores premium
 $primary-gradient: var(--gradient-primary);
 $primary-strong-gradient: var(--gradient-primary-strong);
@@ -53,3 +55,8 @@ $header-height: 72px;
 
 $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 $transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+
+$hospital-blue: color-utils.mix(#1b6fa8, $primary-color, 65%);
+$hospital-blue-strong: color-utils.adjust($hospital-blue, $lightness: -14%);
+$hospital-blue-soft: color-utils.adjust($hospital-blue, $lightness: 12%);

@@ -1,7 +1,6 @@
 @use '../../admin/styles/_vars.scss' as *;
 @use '../../layout/styles/_mixins.scss' as *;
 @use '../../layout/styles/_media-queries.scss' as *;
-@use '../../../styles/color-utils' as color-utils;
 
 .admin-panel {
   display: flex;
@@ -9,18 +8,14 @@
   overflow: hidden;
   background: $bg-secondary;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  
-  $hospital-blue: color-utils.mix(#1b6fa8, $primary-color, 65%);
-  $hospital-blue-strong: color-utils.adjust($hospital-blue, $lightness: -14%);
-  $hospital-blue-soft: color-utils.adjust($hospital-blue, $lightness: 12%);
 
   &__sidebar {
     width: $sidebar-width;
     background: linear-gradient(
       162deg,
-      color-utils.adjust($hospital-blue-strong, $alpha: 2%) 0%,
-      color-utils.adjust($hospital-blue, $alpha: 6%) 45%,
-      color-utils.adjust($hospital-blue-soft, $alpha: 8%) 100%
+      color-mix(in srgb, #{$hospital-blue-strong} 2%, transparent) 0%,
+      color-mix(in srgb, #{$hospital-blue} 6%, transparent) 45%,
+      color-mix(in srgb, #{$hospital-blue-soft} 8%, transparent) 100%
     );
     color: rgba(255, 255, 255, 0.9);
     position: fixed;
@@ -43,7 +38,7 @@
       border-radius: 0 24px 24px 0;
       backdrop-filter: blur(18px);
       border-right: 1px solid rgba(255, 255, 255, 0.22);
-      box-shadow: 0 32px 60px color-utils.adjust($hospital-blue-strong, $alpha: 55%);
+      box-shadow: 0 32px 60px color-mix(in srgb, #{$hospital-blue-strong} 55%, transparent);
     }
 
     &.open {
@@ -245,7 +240,11 @@
       inset: 10px auto 10px 0;
       width: 4px;
       border-radius: 4px;
-      background: linear-gradient(180deg, rgba($hospital-blue-strong, 0.2) 0%, rgba($hospital-blue-soft, 0.9) 100%);
+      background: linear-gradient(
+        180deg, 
+        color-mix(in srgb, #{$hospital-blue-strong} 20%, transparent) 0%, 
+        color-mix(in srgb, #{$hospital-blue-soft} 90%, transparent) 100%
+      );
       transform: scaleY(0);
       transform-origin: top;
       transition: transform 0.3s ease;
@@ -272,9 +271,9 @@
     }
 
     &:hover {
-      background: rgba($hospital-blue-soft, 0.16);
+      background: color-mix(in srgb, #{$hospital-blue-soft} 16%, transparent);
       color: rgba(255, 255, 255, 0.98);
-      border-color: rgba($hospital-blue-soft, 0.4);
+      border-color: color-mix(in srgb, #{$hospital-blue-soft} 40%, transparent);
       transform: translateX(4px);
 
       &::before {
@@ -293,16 +292,21 @@
     }
 
     &--active {
-      background: rgba($hospital-blue, 0.22);
+      background: color-mix(in srgb, #{$hospital-blue} 22%, transparent);
       color: white;
       font-weight: 600;
-      border-color: rgba($hospital-blue-soft, 0.55);
-      box-shadow: inset 0 0 0 1px rgba($hospital-blue-soft, 0.4), 0 12px 30px rgba($hospital-blue-strong, 0.24);
+      border-color: color-mix(in srgb, #{$hospital-blue-soft} 55%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, #{$hospital-blue-soft} 40%, transparent), 
+                  0 12px 30px color-mix(in srgb, #{$hospital-blue-strong} 24%, transparent);
       transform: translateX(4px);
 
       &::before {
         transform: scaleY(1);
-        background: linear-gradient(180deg, rgba($hospital-blue-strong, 0.75) 0%, rgba($hospital-blue-soft, 0.95) 100%);
+        background: linear-gradient(
+          180deg, 
+          color-mix(in srgb, #{$hospital-blue-strong} 75%, transparent) 0%, 
+          color-mix(in srgb, #{$hospital-blue-soft} 95%, transparent) 100%
+        );
       }
 
       &::after {
@@ -441,7 +445,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba($hospital-blue-strong, 0.48);
+    background-color: color-mix(in srgb, #{$hospital-blue-strong} 48%, transparent);
     z-index: 999;
     opacity: 0;
     visibility: hidden;

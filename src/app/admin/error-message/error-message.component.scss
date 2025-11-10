@@ -4,7 +4,6 @@
 @use '../../../styles/color-utils' as color-utils;
 
 .error-message {
-  @include glass-morphism(0.9);
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-left: 4px solid $error-color;
@@ -15,12 +14,13 @@
   font-weight: 500;
   position: relative;
   animation: slideInDown 0.3s ease-out;
+  @include glass-morphism(0.9);
   @include flex-inline(1rem, flex-start);
 
   @include mobile-only {
-    @include flex-column;
     align-items: flex-start;
     gap: 1rem;
+    @include flex-column;
   }
 
   &__icon {
@@ -43,8 +43,6 @@
   }
 
   &__close-btn {
-    @include button-reset;
-    @include flex-center;
     width: 2rem;
     height: 2rem;
     border-radius: 50%;
@@ -52,7 +50,9 @@
     background: transparent;
     transition: $transition-smooth;
     flex-shrink: 0;
-
+    @include button-reset;
+    @include flex-center;
+    
     @include mobile-only {
       align-self: flex-end;
     }
