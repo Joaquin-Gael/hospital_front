@@ -1,9 +1,9 @@
 @use '../../layout/styles/_media-queries.scss' as *;
 @use '../../layout/styles/_mixins.scss' as *;
 @use '../styles/_vars.scss' as *;
+@use '../../../styles/color-utils' as color-utils;
 
 .error-message {
-  @include flex-inline(1rem, flex-start);
   @include glass-morphism(0.9);
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
@@ -11,10 +11,11 @@
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  color: darken($error-color, 20%);
+  color: color-utils.adjust($error-color, $lightness: -20%);
   font-weight: 500;
   position: relative;
   animation: slideInDown 0.3s ease-out;
+  @include flex-inline(1rem, flex-start);
 
   @include mobile-only {
     @include flex-column;
