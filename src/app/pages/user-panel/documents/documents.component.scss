@@ -14,8 +14,7 @@
 
 .document-card {
   padding: 16px;
-  transition: $transition;
-  @include card;
+  @include card--interactive;
   @include flex-inline(16px);
 
   &:hover {
