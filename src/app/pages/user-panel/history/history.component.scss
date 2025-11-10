@@ -17,7 +17,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background-color: $card-background;
   min-width: 600px;
 
   th, td {
@@ -108,7 +108,7 @@
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 500;
-  background-color: rgba($secondary-color, 0.1);
+  background-color: panel-alpha($secondary-color, 0.1);
   color: $secondary-color;
   white-space: nowrap;
   @include flex-inline(6px, center, center);
@@ -122,7 +122,7 @@
   }
 
   &--completed {
-    background-color: rgba($success-color, 0.1);
+    background-color: panel-alpha($success-color, 0.1);
     color: $success-color;
 
     .status-badge__dot {
@@ -131,7 +131,7 @@
   }
 
   &--cancelled {
-    background-color: rgba($danger-color, 0.1);
+    background-color: panel-alpha($danger-color, 0.1);
     color: $danger-color;
 
     .status-badge__dot {

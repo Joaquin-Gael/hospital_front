@@ -1,89 +1,145 @@
 @use '../../layout/styles/_mixins.scss' as *;
-@use 'sass:color';
+@use '../../styles/color-utils' as color-utils;
+
+@function panel-alpha($color, $opacity) {
+  @if $opacity < 0 or $opacity > 1 {
+    @error 'Opacity must be between 0 and 1.';
+  }
+
+  $alpha-diff: $opacity - 1;
+
+  @return color-utils.adjust($color, $alpha: $alpha-diff);
+}
+
+@function panel-tint($color, $lightness) {
+  @return color-utils.adjust($color, $lightness: $lightness);
+}
+
+:root {
+  --user-panel-surface: var(--surface-primary);
+  --user-panel-surface-alt: color-mix(in srgb, var(--surface-primary) 92%, var(--surface-secondary) 8%);
+  --user-panel-surface-muted: color-mix(in srgb, var(--surface-primary) 85%, var(--surface-secondary) 15%);
+  --user-panel-border: var(--border-subtle);
+  --user-panel-border-strong: var(--border-strong);
+  --user-panel-text: var(--text-primary);
+  --user-panel-text-muted: var(--text-secondary);
+  --user-panel-text-soft: var(--text-muted);
+  --user-panel-primary: var(--color-primary);
+  --user-panel-primary-hover: var(--color-primary-hover);
+  --user-panel-primary-dark: var(--color-primary-dark);
+  --user-panel-primary-soft: #{panel-alpha(var(--color-primary), 0.12)};
+  --user-panel-layer-soft: #{panel-alpha(var(--color-primary), 0.1)};
+  --user-panel-layer-strong: #{panel-alpha(var(--color-primary), 0.18)};
+  --user-panel-success: var(--color-success);
+  --user-panel-success-soft: #{panel-alpha(var(--color-success), 0.16)};
+  --user-panel-warning: var(--color-warning);
+  --user-panel-warning-soft: #{panel-alpha(var(--color-warning), 0.16)};
+  --user-panel-danger: var(--color-error);
+  --user-panel-danger-soft: #{panel-alpha(var(--color-error), 0.16)};
+  --user-panel-info: var(--color-info);
+  --user-panel-info-soft: #{panel-alpha(var(--color-info), 0.16)};
+  --user-panel-shadow-sm: var(--shadow-sm);
+  --user-panel-shadow-md: var(--shadow-md);
+  --user-panel-shadow-lg: var(--shadow-lg);
+  --user-panel-focus-ring: var(--focus-ring);
+  --user-panel-overlay: var(--surface-backdrop);
+  --user-panel-navbar-hover: #{panel-alpha(var(--color-primary), 0.12)};
+  --user-panel-navbar-active: #{panel-alpha(var(--color-primary), 0.18)};
+  --user-panel-navbar-border: #{panel-alpha(var(--color-primary), 0.25)};
+  --user-panel-navbar-gradient: var(--gradient-primary);
+  --user-panel-navbar-text: var(--text-primary);
+  --user-panel-footer-shadow: var(--shadow-sm);
+  --user-panel-footer-button-shadow: #{panel-alpha(var(--color-primary), 0.2)};
+}
+
+[data-theme='dark'] {
+  --user-panel-surface-alt: color-mix(in srgb, var(--surface-primary) 88%, var(--surface-secondary) 12%);
+  --user-panel-surface-muted: color-mix(in srgb, var(--surface-primary) 70%, var(--surface-secondary) 30%);
+  --user-panel-navbar-hover: #{panel-alpha(var(--color-primary), 0.2)};
+  --user-panel-navbar-active: #{panel-alpha(var(--color-primary), 0.28)};
+  --user-panel-footer-shadow: var(--shadow-md);
+}
 
 // Variables
-$primary-color: #3b82f6;
-$primary-light: #3b82f6;
-$primary-dark: #2563eb;
-$primary-bg: rgba($primary-color, 0.1);
-$secondary-color: #6b7280;
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$danger-color: #ef4444;
-$info-color: #06b6d4;
-$background-color: #f9fafb;
-$card-background: #ffffff;
-$text-color: #1f2937;
-$text-light: #6b7280;
-$text-lighter: #9ca3af;
-$border-color: #e5e7eb;
-$border-radius: 8px;
-$border-radius-sm: 6px;
-$border-radius-lg: 12px;
-$box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-$box-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$box-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
-$transition: all 0.2s ease;
+$primary-color: var(--user-panel-primary);
+$primary-dark: var(--user-panel-primary-dark);
+$primary-bg: var(--user-panel-layer-soft);
+$primary-soft: var(--user-panel-primary-soft);
+$secondary-color: var(--color-secondary);
+$success-color: var(--user-panel-success);
+$success-bg: var(--user-panel-success-soft);
+$warning-color: var(--user-panel-warning);
+$warning-bg: var(--user-panel-warning-soft);
+$danger-color: var(--user-panel-danger);
+$danger-bg: var(--user-panel-danger-soft);
+$info-color: var(--user-panel-info);
+$info-bg: var(--user-panel-info-soft);
+$background-color: var(--user-panel-surface);
+$card-background: var(--user-panel-surface-alt);
+$surface-muted: var(--user-panel-surface-muted);
+$text-color: var(--user-panel-text);
+$text-light: var(--user-panel-text-muted);
+$text-lighter: var(--user-panel-text-soft);
+$border-color: var(--user-panel-border);
+$border-color-strong: var(--user-panel-border-strong);
+$border-radius: var(--border-radius-md);
+$border-radius-sm: var(--border-radius-sm);
+$border-radius-lg: var(--border-radius-lg);
+$box-shadow: var(--user-panel-shadow-sm);
+$box-shadow-md: var(--user-panel-shadow-md);
+$box-shadow-lg: var(--user-panel-shadow-lg);
+$transition: var(--transition-smooth);
 $sidebar-width: 280px;
 $sidebar-collapsed-width: 80px;
 $header-height: 64px;
-$transition: all 0.2s ease;
 
 // Navbar variables
 $navbar-height: 64px;
 $navbar-mobile-height: 56px;
-$navbar-focus-color: #3b82f6;
-$navbar-radius: 8px;
-$navbar-transition: all 0.2s ease;
-$navbar-hover-bg: #f3f4f6;
-$navbar-active-bg: #e5e7eb;
-$navbar-primary: #3b82f6;
+$navbar-focus-color: var(--user-panel-primary);
+$navbar-radius: var(--border-radius-md);
+$navbar-transition: var(--transition-smooth);
+$navbar-hover-bg: var(--user-panel-navbar-hover);
+$navbar-active-bg: var(--user-panel-navbar-active);
+$navbar-primary: var(--user-panel-primary);
 $navbar-badge-size: 20px;
 $navbar-dropdown-width: 200px;
 $navbar-avatar-size: 40px;
 $navbar-avatar-size-mobile: 32px;
 $navbar-logo-size: 32px;
 $navbar-logo-size-mobile: 28px;
-$navbar-text: #1f2937;
-$navbar-border: #e5e7eb;
-$navbar-user-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8);
+$navbar-text: var(--user-panel-navbar-text);
+$navbar-border: var(--user-panel-navbar-border);
+$navbar-user-gradient: var(--user-panel-navbar-gradient);
 
 // Footer variables
-$footer-text: #f9fafb;
-$footer-text-secondary: #d1d5db;
-$footer-accent: #3b82f6;
-$footer-border: #374151;
-$footer-error: #ef4444;
+$footer-text: var(--text-white);
+$footer-text-secondary: color-utils.adjust(var(--text-white), $alpha: -0.32);
+$footer-accent: var(--user-panel-primary);
+$footer-border: color-utils.adjust(var(--surface-sidebar), $alpha: -0.75);
+$footer-error: var(--user-panel-danger);
 $footer-social-size: 40px;
-$footer-social-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8);
-$footer-newsletter-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8);
+$footer-social-gradient: var(--gradient-primary);
+$footer-newsletter-gradient: var(--gradient-primary);
 $footer-input-height: 44px;
 $footer-button-height: 44px;
-$footer-radius: 8px;
-$footer-transition: all 0.2s ease;
+$footer-radius: var(--border-radius-md);
+$footer-transition: var(--transition-smooth);
 $footer-section-gap: 2rem;
 $footer-section-gap-mobile: 1.5rem;
 $footer-logo-size: 32px;
-$footer-input-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-$footer-button-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+$footer-input-shadow: var(--user-panel-footer-shadow);
+$footer-button-shadow: var(--user-panel-footer-button-shadow);
 
 // Font sizes
 $font-size-nav: 14px;
 
 // Card mixin
 @mixin card {
-  background-color: white;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow;
-  border: 1px solid $border-color;
-}
-
-
-
-@mixin card {
   background-color: $card-background;
   border-radius: $border-radius;
   box-shadow: $box-shadow;
+  border: 1px solid $border-color;
   transition: $transition;
 }
 
@@ -106,29 +162,29 @@ $font-size-nav: 14px;
   cursor: pointer;
   transition: $transition;
   border: none;
-  color: white;
-  
+  color: var(--text-white);
+
   &--primary {
-    color: white;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: var(--text-white);
+    background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
   }
-  
+
   &--outline {
     background-color: transparent;
     color: $text-color;
     border: 1px solid $border-color;
-    
+
     &:hover {
       background-color: $background-color;
     }
   }
-  
+
   &--danger {
     background-color: $danger-color;
-    color: white;
-    
+    color: var(--text-white);
+
     &:hover {
-      background-color: color.adjust($danger-color, $lightness: -5%);
+      background-color: color-utils.adjust($danger-color, $lightness: -5%);
     }
   }
   
@@ -153,12 +209,12 @@ $font-size-nav: 14px;
   cursor: pointer;
   transition: $transition;
   @include flex-inline(8px, center);
-  
+
   &:hover {
     background-color: $background-color;
     color: $primary-color;
   }
-  
+
   .icon {
     width: 18px;
     height: 18px;
@@ -179,7 +235,7 @@ $font-size-nav: 14px;
     background-color: $primary-bg;
     color: $primary-color;
     margin-bottom: 24px;
-    
+
     .icon {
       width: 40px;
       height: 40px;

@@ -25,7 +25,7 @@
     background-color: $background-color;
 
     @include touch-device {
-      background-color: white;
+      background-color: $card-background;
     }
   }
   
@@ -42,7 +42,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: rgba($primary-color, 0.1);
+    background-color: panel-alpha($primary-color, 0.1);
     color: $primary-color;
     flex-shrink: 0;
     @include flex-center;
@@ -58,17 +58,17 @@
     }
     
     &--reminder {
-      background-color: rgba($warning-color, 0.1);
+      background-color: panel-alpha($warning-color, 0.1);
       color: $warning-color;
     }
     
     &--change {
-      background-color: rgba($info-color, 0.1);
+      background-color: panel-alpha($info-color, 0.1);
       color: $info-color;
     }
     
     &--info {
-      background-color: rgba($primary-color, 0.1);
+      background-color: panel-alpha($primary-color, 0.1);
       color: $primary-color;
     }
 
@@ -139,7 +139,7 @@
 
     &--primary {
       background-color: $primary-color;
-      color: white;
+      color: var(--text-white);
       border-color: $primary-color;
       @include hover-effect($primary-dark);
     }
