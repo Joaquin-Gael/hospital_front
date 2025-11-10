@@ -10,6 +10,7 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   &__sidebar {
+  -webkit-text-fill-color: black;
     width: $sidebar-width;
     background: linear-gradient(
       162deg,
