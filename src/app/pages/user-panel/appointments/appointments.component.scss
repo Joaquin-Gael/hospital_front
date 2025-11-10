@@ -21,8 +21,7 @@
 
 .appointment-card {
   overflow: hidden;
-  transition: $transition;
-  @include card;
+  @include card--interactive;
 
   &:hover {
     transform: translateY(-4px);
