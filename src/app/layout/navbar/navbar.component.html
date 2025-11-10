@@ -1,4 +1,8 @@
-<nav class="navbar" [class.scrolled]="scrolled">
+<nav
+  class="navbar"
+  [attr.data-state]="scrollState"
+  [attr.data-menu]="menuOpen ? 'open' : 'closed'"
+>
   <div class="navbar-surface">
     <div class="navbar-container">
       <div class="navbar-logo">
@@ -11,21 +15,32 @@
         </a>
       </div>
 
-      <div class="navbar-menu-toggle" (click)="toggleMenu()">
-        <span class="menu-icon" [class.open]="isMenuOpen">
+      <button
+        type="button"
+        class="navbar-menu-toggle"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen"
+        aria-controls="navbar-links"
+        aria-label="Abrir o cerrar menú de navegación"
+      >
+        <span class="menu-icon" [class.open]="menuOpen">
           <span></span>
           <span></span>
           <span></span>
         </span>
-      </div>
+      </button>
 
-      <div class="navbar-links" [class.open]="isMenuOpen">
+      <div
+        id="navbar-links"
+        class="navbar-links"
+        [attr.data-state]="menuOpen ? 'open' : 'closed'"
+      >
         @for (item of navItems; track item.label) {
           <a
             [routerLink]="item.route"
             routerLinkActive="active"
             [routerLinkActiveOptions]="{exact: item.route === '/'}"
-            (click)="isMenuOpen = false"
+            (click)="closeMenu()"
           >
             {{item.label}}
           </a>
@@ -33,4 +48,11 @@
       </div>
     </div>
   </div>
+  <div
+    class="navbar-overlay"
+    *ngIf="menuOpen"
+    (click)="closeMenu()"
+    aria-hidden="true"
+    [attr.data-state]="scrollState"
+  ></div>
 </nav>
