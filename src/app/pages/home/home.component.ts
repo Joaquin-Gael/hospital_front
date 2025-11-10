@@ -21,6 +21,7 @@ import { DEPARTMENTS, DOCTORS, NEWS, FAQS, SPECIALTIES, STATS, HERO } from './da
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
+  host: { class: 'home-page' },
   standalone: true,
   imports: [
     CommonModule,

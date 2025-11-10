@@ -38,7 +38,7 @@
   &:hover {
     .specialty-icon {
       transform: scale(1.1);
-      background: rgba(255, 255, 255, 0.3);
+      background: color-mix(in srgb, var(--text-white) 30%, transparent);
     }
   }
 }
@@ -55,7 +55,7 @@
   .material-icons {
     font-size: 32px;
     color: vars.$primary;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0 2px 4px color-mix(in srgb, #000 20%, transparent));
   }
 }
 
