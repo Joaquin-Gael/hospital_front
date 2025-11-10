@@ -4,7 +4,6 @@
 @use '../../../styles/color-utils' as color-utils;
 
 .error-message {
-  @include flex-inline(1rem, flex-start);
   @include glass-morphism(0.9);
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
@@ -16,6 +15,7 @@
   font-weight: 500;
   position: relative;
   animation: slideInDown 0.3s ease-out;
+  @include flex-inline(1rem, flex-start);
 
   @include mobile-only {
     @include flex-column;
