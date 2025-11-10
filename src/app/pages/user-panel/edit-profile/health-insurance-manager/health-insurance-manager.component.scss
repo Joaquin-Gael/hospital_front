@@ -10,7 +10,7 @@
     text-align: center;
     margin-bottom: 32px;
     padding-bottom: 24px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid $border-color;
 
     @include mobile-only {
       margin-bottom: 24px;
@@ -21,7 +21,7 @@
   &__title {
     font-size: 28px;
     font-weight: 700;
-    color: #1f2937;
+    color: $text-color;
     margin: 0 0 12px 0;
     @include flex-inline(12px, center, center);
 
@@ -33,7 +33,7 @@
 
   &__title-icon {
     font-size: 32px;
-    color: #059669;
+    color: $success-color;
 
     @include mobile-only {
       font-size: 28px;
@@ -42,7 +42,7 @@
 
   &__description {
     font-size: 16px;
-    color: #6b7280;
+    color: $text-light;
     margin: 0;
     line-height: 1.5;
 
@@ -52,11 +52,11 @@
   }
 
   &__content {
-    background: white;
+    background: $card-background;
     border-radius: 16px;
     padding: 32px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 24px panel-alpha(var(--surface-primary-dark), 0.08);
+    border: 1px solid $border-color;
 
     @include mobile-only {
       padding: 20px;
@@ -67,7 +67,7 @@
   &__actions {
     margin-top: 32px;
     padding-top: 24px;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid panel-tint($surface-muted, -4%);
     @include flex-inline(16px, center, space-between);
 
     @include mobile-only {
@@ -95,13 +95,13 @@
     }
 
     &--primary {
-      background: linear-gradient(135deg, #059669 0%, #047857 100%);
-      color: white;
-      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+      background: linear-gradient(135deg, $success-color 0%, panel-tint($success-color, -10%) 100%);
+      color: var(--text-white);
+      box-shadow: 0 4px 14px panel-alpha($success-color, 0.25);
 
       &:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(5, 150, 105, 0.35);
+        box-shadow: 0 8px 24px panel-alpha($success-color, 0.35);
 
         @include reduce-motion {
           transform: none;
@@ -122,7 +122,7 @@
 
   &__status {
     font-size: 14px;
-    color: #059669;
+    color: $success-color;
     font-weight: 500;
     @include flex-inline(8px, center);
 
@@ -163,7 +163,7 @@
   &__title {
     font-size: 18px;
     font-weight: 600;
-    color: #1f2937;
+    color: $text-color;
     margin: 0 0 16px 0;
     padding: 0 4px;
     @include flex-inline(8px);
@@ -176,11 +176,11 @@
 
   &__icon {
     font-size: 20px;
-    color: #3b82f6;
+    color: $primary-color;
     flex-shrink: 0;
     
     &.fa-check-circle {
-      color: #059669; 
+      color: $success-color; 
     }
 
     @include mobile-only {
@@ -191,8 +191,8 @@
   &__count {
     font-size: 14px;
     font-weight: 500;
-    color: #059669;
-    background: #d1fae5;
+    color: $success-color;
+    background: panel-alpha($success-color, 0.16);
     padding: 4px 10px; 
     border-radius: 12px;
     margin-left: auto;
@@ -205,8 +205,8 @@
 }
 
 .health-insurance-list {
-  background: #ffffff;
-  border: 2px dashed #d1d5db;
+  background: $card-background;
+  border: 2px dashed panel-tint($border-color, 8%);
   border-radius: 12px;
   padding: 16px;
   min-height: 320px;
@@ -228,36 +228,36 @@
   }
 
   &--available {
-    border-color: #3b82f6;
+    border-color: $primary-color;
     
     &:hover {
-      border-color: #2563eb;
-      background: #f8faff;
+      border-color: $primary-dark;
+      background: panel-alpha($primary-color, 0.08);
 
       @include touch-device {
-        background: #ffffff;
+        background: $card-background;
       }
     }
   }
 
   &--selected {
-    border-color: #059669;
+    border-color: $success-color;
     
     &:hover {
-      border-color: #047857;
-      background: #f0fdf4;
+      border-color: panel-tint($success-color, -10%);
+      background: panel-alpha($success-color, 0.12);
 
       @include touch-device {
-        background: #ffffff;
+        background: $card-background;
       }
     }
   }
 
   &--drag-over {
     border-style: solid;
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    background: linear-gradient(135deg, panel-alpha($info-color, 0.12) 0%, panel-alpha($info-color, 0.18) 100%);
     transform: scale(1.02);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 8px 25px panel-alpha($primary-color, 0.15);
 
     @include reduce-motion {
       transform: none;
@@ -274,16 +274,16 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: panel-tint($surface-muted, -8%);
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #94a3b8; 
+    background: panel-tint($text-light, 6%); 
     border-radius: 3px;
     
     &:hover {
-      background: #6b7280;
+      background: $text-light;
     }
   }
 }
@@ -316,21 +316,21 @@
   }
 
   &--available {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-color: #e2e8f0;
+    background: linear-gradient(135deg, panel-tint($surface-muted, -6%) 0%, panel-tint($surface-muted, -8%) 100%);
+    border-color: panel-tint($border-color, 4%);
 
     &:hover {
-      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-      border-color: #0ea5e9;
+      background: linear-gradient(135deg, panel-alpha($info-color, 0.18) 0%, panel-tint($info-color, 18%) 100%);
+      border-color: $info-color;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+      box-shadow: 0 4px 12px panel-alpha($info-color, 0.15);
 
       @include reduce-motion {
         transform: none;
       }
 
       @include touch-device {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        background: linear-gradient(135deg, panel-tint($surface-muted, -6%) 0%, panel-tint($surface-muted, -8%) 100%);
         transform: none;
         box-shadow: none;
       }
@@ -338,21 +338,21 @@
   }
 
   &--selected {
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-    border-color: #bbf7d0;
+    background: linear-gradient(135deg, panel-alpha($success-color, 0.12) 0%, panel-alpha($success-color, 0.2) 100%);
+    border-color: panel-tint($success-color, 24%);
 
     &:hover {
-      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-      border-color: #059669;
+      background: linear-gradient(135deg, panel-alpha($success-color, 0.16) 0%, panel-alpha($success-color, 0.16) 100%);
+      border-color: $success-color;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+      box-shadow: 0 4px 12px panel-alpha($success-color, 0.15);
 
       @include reduce-motion {
         transform: none;
       }
 
       @include touch-device {
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        background: linear-gradient(135deg, panel-alpha($success-color, 0.12) 0%, panel-alpha($success-color, 0.2) 100%);
         transform: none;
         box-shadow: none;
       }
@@ -372,7 +372,7 @@
 
   &__name {
     font-weight: 500;
-    color: #1f2937; 
+    color: $text-color; 
     font-size: 14px;
     line-height: 1.3;
     @include text-truncate;
@@ -384,9 +384,9 @@
 
   &__discount {
     font-size: 12px;
-    color: #059669;
+    color: $success-color;
     font-weight: 500;
-    background: #d1fae5;
+    background: panel-alpha($success-color, 0.16);
     padding: 2px 8px; 
     border-radius: 4px;
     align-self: flex-start;
@@ -406,11 +406,11 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    background: #3b82f6;
-    color: white;
+    background: $primary-color;
+    color: var(--text-white);
     flex-shrink: 0;
     @include flex-center;
-    @include hover-effect(#2563eb);
+    @include hover-effect($primary-dark);
 
     &:hover {
       transform: scale(1.1);
@@ -425,9 +425,9 @@
     }
 
     &--remove {
-      background: #ef4444;
+      background: $danger-color;
       font-size: 16px;
-      @include hover-effect(#dc2626);
+      @include hover-effect(panel-tint($danger-color, -10%));
     }
 
     @include mobile-only {
@@ -447,7 +447,7 @@
   height: 100%;
   min-height: 200px;
   text-align: center;
-  color: #6b7280;
+  color: $text-light;
   @include flex-center;
   @include flex-column;
   
@@ -492,7 +492,7 @@
 
 // Focus visible para accesibilidad
 :focus-visible {
-  outline: 3px solid #3b82f6;
+  outline: 3px solid $primary-color;
   outline-offset: 2px;
   border-radius: 4px;
 }
