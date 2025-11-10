@@ -1,7 +1,7 @@
-@use 'sass:color';
 @use '../../layout/styles/_media-queries.scss' as *;
 @use '../../layout/styles/_mixins.scss' as *;
 @use '../../admin/styles/_vars.scss' as *;
+@use '../../../styles/color-utils' as color-utils;
 
 .view-dialog-overlay {
   position: fixed;
@@ -188,12 +188,20 @@
     border-radius: 4px;
 
     &--success {
-      background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -10%) 100%);
+      background: linear-gradient(
+        135deg,
+        $success-color 0%,
+        color-utils.adjust($success-color, $lightness: -10%) 100%
+      );
       color: $text-white;
     }
 
     &--error {
-      background: linear-gradient(135deg, $error-color 0%, color.adjust($error-color, $lightness: -10%) 100%);
+      background: linear-gradient(
+        135deg,
+        $error-color 0%,
+        color-utils.adjust($error-color, $lightness: -10%) 100%
+      );
       color: $text-white;
     }
   }

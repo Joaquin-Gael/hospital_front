@@ -1,7 +1,7 @@
-@use "sass:color";
 @use "../styles/_vars.scss" as *;
 @use "../../layout/styles/_mixins.scss" as *;
 @use "../../layout/styles/_media-queries.scss" as *;
+@use '../../../styles/color-utils' as color-utils;
 
 .health-insurance-section {
   animation: fadeInUp 0.6s ease-out;
@@ -95,7 +95,7 @@
       cursor: not-allowed !important;
       transform: none !important;
       box-shadow: none !important;
-      background: color.adjust($bg-secondary, $lightness: -5%) !important;
+      background: color-utils.adjust($bg-secondary, $lightness: -5%) !important;
       color: $text-muted !important;
       border-color: $border-light !important;
     }
@@ -211,7 +211,7 @@
     background: linear-gradient(
       135deg,
       $success-color 0%,
-      color.adjust($success-color, $lightness: -10%) 100%
+      color-utils.adjust($success-color, $lightness: -10%) 100%
     ) !important;
     color: white !important;
     box-shadow: $shadow-md !important;
@@ -227,7 +227,7 @@
     background: linear-gradient(
       135deg,
       $warning-color 0%,
-      color.adjust($warning-color, $lightness: -10%) 100%
+      color-utils.adjust($warning-color, $lightness: -10%) 100%
     ) !important;
     color: white !important;
     box-shadow: $shadow-md !important;
@@ -243,7 +243,7 @@
     background: linear-gradient(
       135deg,
       $error-color 0%,
-      color.adjust($error-color, $lightness: -10%) 100%
+      color-utils.adjust($error-color, $lightness: -10%) 100%
     ) !important;
     color: white !important;
     box-shadow: $shadow-md !important;
@@ -259,7 +259,7 @@
     background: linear-gradient(
       135deg,
       $info-color 0%,
-      color.adjust($info-color, $lightness: -10%) 100%
+      color-utils.adjust($info-color, $lightness: -10%) 100%
     ) !important;
     color: white !important;
     box-shadow: $shadow-md !important;
