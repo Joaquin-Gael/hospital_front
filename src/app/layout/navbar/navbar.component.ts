@@ -1,9 +1,8 @@
-import { Component, OnInit, OnDestroy, HostListener, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subscription, combineLatest, of } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
-import { StorageService } from '../../services/core/storage.service'
 
 @Component({
   selector: 'app-navbar',
@@ -12,10 +11,12 @@ import { StorageService } from '../../services/core/storage.service'
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
+type ScrollState = 'initial' | 'scrolled';
+
 export class NavbarComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
-  isMenuOpen = false;
-  scrolled = false;
+  menuOpen = false;
+  scrollState: ScrollState = 'initial';
   navItems: any[] = [];
 
   constructor(private authService: AuthService) {}
@@ -28,6 +29,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
         }
       )
     );
+
+    this.onWindowScroll();
   }
 
   ngOnDestroy() {
@@ -63,11 +66,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   toggleMenu() {
-    this.isMenuOpen = !this.isMenuOpen;
+    this.menuOpen = !this.menuOpen;
+  }
+
+  closeMenu() {
+    this.menuOpen = false;
   }
 
   @HostListener('window:scroll', [])
   onWindowScroll() {
-    this.scrolled = window.scrollY > 20;
+    this.scrollState = window.scrollY > 20 ? 'scrolled' : 'initial';
   }
 }

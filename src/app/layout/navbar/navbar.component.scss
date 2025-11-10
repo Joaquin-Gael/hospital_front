@@ -1,10 +1,64 @@
 @use '../styles/_variables.scss' as var;
 @use '../styles/_media-queries.scss' as mq;
 @use '../styles/_mixins.scss' as mix;
+@use 'sass:map';
+
+$navbar-link-states: (
+  default: (
+    text: color-mix(in srgb, var(--text-secondary) 94%, var(--text-white) 6%),
+    background: transparent,
+    border: transparent
+  ),
+  hover: (
+    text: var(--text-white),
+    background: color-mix(in srgb, var(--color-primary) 18%, transparent),
+    border: color-mix(in srgb, var(--border-primary-soft) 85%, transparent)
+  ),
+  active: (
+    text: var(--text-white),
+    background: color-mix(in srgb, var(--color-primary) 28%, transparent),
+    border: var(--border-primary-strong)
+  )
+);
+
+@function state-token($state, $token) {
+  @return map.get(map.get($navbar-link-states, $state), $token);
+}
 
 .navbar {
-  --navbar-vertical-padding: clamp(1rem, 2.5vw, 1.75rem);
+  --navbar-padding-initial: clamp(1rem, 2.5vw, 1.75rem);
+  --navbar-padding-scrolled: clamp(0.65rem, 2vw, 1rem);
+  --navbar-vertical-padding: var(--navbar-padding-initial);
   --navbar-offset: calc(#{var.$navbar-height} + var(--navbar-vertical-padding) * 2);
+  --navbar-surface-bg: color-mix(in srgb, var(--surface-topbar) 92%, transparent);
+  --navbar-surface-border: var(--border-primary-soft);
+  --navbar-surface-shadow: var(--shadow-glass-strong);
+  --navbar-surface-translate: translateY(0) scale(1);
+  --navbar-surface-blur: 28px;
+  --navbar-surface-highlight-opacity: 0.85;
+  --navbar-backdrop-opacity: 0.35;
+  --navbar-links-bg: color-mix(in srgb, var(--surface-topbar) 60%, transparent);
+  --navbar-links-border: color-mix(in srgb, var(--border-subtle) 80%, transparent);
+  --navbar-link-color: #{state-token(default, text)};
+  --navbar-link-bg: #{state-token(default, background)};
+  --navbar-link-border: #{state-token(default, border)};
+  --navbar-link-hover-bg: #{state-token(hover, background)};
+  --navbar-link-hover-border: #{state-token(hover, border)};
+  --navbar-link-hover-color: #{state-token(hover, text)};
+  --navbar-link-active-bg: #{state-token(active, background)};
+  --navbar-link-active-border: #{state-token(active, border)};
+  --navbar-link-active-color: #{state-token(active, text)};
+  --navbar-link-glow: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 30%, transparent),
+    color-mix(in srgb, var(--color-secondary) 22%, transparent)
+  );
+  --navbar-link-outline: var(--border-focus);
+  --navbar-cta-shadow: var(--shadow-btn-primary);
+  --navbar-menu-toggle-bg: color-mix(in srgb, var(--surface-topbar) 82%, transparent);
+  --navbar-menu-toggle-border: var(--border-subtle);
+  --navbar-menu-toggle-hover: color-mix(in srgb, var(--color-primary) 14%, var(--surface-topbar));
+  --navbar-overlay-blur: 12px;
   position: fixed;
   top: 0;
   left: 0;
@@ -20,35 +74,49 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 50% -120px, rgba(99, 102, 241, 0.25), transparent 60%);
-    opacity: 0.4;
+    background: radial-gradient(
+      circle at 50% -120px,
+      color-mix(in srgb, var(--color-primary) 26%, transparent),
+      transparent 60%
+    );
+    opacity: var(--navbar-backdrop-opacity);
     pointer-events: none;
     transition: opacity 0.45s ease;
   }
 
-  &.scrolled {
-    --navbar-vertical-padding: clamp(0.65rem, 2vw, 1rem);
+  &[data-state='scrolled'] {
+    --navbar-vertical-padding: var(--navbar-padding-scrolled);
     --navbar-offset: calc(#{var.$navbar-mobile-height} + var(--navbar-vertical-padding) * 2);
-    padding: var(--navbar-vertical-padding) 0;
-
-    &::before {
-      opacity: 0.2;
-    }
+    --navbar-surface-bg: color-mix(
+      in srgb,
+      var(--surface-topbar) 96%,
+      color-mix(in srgb, var(--surface-backdrop) 35%, transparent)
+    );
+    --navbar-surface-border: var(--border-primary-strong);
+    --navbar-surface-shadow: var(--shadow-lg);
+    --navbar-surface-translate: translateY(-6px) scale(0.995);
+    --navbar-surface-blur: 32px;
+    --navbar-surface-highlight-opacity: 0.65;
+    --navbar-backdrop-opacity: 0.22;
+    --navbar-links-bg: color-mix(in srgb, var(--surface-topbar) 70%, transparent);
+    --navbar-links-border: var(--border-primary-strong);
+    --navbar-link-color: color-mix(in srgb, var(--text-secondary) 96%, var(--text-white) 4%);
   }
 
   &-surface {
     position: relative;
     width: min(1100px, calc(100% - clamp(1.5rem, 6vw, 4.5rem)));
     border-radius: 999px;
-    background: rgba(17, 24, 39, 0.82);
-    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: var(--navbar-surface-bg);
+    border: 1px solid var(--navbar-surface-border);
     padding: clamp(0.45rem, 1vw, 0.85rem) clamp(1rem, 2.4vw, 2.5rem);
     display: flex;
     justify-content: center;
     align-items: center;
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    box-shadow: 0 32px 64px rgba(30, 64, 175, 0.22), 0 18px 30px rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(var(--navbar-surface-blur));
+    -webkit-backdrop-filter: blur(var(--navbar-surface-blur));
+    box-shadow: var(--navbar-surface-shadow);
+    transform: var(--navbar-surface-translate);
     transition: transform 0.45s ease, background 0.45s ease, border-color 0.45s ease,
       box-shadow 0.45s ease;
     overflow: hidden;
@@ -57,9 +125,13 @@
       content: '';
       position: absolute;
       inset: -160px;
-      background: radial-gradient(circle at top, rgba(139, 92, 246, 0.35), transparent 65%);
+      background: radial-gradient(
+        circle at top,
+        color-mix(in srgb, var(--color-secondary) 35%, transparent),
+        transparent 65%
+      );
       filter: blur(30px);
-      opacity: 0.85;
+      opacity: var(--navbar-surface-highlight-opacity);
       transition: opacity 0.45s ease;
       pointer-events: none;
     }
@@ -69,19 +141,6 @@
       border-radius: 28px;
       padding: 0.75rem 1rem;
       overflow: visible;
-    }
-  }
-
-  &.scrolled {
-    .navbar-surface {
-      background: rgba(17, 24, 39, 0.92);
-      border-color: rgba(129, 140, 248, 0.3);
-      box-shadow: 0 22px 42px rgba(15, 23, 42, 0.55);
-      transform: translateY(-6px) scale(0.995);
-
-      &::before {
-        opacity: 0.65;
-      }
     }
   }
 
@@ -112,7 +171,7 @@
       .logo-image {
         height: clamp(44px, 5vw, 56px);
         width: auto;
-        filter: drop-shadow(0 6px 16px rgba(30, 64, 175, 0.25));
+        filter: drop-shadow(0 6px 16px color-mix(in srgb, var(--color-primary) 35%, transparent));
         transition: var.$navbar-transition;
 
         @include mq.mobile-only {
@@ -135,7 +194,12 @@
         font-size: clamp(1.05rem, 2.1vw, 1.45rem);
         font-weight: var.$font-weight-semibold;
         letter-spacing: 0.02em;
-        background: linear-gradient(120deg, #e0f2fe 0%, #bfdbfe 40%, #60a5fa 100%);
+        background: linear-gradient(
+          120deg,
+          color-mix(in srgb, var(--text-white) 85%, var(--color-primary) 15%) 0%,
+          color-mix(in srgb, var(--color-primary) 45%, var(--color-secondary)) 40%,
+          color-mix(in srgb, var(--color-info) 70%, var(--color-primary)) 100%
+        );
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
@@ -148,16 +212,17 @@
         font-weight: 600;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: #c7d2fe;
-        background: rgba(79, 70, 229, 0.18);
-        border: 1px solid rgba(129, 140, 248, 0.28);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        color: color-mix(in srgb, var(--text-white) 88%, var(--color-primary-light) 12%);
+        background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+        border: 1px solid color-mix(in srgb, var(--border-primary-soft) 90%, transparent);
+        box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-white) 12%, transparent);
 
         @include mq.nav-mobile {
           display: none;
+        }
+      }
+    }
   }
-  }
-}
 
   &-links {
     display: flex;
@@ -165,8 +230,8 @@
     gap: clamp(0.4rem, 1.5vw, 0.85rem);
     padding: 0.2rem;
     border-radius: 999px;
-    background: rgba(15, 23, 42, 0.55);
-    border: 1px solid transparent;
+    background: var(--navbar-links-bg);
+    border: 1px solid var(--navbar-links-border);
     transition: background 0.35s ease, border-color 0.35s ease;
 
     a {
@@ -178,8 +243,10 @@
       padding: 0.65rem 1.15rem;
       border-radius: 999px;
       letter-spacing: 0.02em;
-      color: rgba(226, 232, 240, 0.92);
-      transition: transform 0.3s ease, color 0.3s ease;
+      color: var(--navbar-link-color);
+      background: var(--navbar-link-bg);
+      border: 1px solid var(--navbar-link-border);
+      transition: transform 0.3s ease, color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
       z-index: 0;
       overflow: hidden;
       @include mix.focus-ring-nav;
@@ -189,7 +256,7 @@
         position: absolute;
         inset: 0;
         border-radius: inherit;
-        background: linear-gradient(135deg, rgba(129, 140, 248, 0.4), rgba(56, 189, 248, 0.15));
+        background: var(--navbar-link-glow);
         opacity: 0;
         transition: opacity 0.3s ease;
         z-index: -1;
@@ -200,15 +267,17 @@
         position: absolute;
         inset: 1px;
         border-radius: inherit;
-        border: 1px solid rgba(148, 163, 184, 0.18);
+        border: 1px solid transparent;
         opacity: 0;
-        transition: opacity 0.3s ease;
+        transition: opacity 0.3s ease, border-color 0.3s ease;
         z-index: -2;
       }
 
       &:hover {
-        color: var.$white;
+        color: var(--navbar-link-hover-color);
         transform: translateY(-2px);
+        background: var(--navbar-link-hover-bg);
+        border-color: var(--navbar-link-hover-border);
 
         &::before {
           opacity: 1;
@@ -216,12 +285,15 @@
 
         &::after {
           opacity: 1;
+          border-color: var(--navbar-link-hover-border);
         }
       }
 
       &.active {
-        color: var.$white;
+        color: var(--navbar-link-active-color);
         font-weight: var.$font-weight-semibold;
+        background: var(--navbar-link-active-bg);
+        border-color: var(--navbar-link-active-border);
 
         &::before {
           opacity: 1;
@@ -229,7 +301,7 @@
 
         &::after {
           opacity: 1;
-          border-color: rgba(191, 219, 254, 0.55);
+          border-color: var(--navbar-link-active-border);
         }
 
         &::marker {
@@ -239,9 +311,14 @@
 
       &[routerLink="/login"],
       &[routerLink="/register"] {
-        background: linear-gradient(135deg, #6366f1 0%, #7c3aed 45%, #8b5cf6 100%);
-        color: var.$white;
-        box-shadow: 0 16px 34px rgba(79, 70, 229, 0.35);
+        background: linear-gradient(
+          135deg,
+          color-mix(in srgb, var(--color-primary) 85%, var(--color-primary-light) 15%) 0%,
+          color-mix(in srgb, var(--color-secondary) 75%, var(--color-primary) 25%) 100%
+        );
+        color: var(--text-white);
+        box-shadow: var(--navbar-cta-shadow);
+        border-color: transparent;
 
         &::before,
         &::after {
@@ -268,16 +345,16 @@
       gap: 0.85rem;
       padding: 2.75rem 1.75rem 2rem;
       border-radius: 0;
-      background: rgba(15, 23, 42, 0.98);
+      background: color-mix(in srgb, var(--surface-topbar) 96%, var(--surface-backdrop));
       border: none;
-      box-shadow: 0 28px 65px rgba(15, 23, 42, 0.45);
+      box-shadow: var(--shadow-lg);
       transform: translateY(-100%);
       opacity: 0;
       visibility: hidden;
       transition: var.$navbar-transition;
       z-index: calc(var.$navbar-z-index - 1);
 
-      &.open {
+      &[data-state='open'] {
         transform: translateY(0);
         opacity: 1;
         visibility: visible;
@@ -290,15 +367,16 @@
         margin: 0;
         border-radius: 18px;
         font-size: 1.05rem;
-        border: 1px solid rgba(99, 102, 241, 0.15);
+        border: 1px solid var(--border-primary-soft);
+        background: color-mix(in srgb, var(--surface-topbar) 94%, transparent);
 
         &::after {
           opacity: 1;
-          border-color: rgba(99, 102, 241, 0.2);
+          border-color: var(--border-primary-strong);
         }
 
         &.active::after {
-          border-color: rgba(191, 219, 254, 0.4);
+          border-color: var(--navbar-link-active-border);
         }
 
         &[routerLink="/login"],
@@ -310,36 +388,21 @@
     }
   }
 
-  &.scrolled {
-    .navbar-links {
-      background: rgba(15, 23, 42, 0.65);
-      border-color: rgba(148, 163, 184, 0.28);
-
-      a {
-        color: rgba(226, 232, 240, 0.95);
-
-        &.active {
-          color: var.$white;
-        }
-      }
-    }
-  }
-
   &-menu-toggle {
     display: none;
     cursor: pointer;
-    background: rgba(148, 163, 184, 0.12);
-    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: var(--navbar-menu-toggle-bg);
+    border: 1px solid var(--navbar-menu-toggle-border);
     padding: 8px;
     border-radius: 14px;
     transition: var.$navbar-transition;
-    color: var.$white;
+    color: color-mix(in srgb, var(--text-secondary) 85%, var(--text-white) 15%);
     @include mix.focus-ring-nav;
 
     &:hover {
-      background: rgba(99, 102, 241, 0.2);
+      background: var(--navbar-menu-toggle-hover);
       transform: translateY(-1px);
-      border-color: rgba(129, 140, 248, 0.45);
+      border-color: var(--border-primary-soft);
     }
 
     @include mq.nav-mobile {
@@ -360,7 +423,7 @@
         display: block;
         height: 3px;
         width: 100%;
-        background: #e2e8f0;
+        background: color-mix(in srgb, var(--text-secondary) 90%, var(--text-white) 10%);
         border-radius: 2px;
         transition: var.$navbar-transition;
       }
@@ -384,6 +447,26 @@
     }
   }
 
+  &-overlay {
+    position: fixed;
+    top: var(--navbar-offset);
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - var(--navbar-offset));
+    background: color-mix(in srgb, var(--surface-backdrop) 92%, transparent);
+    backdrop-filter: blur(var(--navbar-overlay-blur));
+    -webkit-backdrop-filter: blur(var(--navbar-overlay-blur));
+    z-index: var.$navbar-overlay-z-index;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    animation: fadeInDown 0.3s ease forwards;
+
+    &[data-state='scrolled'] {
+      top: calc(#{var.$navbar-mobile-height} + var(--navbar-padding-scrolled) * 2);
+      height: calc(100vh - calc(#{var.$navbar-mobile-height} + var(--navbar-padding-scrolled) * 2));
+    }
+  }
+
   @include mq.reduce-motion {
     &, * {
       transition: none !important;
@@ -402,27 +485,17 @@
       }
     }
   }
-
-  &-overlay {
-    z-index: var.$navbar-overlay-z-index;
-    @include mix.mobile-overlay(var.$navbar-height);
-
-    &.scrolled {
-      @include mix.mobile-overlay(var.$navbar-mobile-height);
-    }
-  }
 }
 
-// Animaciones insanas
 @keyframes pulse-border {
   0% {
-    box-shadow: 0 0 0 0 hsla(195, 85%, 45%, 0.4);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-info) 40%, transparent);
   }
   70% {
-    box-shadow: 0 0 0 10px hsla(195, 85%, 45%, 0);
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-info) 0%, transparent);
   }
   100% {
-    box-shadow: 0 0 0 0 hsla(195, 85%, 45%, 0);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-info) 0%, transparent);
   }
 }
 
@@ -448,13 +521,12 @@
   }
 }
 
-.navbar-links.open {
+.navbar-links[data-state='open'] {
   @include mq.nav-mobile {
     animation: fadeInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// Variantes adicionales
 .navbar.sticky {
   position: sticky;
   top: 0;
@@ -475,91 +547,11 @@
     }
   }
 
-  &.scrolled {
+  &[data-state='scrolled'] {
     .navbar-surface {
-      background: rgba(255, 255, 255, 0.95);
-      border-color: rgba(148, 163, 184, 0.25);
-      box-shadow: var.$navbar-shadow;
+      background: color-mix(in srgb, var(--surface-topbar) 98%, transparent);
+      border-color: var(--border-primary-soft);
+      box-shadow: var(--shadow-md);
     }
   }
-}
-
-// Modo oscuro mejorado
-@include mq.dark-mode {
-  .navbar {
-    &::before {
-      opacity: 0.5;
-    }
-
-    .navbar-surface {
-      background: rgba(10, 15, 30, 0.88);
-      border-color: rgba(129, 140, 248, 0.32);
-      box-shadow: 0 32px 72px rgba(17, 24, 39, 0.55);
-
-      &::before {
-        opacity: 0.9;
-      }
-    }
-
-    &.scrolled {
-      .navbar-surface {
-        background: rgba(10, 15, 30, 0.95);
-        border-color: rgba(129, 140, 248, 0.38);
-      }
-    }
-
-    .navbar-logo {
-      .logo-name {
-        background: linear-gradient(120deg, #c7d2fe 0%, #93c5fd 45%, #60a5fa 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .logo-badge {
-        color: #e0e7ff;
-        background: rgba(79, 70, 229, 0.32);
-        border-color: rgba(129, 140, 248, 0.45);
-      }
-    }
-
-    .navbar-links {
-      background: rgba(15, 23, 42, 0.6);
-      border-color: rgba(99, 102, 241, 0.22);
-
-      a {
-        color: rgba(226, 232, 240, 0.92);
-
-        &::after {
-          border-color: rgba(99, 102, 241, 0.22);
-        }
-
-        &:hover {
-          color: #f8fafc;
-        }
-
-        &.active {
-          color: #f8fafc;
-
-          &::after {
-            border-color: rgba(191, 219, 254, 0.48);
-          }
-        }
-
-        &[routerLink="/login"],
-        &[routerLink="/register"] {
-          box-shadow: 0 18px 40px rgba(99, 102, 241, 0.45);
-        }
-      }
-    }
-
-    .navbar-menu-toggle {
-      background: rgba(30, 64, 175, 0.25);
-      border-color: rgba(99, 102, 241, 0.3);
-
-      .menu-icon span {
-        background: #f8fafc;
-      }
-    }
-  }
-}
 }
