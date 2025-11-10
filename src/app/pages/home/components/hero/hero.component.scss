@@ -84,7 +84,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
+  background: color-mix(in srgb, #000 10%, transparent);
   z-index: 1;
 }
 
@@ -183,8 +183,8 @@ h1 {
 
   .material-icons {
     font-size: 1.25rem;
-    color: rgba(8, 119, 182, 0.8);
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    color: color-mix(in srgb, var(--color-primary) 80%, var(--text-white));
+    filter: drop-shadow(0 1px 2px color-mix(in srgb, #000 30%, transparent));
   }
 }
 
@@ -196,8 +196,8 @@ h1 {
 
   .material-icons {
     font-size: 1.25rem;
-    color: rgba(239, 68, 68, 0.8);
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    color: color-mix(in srgb, var(--color-error) 80%, var(--text-white));
+    filter: drop-shadow(0 1px 2px color-mix(in srgb, #000 30%, transparent));
   }
 }
 
@@ -232,7 +232,7 @@ h1 {
     .material-icons {
       font-size: 1rem;
       color: vars.$medical-green;
-      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+      filter: drop-shadow(0 1px 2px color-mix(in srgb, #000 20%, transparent));
     }
   }
 }

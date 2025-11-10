@@ -19,53 +19,53 @@ $border-radius-md: 1rem;
 $border-radius-lg: 1.5rem;
 $border-radius-xl: 2rem;
 
-:root {
-  --primary-hue: #{$primary-hue};
-  --primary-sat: #{$primary-sat};
-  --primary-light: #{$primary-light};
+.home-page {
+  --glass-bg: color-mix(in srgb, var(--text-white) 12%, transparent);
+  --glass-bg-strong: color-mix(in srgb, var(--text-white) 18%, transparent);
+  --glass-border: color-mix(in srgb, var(--text-white) 20%, transparent);
+  --glass-border-strong: color-mix(in srgb, var(--text-white) 30%, transparent);
 
-  --accent-hue: #{$accent-hue};
-  --accent-sat: #{$accent-sat};
-  --accent-light: #{$accent-light};
+  --shadow-glass: 0 8px 32px color-mix(in srgb, var(--color-secondary) 20%, transparent);
+  --shadow-glass-strong: 0 12px 40px color-mix(in srgb, var(--color-secondary) 26%, transparent);
+  --shadow-medical: 0 4px 20px color-mix(in srgb, var(--color-primary) 22%, transparent);
+  --shadow-success: 0 4px 20px color-mix(in srgb, var(--color-success) 22%, transparent);
 
-  --medical-green-hue: #{$medical-green-hue};
-  --medical-green-sat: #{$medical-green-sat};
-  --medical-green-light: #{$medical-green-light};
+  --text-primary: var(--text-white);
+  --text-secondary: color-mix(in srgb, var(--text-white) 80%, transparent);
+  --text-shadow: color-mix(in srgb, #000 30%, transparent);
+  --text-shadow-strong: color-mix(in srgb, #000 50%, transparent);
 
-  // Glass effects mejorados para hospital
-  --glass-bg: rgba(255, 255, 255, 0.12);
-  --glass-bg-strong: rgba(255, 255, 255, 0.18);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-border-strong: rgba(255, 255, 255, 0.3);
-  
-  // Sombras médicas profesionales
-  --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.15);
-  --shadow-glass-strong: 0 12px 40px rgba(31, 38, 135, 0.2);
-  --shadow-medical: 0 4px 20px rgba(0, 119, 182, 0.15);
-  --shadow-success: 0 4px 20px rgba(34, 197, 94, 0.15);
+  --home-border-radius-sm-base: var(--border-radius-sm);
+  --home-border-radius-md-base: var(--border-radius-md);
+  --home-border-radius-lg-base: var(--border-radius-lg);
+  --home-border-radius-xl-base: var(--border-radius-xl);
+  --border-radius-sm: calc(var(--home-border-radius-sm-base) + 0.125rem);
+  --border-radius-md: calc(var(--home-border-radius-md-base) + 0.5rem);
+  --border-radius-lg: calc(var(--home-border-radius-lg-base) + 0.75rem);
+  --border-radius-xl: calc(var(--home-border-radius-xl-base) + 1rem);
 
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-shadow: rgba(0, 0, 0, 0.3);
-  --text-shadow-strong: rgba(0, 0, 0, 0.5);
+  --shadow-btn-primary: 0 4px 15px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  --shadow-btn-primary-hover: 0 6px 20px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  --shadow-btn-success: 0 4px 15px color-mix(in srgb, var(--color-success) 30%, transparent);
+  --shadow-btn-success-hover: 0 6px 20px color-mix(in srgb, var(--color-success) 40%, transparent);
+  --shadow-btn-emergency: 0 4px 15px color-mix(in srgb, var(--color-error) 30%, transparent);
+  --shadow-btn-emergency-hover: 0 6px 20px color-mix(in srgb, var(--color-error) 40%, transparent);
 
-  --border-radius-sm: #{$border-radius-sm};
-  --border-radius-md: #{$border-radius-md};
-  --border-radius-lg: #{$border-radius-lg};
-  --border-radius-xl: #{$border-radius-xl};
-
-  // Botones médicos
-  --shadow-btn-primary: 0 4px 15px rgba(0, 119, 182, 0.3);
-  --shadow-btn-primary-hover: 0 6px 20px rgba(0, 119, 182, 0.4);
-  --shadow-btn-success: 0 4px 15px rgba(34, 197, 94, 0.3);
-  --shadow-btn-success-hover: 0 6px 20px rgba(34, 197, 94, 0.4);
-  --shadow-btn-emergency: 0 4px 15px rgba(239, 68, 68, 0.3);
-  --shadow-btn-emergency-hover: 0 6px 20px rgba(239, 68, 68, 0.4);
-
-  // Gradientes médicos
-  --gradient-primary: linear-gradient(135deg, hsl(#{$primary-hue}, #{$primary-sat}, #{$primary-light}), hsl(#{$accent-hue}, #{$accent-sat}, #{$accent-light}));
-  --gradient-success: linear-gradient(135deg, hsl(#{$medical-green-hue}, #{$medical-green-sat}, #{$medical-green-light}), hsl(#{$medical-green-hue}, #{$medical-green-sat}, 40%));
-  --gradient-hero: linear-gradient(135deg, rgba(202, 240, 248, 0.9), rgba(173, 232, 244, 0.9));
+  --gradient-primary: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 85%, white) 0%,
+    color-mix(in srgb, var(--color-secondary) 70%, white) 100%
+  );
+  --gradient-success: linear-gradient(
+    135deg,
+    var(--color-success) 0%,
+    color-mix(in srgb, var(--color-success) 70%, var(--color-secondary)) 100%
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 15%, var(--surface-primary)) 0%,
+    color-mix(in srgb, var(--color-secondary) 18%, var(--surface-primary)) 100%
+  );
 }
 
 // Fallbacks SCSS mejorados
