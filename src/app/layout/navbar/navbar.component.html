@@ -1,58 +1,54 @@
 <nav
   class="navbar"
-  [attr.data-state]="scrollState"
-  [attr.data-menu]="menuOpen ? 'open' : 'closed'"
+  [attr.data-state]="scrollState()"
+  [attr.data-menu]="menuOpen() ? 'open' : 'closed'"
 >
-  <div class="navbar-surface">
-    <div class="navbar-container">
-      <div class="navbar-logo">
-        <a routerLink="/">
-          <img src="assets/hospital-logo-blanco.png" alt="Logo" class="logo-image" />
-          <div class="logo-detail">
-            <span class="logo-name">Hospital Central</span>
-            <span class="logo-badge">Cuidamos de ti</span>
-          </div>
-        </a>
-      </div>
-
-      <button
-        type="button"
-        class="navbar-menu-toggle"
-        (click)="toggleMenu()"
-        [attr.aria-expanded]="menuOpen"
-        aria-controls="navbar-links"
-        aria-label="Abrir o cerrar menú de navegación"
-      >
-        <span class="menu-icon" [class.open]="menuOpen">
-          <span></span>
-          <span></span>
-          <span></span>
-        </span>
-      </button>
-
-      <div
-        id="navbar-links"
-        class="navbar-links"
-        [attr.data-state]="menuOpen ? 'open' : 'closed'"
-      >
-        @for (item of navItems; track item.label) {
-          <a
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{exact: item.route === '/'}"
-            (click)="closeMenu()"
-          >
-            {{item.label}}
-          </a>
-        }
-      </div>
+  <div class="navbar-container">
+    <div class="navbar-logo">
+      <a routerLink="/" (click)="closeMenu()">
+        <img src="assets/hospital-logo-negro.png" alt="Hospital Central Logo" class="logo-image" />
+      </a>
     </div>
+
+    <div
+      class="navbar-links"
+      [attr.data-state]="menuOpen() ? 'open' : 'closed'"
+    >
+      @for (item of navItems(); track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: item.route === '/'}"
+          (click)="closeMenu()"
+          class="nav-link"
+        >
+          {{ item.label }}
+        </a>
+      } @empty {
+        <span class="nav-empty">No hay elementos disponibles</span>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="navbar-toggle"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="menuOpen()"
+      [attr.aria-label]="menuOpen() ? 'Cerrar menú' : 'Abrir menú'"
+    >
+      <span class="toggle-icon" [class.open]="menuOpen()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
   </div>
-  <div
-    class="navbar-overlay"
-    *ngIf="menuOpen"
-    (click)="closeMenu()"
-    aria-hidden="true"
-    [attr.data-state]="scrollState"
-  ></div>
+
+  @if (menuOpen()) {
+    <div
+      class="navbar-overlay"
+      (click)="closeMenu()"
+      [attr.data-state]="scrollState()"
+    ></div>
+  }
 </nav>

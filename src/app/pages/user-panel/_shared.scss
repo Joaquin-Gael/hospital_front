@@ -1,5 +1,5 @@
 @use '../../layout/styles/_mixins.scss' as *;
-@use '../../styles/color-utils' as color-utils;
+@use '../../../styles/_color-utils.scss' as color-utils;
 
 @function panel-alpha($color, $opacity) {
   @if $opacity < 0 or $opacity > 1 {

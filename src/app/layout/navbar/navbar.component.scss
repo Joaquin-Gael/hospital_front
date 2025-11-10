@@ -1,557 +1,352 @@
-@use '../styles/_variables.scss' as var;
+@use '../styles/_variables.scss' as vars;
 @use '../styles/_media-queries.scss' as mq;
 @use '../styles/_mixins.scss' as mix;
 @use 'sass:map';
 
-$navbar-link-states: (
-  default: (
-    text: color-mix(in srgb, var(--text-secondary) 94%, var(--text-white) 6%),
-    background: transparent,
-    border: transparent
-  ),
-  hover: (
-    text: var(--text-white),
-    background: color-mix(in srgb, var(--color-primary) 18%, transparent),
-    border: color-mix(in srgb, var(--border-primary-soft) 85%, transparent)
-  ),
-  active: (
-    text: var(--text-white),
-    background: color-mix(in srgb, var(--color-primary) 28%, transparent),
-    border: var(--border-primary-strong)
-  )
-);
-
-@function state-token($state, $token) {
-  @return map.get(map.get($navbar-link-states, $state), $token);
-}
-
 .navbar {
-  --navbar-padding-initial: clamp(1rem, 2.5vw, 1.75rem);
-  --navbar-padding-scrolled: clamp(0.65rem, 2vw, 1rem);
-  --navbar-vertical-padding: var(--navbar-padding-initial);
-  --navbar-offset: calc(#{var.$navbar-height} + var(--navbar-vertical-padding) * 2);
-  --navbar-surface-bg: color-mix(in srgb, var(--surface-topbar) 92%, transparent);
-  --navbar-surface-border: var(--border-primary-soft);
-  --navbar-surface-shadow: var(--shadow-glass-strong);
-  --navbar-surface-translate: translateY(0) scale(1);
-  --navbar-surface-blur: 28px;
-  --navbar-surface-highlight-opacity: 0.85;
-  --navbar-backdrop-opacity: 0.35;
-  --navbar-links-bg: color-mix(in srgb, var(--surface-topbar) 60%, transparent);
-  --navbar-links-border: color-mix(in srgb, var(--border-subtle) 80%, transparent);
-  --navbar-link-color: #{state-token(default, text)};
-  --navbar-link-bg: #{state-token(default, background)};
-  --navbar-link-border: #{state-token(default, border)};
-  --navbar-link-hover-bg: #{state-token(hover, background)};
-  --navbar-link-hover-border: #{state-token(hover, border)};
-  --navbar-link-hover-color: #{state-token(hover, text)};
-  --navbar-link-active-bg: #{state-token(active, background)};
-  --navbar-link-active-border: #{state-token(active, border)};
-  --navbar-link-active-color: #{state-token(active, text)};
-  --navbar-link-glow: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--color-primary) 30%, transparent),
-    color-mix(in srgb, var(--color-secondary) 22%, transparent)
-  );
-  --navbar-link-outline: var(--border-focus);
-  --navbar-cta-shadow: var(--shadow-btn-primary);
-  --navbar-menu-toggle-bg: color-mix(in srgb, var(--surface-topbar) 82%, transparent);
-  --navbar-menu-toggle-border: var(--border-subtle);
-  --navbar-menu-toggle-hover: color-mix(in srgb, var(--color-primary) 14%, var(--surface-topbar));
-  --navbar-overlay-blur: 12px;
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
   width: 100%;
-  padding: var(--navbar-vertical-padding) 0;
-  display: flex;
-  justify-content: center;
-  background: transparent;
-  z-index: var.$navbar-z-index;
-  transition: padding 0.45s ease, background 0.45s ease, box-shadow 0.45s ease;
+  z-index: vars.$navbar-z-index;
+  padding: 1.5rem 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &[data-state='initial'] {
+    background: transparent;
+    box-shadow: none;
+    
+    .navbar-container {
+      background: transparent;
+      border: 1px solid transparent;
+      backdrop-filter: none;
+    }
+    
+    .logo-name,
+    .nav-link {
+      color: var(--text-white);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .logo-tagline {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .toggle-icon span {
+      background: var(--text-white);
+    }
+  }
+  
+  &[data-state='scrolled'] {
+    /*
+    padding: 0.75rem 0;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    */
+    .navbar-container {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+    
+    .logo-name,
+    .nav-link {
+      color: var(--text-primary);
+      text-shadow: none;
+    }
+    
+    .logo-tagline {
+      color: var(--text-muted);
+    }
+    
+    .toggle-icon span {
+      background: var(--text-primary);
+    }
+  }
+}
 
+.navbar-container {
+  max-width: 1400px;
+  width: 95%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1rem 2rem;
+  border-radius: 16px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  @media (max-width: 768px) {
+    width: 90%;
+    padding: 0.75rem 1rem;
+    gap: 1rem;
+  }
+}
+
+.navbar-logo {
+  a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+    
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 4px;
+      border-radius: 8px;
+    }
+  }
+  
+  .logo-image {
+    height: 48px;
+    width: auto;
+    transition: all 0.3s ease;
+    
+    @media (max-width: 768px) {
+      height: 40px;
+    }
+  }
+  
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+  
+  .logo-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    transition: color 0.3s ease;
+  }
+  
+  .logo-tagline {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+  }
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  @media (max-width: 968px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transform: translateX(100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: calc(vars.$navbar-z-index + 10);
+    
+    &[data-state='open'] {
+      transform: translateX(0);
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}
+
+.nav-link {
+  position: relative;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(
-      circle at 50% -120px,
-      color-mix(in srgb, var(--color-primary) 26%, transparent),
-      transparent 60%
-    );
-    opacity: var(--navbar-backdrop-opacity);
-    pointer-events: none;
-    transition: opacity 0.45s ease;
-  }
-
-  &[data-state='scrolled'] {
-    --navbar-vertical-padding: var(--navbar-padding-scrolled);
-    --navbar-offset: calc(#{var.$navbar-mobile-height} + var(--navbar-vertical-padding) * 2);
-    --navbar-surface-bg: color-mix(
-      in srgb,
-      var(--surface-topbar) 96%,
-      color-mix(in srgb, var(--surface-backdrop) 35%, transparent)
-    );
-    --navbar-surface-border: var(--border-primary-strong);
-    --navbar-surface-shadow: var(--shadow-lg);
-    --navbar-surface-translate: translateY(-6px) scale(0.995);
-    --navbar-surface-blur: 32px;
-    --navbar-surface-highlight-opacity: 0.65;
-    --navbar-backdrop-opacity: 0.22;
-    --navbar-links-bg: color-mix(in srgb, var(--surface-topbar) 70%, transparent);
-    --navbar-links-border: var(--border-primary-strong);
-    --navbar-link-color: color-mix(in srgb, var(--text-secondary) 96%, var(--text-white) 4%);
-  }
-
-  &-surface {
-    position: relative;
-    width: min(1100px, calc(100% - clamp(1.5rem, 6vw, 4.5rem)));
-    border-radius: 999px;
-    background: var(--navbar-surface-bg);
-    border: 1px solid var(--navbar-surface-border);
-    padding: clamp(0.45rem, 1vw, 0.85rem) clamp(1rem, 2.4vw, 2.5rem);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(var(--navbar-surface-blur));
-    -webkit-backdrop-filter: blur(var(--navbar-surface-blur));
-    box-shadow: var(--navbar-surface-shadow);
-    transform: var(--navbar-surface-translate);
-    transition: transform 0.45s ease, background 0.45s ease, border-color 0.45s ease,
-      box-shadow 0.45s ease;
-    overflow: hidden;
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: -160px;
-      background: radial-gradient(
-        circle at top,
-        color-mix(in srgb, var(--color-secondary) 35%, transparent),
-        transparent 65%
-      );
-      filter: blur(30px);
-      opacity: var(--navbar-surface-highlight-opacity);
-      transition: opacity 0.45s ease;
-      pointer-events: none;
-    }
-
-    @include mq.nav-mobile {
-      width: calc(100% - 1.5rem);
-      border-radius: 28px;
-      padding: 0.75rem 1rem;
-      overflow: visible;
-    }
-  }
-
-  &-container {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: clamp(0.75rem, 2.5vw, 1.5rem);
-  }
-
-  &-logo {
-    a {
-      display: flex;
-      align-items: center;
-      gap: clamp(0.65rem, 2vw, 1.25rem);
-      text-decoration: none;
-      transition: var.$navbar-transition;
-      padding: 0.25rem;
-      border-radius: calc(var.$navbar-radius * 1.5);
-
-      &:hover {
-        transform: translateY(-1px);
-      }
-
-      @include mix.focus-ring-nav;
-
-      .logo-image {
-        height: clamp(44px, 5vw, 56px);
-        width: auto;
-        filter: drop-shadow(0 6px 16px color-mix(in srgb, var(--color-primary) 35%, transparent));
-        transition: var.$navbar-transition;
-
-        @include mq.mobile-only {
-          height: 40px;
-        }
-      }
-
-      .logo-detail {
-        display: flex;
-        flex-direction: column;
-        gap: 0.1rem;
-
-        @include mq.mobile-only {
-          display: none;
-        }
-      }
-
-      .logo-name {
-        font-family: var.$font-family-logo;
-        font-size: clamp(1.05rem, 2.1vw, 1.45rem);
-        font-weight: var.$font-weight-semibold;
-        letter-spacing: 0.02em;
-        background: linear-gradient(
-          120deg,
-          color-mix(in srgb, var(--text-white) 85%, var(--color-primary) 15%) 0%,
-          color-mix(in srgb, var(--color-primary) 45%, var(--color-secondary)) 40%,
-          color-mix(in srgb, var(--color-info) 70%, var(--color-primary)) 100%
-        );
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .logo-badge {
-        align-self: flex-start;
-        padding: 0.18rem 0.65rem;
-        border-radius: 999px;
-        font-size: 0.68rem;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: color-mix(in srgb, var(--text-white) 88%, var(--color-primary-light) 12%);
-        background: color-mix(in srgb, var(--color-primary) 18%, transparent);
-        border: 1px solid color-mix(in srgb, var(--border-primary-soft) 90%, transparent);
-        box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-white) 12%, transparent);
-
-        @include mq.nav-mobile {
-          display: none;
-        }
-      }
-    }
-  }
-
-  &-links {
-    display: flex;
-    align-items: center;
-    gap: clamp(0.4rem, 1.5vw, 0.85rem);
-    padding: 0.2rem;
-    border-radius: 999px;
-    background: var(--navbar-links-bg);
-    border: 1px solid var(--navbar-links-border);
-    transition: background 0.35s ease, border-color 0.35s ease;
-
-    a {
-      font-family: var.$font-family-base;
-      font-size: clamp(0.9rem, 1.6vw, 1.05rem);
-      text-decoration: none;
-      font-weight: var.$font-weight-medium;
-      position: relative;
-      padding: 0.65rem 1.15rem;
-      border-radius: 999px;
-      letter-spacing: 0.02em;
-      color: var(--navbar-link-color);
-      background: var(--navbar-link-bg);
-      border: 1px solid var(--navbar-link-border);
-      transition: transform 0.3s ease, color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
-      z-index: 0;
-      overflow: hidden;
-      @include mix.focus-ring-nav;
-
-      &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        background: var(--navbar-link-glow);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        z-index: -1;
-      }
-
-      &::after {
-        content: '';
-        position: absolute;
-        inset: 1px;
-        border-radius: inherit;
-        border: 1px solid transparent;
-        opacity: 0;
-        transition: opacity 0.3s ease, border-color 0.3s ease;
-        z-index: -2;
-      }
-
-      &:hover {
-        color: var(--navbar-link-hover-color);
-        transform: translateY(-2px);
-        background: var(--navbar-link-hover-bg);
-        border-color: var(--navbar-link-hover-border);
-
-        &::before {
-          opacity: 1;
-        }
-
-        &::after {
-          opacity: 1;
-          border-color: var(--navbar-link-hover-border);
-        }
-      }
-
-      &.active {
-        color: var(--navbar-link-active-color);
-        font-weight: var.$font-weight-semibold;
-        background: var(--navbar-link-active-bg);
-        border-color: var(--navbar-link-active-border);
-
-        &::before {
-          opacity: 1;
-        }
-
-        &::after {
-          opacity: 1;
-          border-color: var(--navbar-link-active-border);
-        }
-
-        &::marker {
-          content: none;
-        }
-      }
-
-      &[routerLink="/login"],
-      &[routerLink="/register"] {
-        background: linear-gradient(
-          135deg,
-          color-mix(in srgb, var(--color-primary) 85%, var(--color-primary-light) 15%) 0%,
-          color-mix(in srgb, var(--color-secondary) 75%, var(--color-primary) 25%) 100%
-        );
-        color: var(--text-white);
-        box-shadow: var(--navbar-cta-shadow);
-        border-color: transparent;
-
-        &::before,
-        &::after {
-          opacity: 0;
-        }
-
-        &:hover {
-          transform: translateY(-3px) scale(1.02);
-        }
-
-        &:active {
-          transform: translateY(-1px) scale(0.99);
-        }
-      }
-    }
-
-    @include mq.nav-mobile {
-      position: fixed;
-      top: var(--navbar-offset);
-      left: 0;
-      width: 100%;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0.85rem;
-      padding: 2.75rem 1.75rem 2rem;
-      border-radius: 0;
-      background: color-mix(in srgb, var(--surface-topbar) 96%, var(--surface-backdrop));
-      border: none;
-      box-shadow: var(--shadow-lg);
-      transform: translateY(-100%);
-      opacity: 0;
-      visibility: hidden;
-      transition: var.$navbar-transition;
-      z-index: calc(var.$navbar-z-index - 1);
-
-      &[data-state='open'] {
-        transform: translateY(0);
-        opacity: 1;
-        visibility: visible;
-      }
-
-      a {
-        width: 100%;
-        text-align: left;
-        padding: 1rem 1.25rem;
-        margin: 0;
-        border-radius: 18px;
-        font-size: 1.05rem;
-        border: 1px solid var(--border-primary-soft);
-        background: color-mix(in srgb, var(--surface-topbar) 94%, transparent);
-
-        &::after {
-          opacity: 1;
-          border-color: var(--border-primary-strong);
-        }
-
-        &.active::after {
-          border-color: var(--navbar-link-active-border);
-        }
-
-        &[routerLink="/login"],
-        &[routerLink="/register"] {
-          text-align: center;
-          border: none;
-        }
-      }
-    }
-  }
-
-  &-menu-toggle {
-    display: none;
-    cursor: pointer;
-    background: var(--navbar-menu-toggle-bg);
-    border: 1px solid var(--navbar-menu-toggle-border);
-    padding: 8px;
-    border-radius: 14px;
-    transition: var.$navbar-transition;
-    color: color-mix(in srgb, var(--text-secondary) 85%, var(--text-white) 15%);
-    @include mix.focus-ring-nav;
-
-    &:hover {
-      background: var(--navbar-menu-toggle-hover);
-      transform: translateY(-1px);
-      border-color: var(--border-primary-soft);
-    }
-
-    @include mq.nav-mobile {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .menu-icon {
-      width: 28px;
-      height: 22px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-
-      span {
-        display: block;
-        height: 3px;
-        width: 100%;
-        background: color-mix(in srgb, var(--text-secondary) 90%, var(--text-white) 10%);
-        border-radius: 2px;
-        transition: var.$navbar-transition;
-      }
-
-      &.open {
-        span {
-          &:nth-child(1) {
-            transform: translateY(9.5px) rotate(45deg);
-          }
-
-          &:nth-child(2) {
-            opacity: 0;
-            transform: scale(0);
-          }
-
-          &:nth-child(3) {
-            transform: translateY(-9.5px) rotate(-45deg);
-          }
-        }
-      }
-    }
-  }
-
-  &-overlay {
-    position: fixed;
-    top: var(--navbar-offset);
-    left: 0;
-    width: 100vw;
-    height: calc(100vh - var(--navbar-offset));
-    background: color-mix(in srgb, var(--surface-backdrop) 92%, transparent);
-    backdrop-filter: blur(var(--navbar-overlay-blur));
-    -webkit-backdrop-filter: blur(var(--navbar-overlay-blur));
-    z-index: var.$navbar-overlay-z-index;
+    border-radius: inherit;
+    background: var(--color-primary);
+    opacity: 0;
     transition: opacity 0.3s ease;
-    opacity: 0;
-    animation: fadeInDown 0.3s ease forwards;
-
-    &[data-state='scrolled'] {
-      top: calc(#{var.$navbar-mobile-height} + var(--navbar-padding-scrolled) * 2);
-      height: calc(100vh - calc(#{var.$navbar-mobile-height} + var(--navbar-padding-scrolled) * 2));
+    z-index: -1;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    
+    &::before {
+      opacity: 0.1;
     }
   }
-
-  @include mq.reduce-motion {
-    &, * {
-      transition: none !important;
-      animation: none !important;
+  
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  
+  &.active {
+    font-weight: 600;
+    color: var(--color-primary);
+    
+    &::before {
+      opacity: 0.15;
     }
   }
+  
+  &[href='/login'],
+  &[href='/register'] {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: var(--text-white);
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(15, 155, 174, 0.3);
+    
+    &::before {
+      display: none;
+    }
+    
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(15, 155, 174, 0.4);
+    }
+  }
+  
+  @media (max-width: 968px) {
+    width: 100%;
+    text-align: center;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    color: var(--text-primary);
+  }
+}
 
-  @include mq.high-contrast {
-    border-bottom: 3px solid var.$navbar-text-dark;
+.nav-empty {
+  padding: 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
 
-    .navbar-links a {
-      border: 2px solid transparent;
+.navbar-toggle {
+  display: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: calc(vars.$navbar-z-index + 20);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+  }
+  
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  
+  @media (max-width: 968px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
 
-      &:focus {
-        border-color: var.$navbar-focus-color;
+.toggle-icon {
+  width: 24px;
+  height: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  
+  span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    border-radius: 2px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  &.open {
+    span {
+      &:nth-child(1) {
+        transform: translateY(8.5px) rotate(45deg);
+      }
+      
+      &:nth-child(2) {
+        opacity: 0;
+        transform: scaleX(0);
+      }
+      
+      &:nth-child(3) {
+        transform: translateY(-8.5px) rotate(-45deg);
       }
     }
   }
 }
 
-@keyframes pulse-border {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-info) 40%, transparent);
-  }
-  70% {
-    box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-info) 0%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-info) 0%, transparent);
-  }
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.navbar-links[data-state='open'] {
-  @include mq.nav-mobile {
-    animation: fadeInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
-.navbar.sticky {
-  position: sticky;
+.navbar-overlay {
+  position: fixed;
   top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  -webkit-backdrop-filter: blur(4px);
+  z-index: calc(vars.$navbar-z-index + 5);
+  animation: fadeIn 0.3s ease;
+  
+  @media (min-width: 969px) {
+    display: none;
+  }
 }
 
-.navbar.transparent {
-  &::before {
+@keyframes fadeIn {
+  from {
     opacity: 0;
   }
-
-  .navbar-surface {
-    background: transparent;
-    border-color: transparent;
-    box-shadow: none;
-
-    &::before {
-      opacity: 0;
-    }
+  to {
+    opacity: 1;
   }
+}
 
-  &[data-state='scrolled'] {
-    .navbar-surface {
-      background: color-mix(in srgb, var(--surface-topbar) 98%, transparent);
-      border-color: var(--border-primary-soft);
-      box-shadow: var(--shadow-md);
-    }
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .navbar-container,
+  .nav-link,
+  .navbar-toggle,
+  .toggle-icon span {
+    transition: none !important;
+    animation: none !important;
   }
 }

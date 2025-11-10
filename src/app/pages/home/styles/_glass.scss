@@ -1,16 +1,17 @@
+@use 'sass:math';
 @use './_variables-moderns.scss' as vars;
 
 @mixin glass-base($opacity: 0.12, $blur: 16px, $border-opacity: 0.2) {
   &{
-    background: color-mix(in srgb, var(--text-white) #{percentage($opacity)}, transparent);
+    background: color-mix(in srgb, var(--text-white) #{math.percentage($opacity)}, transparent);
     backdrop-filter: blur($blur);
     -webkit-backdrop-filter: blur($blur);
-    border: 1px solid color-mix(in srgb, var(--text-white) #{percentage($border-opacity)}, transparent);
+    border: 1px solid color-mix(in srgb, var(--text-white) #{math.percentage($border-opacity)}, transparent);
   }
   @supports not (backdrop-filter: blur($blur)) {
     background: color-mix(
       in srgb,
-      var(--text-white) #{percentage($opacity + 0.08)},
+      var(--text-white) #{math.percentage($opacity + 0.08)},
       transparent
     );
   }
