@@ -25,9 +25,11 @@
   </div>
 
   <div class="hero-image">
-    <div class="floating-card" 
-         *ngFor="let card of heroData.floatingCards" 
-         [class]="card.position">
+    <div
+      class="floating-card"
+      *ngFor="let card of heroData.floatingCards"
+      [ngClass]="card.position"
+    >
       <span class="material-icons">{{ card.icon }}</span>
       <span>{{ card.text }}</span>
     </div>
