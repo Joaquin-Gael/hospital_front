@@ -1,6 +1,6 @@
 @use './_variables-moderns.scss' as vars;
 
-@mixin ripple($color: rgba(255, 255, 255, 0.3), $duration: 600ms) {
+@mixin ripple($color: color-mix(in srgb, var(--text-white) 30%, transparent), $duration: 600ms) {
   &{
     position: relative;
     overflow: hidden;
@@ -43,27 +43,27 @@
 }
 
 @mixin ripple-dark($opacity: 0.15) {
-  @include ripple(rgba(0, 0, 0, $opacity));
+  @include ripple(color-mix(in srgb, #000 #{percentage($opacity)}, transparent));
 }
 
 @mixin ripple-light($opacity: 0.25) {
-  @include ripple(rgba(255, 255, 255, $opacity));
+  @include ripple(color-mix(in srgb, var(--text-white) #{percentage($opacity)}, transparent));
 }
 
 @mixin ripple-primary() {
-  @include ripple(rgba(0, 119, 182, 0.3));
+  @include ripple(color-mix(in srgb, var(--color-primary) 30%, transparent));
 }
 
 @mixin ripple-medical() {
-  @include ripple(rgba(0, 119, 182, 0.25));
+  @include ripple(color-mix(in srgb, var(--color-primary) 25%, transparent));
 }
 
 @mixin ripple-success() {
-  @include ripple(rgba(34, 197, 94, 0.3));
+  @include ripple(color-mix(in srgb, var(--color-success) 30%, transparent));
 }
 
 @mixin ripple-emergency() {
-  @include ripple(rgba(239, 68, 68, 0.3));
+  @include ripple(color-mix(in srgb, var(--color-error) 30%, transparent));
 }
 
 // Ripple especializado para botones médicos

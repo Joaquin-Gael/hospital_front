@@ -2,13 +2,17 @@
 
 @mixin glass-base($opacity: 0.12, $blur: 16px, $border-opacity: 0.2) {
   &{
-    background: rgba(255, 255, 255, $opacity);
+    background: color-mix(in srgb, var(--text-white) #{percentage($opacity)}, transparent);
     backdrop-filter: blur($blur);
     -webkit-backdrop-filter: blur($blur);
-    border: 1px solid rgba(255, 255, 255, $border-opacity);
+    border: 1px solid color-mix(in srgb, var(--text-white) #{percentage($border-opacity)}, transparent);
   }
   @supports not (backdrop-filter: blur($blur)) {
-    background: rgba(255, 255, 255, $opacity + 0.08);
+    background: color-mix(
+      in srgb,
+      var(--text-white) #{percentage($opacity + 0.08)},
+      transparent
+    );
   }
 }
 
@@ -25,15 +29,15 @@
   color: vars.$text-primary;
   text-shadow: 0 1px 2px var(--text-shadow);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-glass-strong);
-    background: rgba(255, 255, 255, 0.15);
+    background: color-mix(in srgb, var(--text-white) 15%, transparent);
   }
-  
+
   &:focus-within {
-    outline: 2px solid vars.$primary;
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
 }
@@ -64,9 +68,9 @@
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0, 119, 182, 0.2);
-    background: rgba(255, 255, 255, 0.18);
-    
+    box-shadow: 0 12px 40px color-mix(in srgb, var(--color-primary) 25%, transparent);
+    background: color-mix(in srgb, var(--text-white) 18%, transparent);
+
     &::before {
       opacity: 1;
     }
@@ -80,7 +84,7 @@
   justify-content: center;
   backdrop-filter: blur($blur);
   -webkit-backdrop-filter: blur($blur);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid color-mix(in srgb, var(--text-white) 30%, transparent);
   position: relative;
   overflow: hidden;
   
@@ -114,15 +118,15 @@
     border-radius: var(--border-radius-md);
   }
   
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--color-secondary) 24%, transparent);
   color: #000000;
   text-shadow: 0 1px 2px var(--text-shadow);
   font-weight: 500;
   animation: float 6s ease-in-out infinite;
   @include glass-base(0.2, 12px, 0.3);
-  
+
   .material-icons {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 1px 2px color-mix(in srgb, #000 30%, transparent));
   }
 }
 
@@ -143,17 +147,17 @@
     &:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-btn-primary-hover);
-      background: rgba(255, 255, 255, 0.2);
+      background: color-mix(in srgb, var(--text-white) 20%, transparent);
     }
   } @else if $variant == 'success' {
     color: vars.$text-primary;
     text-shadow: 0 1px 2px var(--text-shadow);
     box-shadow: var(--shadow-btn-success);
-    
+
     &:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-btn-success-hover);
-      background: rgba(255, 255, 255, 0.2);
+      background: color-mix(in srgb, var(--text-white) 20%, transparent);
     }
   } @else if $variant == 'emergency' {
     color: vars.$text-primary;
@@ -165,7 +169,7 @@
     &:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-btn-emergency-hover);
-      background: rgba(255, 255, 255, 0.2);
+      background: color-mix(in srgb, var(--text-white) 20%, transparent);
     }
   }
   
