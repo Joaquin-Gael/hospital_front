@@ -4,11 +4,8 @@
 
 .contact-section {
   min-height: calc(100vh - var.$navbar-height);
-  padding: 4rem 0;
-  //background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%);
   position: relative;
   overflow: hidden;
-  margin-top: 80px;
 
   &::before,
   &::after {
@@ -17,24 +14,24 @@
     width: 600px;
     height: 600px;
     border-radius: 50%;
-    opacity: 0.1;
+    opacity: 0.05;
     z-index: 0;
+    pointer-events: none;
   }
 
   &::before {
-    //background: radial-gradient(circle, var.$navbar-primary 0%, transparent 70%);
+    background: radial-gradient(circle, var.$navbar-primary 0%, transparent 70%);
     top: -300px;
     left: -200px;
   }
 
   &::after {
-    //background: radial-gradient(circle, var.$primary-light 0%, transparent 70%);
+    background: radial-gradient(circle, var.$primary-light 0%, transparent 70%);
     bottom: -300px;
     right: -200px;
   }
 
   @include resp.nav-mobile {
-    padding: 2rem 0;
     min-height: calc(100vh - var.$navbar-mobile-height);
   }
 }
@@ -42,6 +39,8 @@
 .container {
   position: relative;
   z-index: 1;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
   @include resp.container-responsive;
 }
 
@@ -83,28 +82,43 @@
 
 .contact-content {
   display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 2rem;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 3rem;
+  align-items: start;
   animation: fadeInUp 0.8s ease-out;
 
   @include resp.desktop-up {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
 }
 
+// Info cards en grid 2x2
 .contact-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+
+  @include resp.tablet-up {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include resp.nav-mobile {
+    grid-template-columns: 1fr;
+  }
 }
 
 .info-card {
-  padding: 1.5rem;
+  padding: 1.75rem 1.5rem;
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08);
   transition: var.$navbar-transition;
   border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   @include mix.glass-morphism(0.9);
+
 
   &:hover {
     transform: translateY(-4px);
@@ -113,16 +127,15 @@
   }
 
   .icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
     background: var.$navbar-user-gradient;
-    margin-bottom: 1rem;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
     @include mix.flex-center;
 
     i {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       color: white;
     }
   }
@@ -131,22 +144,22 @@
     font-size: 1.125rem;
     font-weight: 600;
     color: var.$text-dark;
-    margin-bottom: 0.5rem;
+    margin: 0;
   }
 
   p {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var.$text-light;
-    margin: 0.25rem 0;
-    line-height: 1.6;
+    margin: 0;
+    line-height: 1.5;
 
-    &:last-child {
-      margin-bottom: 0;
+    & + p {
+      margin-top: 0.25rem;
     }
   }
 
   @include resp.nav-mobile {
-    padding: 1.25rem;
+    padding: 1.5rem 1.25rem;
 
     .icon {
       width: 48px;
@@ -156,6 +169,14 @@
         font-size: 1.25rem;
       }
     }
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    p {
+      font-size: 0.875rem;
+    }
   }
 }
 
@@ -164,15 +185,17 @@
   border-radius: 24px;
   box-shadow: var.$shadow-glass;
   border: 1px solid rgba(255, 255, 255, 0.3);
+  position: sticky;
+  top: calc(var.$navbar-height + 2rem);
   @include mix.glass-morphism(0.95);
-
+  
   h3 {
     font-size: 1.5rem;
     font-weight: 700;
     color: var.$text-dark;
-    margin-bottom: 2rem;
+    margin-bottom: 1.75rem;
     position: relative;
-    padding-bottom: 1rem;
+    padding-bottom: 0.75rem;
 
     &::after {
       content: '';
@@ -186,8 +209,12 @@
     }
   }
 
+  @include resp.desktop-up {
+    position: static;
+  }
+
   @include resp.nav-mobile {
-    padding: 1.5rem;
+    padding: 1.75rem 1.5rem;
 
     h3 {
       font-size: 1.25rem;
@@ -207,12 +234,14 @@
 
   i {
     font-size: 1.25rem;
+    flex-shrink: 0;
   }
 
   p {
     margin: 0;
     font-size: 0.95rem;
     font-weight: 500;
+    line-height: 1.4;
   }
 
   &.alert-success {
@@ -239,7 +268,7 @@
 .contact-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .form-group {
@@ -248,10 +277,9 @@
   gap: 0.5rem;
 
   label {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var.$text-dark;
-    margin-bottom: 0.25rem;
   }
 }
 
@@ -267,6 +295,7 @@
     font-size: 1.125rem;
     z-index: 1;
     pointer-events: none;
+    transition: color 0.3s ease;
   }
 
   input,
@@ -290,12 +319,22 @@
     &:focus {
       outline: none;
       border-color: var.$navbar-primary;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+
+      ~ i {
+        color: var.$navbar-primary;
+      }
     }
 
     &:hover:not(:focus) {
-      border-color: rgba(99, 102, 241, 0.3);
+      border-color: rgba(99, 102, 241, 0.2);
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    &[aria-invalid="true"] {
+      border-color: var.$emergency-color;
+      background: rgba(239, 68, 68, 0.05);
     }
   }
 
@@ -310,23 +349,25 @@
 
   textarea {
     resize: vertical;
-    min-height: 120px;
+    min-height: 110px;
     font-family: inherit;
     line-height: 1.6;
+    padding-top: 1rem;
   }
 }
 
 .error-message {
   font-size: 0.875rem;
   color: var.$emergency-color;
-  margin-top: 0.25rem;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.375rem;
   animation: shake 0.3s ease-in-out;
+  font-weight: 500;
 
   &::before {
     content: '⚠';
+    font-size: 1rem;
   }
 }
 
@@ -341,6 +382,10 @@
   transition: var.$navbar-transition;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
   margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
@@ -357,8 +402,9 @@
     transform: none;
   }
 
-  i {
-    margin-right: 0.5rem;
+  &:focus-visible {
+    outline: 2px solid var.$navbar-primary;
+    outline-offset: 2px;
   }
 }
 
@@ -408,7 +454,6 @@
   }
 }
 
-// Loading spinner animation
 @keyframes spin {
   from {
     transform: rotate(0deg);

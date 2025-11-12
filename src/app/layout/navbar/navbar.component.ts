@@ -36,16 +36,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isLoggedIn = signal(false)
   userScopes = signal<string[]>([])
   
-  // inyección vía inject()
   private readonly authService = inject(AuthService)
   private readonly router = inject(Router)
   
-  // nav items derivados del estado
   navItems = computed(() =>
     this.getNavItems(this.isLoggedIn(), this.userScopes()),
   )
   
-  // efecto de debug (opcional)
+  // efecto de debug
   private readonly logEffect = effect(() => {
     console.log("[v0] Navbar state:", {
       scrollState: this.scrollState(),
@@ -66,7 +64,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
       }),
     )
     
-    // 🎯 SOLUCIÓN: Scroll al tope en cada navegación
     this.subscriptions.add(
       this.router.events
         .pipe(filter((event) => event instanceof NavigationEnd))

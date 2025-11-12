@@ -1,0 +1,24 @@
+<section class="hero">
+  <div class="hero__background">
+    <img 
+      [src]="heroData.backgroundImage" 
+      [alt]="heroData.altText || 'Hero image'" 
+      class="hero__image"
+      loading="eager">
+  </div>
+  
+  <div class="hero__content">
+    <div class="container">
+      <h1 class="hero__title">
+        {{ heroData.title }}
+        @if (heroData.subtitle) {
+          <br>
+          <span class="hero__subtitle">{{ heroData.subtitle }}</span>
+        }
+        @if (heroData.highlightText) {
+          <span class="highlight">{{ heroData.highlightText }}</span>
+        }
+      </h1>
+    </div>
+  </div>
+</section>
