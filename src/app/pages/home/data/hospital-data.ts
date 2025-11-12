@@ -1,49 +1,49 @@
 import { Department, Doctor, News, FAQ, Specialty, Stat, HeroData } from '../models/interfaces';
 
 export const HERO: HeroData = {
-    backgroundImage: 'assets/hero.png',
-    altText: 'Hospital SDLG - Centro Médico de Excelencia',
-    title: 'Hospital SDLG',
-    subtitle: '',
-    highlightText: 'Centro Médico de Excelencia',
-    badge: 'Centro Médico de Excelencia',
-    description: 'Comprometidos con tu salud y bienestar con atención médica de calidad y tecnología avanzada',
-    primaryButtonText: 'Agendar Cita',
-    primaryButtonIcon: 'event',
-    secondaryButtonText: 'Contacto de Emergencia',
-    secondaryButtonIcon: 'phone',
-    certifications: [
-      {
-        icon: 'verified',
-        text: 'Acreditación JCI'
-      },
-      {
-        icon: 'verified',
-        text: 'ISO 9001'
-      },
-      {
-        icon: 'verified',
-        text: 'Hospital Universitario'
-      }
-    ],
-    floatingCards: [
-      {
-        icon: 'medical_services',
-        text: 'Atención 24/7',
-        position: 'card-1'
-      },
-      {
-        icon: 'health_and_safety',
-        text: 'Excelencia Médica',
-        position: 'card-2'
-      },
-      {
-        icon: 'healing',
-        text: 'Tecnología Avanzada',
-        position: 'card-3'
-      }
-    ]
-  };
+  backgroundImage: 'assets/hero.png',
+  altText: 'Hospital SDLG - Centro Médico de Excelencia',
+  title: 'Hospital SDLG',
+  subtitle: '',
+  highlightText: 'Centro Médico de Excelencia',
+  badge: 'Centro Médico de Excelencia',
+  description: 'Comprometidos con tu salud y bienestar con atención médica de calidad y tecnología avanzada',
+  primaryButtonText: 'Agendar Cita',
+  primaryButtonIcon: 'event',
+  secondaryButtonText: 'Contacto de Emergencia',
+  secondaryButtonIcon: 'phone',
+  certifications: [
+    {
+      icon: 'verified',
+      text: 'Acreditación JCI'
+    },
+    {
+      icon: 'verified',
+      text: 'ISO 9001'
+    },
+    {
+      icon: 'verified',
+      text: 'Hospital Universitario'
+    }
+  ],
+  floatingCards: [
+    {
+      icon: 'medical_services',
+      text: 'Atención 24/7',
+      position: 'card-1'
+    },
+    {
+      icon: 'health_and_safety',
+      text: 'Excelencia Médica',
+      position: 'card-2'
+    },
+    {
+      icon: 'healing',
+      text: 'Tecnología Avanzada',
+      position: 'card-3'
+    }
+  ]
+};
 
 export const DEPARTMENTS: Department[] = [
   {
