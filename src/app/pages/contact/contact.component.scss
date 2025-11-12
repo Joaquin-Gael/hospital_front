@@ -22,13 +22,13 @@
   }
 
   &::before {
-    background: radial-gradient(circle, var.$navbar-primary 0%, transparent 70%);
+    //background: radial-gradient(circle, var.$navbar-primary 0%, transparent 70%);
     top: -300px;
     left: -200px;
   }
 
   &::after {
-    background: radial-gradient(circle, var.$primary-light 0%, transparent 70%);
+    //background: radial-gradient(circle, var.$primary-light 0%, transparent 70%);
     bottom: -300px;
     right: -200px;
   }
