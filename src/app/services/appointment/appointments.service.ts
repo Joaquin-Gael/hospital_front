@@ -5,7 +5,15 @@ import { APPOINTMENT_ENDPOINTS } from './appointment-endpoints';
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
-import { Appointment, Turn, TurnCreate, TurnDelete, UpdateTurnState } from '../interfaces/appointment.interfaces';
+import {
+  Appointment,
+  Turn,
+  TurnCreate,
+  TurnDelete,
+  TurnRescheduleRequest,
+  TurnRescheduleResponse,
+  UpdateTurnState,
+} from '../interfaces/appointment.interfaces';
 import { PayTurnWithCashResponse } from '../interfaces/cashes.interfaces';
 
 @Injectable({
@@ -86,6 +94,20 @@ export class AppointmentService {
     return this.apiService.patch<UpdateTurnState>(endpoint, null).pipe(
       catchError((error) => this.handleError(`Error updating turn state for turn ${turnId}`, error))
     );
+  }
+
+  rescheduleTurn(
+    turnId: string,
+    payload: TurnRescheduleRequest
+  ): Observable<TurnRescheduleResponse> {
+    this.logger.debug(`Rescheduling turn ${turnId}`, payload);
+    return this.apiService
+      .patch<TurnRescheduleResponse>(APPOINTMENT_ENDPOINTS.RESCHEDULE_TURN(turnId), payload)
+      .pipe(
+        catchError((error) =>
+          this.handleError(`Error rescheduling turn ${turnId}`, error)
+        )
+      );
   }
 
   /**
