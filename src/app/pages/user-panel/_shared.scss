@@ -134,13 +134,19 @@ $footer-button-shadow: var(--user-panel-footer-button-shadow);
 // Font sizes
 $font-size-nav: 14px;
 
-// Card mixin
+// Card mixins
 @mixin card {
-  background-color: $card-background;
+  background-color: var(--user-panel-surface-alt);
   border-radius: $border-radius;
-  box-shadow: $box-shadow;
-  border: 1px solid $border-color;
-  transition: $transition;
+  border: 1px solid var(--user-panel-border);
+  box-shadow: var(--user-panel-shadow-sm);
+  transition: background-color $transition, border-color $transition, box-shadow $transition;
+}
+
+@mixin card--interactive {
+  @include card;
+  transition: background-color $transition, border-color $transition, box-shadow $transition, transform $transition;
+  will-change: transform, box-shadow;
 }
 
 // Global Styles
