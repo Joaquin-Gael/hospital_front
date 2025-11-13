@@ -16,9 +16,8 @@
 .notification-card {
   padding: 16px;
   cursor: pointer;
-  transition: $transition;
   position: relative;
-  @include card;
+  @include card--interactive;
   @include flex-inline(16px, flex-start);
 
   &:hover {
