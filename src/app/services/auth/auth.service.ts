@@ -26,7 +26,7 @@ export class AuthService {
   private readonly logger = inject(LoggerService);
   private readonly apiBaseUrl = inject(API_BASE_URL);
 
-  // 🔐 Estado de sesión y scopes con signals (como en feature/security)
+  // 🔐 Estado de sesión y scopes con signals
   private loginStatusSignal = signal<boolean>(false);
   loginStatus$ = computed(() => this.loginStatusSignal());
 
@@ -301,7 +301,6 @@ export class AuthService {
   // ========= SESSION & ERRORES =========
 
   private clearSession(): void {
-    // Acá asumimos que clearStorage también borra scopes, tokens, etc.
     if (this.storage.clearStorage) {
       this.storage.clearStorage();
     }
