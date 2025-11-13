@@ -8,9 +8,10 @@ import {
   effect,
   inject,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
-import { Subscription, combineLatest, of, filter } from 'rxjs';
+import { Subscription, combineLatest, filter } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
 
 interface NavItem {
@@ -53,27 +54,26 @@ export class NavbarComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    // sincronizar login + scopes almacenados
+    const loginStatus$ = toObservable(this.authService.loginStatus$);
+    const scopes$ = toObservable(this.authService.scopes$);
+
     this.subscriptions.add(
-      combineLatest([
-        this.authService.loginStatus$,
-        of(this.authService.getStoredScopes()),
-      ]).subscribe(([isLoggedIn, scopes]) => {
-        this.isLoggedIn.set(isLoggedIn);
-        this.userScopes.set(scopes);
-      }),
+      combineLatest([loginStatus$, scopes$]).subscribe(
+        ([isLoggedIn, scopes]) => {
+          this.isLoggedIn.set(isLoggedIn);
+          this.userScopes.set(scopes ?? []);
+        }
+      )
     );
 
-    // scroll to top en cada navegación
     this.subscriptions.add(
       this.router.events
         .pipe(filter((event) => event instanceof NavigationEnd))
         .subscribe(() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
-        }),
+        })
     );
 
-    // estado inicial de scroll
     this.onWindowScroll();
   }
 

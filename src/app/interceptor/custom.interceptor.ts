@@ -51,13 +51,11 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
 
   let headers = req.headers;
 
-  // 🔐 Access token desde cookie (NO localStorage)
   const accessTokenFromCookie = authService.getAccessTokenFromCookie();
   if (accessTokenFromCookie && !isPublic && !isSensitive) {
     headers = headers.set('Authorization', `Bearer ${accessTokenFromCookie}`);
   }
 
-  // 🛡️ CSRF solo para endpoints sensibles (refresh / logout)
   if (isSensitive) {
     const csrfToken = getCsrfTokenFromCookies();
     if (csrfToken) {
@@ -75,8 +73,6 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
   return next(clonedReq).pipe(
     catchError((error: HttpErrorResponse) => {
       const status = error.status;
-
-      // ⏳ Manejo de 401 con refresh basado en cookies
       if (status === 401 && !isPublic) {
         if (!isRefreshing) {
           isRefreshing = true;
@@ -111,7 +107,6 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
             })
           );
         } else {
-          // Ya hay un refresh en curso: por ahora dejamos fallar esta request
           return throwError(() => error);
         }
       }
