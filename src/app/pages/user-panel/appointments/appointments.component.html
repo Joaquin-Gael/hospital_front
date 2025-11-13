@@ -103,7 +103,7 @@
       <div class="appointment-card__footer">
         <button
           class="btn btn--outline btn--sm"
-          (click)="onReschedule(appointment.id)"
+          (click)="onReschedule(appointment.turnId)"
           [disabled]="appointment.state !== 'waiting'"
         >
           Reprogramar
