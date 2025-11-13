@@ -96,7 +96,7 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background-color: rgba($danger-color, 0.1);
+    background-color: panel-alpha($danger-color, 0.1);
     color: $danger-color;
     margin-bottom: 24px;
     @include flex-center;
@@ -164,18 +164,6 @@
     animation-duration: 0.01ms !important;
   }
 }
-
-/* Modo oscuro (preparado para futuro)
-@media (prefers-color-scheme: dark) {
-  .dashboard {
-    background-color: #1a1a1a;
-  }
-  
-  .content {
-    background-color: #1a1a1a;
-  }
-}
-*/
 
 // Soporte para dispositivos plegables
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {

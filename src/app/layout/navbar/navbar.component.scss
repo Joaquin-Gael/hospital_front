@@ -1,418 +1,409 @@
-@use '../styles/_variables.scss' as var;
-@use '../styles/_media-queries.scss' as mq;
-@use '../styles/_mixins.scss' as mix;
+@use "../styles/_variables.scss" as vars;
+@use "../styles/_media-queries.scss" as mq;
+@use "../styles/_mixins.scss" as mix;
+@use "sass:map";
+@import url("https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap");
 
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
   width: 100%;
-  height: var.$navbar-height;
-  background: #1f2937;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid hsla(195, 85%, 45%, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  z-index: var.$navbar-z-index;
-  transition: var.$navbar-transition;
-  
-  &.scrolled {
-    height: var.$navbar-mobile-height;
-    background: rgba(255, 255, 255, 0.98);
-    border-bottom: 1px solid hsla(195, 85%, 45%, 0.15);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    
-    .navbar-links {
-      @include mq.nav-mobile {
-        top: var.$navbar-mobile-height;
-      }
+  z-index: vars.$navbar-z-index;
+  padding: 1.5rem 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Estado inicial (hero transparente) */
+  &[data-state="initial"] {
+    background: transparent;
+    box-shadow: none;
+
+    .navbar-container {
+      background: transparent;
+      border: 1px solid transparent;
+      backdrop-filter: none;
     }
-  }
 
-  &-container {
-    height: 100%;
-    @include mix.flex-between;
-    @include mq.nav-container;
-  }
+    .logo-image {
+      opacity: 1;
+      transform: scale(1.5);
+    }
 
-  &-logo {
-    a {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      transition: var.$navbar-transition;
-      
+    .nav-link {
+      font-family: "Satoshi", "Inter", sans-serif;
+      color: var(--text-white);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      position: relative;
+      font-weight: 500;
+      transition: all 0.3s ease;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0.45rem;
+        left: 1.25rem;
+        right: 1.25rem;
+        height: 2px;
+        background: var(--text-white);
+        border-radius: 2px;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
       &:hover {
-        transform: scale(1.02) translateY(-1px);
-      }
-      
-      @include mix.focus-ring-nav;
-      
-      .logo-image {
-        height: 100px;
-        width: auto;
-        margin-right: 12px;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-        transition: var.$navbar-transition;
-        
-        @include mq.mobile-only {
-          height: 40px;
-          margin-right: 8px;
+        color: var(--text-white);
+        text-shadow: 0 0 6px rgba(255, 255, 255, 0.25);
+
+        &::after {
+          transform: scaleX(1);
         }
       }
-      
-      .logo-text {
-        font-family: var.$font-family-logo;
-        font-size: var.$font-size-logo;
-        font-weight: var.$font-weight-bold;
-        color: var.$navbar-text-dark;
-        letter-spacing: var.$letter-spacing;
-        background: linear-gradient(135deg, var.$navbar-primary 0%, var.$navbar-primary-hover 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        
-        @include mq.mobile-only {
-          font-size: calc(var.$font-size-logo * 0.85);
+
+      &.active {
+        color: var(--text-white);
+        font-weight: 600;
+
+        &::after {
+          transform: scaleX(1);
         }
       }
     }
+
+    .toggle-icon span {
+      background: var(--text-white);
+    }
   }
 
-  &-links {
+  /* Estado con scroll */
+  &[data-state="scrolled"] {
+    .navbar-container {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .logo-image {
+      opacity: 1;
+      transform: scale(1.5);
+    }
+
+    .nav-link {
+      font-family: "Satoshi", "Inter", sans-serif;
+      position: relative;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+      color: var(--text-primary);
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0.45rem;
+        left: 1.25rem;
+        right: 1.25rem;
+        height: 2px;
+        background: vars.$navbar-text-dark;
+        border-radius: 2px;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      &:hover {
+        //color: var(--color-primary);
+
+        &::after {
+          transform: scaleX(1);
+        }
+      }
+
+      &.active::after {
+        transform: scaleX(1);
+      }
+    }
+
+    .toggle-icon span {
+      background: var(--text-primary);
+    }
+  }
+}
+
+/* Container principal */
+
+/* Container principal */
+.navbar-container {
+  max-width: none; /* Elimina el límite de ancho */
+  width: calc(100% - 2rem); /* Deja 1rem de margen a cada lado */
+  margin: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1rem 3rem; /* Aumenta el padding horizontal */
+  border-radius: 16px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    gap: 1rem;
+  }
+}
+
+/* Logo */
+.navbar-logo {
+  a {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    @include mq.nav-spacing-responsive;
-    
-    a {
-      font-family: var.$font-family-base;
-      font-size: var.$font-size-nav;
-      text-decoration: none;
-      font-weight: var.$font-weight-medium;
-      position: relative;
-      padding: 12px 20px;
-      border-radius: var.$navbar-radius;
-      transition: var.$navbar-transition;
-      letter-spacing: var.$letter-spacing;
-      @include mix.focus-ring-nav;
+    gap: 1rem;
+    text-decoration: none;
+    transition: transform 0.3s ease;
 
-      // Estilo base para todos los links
-      color: var.$navbar-text;
-      
-      // Efecto hover insano para links generales
-      &:hover {
-        color: var.$navbar-primary;
-        background: var.$navbar-hover-gradient;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
-        
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(135deg, hsla(195, 85%, 45%, 0.1) 0%, hsla(195, 85%, 55%, 0.1) 100%);
-          border-radius: var.$navbar-radius;
-          z-index: -1;
-          animation: pulse-border 0.6s ease-out;
-        }
-      }
-      
-      &.active {
-        color: var.$navbar-primary;
-        font-weight: var.$font-weight-semibold;
-        background: var.$navbar-active-bg;
-        box-shadow: 0 4px 12px hsla(195, 85%, 45%, 0.2);
-        
-        &::after {
-          content: '';
-          position: absolute;
-          bottom: -8px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 30px;
-          height: 3px;
-          background: linear-gradient(90deg, var.$navbar-primary 0%, var.$navbar-primary-hover 100%);
-          border-radius: 2px;
-          box-shadow: 0 2px 8px hsla(195, 85%, 45%, 0.3);
-        }
-      }
-
-      // Estilo específico para "Iniciar Sesión" y "Registrarse" cuando no autenticado
-      &[routerLink="/login"],
-      &[routerLink="/register"] {
-        background: linear-gradient(135deg, #4b5eaa 0%, #2a4370 100%);
-        color: var.$white;
-        font-weight: var.$font-weight-semibold;
-        
-        &:hover {
-          background: linear-gradient(135deg, #3a4886 0%, #1d2f50 100%);
-          transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 12px 30px rgba(74, 94, 170, 0.4);
-          
-          &::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-            left: 100%;
-          }
-        }
-        
-        &:active {
-          transform: translateY(-1px) scale(0.98);
-        }
-      }
-    }
-    
-    @include mq.nav-mobile {
-      position: fixed;
-      top: var.$navbar-height;
-      left: 0;
-      width: 100%;
-      flex-direction: column;
-      background: #1f2937;
-      backdrop-filter: blur(20px);
-      padding: 30px 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-      transform: translateY(-100%);
-      opacity: 0;
-      visibility: hidden;
-      transition: var.$navbar-transition;
-      z-index: calc(var.$navbar-z-index - 1);
-      
-      &.open {
-        transform: translateY(0);
-        opacity: 1;
-        visibility: visible;
-      }
-      
-      a {
-        width: 100%;
-        text-align: center;
-        padding: 18px 24px;
-        margin: 4px 0;
-        border-bottom: 1px solid hsla(195, 85%, 45%, 0.1);
-        font-size: 1.1rem;
-        
-        &:last-child {
-          border-bottom: none;
-        }
-        
-        &.active::after {
-          bottom: 8px;
-          width: 60px;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-
-        // Estilo móvil para "Iniciar Sesión" y "Registrarse"
-        &[routerLink="/login"],
-        &[routerLink="/register"] {
-          background: linear-gradient(135deg, #4b5eaa 0%, #2a4370 100%);
-          color: var.$white;
-          font-weight: var.$font-weight-semibold;
-          
-          &:hover {
-            background: linear-gradient(135deg, #3a4886 0%, #1d2f50 100%);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 30px rgba(74, 94, 170, 0.4);
-          }
-          
-          &:active {
-            transform: translateY(-1px) scale(0.98);
-          }
-        }
-      }
-    }
-  }
-
-  &-menu-toggle {
-    display: none;
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 8px;
-    border-radius: var.$navbar-radius;
-    transition: var.$navbar-transition;
-    @include mix.focus-ring-nav;
-    
     &:hover {
-      background: var.$navbar-hover-bg;
-      transform: scale(1.05);
+      transform: translateY(-2px);
     }
-    
-    @include mq.nav-mobile {
-      display: block;
-    }
-    
-    .menu-icon {
-      width: 28px;
-      height: 22px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      
-      span {
-        display: block;
-        height: 3px;
-        width: 100%;
-        background: var.$navbar-text-dark;
-        border-radius: 2px;
-        transition: var.$navbar-transition;
-      }
-      
-      &.open {
-        span {
-          &:nth-child(1) {
-            transform: translateY(9.5px) rotate(45deg);
-          }
-          
-          &:nth-child(2) {
-            opacity: 0;
-            transform: scale(0);
-          }
-          
-          &:nth-child(3) {
-            transform: translateY(-9.5px) rotate(-45deg);
-          }
-        }
-      }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 4px;
+      border-radius: 8px;
     }
   }
 
-  // Estados adicionales para accesibilidad
-  @include mq.reduce-motion {
-    &, * {
-      transition: none !important;
-      animation: none !important;
-    }
-  }
+  .logo-image {
+    height: 56px;
+    width: auto;
+    transform-origin: center;
+    margin: -6px 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
 
-  @include mq.high-contrast {
-    border-bottom: 3px solid var.$navbar-text-dark;
-    
-    .navbar-links a {
-      border: 2px solid transparent;
-      
-      &:focus {
-        border-color: var.$navbar-focus-color;
-      }
-    }
-  }
-
-  &-overlay {
-    z-index: var.$navbar-overlay-z-index;
-    @include mix.mobile-overlay(var.$navbar-height);
-    
-    &.scrolled {
-      @include mix.mobile-overlay(var.$navbar-mobile-height);
+    @media (max-width: 768px) {
+      height: 48px;
     }
   }
 }
 
-// Animaciones insanas
-@keyframes pulse-border {
-  0% {
-    box-shadow: 0 0 0 0 hsla(195, 85%, 45%, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px hsla(195, 85%, 45%, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 hsla(195, 85%, 45%, 0);
-  }
-}
+/* Links */
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.navbar-links.open {
-  @include mq.nav-mobile {
-    animation: fadeInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
-// Variantes adicionales
-.navbar.sticky {
-  position: sticky;
-  top: 0;
-}
-
-.navbar.transparent {
-  background: transparent;
-  backdrop-filter: none;
-  box-shadow: none;
-  border-bottom: none;
-  
-  &.scrolled {
-    background: rgba(255, 255, 255, 0.95);
+  @media (max-width: 968px) {
+    position: absolute;
+    top: calc(100% + 1rem);
+    right: 0;
+    width: 280px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
-    box-shadow: var.$navbar-shadow;
-    border-bottom: 1px solid hsla(195, 85%, 45%, 0.1);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: translateY(-10px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: calc(vars.$navbar-z-index + 10);
+
+    &[data-state="open"] {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: calc(100vw - 2rem);
+    right: 1rem;
   }
 }
 
-// Modo oscuro mejorado
-@include mq.dark-mode {
-  .navbar {
-    background: rgba(17, 24, 39, 0.95);
-    border-bottom: 1px solid hsla(195, 85%, 45%, 0.2);
-    
-    &.scrolled {
-      background: rgba(17, 24, 39, 0.98);
-      border-bottom: 1px solid hsla(195, 85%, 45%, 0.3);
+/* Link individual */
+.nav-link {
+  position: relative;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(255, 255, 255, 0.15);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  &[href="/login"],
+  &[href="/register"] {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary) 0%,
+      var(--color-primary-dark) 100%
+    );
+    color: var(--text-white);
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(15, 155, 174, 0.3);
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(15, 155, 174, 0.4);
     }
-    
-    .navbar-logo .logo-text {
-      background: linear-gradient(135deg, hsl(195, 85%, 45%) 0%, hsl(195, 85%, 55%) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .navbar-links a {
-      color: #e5e7eb;
-      
-      &:hover {
-        color: hsl(195, 85%, 45%);
-        background: hsla(195, 85%, 45%, 0.15);
-      }
-      
-      &.active {
-        color: hsl(195, 85%, 45%);
-        background: hsla(195, 85%, 45%, 0.15);
-      }
-    
-    .navbar-menu-toggle .menu-icon span {
-      background: #e5e7eb;
+  }
+
+  @media (max-width: 968px) {
+    width: 100%;
+    text-align: left;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+
+    &:hover {
+      transform: translateX(4px);
     }
   }
 }
+
+/* Mobile Toggle */
+.navbar-toggle {
+  display: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: calc(vars.$navbar-z-index + 20);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 968px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
+
+/* Ícono hamburguesa */
+.toggle-icon {
+  width: 24px;
+  height: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    border-radius: 2px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &.open {
+    span {
+      &:nth-child(1) {
+        transform: translateY(8.5px) rotate(45deg);
+      }
+      &:nth-child(2) {
+        opacity: 0;
+        transform: scaleX(0);
+      }
+      &:nth-child(3) {
+        transform: translateY(-8.5px) rotate(-45deg);
+      }
+    }
+  }
+}
+
+/* Overlay del menú móvil */
+.navbar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: calc(vars.$navbar-z-index + 5);
+  animation: fadeIn 0.3s ease;
+
+  @media (min-width: 969px) {
+    display: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .navbar-container,
+  .nav-link,
+  .navbar-toggle,
+  .toggle-icon span {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (max-width: 968px) {
+  .navbar-links[data-state="open"] {
+    .nav-link {
+      color: #000 !important;
+      
+      &::after {
+        background: #000 !important;
+      }
+    }
+
+    .toggle-icon span {
+      background: #000 !important;
+    }
+  }
+}
+

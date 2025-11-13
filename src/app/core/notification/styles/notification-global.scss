@@ -1,45 +1,133 @@
+@use 'sass:color';
 @use './_notification-variables.scss' as vars;
+@use './_notification-media.scss' as media;
 
-// Estilos globales para el contenedor del snackbar
+$surface-base: #0f172a;
+$shadow-base: 0 28px 64px rgba(15, 58, 70, 0.32);
+
+$success-surface: color.mix(vars.$success-color, $surface-base, 28%);
+$success-border: color.mix(vars.$success-color, #ffffff, 32%);
+$success-shadow: 0 24px 52px rgba(34, 197, 94, 0.26);
+$success-text: color.mix(vars.$success-color, #ffffff, 88%);
+
+$error-surface: color.mix(vars.$error-color, $surface-base, 26%);
+$error-border: color.mix(vars.$error-color, #ffffff, 30%);
+$error-shadow: 0 24px 52px rgba(239, 68, 68, 0.28);
+$error-text: color.mix(vars.$error-color, #ffffff, 92%);
+
+$warning-surface: color.mix(vars.$warning-color, $surface-base, 24%);
+$warning-border: color.mix(vars.$warning-color, #ffffff, 30%);
+$warning-shadow: 0 24px 52px rgba(245, 158, 11, 0.28);
+$warning-text: color.mix(vars.$warning-color, #ffffff, 88%);
+
+$info-surface: color.mix(vars.$info-color, $surface-base, 24%);
+$info-border: color.mix(vars.$info-color, #ffffff, 32%);
+$info-shadow: 0 24px 52px rgba(59, 130, 246, 0.28);
+$info-text: color.mix(vars.$info-color, #ffffff, 90%);
+
+@keyframes toastPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.98);
+  }
+
+  50% {
+    opacity: 0.75;
+    transform: scale(1.02);
+  }
+}
+
 .notification-container {
+  .mat-mdc-snack-bar-container {
+    position: relative;
+    border-radius: vars.$border-radius !important;
+    padding: 0 !important;
+    min-width: 300px !important;
+    max-width: 500px !important;
+    color: var(--notification-text, vars.$text-primary-dark);
+    background: var(--notification-surface, $surface-base);
+    box-shadow: var(--notification-shadow, $shadow-base);
+    border: 1px solid var(--notification-border, rgba(255, 255, 255, 0.08));
+    transition: box-shadow var(--transition-smooth), transform var(--transition-smooth), background var(--transition-smooth);
+    overflow: hidden;
+
+    --mdc-snackbar-container-color: transparent;
+    --mat-snack-bar-button-color: var(--notification-accent, vars.$info-color);
+    --mdc-snackbar-supporting-text-color: var(--notification-text, vars.$text-primary-dark);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      box-shadow: inset 0 0 0 1px var(--notification-border, rgba(255, 255, 255, 0.08));
+      animation: toastPulse 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 32px 70px rgba(15, 58, 70, 0.4);
+    }
+  }
+
   &.notification-success {
     .mat-mdc-snack-bar-container {
-      --mdc-snackbar-container-color: transparent;
-      --mat-snack-bar-button-color: #{vars.$success-color};
+      --notification-accent: #{vars.$success-color};
+      --notification-surface: #{$success-surface};
+      --notification-border: #{$success-border};
+      --notification-shadow: #{$success-shadow};
+      --notification-text: #{$success-text};
     }
   }
 
   &.notification-error {
     .mat-mdc-snack-bar-container {
-      --mdc-snackbar-container-color: transparent;
-      --mat-snack-bar-button-color: #{vars.$error-color};
+      --notification-accent: #{vars.$error-color};
+      --notification-surface: #{$error-surface};
+      --notification-border: #{$error-border};
+      --notification-shadow: #{$error-shadow};
+      --notification-text: #{$error-text};
     }
   }
 
   &.notification-warning {
     .mat-mdc-snack-bar-container {
-      --mdc-snackbar-container-color: transparent;
-      --mat-snack-bar-button-color: #{vars.$warning-color};
+      --notification-accent: #{vars.$warning-color};
+      --notification-surface: #{$warning-surface};
+      --notification-border: #{$warning-border};
+      --notification-shadow: #{$warning-shadow};
+      --notification-text: #{$warning-text};
     }
   }
 
   &.notification-info {
     .mat-mdc-snack-bar-container {
-      --mdc-snackbar-container-color: transparent;
-      --mat-snack-bar-button-color: #{vars.$info-color};
+      --notification-accent: #{vars.$info-color};
+      --notification-surface: #{$info-surface};
+      --notification-border: #{$info-border};
+      --notification-shadow: #{$info-shadow};
+      --notification-text: #{$info-text};
     }
   }
 }
 
-// Animaciones personalizadas para el contenedor
-.mat-mdc-snack-bar-container {
-  border-radius: vars.$border-radius !important;
-  padding: 0 !important;
-  min-width: 300px !important;
-  max-width: 500px !important;
+@media (max-width: vars.$breakpoint-sm) {
+  .notification-container {
+    .mat-mdc-snack-bar-container {
+      min-width: 280px !important;
+      max-width: calc(100vw - 32px) !important;
+    }
+  }
+}
 
-  @media (max-width: vars.$breakpoint-sm) {
-    min-width: 280px !important;
-    max-width: calc(100vw - 32px) !important;
+@include media.reduce-motion {
+  .mat-mdc-snack-bar-container {
+    transition-duration: 0.01ms !important;
+
+    &::before {
+      animation: none !important;
+    }
   }
 }

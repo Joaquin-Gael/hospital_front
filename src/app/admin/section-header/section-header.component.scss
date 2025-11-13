@@ -1,7 +1,7 @@
-@use 'sass:color';
 @use '../styles/_vars.scss' as *;
 @use '../../layout/styles/_mixins.scss' as *;
 @use '../../layout/styles/_media-queries.scss' as *;
+@use '../../../styles/color-utils' as color-utils;
 
 .section-header {
   margin-bottom: 2rem;
@@ -41,7 +41,7 @@
     font-weight: 800;
     background: $primary-gradient;
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    //-webkit-text-fill-color: transparent;
     background-clip: text;
     letter-spacing: -0.02em;
     position: relative;
@@ -109,22 +109,38 @@
     }
 
     &--secondary {
-      background: linear-gradient(135deg, $text-secondary 0%, color.adjust($text-secondary, $lightness: -10%) 100%);
+      background: linear-gradient(
+        135deg,
+        $text-secondary 0%,
+        color-utils.adjust($text-secondary, $lightness: -10%) 100%
+      );
       color: $text-white;
     }
 
     &--success {
-      background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -10%) 100%);
+      background: linear-gradient(
+        135deg,
+        $success-color 0%,
+        color-utils.adjust($success-color, $lightness: -10%) 100%
+      );
       color: $text-white;
     }
 
     &--warning {
-      background: linear-gradient(135deg, $warning-color 0%, color.adjust($warning-color, $lightness: -10%) 100%);
+      background: linear-gradient(
+        135deg,
+        $warning-color 0%,
+        color-utils.adjust($warning-color, $lightness: -10%) 100%
+      );
       color: $text-white;
     }
 
     &--danger {
-      background: linear-gradient(135deg, $error-color 0%, color.adjust($error-color, $lightness: -10%) 100%);
+      background: linear-gradient(
+        135deg,
+        $error-color 0%,
+        color-utils.adjust($error-color, $lightness: -10%) 100%
+      );
       color: $text-white;
     }
 

@@ -10,7 +10,7 @@
     text-align: center;
     margin-bottom: 32px;
     padding-bottom: 24px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid $border-color;
 
     @include mobile-only {
       margin-bottom: 24px;
@@ -21,7 +21,7 @@
   &__title {
     font-size: 28px;
     font-weight: 700;
-    color: #1f2937;
+    color: $text-color;
     margin: 0 0 12px 0;
     @include flex-inline(12px, center, center);
 
@@ -33,7 +33,7 @@
 
   &__title-icon {
     font-size: 32px;
-    color: #f59e0b;
+    color: $warning-color;
 
     @include mobile-only {
       font-size: 28px;
@@ -42,7 +42,7 @@
 
   &__description {
     font-size: 16px;
-    color: #6b7280;
+    color: $text-light;
     margin: 0;
     line-height: 1.5;
     max-width: 600px;
@@ -69,10 +69,10 @@
   &__progress-bar {
     width: 100%;
     height: 8px;
-    background: #f3f4f6;
+    background: panel-tint($surface-muted, -4%);
     border-radius: 4px;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 2px 4px panel-alpha(var(--surface-primary-dark), 0.05);
 
     @include mobile-only {
       height: 6px;
@@ -81,10 +81,10 @@
 
   &__progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #10b981, #34d399);
+    background: linear-gradient(90deg, $success-color, panel-tint($success-color, 12%));
     border-radius: 4px;
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 2px 8px panel-alpha($success-color, 0.3);
 
     @include reduce-motion {
       transition-duration: 0s;
@@ -96,7 +96,7 @@
     text-align: center;
     font-size: 12px;
     font-weight: 500;
-    color: #6b7280;
+    color: $text-light;
     margin-top: 6px;
 
     @include mobile-only {
@@ -106,11 +106,11 @@
   }
 
   &__content {
-    background: white;
+    background: $card-background;
     border-radius: 16px;
     padding: 32px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 24px panel-alpha(var(--surface-primary-dark), 0.08);
+    border: 1px solid $border-color;
 
     @include mobile-only {
       padding: 20px;
@@ -138,7 +138,7 @@
   &__section-title {
     font-size: 18px;
     font-weight: 600;
-    color: #374151;
+    color: panel-tint($text-color, -8%);
     margin: 0 0 16px 0;
     @include flex-inline(8px, center, flex-start);
 
@@ -150,7 +150,7 @@
 
   &__section-check {
     font-size: 20px;
-    color: #10b981;
+    color: $success-color;
     line-height: 1;
     animation: checkmark-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
@@ -181,9 +181,9 @@
   &__dropzone {
     position: relative;
     min-height: 220px;
-    border: 2px dashed #d1d5db;
+    border: 2px dashed panel-tint($border-color, 8%);
     border-radius: 12px;
-    background: #f9fafb;
+    background: $surface-muted;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
@@ -195,8 +195,8 @@
     }
 
     &:hover {
-      border-color: #3b82f6;
-      background: #f0f9ff;
+      border-color: $primary-color;
+      background: panel-alpha($info-color, 0.12);
       transform: translateY(-2px);
 
       @include reduce-motion {
@@ -205,15 +205,15 @@
 
       @include touch-device {
         transform: none;
-        background: #f9fafb;
+        background: $surface-muted;
       }
     }
 
     &--dragging {
-      border-color: #3b82f6;
-      background: #dbeafe;
+      border-color: $primary-color;
+      background: panel-alpha($primary-color, 0.18);
       transform: scale(1.02);
-      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+      box-shadow: 0 8px 25px panel-alpha($primary-color, 0.15);
 
       @include reduce-motion {
         transform: none;
@@ -221,20 +221,20 @@
     }
 
     &--success {
-      border-color: #10b981;
-      background: #f0fdf4;
+      border-color: $success-color;
+      background: panel-alpha($success-color, 0.12);
 
       &:hover {
-        background: #ecfdf5;
+        background: panel-alpha($success-color, 0.16);
       }
     }
 
     &--error {
-      border-color: #ef4444;
-      background: #fef2f2;
+      border-color: $danger-color;
+      background: panel-alpha($danger-color, 0.16);
 
       &:hover {
-        background: #fef2f2;
+        background: panel-alpha($danger-color, 0.16);
       }
     }
 
@@ -245,7 +245,7 @@
 
       &:hover {
         transform: none;
-        background: #f9fafb;
+        background: $surface-muted;
       }
     }
   }
@@ -262,7 +262,7 @@
   &__icon {
     font-size: 36px;
     margin-bottom: 16px;
-    color: #6b7280;
+    color: $text-light;
     line-height: 1;
 
     @include mobile-only {
@@ -273,11 +273,11 @@
 
   &__dropzone-text {
     font-size: 16px;
-    color: #6b7280;
+    color: $text-light;
     margin: 0 0 8px 0;
 
     strong {
-      color: #3b82f6;
+      color: $primary-color;
       font-weight: 600;
     }
 
@@ -289,7 +289,7 @@
 
   &__dropzone-subtext {
     font-size: 14px;
-    color: #9ca3af;
+    color: $text-lighter;
     margin: 0;
 
     @include mobile-only {
@@ -316,7 +316,7 @@
     height: auto;
     object-fit: contain;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px panel-alpha(var(--surface-primary-dark), 0.1);
   }
 
   &__file-info {
@@ -324,8 +324,8 @@
     bottom: 8px;
     left: 8px;
     right: 48px;
-    background: rgba(0, 0, 0, 0.75);
-    color: white;
+    background: panel-alpha(var(--surface-primary-dark), 0.75);
+    color: var(--text-white);
     padding: 6px 10px;
     border-radius: 6px;
     font-size: 12px;
@@ -372,7 +372,7 @@
 
   &__error-icon {
     font-size: 36px;
-    color: #dc2626;
+    color: panel-tint($danger-color, -10%);
     line-height: 1;
 
     @include mobile-only {
@@ -382,7 +382,7 @@
 
   &__error-text {
     font-size: 14px;
-    color: #dc2626;
+    color: panel-tint($danger-color, -10%);
     margin: 0;
     font-weight: 500;
     line-height: 1.4;
@@ -393,8 +393,8 @@
   }
 
   &__retry-btn {
-    background: #f59e0b;
-    color: white;
+    background: $warning-color;
+    color: var(--text-white);
     border: none;
     padding: 8px 16px;
     border-radius: 6px;
@@ -405,7 +405,7 @@
     @include flex-inline(6px, center, center);
 
     &:hover {
-      background: #d97706;
+      background: panel-tint($warning-color, -10%);
       transform: translateY(-1px);
 
       @include reduce-motion {
@@ -427,8 +427,8 @@
     height: 36px;
     border: none;
     border-radius: 50%;
-    background: rgba(239, 68, 68, 0.9);
-    color: white;
+    background: panel-alpha($danger-color, 0.9);
+    color: var(--text-white);
     font-size: 24px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -437,7 +437,7 @@
     @include flex-center;
 
     &:hover:not(:disabled) {
-      background: #dc2626;
+      background: panel-tint($danger-color, -10%);
       transform: scale(1.1);
 
       @include reduce-motion {
@@ -466,7 +466,7 @@
   &__actions {
     text-align: center;
     padding-top: 24px;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid panel-tint($surface-muted, -4%);
     gap: 12px;
     @include flex-column;
 
@@ -477,8 +477,8 @@
   }
 
   &__submit-btn {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: white;
+    background: linear-gradient(135deg, $warning-color 0%, panel-tint($warning-color, -10%) 100%);
+    color: var(--text-white);
     border: none;
     border-radius: 12px;
     padding: 16px 32px;
@@ -487,7 +487,7 @@
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     min-width: 240px;
-    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+    box-shadow: 0 4px 14px panel-alpha($warning-color, 0.25);
     position: relative;
     overflow: hidden;
 
@@ -497,7 +497,7 @@
 
     &:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35);
+      box-shadow: 0 8px 24px panel-alpha($warning-color, 0.35);
 
       @include reduce-motion {
         transform: none;
@@ -509,13 +509,13 @@
     }
 
     &--disabled {
-      background: #d1d5db;
-      color: #9ca3af;
+      background: panel-tint($border-color, 8%);
+      color: $text-lighter;
       cursor: not-allowed;
       box-shadow: none;
 
       &:hover {
-        background: #d1d5db;
+        background: panel-tint($border-color, 8%);
         transform: none;
       }
     }
@@ -558,8 +558,8 @@
   }
 
   &__retry-all-btn {
-    background: #3b82f6;
-    color: white;
+    background: $primary-color;
+    color: var(--text-white);
     border: none;
     padding: 10px 20px;
     border-radius: 8px;
@@ -570,7 +570,7 @@
     @include flex-inline(8px, center, center);
 
     &:hover {
-      background: #2563eb;
+      background: $primary-dark;
       transform: translateY(-1px);
 
       @include reduce-motion {
@@ -592,21 +592,21 @@
     @include flex-inline(8px, center, center);
 
     &--success {
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
+      background: panel-alpha($success-color, 0.16);
+      color: panel-tint($success-color, -18%);
+      border: 1px solid panel-tint($success-color, 24%);
     }
 
     &--warning {
-      background: #fffbeb;
-      color: #92400e;
-      border: 1px solid #fcd34d;
+      background: panel-alpha($warning-color, 0.16);
+      color: panel-tint($warning-color, -20%);
+      border: 1px solid panel-tint($warning-color, 18%);
     }
 
     &--info {
-      background: #eff6ff;
-      color: #1e40af;
-      border: 1px solid #93c5fd;
+      background: panel-alpha($info-color, 0.18);
+      color: panel-tint($info-color, -20%);
+      border: 1px solid panel-tint($info-color, 18%);
     }
 
     @include mobile-only {
@@ -633,9 +633,9 @@
   }
 
   &__tips {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border: 1px solid #e2e8f0;
-    border-left: 4px solid #3b82f6;
+    background: linear-gradient(135deg, panel-tint($surface-muted, -6%) 0%, panel-tint($surface-muted, -8%) 100%);
+    border: 1px solid panel-tint($border-color, 4%);
+    border-left: 4px solid $primary-color;
     border-radius: 12px;
     padding: 20px;
     position: relative;
@@ -648,7 +648,7 @@
       right: 0;
       width: 100px;
       height: 100px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+      background: radial-gradient(circle, panel-alpha($primary-color, 0.1) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -661,7 +661,7 @@
   &__tips-title {
     font-size: 16px;
     font-weight: 600;
-    color: #1e40af;
+    color: panel-tint($info-color, -20%);
     margin: 0 0 12px 0;
     @include flex-inline(10px, center, flex-start);
 
@@ -672,7 +672,7 @@
 
     i.material-icons {
       font-size: 20px;
-      color: #3b82f6;
+      color: $primary-color;
 
       @include mobile-only {
         font-size: 18px;
@@ -694,7 +694,7 @@
 
   &__tips-list li {
     font-size: 14px;
-    color: #475569;
+    color: panel-tint($text-color, -12%);
     line-height: 1.5;
     padding-left: 20px;
     position: relative;
@@ -707,13 +707,13 @@
       top: 0.6em;
       width: 6px;
       height: 6px;
-      background: #3b82f6;
+      background: $primary-color;
       border-radius: 50%;
       transform: translateY(-50%);
     }
 
     &:hover {
-      color: #334155;
+      color: panel-tint($text-color, -16%);
     }
 
     @include mobile-only {
@@ -761,7 +761,7 @@
 
   // Focus visible para accesibilidad
   :focus-visible {
-    outline: 3px solid #3b82f6;
+    outline: 3px solid $primary-color;
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -770,7 +770,7 @@
   @media (hover: none) and (pointer: coarse) {
     &__dropzone:hover {
       transform: none;
-      background: #f9fafb;
+      background: $surface-muted;
     }
     
     &__submit-btn:hover:not(:disabled) {

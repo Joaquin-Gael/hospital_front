@@ -4,7 +4,7 @@
 
 .sidebar {
   width: $sidebar-width;
-  background-color: white;
+  background-color: $card-background;
   border-right: 1px solid $border-color;
   position: fixed;
   top: 0;
@@ -13,22 +13,35 @@
   z-index: 1000;
   transform: translateX(-100%);
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 10px panel-alpha(var(--surface-primary-dark), 0.1);
   @include flex-column;
 
   @include desktop-up {
     transform: translateX(0);
   }
 
+  @include nav-mobile {
+    width: min(88vw, 320px);
+    background: panel-alpha(var(--text-white), 0.92);
+    backdrop-filter: blur(18px);
+    border-right: 1px solid panel-alpha($primary-color, 0.12);
+    border-radius: 0 24px 24px 0;
+    box-shadow: 0 28px 48px panel-alpha(var(--surface-primary-dark), 0.24);
+  }
+
   &.open {
     transform: translateX(0);
+
+    @include nav-mobile {
+      box-shadow: 0 32px 56px panel-alpha(var(--surface-primary-dark), 0.28);
+    }
   }
 
   &__header {
     height: $header-height;
     padding: 0 24px;
     border-bottom: 1px solid $border-color;
-    background-color: white;
+    background-color: $card-background;
     @include flex-between;
 
     @include mobile-only {
@@ -38,6 +51,11 @@
 
     @include tablet-only {
       padding: 0 20px;
+    }
+
+    @include nav-mobile {
+      border-bottom-color: panel-alpha($primary-color, 0.08);
+      background: transparent;
     }
   }
 
@@ -104,6 +122,16 @@
     @include desktop-up {
       display: none;
     }
+
+    @include nav-mobile {
+      background-color: panel-alpha(var(--text-white), 0.18);
+      border: 1px solid panel-alpha($primary-color, 0.2);
+
+      &:hover {
+        background-color: panel-alpha($primary-color, 0.1);
+        color: $primary-color;
+      }
+    }
   }
 
   &__user {
@@ -116,6 +144,12 @@
 
     @include tablet-only {
       padding: 18px 20px;
+    }
+
+    @include nav-mobile {
+      border-bottom-color: panel-alpha($primary-color, 0.08);
+      background: panel-alpha(var(--text-white), 0.35);
+      backdrop-filter: blur(2px);
     }
   }
 
@@ -183,7 +217,7 @@
     }
 
     &-initials {
-      color: white;
+      color: var(--text-white);
       font-size: 18px;
       font-weight: 600;
       text-transform: uppercase;
@@ -241,6 +275,10 @@
 
     @include tablet-only {
       padding: 18px 14px;
+    }
+
+    @include nav-mobile {
+      padding: 20px 18px 24px;
     }
   }
 
@@ -313,6 +351,10 @@
       min-height: 40px;
     }
 
+    @include nav-mobile {
+      padding-inline: 14px 48px;
+    }
+
     @include tablet-only {
       padding: 11px 14px;
       font-size: 13px;
@@ -348,13 +390,13 @@
     right: -6px;
     font-size: 9px;
     line-height: 1;
-    @include badge($danger-color, white, 16px);
+    @include badge($danger-color, var(--text-white), 16px);
   }
 
   &__footer {
     padding: 16px;
     border-top: 1px solid $border-color;
-    background-color: white;
+    background-color: $card-background;
 
     @include mobile-only {
       padding: 12px;
@@ -362,6 +404,12 @@
 
     @include tablet-only {
       padding: 14px;
+    }
+
+    @include nav-mobile {
+      border-top-color: panel-alpha($primary-color, 0.08);
+      padding: 20px 18px 24px;
+      background: transparent;
     }
   }
 
@@ -381,9 +429,9 @@
     @include flex-inline(12px);
 
     &:hover {
-      background-color: rgba($danger-color, 0.05);
+      background-color: panel-alpha($danger-color, 0.05);
       transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba($danger-color, 0.15);
+      box-shadow: 0 2px 8px panel-alpha($danger-color, 0.15);
     }
 
     &:active {
@@ -401,6 +449,10 @@
       padding: 10px 12px;
       font-size: 13px;
       min-height: 40px;
+    }
+
+    @include nav-mobile {
+      padding-inline: 14px 48px;
     }
 
     @include tablet-only {
@@ -463,12 +515,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: panel-alpha(var(--surface-primary-dark), 0.55);
   z-index: 999;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(8px);
 
   &.visible {
     opacity: 1;

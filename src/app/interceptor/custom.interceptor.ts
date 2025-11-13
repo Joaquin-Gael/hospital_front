@@ -21,7 +21,9 @@ let isRefreshing = false;
 function readCookie(name: string): string | null {
   const value = `; ${document.cookie || ''}`;
   const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift() || null;
+  }
   return null;
 }
 
@@ -49,11 +51,13 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
 
   let headers = req.headers;
 
+  // 🔐 Access token desde cookie (NO localStorage)
   const accessTokenFromCookie = authService.getAccessTokenFromCookie();
   if (accessTokenFromCookie && !isPublic && !isSensitive) {
     headers = headers.set('Authorization', `Bearer ${accessTokenFromCookie}`);
   }
 
+  // 🛡️ CSRF solo para endpoints sensibles (refresh / logout)
   if (isSensitive) {
     const csrfToken = getCsrfTokenFromCookies();
     if (csrfToken) {
@@ -72,34 +76,46 @@ export const customInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       const status = error.status;
 
+      // ⏳ Manejo de 401 con refresh basado en cookies
       if (status === 401 && !isPublic) {
         if (!isRefreshing) {
           isRefreshing = true;
+
           return authService.refreshToken().pipe(
             switchMap(() => {
               isRefreshing = false;
+
               const newToken = authService.getAccessTokenFromCookie();
               let newHeaders = req.headers;
+
               if (newToken) {
                 newHeaders = newHeaders.set('Authorization', `Bearer ${newToken}`);
               }
-              return next(req.clone({
-                withCredentials: true,
-                headers: newHeaders
-              }));
+
+              return next(
+                req.clone({
+                  withCredentials: true,
+                  headers: newHeaders
+                })
+              );
             }),
             catchError((refreshError) => {
               isRefreshing = false;
               storage.clearScopes();
               router.navigate(['/home']);
               logger.error('Error al refrescar el token:', refreshError);
-              return throwError(() => new Error('Sesión expirada, por favor iniciá sesión nuevamente.'));
+              return throwError(
+                () =>
+                  new Error('Sesión expirada, por favor iniciá sesión nuevamente.')
+              );
             })
           );
         } else {
+          // Ya hay un refresh en curso: por ahora dejamos fallar esta request
           return throwError(() => error);
         }
       }
+
       logger.error(`Error en la petición ${req.url}:`, error.message);
       return throwError(() => error);
     })

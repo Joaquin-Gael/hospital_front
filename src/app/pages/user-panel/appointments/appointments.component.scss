@@ -177,17 +177,17 @@
     text-transform: capitalize;
 
     &.status-waiting {
-      background-color: rgba($warning-color, 0.1);
+      background-color: panel-alpha($warning-color, 0.1);
       color: $warning-color;
     }
 
     &.status-completed {
-      background-color: rgba($success-color, 0.1);
+      background-color: panel-alpha($success-color, 0.1);
       color: $success-color;
     }
 
     &.status-cancelled {
-      background-color: rgba($danger-color, 0.1);
+      background-color: panel-alpha($danger-color, 0.1);
       color: $danger-color;
     }
 
@@ -217,7 +217,7 @@
 
     &--danger {
       border-color: $danger-color;
-      @include hover-effect(rgba($danger-color, 0.1));
+      @include hover-effect(panel-alpha($danger-color, 0.1));
 
       &[disabled] {
         color: $text-lighter;
@@ -290,7 +290,7 @@
   }
 
   .btn--primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
     @include hover-effect($primary-dark);
 
     @include mobile-only {

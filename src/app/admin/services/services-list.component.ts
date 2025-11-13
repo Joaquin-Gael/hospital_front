@@ -16,6 +16,7 @@ import {
 } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
+  EntityFormPayload,
   FormField,
 } from '../../shared/entity-form/entity-form.component';
 import { ServiceService } from '../../services/service/service.service';
@@ -35,6 +36,9 @@ import { SpecialityService } from '../../services/speciality/speciality.service'
 import { forkJoin } from 'rxjs';
 import { NotificationService } from '../../core/notification';
 
+type ServiceFormValues = EntityFormPayload &
+  ServiceCreate;
+
 @Component({
   selector: 'app-service-list',
   standalone: true,
@@ -52,6 +56,7 @@ import { NotificationService } from '../../core/notification';
   templateUrl: './services-list.component.html',
   styleUrls: ['./services-list.component.scss'],
 })
+
 export class ServiceListComponent implements OnInit {
   private serviceService = inject(ServiceService);
   private logger = inject(LoggerService);
@@ -67,6 +72,7 @@ export class ServiceListComponent implements OnInit {
   error: string | null = null;
   showForm = false;
   formMode: 'create' | 'edit' = 'create';
+  lastFormMode: 'create' | 'edit' | null = null;
 
   // View dialog
   viewDialogOpen = false;
@@ -107,7 +113,7 @@ export class ServiceListComponent implements OnInit {
     { key: 'associatedSpecialtyName', label: 'Especialidad' },
   ];
 
-  baseFormFields: FormField[] = [
+  baseFormFields: FormField<ServiceFormValues>[] = [
     {
       key: 'name',
       label: 'Nombre',
@@ -149,16 +155,18 @@ export class ServiceListComponent implements OnInit {
     },
   ];
 
-  get formFields(): FormField[] {
-    if (this._formFields.length === 0 || this.formMode !== this.formMode) {
+  get formFields(): FormField<ServiceFormValues>[] {
+    if (this._formFields.length === 0 || this.lastFormMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
       }));
+      this.lastFormMode = this.formMode;
     }
     return this._formFields;
   }
 
-  private _formFields: FormField[] = [];
+  private _formFields: FormField<ServiceFormValues>[] = [];
+  formInitialData: Partial<ServiceFormValues> | null = null;
 
   ngOnInit(): void {
     this.loadData();
@@ -191,6 +199,7 @@ export class ServiceListComponent implements OnInit {
               value: s.id.toString(),
               label: s.name,
             }));
+          this._formFields = [];
           this.loading = false;
         }
         this.loading = false;
@@ -205,6 +214,7 @@ export class ServiceListComponent implements OnInit {
   onAddNew(): void {
     this.formMode = 'create';
     this.selectedService = null;
+    this.formInitialData = null;
     this.showForm = true;
     this.logger.debug('Opening form for new service');
   }
@@ -212,6 +222,13 @@ export class ServiceListComponent implements OnInit {
   onEdit(service: Service): void {
     this.formMode = 'edit';
     this.selectedService = service;
+    this.formInitialData = {
+      name: service.name ?? '',
+      description: service.description ?? '',
+      price: service.price,
+      icon_code: service.icon_code ?? '',
+      specialty_id: service.specialty_id,
+    };
     this.showForm = true;
     this.logger.debug('Opening form for editing service', service);
   }
@@ -272,22 +289,41 @@ export class ServiceListComponent implements OnInit {
     });
   }
 
-  onFormSubmit(formData: Partial<Service>): void {
+  onFormSubmit(formData: ServiceFormValues): void {
     this.formLoading = true;
     this.error = null;
 
+    const price = Number(formData.price);
+
+    const createPayload: ServiceCreate = {
+      name: formData.name,
+      description: formData.description ?? '',
+      price,
+      specialty_id: formData.specialty_id,
+      icon_code: formData.icon_code ?? '',
+    };
+
+    const updatePayload: ServiceUpdate = {
+      name: formData.name,
+      description: formData.description ?? '',
+      price,
+      specialty_id: formData.specialty_id,
+      icon_code: formData.icon_code ?? '',
+    };
+
     const request =
       this.formMode === 'create'
-        ? this.serviceService.createService(formData as ServiceCreate)
+        ? this.serviceService.createService(createPayload)
         : this.serviceService.updateService(
             this.selectedService!.id.toString(),
-            formData as ServiceUpdate
+            updatePayload
           );
 
     request.subscribe({
       next: () => {
         this.formLoading = false;
         this.showForm = false;
+        this.formInitialData = null;
         this.loadData();
         this.logger.info(
           `Servicio ${
@@ -334,6 +370,7 @@ export class ServiceListComponent implements OnInit {
   onFormCancel(): void {
     this.showForm = false;
     this.selectedService = null;
+    this.formInitialData = null;
     this.logger.debug('Form cancelled');
   }
 

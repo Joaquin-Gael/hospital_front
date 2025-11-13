@@ -14,7 +14,7 @@
     <div class="department-section__form-container">
       <app-entity-form
         [fields]="formFields"
-        [initialData]="selectedDepartment"
+        [initialData]="formInitialData"
         [title]="formMode === 'create' ? 'Nuevo Departamento' : 'Editar Departamento'"
         [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
         [loading]="formLoading"

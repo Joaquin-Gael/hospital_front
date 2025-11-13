@@ -14,7 +14,7 @@
     <div class="service-section__form-container">
       <app-entity-form
         [fields]="formFields"
-        [initialData]="selectedService"
+        [initialData]="formInitialData"
         [title]="formMode === 'create' ? 'Nuevo Servicio' : 'Editar Servicio'"
         [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
         [loading]="formLoading"

@@ -16,6 +16,7 @@ import {
 } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
+  EntityFormPayload,
   FormField,
 } from '../../shared/entity-form/entity-form.component';
 import { LocationService } from '../../services/location/location.service';
@@ -36,10 +37,7 @@ interface ExtendedLocation extends Location {
   departmentCount?: number;
 }
 
-interface LocationFormData {
-  name: string;
-  description: string;
-}
+type LocationFormValues = EntityFormPayload & LocationCreate;
 
 @Component({
   selector: 'app-location-list',
@@ -66,6 +64,7 @@ export class LocationListComponent implements OnInit {
 
   locations: ExtendedLocation[] = [];
   selectedLocation: ExtendedLocation | null = null;
+  formInitialData: Partial<LocationFormValues> | null = null;
   loading = false;
   formLoading = false;
   error: string | null = null;
@@ -109,7 +108,7 @@ export class LocationListComponent implements OnInit {
     },
   ];
 
-  formFields: FormField[] = [
+  formFields: FormField<LocationFormValues>[] = [
     {
       key: 'name',
       label: 'Nombre',
@@ -140,7 +139,7 @@ export class LocationListComponent implements OnInit {
 
     this.locationService.getLocations().subscribe({
       next: (locations) => {
-        console.log('Datos recibidos en loadLocations:', locations);
+        this.logger.debug('Datos recibidos en loadLocations', locations);
         this.locations = locations.map((l) => ({
           ...l,
           departmentCount: l.departments?.length || 0,
@@ -157,6 +156,7 @@ export class LocationListComponent implements OnInit {
   onAddNew(): void {
     this.formMode = 'create';
     this.selectedLocation = null;
+    this.formInitialData = null;
     this.showForm = true;
     this.logger.debug('Opening form for new location');
   }
@@ -164,6 +164,10 @@ export class LocationListComponent implements OnInit {
   onEdit(location: ExtendedLocation): void {
     this.formMode = 'edit';
     this.selectedLocation = { ...location };
+    this.formInitialData = {
+      name: location.name,
+      description: location.description,
+    };
     this.showForm = true;
     this.logger.debug('Opening form for editing location', location);
   }
@@ -217,22 +221,35 @@ export class LocationListComponent implements OnInit {
     });
   }
 
-  onFormSubmit(formData: LocationFormData): void {
+  onFormSubmit(formData: LocationFormValues): void {
     this.formLoading = true;
     this.error = null;
 
+    const createPayload: LocationCreate = {
+      name: formData.name,
+      description: formData.description ?? '',
+    };
+
+    const updatePayload: LocationUpdate = {
+      name: formData.name,
+      description: formData.description ?? '',
+      location_id: this.selectedLocation?.id ?? '',
+    };
+
     const request =
       this.formMode === 'create'
-        ? this.locationService.addLocation(formData as LocationCreate)
+        ? this.locationService.addLocation(createPayload)
         : this.locationService.updateLocation(
             this.selectedLocation!.id,
-            formData as LocationUpdate
+            updatePayload
           );
 
     request.subscribe({
       next: (result: Location) => {
         this.formLoading = false;
         this.showForm = false;
+        this.selectedLocation = null;
+        this.formInitialData = null;
         this.loadLocations();
         this.logger.info(
           `Ubicación ${
@@ -279,6 +296,7 @@ export class LocationListComponent implements OnInit {
   onFormCancel(): void {
     this.showForm = false;
     this.selectedLocation = null;
+    this.formInitialData = null;
     this.logger.debug('Form cancelled');
   }
 

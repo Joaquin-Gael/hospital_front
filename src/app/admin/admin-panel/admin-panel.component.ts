@@ -126,7 +126,7 @@ export class AdminPanelComponent implements OnInit {
   }
 
   @HostListener('document:keydown.escape', ['$event'])
-  onEscapeKey(): void {
+  onEscapeKey(event: any): void {
     if (this.isUserMenuOpen) {
       this.isUserMenuOpen = false;
       this.logger.debug('User menu closed with Escape key');
@@ -138,7 +138,7 @@ export class AdminPanelComponent implements OnInit {
   }
 
   @HostListener('window:resize', ['$event'])
-  onWindowResize(): void {
+  onWindowResize(event: any): void {
     if (window.innerWidth >= 1024 && this.sidebarOpen) {
       this.sidebarOpen = false;
       this.logger.debug('Sidebar closed due to desktop resize');

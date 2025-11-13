@@ -1,109 +1,140 @@
 <section class="contact-section">
+  <!-- Hero integrado -->
+  <app-hero [heroData]="heroData"></app-hero>
+
   <div class="container">
-    <div class="contact-header">
-      <h2>Contáctenos</h2>
-      <p>Estamos aquí para ayudarle con cualquier consulta sobre nuestro sistema de turnos</p>
-    </div>
+    <header class="contact-header">
+    </header>
 
     <div class="contact-content">
-      <div class="contact-info">
-        <div class="info-card">
+      <!-- Info Cards -->
+      <aside class="contact-info">
+        <article class="info-card">
           <div class="icon">
             <i class="fas fa-map-marker-alt"></i>
           </div>
           <h3>Dirección</h3>
           <p>Av. Salud 1234, Ciudad Médica</p>
-        </div>
+        </article>
 
-        <div class="info-card">
+        <article class="info-card">
           <div class="icon">
             <i class="fas fa-phone-alt"></i>
           </div>
           <h3>Teléfono</h3>
           <p>+54 11 4567-8900</p>
           <p>+54 11 4567-8901</p>
-        </div>
+        </article>
 
-        <div class="info-card">
+        <article class="info-card">
           <div class="icon">
             <i class="fas fa-envelope"></i>
           </div>
           <h3>Email</h3>
-          <p>contacto&#64;hospitalsalud.com</p>
-          <p>turnos&#64;hospitalsalud.com</p>
-        </div>
+          <p>contacto&#64;hospitalsdlg.com</p>
+          <p>turnos&#64;hospitalsdlg.com</p>
+        </article>
 
-        <div class="info-card">
+        <article class="info-card">
           <div class="icon">
             <i class="fas fa-clock"></i>
           </div>
           <h3>Horario de Atención</h3>
           <p>Lunes a Viernes: 8:00 - 20:00</p>
           <p>Sábados: 8:00 - 14:00</p>
-        </div>
-      </div>
+        </article>
+      </aside>
 
+      <!-- Contact Form -->
       <div class="contact-form-container">
         <h3>Envíenos un mensaje</h3>
         
         @if (submitSuccess) {
-          <div class="alert alert-success">
+          <div class="alert alert-success" role="alert">
             <i class="fas fa-check-circle"></i>
             <p>¡Su mensaje ha sido enviado con éxito! Nos pondremos en contacto con usted pronto.</p>
           </div>
-        } @else {
-          <div class="alert alert-error">
+        }
+        
+        @if (submitError) {
+          <div class="alert alert-error" role="alert">
             <i class="fas fa-exclamation-circle"></i>
             <p>{{ errorMessage }}</p>
           </div>
         }
         
-        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form" novalidate>
           <div class="form-group">
-            <label for="name">Nombre completo</label>
+            <label for="name">Nombre completo *</label>
             <div class="input-with-icon">
               <i class="fas fa-user"></i>
-              <input type="text" id="name" formControlName="name" placeholder="Ingrese su nombre completo">
+              <input 
+                type="text" 
+                id="name" 
+                formControlName="name" 
+                placeholder="Ingrese su nombre completo"
+                [attr.aria-invalid]="contactForm.get('name')?.invalid && contactForm.get('name')?.touched"
+                aria-describedby="name-error">
             </div>
             @if (contactForm.get('name')?.invalid && contactForm.get('name')?.touched) {
-              <div class="error-message">
+              <span class="error-message" id="name-error" role="alert">
                 El nombre es requerido
-              </div>
+              </span>
             }
           </div>
 
           <div class="form-group">
-            <label for="email">Correo electrónico</label>
+            <label for="email">Correo electrónico *</label>
             <div class="input-with-icon">
               <i class="fas fa-envelope"></i>
-              <input type="email" id="email" formControlName="email" placeholder="Ingrese su correo electrónico">
+              <input 
+                type="email" 
+                id="email" 
+                formControlName="email" 
+                placeholder="ejemplo@correo.com"
+                [attr.aria-invalid]="contactForm.get('email')?.invalid && contactForm.get('email')?.touched"
+                aria-describedby="email-error">
             </div>
             @if (contactForm.get('email')?.invalid && contactForm.get('email')?.touched) {
-              <div class="error-message">
-                Ingrese un correo electrónico válido
-              </div>
+              <span class="error-message" id="email-error" role="alert">
+                @if (contactForm.get('email')?.hasError('required')) {
+                  El correo electrónico es requerido
+                } @else if (contactForm.get('email')?.hasError('email')) {
+                  Ingrese un correo electrónico válido
+                }
+              </span>
             }
           </div>
 
           <div class="form-group">
-            <label for="phone">Teléfono</label>
+            <label for="phone">Teléfono *</label>
             <div class="input-with-icon">
               <i class="fas fa-phone-alt"></i>
-              <input type="tel" id="phone" formControlName="phone" placeholder="Ingrese su número de teléfono">
+              <input 
+                type="tel" 
+                id="phone" 
+                formControlName="phone" 
+                placeholder="1123456789"
+                [attr.aria-invalid]="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched"
+                aria-describedby="phone-error">
             </div>
             @if (contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched) {
-              <div class="error-message">
+              <span class="error-message" id="phone-error" role="alert">
                 Ingrese un número de teléfono válido (10 dígitos)
-              </div>
+              </span>
             }
           </div>
 
           <div class="form-group">
-            <label for="subject">Asunto</label>
+            <label for="subject">Asunto *</label>
             <div class="input-with-icon">
               <i class="fas fa-tag"></i>
-              <select id="subject" formControlName="subject">
-                <option value="" disabled selected>Seleccione un asunto</option>
+              <select 
+                id="subject" 
+                formControlName="subject"
+                [attr.aria-invalid]="contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched"
+                aria-describedby="subject-error">
+                <option value="" disabled>Seleccione un asunto</option>
                 <option value="turnos">Consulta sobre turnos</option>
                 <option value="cancelacion">Cancelación de turno</option>
                 <option value="informacion">Información general</option>
@@ -112,31 +143,41 @@
               </select>
             </div>
             @if (contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched) {
-              <div class="error-message">
+              <span class="error-message" id="subject-error" role="alert">
                 Seleccione un asunto
-              </div>
+              </span>
             }
           </div>
 
           <div class="form-group">
-            <label for="message">Mensaje</label>
+            <label for="message">Mensaje *</label>
             <div class="input-with-icon">
               <i class="fas fa-comment"></i>
-              <textarea id="message" formControlName="message" rows="5" placeholder="Escriba su mensaje aquí"></textarea>
+              <textarea 
+                id="message" 
+                formControlName="message" 
+                rows="5" 
+                placeholder="Escriba su mensaje aquí..."
+                [attr.aria-invalid]="contactForm.get('message')?.invalid && contactForm.get('message')?.touched"
+                aria-describedby="message-error"></textarea>
             </div>
             @if (contactForm.get('message')?.invalid && contactForm.get('message')?.touched) {
-              <div class="error-message">
+              <span class="error-message" id="message-error" role="alert">
                 El mensaje debe tener al menos 10 caracteres
-              </div>
+              </span>
             }
           </div>
 
-          <button type="submit" class="submit-btn" [disabled]="contactForm.invalid || isSubmitting">
-            @if (isSubmitting){
-              <span *ngIf="isSubmitting">
-                <i class="fas fa-spinner fa-spin"></i> Enviando...
-              </span>
+          <button 
+            type="submit" 
+            class="submit-btn" 
+            [disabled]="contactForm.invalid || isSubmitting"
+            [attr.aria-busy]="isSubmitting">
+            @if (isSubmitting) {
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>Enviando...</span>
             } @else {
+              <i class="fas fa-paper-plane"></i>
               <span>Enviar mensaje</span>
             }
           </button>

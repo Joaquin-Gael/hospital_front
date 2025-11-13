@@ -1,0 +1,98 @@
+@use 'sass:color';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'sass:string';
+
+@function _to-string($value) {
+  @if meta.type-of($value) == 'string' {
+    @return $value;
+  }
+
+  @return meta.inspect($value);
+}
+
+@function _clamp-percentage($value) {
+  @if meta.type-of($value) != 'number' {
+    @error 'Expected a number but received #{meta.type-of($value)}.';
+  }
+
+  @if math.unit($value) == '%' {
+    @return math.max(0%, math.min(100%, $value));
+  }
+
+  @if math.is-unitless($value) {
+    $percent: math.percentage($value);
+    @return math.max(0%, math.min(100%, $percent));
+  }
+
+  @error 'Only percentages or unitless numbers are supported.';
+}
+
+@function _color-mix($base, $base-percent, $other, $other-percent) {
+  @return string.unquote(
+    'color-mix(in srgb, #{_to-string($base)} #{_to-string($base-percent)}, #{_to-string($other)} #{_to-string($other-percent)})'
+  );
+}
+
+/// Adjusts a theme color regardless of whether it is a Sass color or a CSS custom property.
+/// When a Sass color is provided the native `color.adjust` implementation is used.
+/// For CSS custom properties the function falls back to `color-mix` so that adjustments
+/// happen at runtime without breaking the build.
+@function adjust($value, $lightness: null, $alpha: null) {
+  @if meta.type-of($value) == 'color' {
+    @return color.adjust($value, $lightness: $lightness, $alpha: $alpha);
+  }
+
+  $result: $value;
+
+  @if $lightness != null and $lightness != 0 {
+    @if meta.type-of($lightness) != 'number' {
+      @error 'The lightness parameter must be a number.';
+    }
+
+    @if math.unit($lightness) != '%' {
+      @error 'Lightness adjustments for CSS variables must be provided in percentages.';
+    }
+
+    $amount: math.abs($lightness);
+    $amount: math.min($amount, 100%);
+
+    $base: 100% - $amount;
+    $mix-color: if($lightness > 0, white, black);
+    $result: _color-mix($value, $base, $mix-color, $amount);
+  }
+
+  @if $alpha != null and $alpha != 0 {
+    @if meta.type-of($alpha) != 'number' {
+      @error 'The alpha parameter must be a number.';
+    }
+
+    $alpha-amount: math.abs($alpha);
+
+    @if math.unit($alpha-amount) == '%' {
+      $alpha-amount: math.div($alpha-amount, 100%);
+    }
+
+    $alpha-amount: math.min($alpha-amount, 1);
+
+    $base-alpha: 1 - $alpha-amount;
+    $base-percent: math.percentage($base-alpha);
+    $alpha-percent: math.percentage($alpha-amount);
+    $result: _color-mix($result, $base-percent, transparent, $alpha-percent);
+  }
+
+  @return $result;
+}
+
+/// Blends two colors using either Sass's native implementation or CSS `color-mix` when
+/// custom properties are involved.
+@function mix($first, $second, $weight: 50%) {
+  @if meta.type-of($first) == 'color' and meta.type-of($second) == 'color' {
+    @return color.mix($first, $second, $weight);
+  }
+
+  $first-percent: _clamp-percentage($weight);
+  $second-percent: 100% - $first-percent;
+
+  @return _color-mix($first, $first-percent, $second, $second-percent);
+}

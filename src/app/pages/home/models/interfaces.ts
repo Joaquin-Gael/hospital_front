@@ -1,23 +1,23 @@
 export interface HeroData {
   backgroundImage: string;
-  altText: string;
-  title: string;
-  subtitle: string;
+  altText?: string;
+  title?: string;
+  subtitle?: string;
   highlightText?: string;
-  badge: string;
-  description: string;
-  primaryButtonText: string;
-  primaryButtonIcon: string;
-  secondaryButtonText: string;
-  secondaryButtonIcon: string;
-  certifications: Array<{
-    icon: string;
-    text: string;
+  badge?: string;
+  description?: string;
+  primaryButtonText?: string;
+  primaryButtonIcon?: string;
+  secondaryButtonText?: string;
+  secondaryButtonIcon?: string;
+  certifications?: Array<{
+    icon? : string;
+    text?: string;
   }>;
-  floatingCards: Array<{
-    icon: string;
-    text: string;
-    position: 'card-1' | 'card-2' | 'card-3';
+  floatingCards?: Array<{
+    icon?: string;
+    text?: string;
+    position?: 'card-1' | 'card-2' | 'card-3';
   }>;
 }
 

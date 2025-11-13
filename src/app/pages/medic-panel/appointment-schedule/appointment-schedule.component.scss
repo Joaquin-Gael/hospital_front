@@ -1,5 +1,6 @@
 @use 'sass:color';
 @use '../styles/_variables.scss' as vars;
+@use '../../../layout/styles/_media-queries.scss' as media;
 
 .appointment-schedule {
   &__header {
@@ -43,7 +44,7 @@
     background-color: vars.$card-background;
     font-size: vars.$font-size-sm;
     color: vars.$text-primary;
-    transition: all vars.$transition-fast;
+    transition: var(--transition-smooth);
     
     @media (max-width: vars.$breakpoint-sm) {
       width: 100%;
@@ -52,7 +53,7 @@
     &:focus {
       outline: none;
       border-color: vars.$primary-color;
-      box-shadow: 0 0 0 2px color.adjust(vars.$primary-color, $alpha: -0.8);
+      box-shadow: 0 0 0 3px var(--focus-ring);
     }
   }
   
@@ -77,7 +78,7 @@
   display: flex;
   flex-direction: column;
   gap: vars.$spacing-4;
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .appointment-card {
@@ -87,15 +88,18 @@
   overflow: hidden;
   border: 1px solid vars.$border-color;
   box-shadow: vars.$shadow-sm;
-  transition: all vars.$transition-normal;
-  
+  transition: box-shadow var(--transition-smooth), transform var(--transition-smooth), border-color var(--transition-smooth);
+
   &:hover {
     box-shadow: vars.$shadow-md;
     transform: translateY(-2px);
+    border-color: color.adjust(vars.$primary-color, $lightness: -8%);
   }
-  
+
   &--urgent {
     border-left: 4px solid vars.$danger-color;
+    animation: pulse 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+    box-shadow: 0 16px 32px rgba(255, 90, 95, 0.18);
   }
   
   &--completed {
@@ -115,6 +119,7 @@
     min-width: 80px;
     font-size: vars.$font-size-md;
     color: vars.$text-primary;
+    transition: background-color var(--transition-smooth), color var(--transition-smooth);
   }
   
   &__content {
@@ -139,7 +144,7 @@
     font-weight: 600;
     color: vars.$text-primary;
     cursor: pointer;
-    transition: color vars.$transition-fast;
+    transition: color var(--transition-smooth);
     
     &:hover {
       color: vars.$primary-color;
@@ -154,6 +159,7 @@
     padding: vars.$spacing-1 vars.$spacing-2;
     border-radius: vars.$border-radius-full;
     font-weight: 500;
+    transition: background-color var(--transition-smooth), color var(--transition-smooth);
   }
   
   &__reason {
@@ -220,10 +226,26 @@
   justify-content: center;
   border-radius: vars.$border-radius-md;
   font-weight: 500;
-  transition: all vars.$transition-fast;
+  transition: var(--transition-smooth);
   cursor: pointer;
   font-size: vars.$font-size-sm;
-  
+  border: none;
+  gap: vars.$spacing-2;
+  box-shadow: none;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
   &--icon {
     width: 2.5rem;
     height: 2.5rem;
@@ -232,59 +254,97 @@
     background-color: transparent;
     border: 1px solid transparent;
     color: vars.$text-secondary;
-    
+    transition: var(--transition-smooth);
+
     &:hover {
       background-color: color.adjust(vars.$background-color, $lightness: -5%);
       color: vars.$text-primary;
+      border-color: color.adjust(vars.$background-color, $lightness: -8%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px var(--focus-ring);
     }
   }
-  
+
   &--sm {
     font-size: vars.$font-size-xs;
     padding: vars.$spacing-1 vars.$spacing-2;
   }
-  
+
   &--primary {
     background-color: vars.$primary-color;
     color: white;
     border: 1px solid vars.$primary-color;
     padding: vars.$spacing-1 vars.$spacing-3;
-    
+    box-shadow: var(--shadow-btn-primary, 0 12px 24px rgba(58, 134, 255, 0.24));
+
     &:hover {
       background-color: color.adjust(vars.$primary-color, $lightness: -5%);
+      box-shadow: var(--shadow-btn-primary-hover, 0 16px 32px rgba(58, 134, 255, 0.32));
+    }
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 3px var(--focus-ring),
+        var(--shadow-btn-primary-hover, 0 16px 32px rgba(58, 134, 255, 0.32));
     }
   }
-  
+
   &--success {
     background-color: vars.$success-color;
     color: white;
     border: 1px solid vars.$success-color;
     padding: vars.$spacing-1 vars.$spacing-3;
-    
+    box-shadow: 0 12px 24px rgba(56, 176, 0, 0.24);
+
     &:hover {
       background-color: color.adjust(vars.$success-color, $lightness: -5%);
+      box-shadow: 0 16px 32px rgba(56, 176, 0, 0.3);
+    }
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 3px var(--focus-ring),
+        0 16px 32px rgba(56, 176, 0, 0.3);
     }
   }
-  
+
   &--danger {
     background-color: vars.$danger-color;
     color: white;
     border: 1px solid vars.$danger-color;
     padding: vars.$spacing-1 vars.$spacing-3;
-    
+    box-shadow: 0 12px 24px rgba(255, 90, 95, 0.24);
+
     &:hover {
       background-color: color.adjust(vars.$danger-color, $lightness: -5%);
+      box-shadow: 0 16px 32px rgba(255, 90, 95, 0.32);
+    }
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 3px var(--focus-ring),
+        0 16px 32px rgba(255, 90, 95, 0.32);
     }
   }
-  
+
   &--warning {
     background-color: vars.$warning-color;
     color: white;
     border: 1px solid vars.$warning-color;
     padding: vars.$spacing-1 vars.$spacing-3;
-    
+    box-shadow: 0 12px 24px rgba(255, 190, 11, 0.24);
+
     &:hover {
       background-color: color.adjust(vars.$warning-color, $lightness: -5%);
+      box-shadow: 0 16px 32px rgba(255, 190, 11, 0.32);
+    }
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 3px var(--focus-ring),
+        0 16px 32px rgba(255, 190, 11, 0.32);
     }
   }
 }
@@ -296,4 +356,14 @@
   border-top-color: vars.$primary-color;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+@include media.reduce-motion {
+  .appointment-card,
+  .appointment-card--urgent,
+  .btn {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
 }

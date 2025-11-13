@@ -1,36 +1,60 @@
 <section class="hero-section">
+  <!-- Background Image -->
+  <div class="hero__background">
+    <img 
+      [src]="heroData.backgroundImage" 
+      [alt]="heroData.altText"
+      class="hero__image"
+      loading="eager"
+    />
+  </div>
+
+  <!-- Hero Content -->
   <div class="hero-content">
     <div class="hero-badge">{{ heroData.badge }}</div>
+    
     <h1>
       {{ heroData.title }}
-      <span class="highlight" *ngIf="heroData.highlightText">{{ heroData.highlightText }}</span>
+      @if (heroData.subtitle) {
+        <br>{{ heroData.subtitle }}
+      }
+      @if (heroData.highlightText) {
+        <br><span class="highlight">{{ heroData.highlightText }}</span>
+      }
     </h1>
+    
     <p class="hero-subtitle">{{ heroData.description }}</p>
+    
     <div class="hero-cta">
-      <button class="btn-primary">
+      <button class="btn-primary" type="button">
         <span class="material-icons">{{ heroData.primaryButtonIcon }}</span>
         {{ heroData.primaryButtonText }}
       </button>
-      <button class="btn-secondary">
+      <button class="btn-secondary" type="button">
         <span class="material-icons">{{ heroData.secondaryButtonIcon }}</span>
         {{ heroData.secondaryButtonText }}
       </button>
     </div>
+    
     <div class="hero-badges">
-      <div class="badge" *ngFor="let cert of heroData.certifications">
-        <span class="material-icons">{{ cert.icon }}</span>
-        {{ cert.text }}
-      </div>
+      @for (cert of heroData.certifications; track cert.text) {
+        <div class="badge">
+          <span class="material-icons">{{ cert.icon }}</span>
+          {{ cert.text }}
+        </div>
+      }
     </div>
   </div>
 
+  <!-- Hero Image Container with Floating Cards -->
   <div class="hero-image">
-    <div class="floating-card" 
-         *ngFor="let card of heroData.floatingCards" 
-         [class]="card.position">
-      <span class="material-icons">{{ card.icon }}</span>
-      <span>{{ card.text }}</span>
-    </div>
+    @for (card of heroData.floatingCards; track card.text) {
+      <div class="floating-card" [ngClass]="card.position">
+        <span class="material-icons">{{ card.icon }}</span>
+        <span>{{ card.text }}</span>
+      </div>
+    }
+    
     <div class="image-container">
       <div class="image-placeholder" aria-hidden="true"></div>
     </div>

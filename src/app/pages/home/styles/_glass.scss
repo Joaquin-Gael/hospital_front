@@ -1,14 +1,19 @@
+@use 'sass:math';
 @use './_variables-moderns.scss' as vars;
 
 @mixin glass-base($opacity: 0.12, $blur: 16px, $border-opacity: 0.2) {
   &{
-    background: rgba(255, 255, 255, $opacity);
+    background: color-mix(in srgb, var(--text-white) #{math.percentage($opacity)}, transparent);
     backdrop-filter: blur($blur);
     -webkit-backdrop-filter: blur($blur);
-    border: 1px solid rgba(255, 255, 255, $border-opacity);
+    border: 1px solid color-mix(in srgb, var(--text-white) #{math.percentage($border-opacity)}, transparent);
   }
   @supports not (backdrop-filter: blur($blur)) {
-    background: rgba(255, 255, 255, $opacity + 0.08);
+    background: color-mix(
+      in srgb,
+      var(--text-white) #{math.percentage($opacity + 0.08)},
+      transparent
+    );
   }
 }
 
@@ -25,15 +30,15 @@
   color: vars.$text-primary;
   text-shadow: 0 1px 2px var(--text-shadow);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-glass-strong);
-    background: rgba(255, 255, 255, 0.15);
+    background: color-mix(in srgb, var(--text-white) 15%, transparent);
   }
-  
+
   &:focus-within {
-    outline: 2px solid vars.$primary;
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
 }
@@ -64,38 +69,52 @@
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0, 119, 182, 0.2);
-    background: rgba(255, 255, 255, 0.18);
-    
+    box-shadow: 0 12px 40px color-mix(in srgb, var(--color-primary) 25%, transparent);
+    background: color-mix(in srgb, var(--text-white) 18%, transparent);
+
     &::before {
       opacity: 1;
     }
   }
 }
 
-@mixin glass-hero($blur: 24px) {
-  background-image: url("https://pbs.twimg.com/media/GwlDc71XoAAmRhg?format=jpg&name=large");
-  background-size: cover;
-  background-position: center;
-  justify-content: center;
-  backdrop-filter: blur($blur);
-  -webkit-backdrop-filter: blur($blur);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+@mixin glass-hero($pattern-path: '/assets/patterns/hero-dots.svg') {
   position: relative;
+  display: flex;
+  justify-content: center;
+  background: var(--gradient-hero);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-glass-strong);
   overflow: hidden;
-  
-  &::before {
+
+  &::before,
+  &::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230077b6' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    opacity: 0.6;
+    inset: 0;
+    pointer-events: none;
     z-index: 0;
   }
-  
+
+  &::before {
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-primary) 18%, transparent) 0%,
+      color-mix(in srgb, var(--color-secondary) 22%, transparent) 60%,
+      color-mix(in srgb, var(--color-accent) 12%, transparent) 100%
+    );
+    opacity: 0.85;
+    mix-blend-mode: screen;
+  }
+
+  &::after {
+    background-image: url(#{$pattern-path});
+    background-size: 480px;
+    background-repeat: repeat;
+    opacity: 0.35;
+    mix-blend-mode: soft-light;
+  }
+
   > * {
     position: relative;
     z-index: 1;
@@ -114,15 +133,15 @@
     border-radius: var(--border-radius-md);
   }
   
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--color-secondary) 24%, transparent);
   color: #000000;
   text-shadow: 0 1px 2px var(--text-shadow);
   font-weight: 500;
   animation: float 6s ease-in-out infinite;
   @include glass-base(0.2, 12px, 0.3);
-  
+
   .material-icons {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 1px 2px color-mix(in srgb, #000 30%, transparent));
   }
 }
 
@@ -143,17 +162,17 @@
     &:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-btn-primary-hover);
-      background: rgba(255, 255, 255, 0.2);
+      background: color-mix(in srgb, var(--text-white) 20%, transparent);
     }
   } @else if $variant == 'success' {
     color: vars.$text-primary;
     text-shadow: 0 1px 2px var(--text-shadow);
     box-shadow: var(--shadow-btn-success);
-    
+
     &:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-btn-success-hover);
-      background: rgba(255, 255, 255, 0.2);
+      background: color-mix(in srgb, var(--text-white) 20%, transparent);
     }
   } @else if $variant == 'emergency' {
     color: vars.$text-primary;
@@ -165,7 +184,7 @@
     &:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-btn-emergency-hover);
-      background: rgba(255, 255, 255, 0.2);
+      background: color-mix(in srgb, var(--text-white) 20%, transparent);
     }
   }
   

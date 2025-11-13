@@ -16,6 +16,7 @@ import {
 } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
+  EntityFormPayload,
   FormField,
 } from '../../shared/entity-form/entity-form.component';
 import { SpecialityService } from '../../services/speciality/speciality.service';
@@ -34,6 +35,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { NotificationService } from '../../core/notification';
 import { forkJoin } from 'rxjs';
+
+type SpecialityFormValues = EntityFormPayload & SpecialtyCreate;
 
 @Component({
   selector: 'app-speciality-list',
@@ -67,6 +70,7 @@ export class SpecialityListComponent implements OnInit {
   error: string | null = null;
   showForm = false;
   formMode: 'create' | 'edit' = 'create';
+  lastFormMode: 'create' | 'edit' | null = null;
 
   // View dialog
   viewDialogOpen = false;
@@ -95,7 +99,7 @@ export class SpecialityListComponent implements OnInit {
     { key: 'associatedDepartmentName', label: 'Departamento' },
   ];
 
-  baseFormFields: FormField[] = [
+  baseFormFields: FormField<SpecialityFormValues>[] = [
     {
       key: 'name',
       label: 'Nombre',
@@ -123,16 +127,18 @@ export class SpecialityListComponent implements OnInit {
     },
   ];
 
-  get formFields(): FormField[] {
-    if (this._formFields.length === 0 || this.formMode !== this.formMode) {
+  get formFields(): FormField<SpecialityFormValues>[] {
+    if (this._formFields.length === 0 || this.lastFormMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
       }));
+      this.lastFormMode = this.formMode;
     }
     return this._formFields;
   }
 
-  private _formFields: FormField[] = [];
+  private _formFields: FormField<SpecialityFormValues>[] = [];
+  formInitialData: Partial<SpecialityFormValues> | null = null;
 
   ngOnInit(): void {
     this.loadData();
@@ -182,6 +188,7 @@ export class SpecialityListComponent implements OnInit {
   onAddNew(): void {
     this.formMode = 'create';
     this.selectedSpeciality = null;
+    this.formInitialData = null;
     this.showForm = true;
     this.logger.debug('Opening form for new speciality');
   }
@@ -189,6 +196,11 @@ export class SpecialityListComponent implements OnInit {
   onEdit(speciality: Specialty): void {
     this.formMode = 'edit';
     this.selectedSpeciality = speciality;
+    this.formInitialData = {
+      name: speciality.name ?? '',
+      description: speciality.description ?? '',
+      department_id: speciality.department_id ?? '',
+    };
     this.showForm = true;
     this.logger.debug('Opening form for editing speciality', speciality);
   }
@@ -254,22 +266,36 @@ export class SpecialityListComponent implements OnInit {
     });
   }
 
-  onFormSubmit(formData: Partial<Specialty>): void {
+  onFormSubmit(formData: SpecialityFormValues): void {
     this.formLoading = true;
     this.error = null;
 
+    const createPayload: SpecialtyCreate = {
+      name: formData.name,
+      description: formData.description ?? '',
+      department_id: formData.department_id,
+    };
+
+    const updatePayload: SpecialtyUpdate = {
+      name: formData.name,
+      description: formData.description ?? '',
+      department_id: formData.department_id,
+    };
+
     const request =
       this.formMode === 'create'
-        ? this.specialityService.addSpeciality(formData as SpecialtyCreate)
+        ? this.specialityService.addSpeciality(createPayload)
         : this.specialityService.updateSpeciality(
             this.selectedSpeciality!.id,
-            formData as SpecialtyUpdate
+            updatePayload
           );
 
     request.subscribe({
       next: () => {
         this.formLoading = false;
         this.showForm = false;
+        this.selectedSpeciality = null;
+        this.formInitialData = null;
         this.loadData();
         this.logger.info(
           `Especialidad ${
@@ -316,6 +342,7 @@ export class SpecialityListComponent implements OnInit {
   onFormCancel(): void {
     this.showForm = false;
     this.selectedSpeciality = null;
+    this.formInitialData = null;
     this.logger.debug('Form cancelled');
   }
 

@@ -16,6 +16,7 @@ import {
 } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
+  EntityFormPayload,
   FormField,
 } from '../../shared/entity-form/entity-form.component';
 import { UserService } from '../../services/user/user.service';
@@ -34,6 +35,20 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
+
+type UserFormValues = EntityFormPayload & {
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  dni: string;
+  password?: string | null;
+  address?: string | null;
+  telephone?: string | null;
+  blood_type?: string | null;
+  health_insurance?: string | null;
+  img_profile?: File | null;
+};
 
 interface ExtendedUser extends UserRead {
   health_insurance_name: string;
@@ -72,6 +87,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   error: string | null = null;
   showForm = false;
   formMode: 'create' | 'edit' = 'create';
+  lastFormMode: 'create' | 'edit' | null = null;
   isSuperuser = false;
   imgProfile: File | undefined = undefined;
   imagePreview: string | null = null;
@@ -93,7 +109,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     },
   ];
 
-  private baseFormFields: FormField[] = [
+  private baseFormFields: FormField<UserFormValues>[] = [
     { key: 'username', label: 'Usuario', type: 'text', required: true },
     {
       key: 'email',
@@ -160,8 +176,8 @@ export class UserListComponent implements OnInit, OnDestroy {
     },
   ];
 
-  get formFields(): FormField[] {
-    if (this._formFields.length === 0 || this.formMode !== this.formMode) {
+  get formFields(): FormField<UserFormValues>[] {
+    if (this._formFields.length === 0 || this.lastFormMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
         required:
@@ -173,11 +189,13 @@ export class UserListComponent implements OnInit, OnDestroy {
             ? []
             : field.validators || [],
       }));
+      this.lastFormMode = this.formMode;
     }
     return this._formFields;
   }
 
-  private _formFields: FormField[] = [];
+  private _formFields: FormField<UserFormValues>[] = [];
+  formInitialData: Partial<UserFormValues> | null = null;
 
   tableColumns: TableColumn[] = [
     {
@@ -308,6 +326,7 @@ export class UserListComponent implements OnInit, OnDestroy {
           label: hi.name,
         })),
       ];
+      this._formFields = [];
     }
   }
 
@@ -358,6 +377,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.selectedUser = null;
     this.imgProfile = undefined;
     this.imagePreview = null;
+    this.formInitialData = null;
     this.updateFormFields();
     this.showForm = true;
     this.logger.debug('Opening form for new user');
@@ -368,6 +388,18 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.selectedUser = { ...user };
     this.imgProfile = undefined;
     this.imagePreview = user.img_profile || null;
+    this.formInitialData = {
+      username: user.username,
+      email: user.email,
+      first_name: user.first_name ?? '',
+      last_name: user.last_name ?? '',
+      dni: user.dni ?? '',
+      password: '',
+      address: user.address ?? '',
+      telephone: user.telephone ?? '',
+      blood_type: user.blood_type ?? '',
+      health_insurance: user.health_insurance?.[0] ?? '',
+    };
     this.updateFormFields();
     this.showForm = true;
     this.logger.debug('Opening form for editing user', user);
@@ -414,8 +446,10 @@ export class UserListComponent implements OnInit, OnDestroy {
     });
   }
 
-  onFormSubmit(formData: any): void {
-    if (formData.password && !this.passwordPattern.test(formData.password)) {
+  onFormSubmit(formData: UserFormValues): void {
+    const passwordValue = formData.password ?? '';
+
+    if (passwordValue && !this.passwordPattern.test(passwordValue)) {
       this.error =
         'La contraseña debe tener al menos 8 caracteres, incluyendo una letra minúscula, una mayúscula, un número y un carácter especial (@$!%*?&#).';
       this.formLoading = false;
@@ -446,18 +480,19 @@ export class UserListComponent implements OnInit, OnDestroy {
       this.formLoading = true;
       this.error = null;
 
+      const healthInsuranceId = formData.health_insurance ?? '';
       if (this.formMode === 'create') {
         const userData: UserCreate = {
           username: formData.username,
           email: formData.email,
-          password: formData.password!,
+          password: passwordValue,
           first_name: formData.first_name,
           last_name: formData.last_name,
           dni: formData.dni,
-          telephone: formData.telephone,
+          telephone: formData.telephone || undefined,
           address: formData.address || undefined,
-          blood_type: formData.blood_type || undefined,
-          health_insurance: formData.health_insurance || undefined,
+          blood_type: formData.blood_type || '',
+          health_insurance: healthInsuranceId ? [healthInsuranceId] : [],
         };
 
         this.userService
@@ -478,6 +513,7 @@ export class UserListComponent implements OnInit, OnDestroy {
               this.showForm = false;
               this.imgProfile = undefined;
               this.imagePreview = null;
+              this.formInitialData = null;
               this.logger.info(
                 `Usuario "${newUser.username}" creado correctamente`
               );
@@ -488,13 +524,20 @@ export class UserListComponent implements OnInit, OnDestroy {
             },
           });
       } else if (this.selectedUser) {
+        const healthInsuranceUpdate =
+          formData.health_insurance === undefined
+            ? undefined
+            : healthInsuranceId
+              ? [healthInsuranceId]
+              : [];
+
         const updateData: UserUpdate = {
           username: this.isSuperuser ? formData.username : undefined,
           first_name: this.isSuperuser ? formData.first_name : undefined,
           last_name: this.isSuperuser ? formData.last_name : undefined,
           telephone: formData.telephone || undefined,
           address: formData.address || undefined,
-          health_insurance: formData.health_insurance || undefined,
+          health_insurance: healthInsuranceUpdate,
         };
 
         this.userService
@@ -520,6 +563,7 @@ export class UserListComponent implements OnInit, OnDestroy {
               this.showForm = false;
               this.imgProfile = undefined;
               this.imagePreview = null;
+              this.formInitialData = null;
               this.logger.info(
                 `Usuario "${updatedUser.username}" actualizado correctamente`
               );
@@ -538,6 +582,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.selectedUser = null;
     this.imgProfile = undefined;
     this.imagePreview = null;
+    this.formInitialData = null;
     this.logger.debug('Form cancelled');
   }
 
