@@ -6,6 +6,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import {
   AppointmentViewModel,
   Turn,
+  TurnRescheduleRequest,
   TurnState,
 } from '../../../services/interfaces/appointment.interfaces';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
@@ -15,13 +16,19 @@ import { LoggerService } from '../../../services/core/logger.service';
 import { NotificationService } from '../../../core/notification';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
+import { RescheduleTurnDialogComponent } from './reschedule-turn-dialog.component';
 
 @Component({
   selector: 'app-appointments',
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.scss'],
   standalone: true,
-  imports: [CommonModule, MatDialogModule, LoadingSpinnerComponent],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    LoadingSpinnerComponent,
+    RescheduleTurnDialogComponent,
+  ],
 })
 export class AppointmentsComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
@@ -125,10 +132,43 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       : this.appointments;
   }
 
-  onReschedule(id: string): void {
-    console.log(`Rescheduling appointment: ${id}`);
-    this.notificationService.info('Reprogramación no implementada');
-    //this.router.navigate(['reschedule-appointment', id], { relativeTo: this.route });
+  onReschedule(turnId: string): void {
+    const appointment = this.appointments.find((item) => item.turnId === turnId);
+    const dialogRef = this.dialog.open(RescheduleTurnDialogComponent, {
+      data: {
+        currentDate: appointment?.date,
+        currentTime: appointment?.time,
+      },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result?: TurnRescheduleRequest) => {
+        if (!result) {
+          return;
+        }
+
+        this.loading = true;
+        this.appointmentService
+          .rescheduleTurn(turnId, result)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.notificationService.success('Turno reprogramado correctamente');
+              if (this.user?.id) {
+                this.loadAppointments(this.user.id);
+              } else {
+                this.loading = false;
+              }
+            },
+            error: (err) => {
+              this.notificationService.error('Error al reprogramar el turno');
+              this.logger.error('Failed to reschedule turn', err);
+              this.loading = false;
+            },
+          });
+      });
   }
 
   onCancel(turnId: string): void {
