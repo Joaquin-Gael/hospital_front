@@ -1,44 +1,174 @@
 <section class="documents">
-  <ng-container *ngIf="loading; else content">
-    <div class="loading-spinner">
-      <i class="material-icons loading-icon">hourglass_empty</i>
-      <span>Cargando documentos...</span>
-    </div>
-  </ng-container>
-
-  <ng-template #content>
-    <ng-container *ngIf="documents.length === 0; else grid">
-      <div class="empty-state">
-        <div class="empty-state__icon">
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </div>
-        <h2>No hay documentos</h2>
-        <p>Tus documentos aparecerán aquí cuando estén disponibles.</p>
+  <div class="documents__section">
+    <div class="section-header">
+      <div>
+        <h2>Comprobantes generados</h2>
+        <p class="section-subtitle">Descargá los comprobantes emitidos automáticamente para tus turnos.</p>
       </div>
+      <button class="btn btn--outline btn--sm" type="button" (click)="onRefresh()">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9H9" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20 20v-5h-.581m-15.357-2a8.003 8.003 0 0015.357 2H15" />
+        </svg>
+        Actualizar
+      </button>
+    </div>
+
+    <ng-container *ngIf="loadingDocuments; else documentsContent">
+      <app-loading-spinner [message]="'Cargando comprobantes...'"></app-loading-spinner>
     </ng-container>
 
-    <ng-template #grid>
-      <div class="documents__grid">
-        <div *ngFor="let document of documents; trackBy: trackById" class="document-card">
-          <div class="document-card__icon">
-            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span>{{ document.type.toUpperCase() }}</span>
-          </div>
-          <div class="document-card__content">
-            <h3 class="document-card__title">{{ document.name }}</h3>
-            <p class="document-card__date">{{ formatDate(document.date) }}</p>
-          </div>
-          <a [href]="document.downloadUrl || document.url" class="document-card__download" download>
-            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-          </a>
+    <ng-template #documentsContent>
+      <ng-container *ngIf="documentsError; else documentsList">
+        <div class="error-state">
+          <h3>Ocurrió un problema</h3>
+          <p>{{ documentsError }}</p>
+          <button class="btn btn--outline btn--sm" type="button" (click)="onRefresh()">Intentar nuevamente</button>
         </div>
-      </div>
+      </ng-container>
+
+      <ng-template #documentsList>
+        <ng-container *ngIf="documents.length === 0; else documentsGrid">
+          <div class="empty-state">
+            <div class="empty-state__icon">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3>No hay comprobantes disponibles</h3>
+            <p>Cuando generes un comprobante, aparecerá en esta sección.</p>
+          </div>
+        </ng-container>
+
+        <ng-template #documentsGrid>
+          <div class="documents__grid">
+            <article *ngFor="let document of documents; trackBy: trackByDocumentId" class="document-card">
+              <div class="document-card__icon">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>PDF</span>
+              </div>
+              <div class="document-card__content">
+                <h3 class="document-card__title">{{ document.filename }}</h3>
+                <p class="document-card__meta">Generado el {{ formatDateTime(document.generatedAt) }}</p>
+                <p class="document-card__subtitle">{{ getDocumentSubtitle(document) }}</p>
+              </div>
+              <button
+                class="document-card__download"
+                type="button"
+                title="Descargar comprobante"
+                [disabled]="isDownloading(document.turnId)"
+                (click)="onDownloadDocument(document)"
+              >
+                <ng-container *ngIf="isDownloading(document.turnId); else documentDownloadIcon">
+                  <span class="spinner" aria-hidden="true"></span>
+                </ng-container>
+                <ng-template #documentDownloadIcon>
+                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                </ng-template>
+              </button>
+            </article>
+          </div>
+        </ng-template>
+      </ng-template>
     </ng-template>
-  </ng-template>
+  </div>
+
+  <div class="documents__section">
+    <div class="section-header">
+      <div>
+        <h2>Historial de descargas</h2>
+        <p class="section-subtitle">Revisá cuándo descargaste tus comprobantes y vuelve a obtenerlos si lo necesitás.</p>
+      </div>
+    </div>
+
+    <ng-container *ngIf="loadingDownloads; else downloadsContent">
+      <app-loading-spinner [message]="'Cargando historial de descargas...'"></app-loading-spinner>
+    </ng-container>
+
+    <ng-template #downloadsContent>
+      <ng-container *ngIf="downloadLogsError; else downloadsList">
+        <div class="error-state">
+          <h3>Ocurrió un problema</h3>
+          <p>{{ downloadLogsError }}</p>
+          <button class="btn btn--outline btn--sm" type="button" (click)="onRefresh()">Intentar nuevamente</button>
+        </div>
+      </ng-container>
+
+      <ng-template #downloadsList>
+        <ng-container *ngIf="downloadLogs.length === 0; else downloadsTable">
+          <div class="empty-state">
+            <div class="empty-state__icon">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3>Todavía no descargaste comprobantes</h3>
+            <p>Una vez que descargues un comprobante, lo verás reflejado aquí.</p>
+          </div>
+        </ng-container>
+
+        <ng-template #downloadsTable>
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Documento</th>
+                  <th>Descargado</th>
+                  <th>Canal</th>
+                  <th>Origen</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let log of downloadLogs; trackBy: trackByDownloadId">
+                  <td>
+                    <div class="table-doc">
+                      <span class="table-doc__name">{{ getFilenameForLog(log) }}</span>
+                      <span class="table-doc__meta">{{ getLogSubtitle(log) }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="table-doc__date">
+                      <span>{{ formatDateTime(log.downloadedAt) }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="table-doc__badge">{{ formatChannel(log.channel) }}</span>
+                  </td>
+                  <td>
+                    <div class="table-doc__meta">
+                      <span>IP: {{ log.clientIp || 'No registrada' }}</span>
+                      <span class="table-doc__agent">{{ log.userAgent || 'Dispositivo desconocido' }}</span>
+                    </div>
+                  </td>
+                  <td class="table__actions">
+                    <button
+                      class="btn-icon"
+                      type="button"
+                      title="Descargar nuevamente"
+                      [disabled]="isDownloading(log.turnId)"
+                      (click)="onDownloadFromLog(log)"
+                    >
+                      <ng-container *ngIf="isDownloading(log.turnId); else downloadLogIcon">
+                        <span class="spinner" aria-hidden="true"></span>
+                      </ng-container>
+                      <ng-template #downloadLogIcon>
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </ng-template>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </ng-template>
+      </ng-template>
+    </ng-template>
+  </div>
 </section>

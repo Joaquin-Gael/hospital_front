@@ -3,8 +3,27 @@
 @use '../shared.scss' as *;
 
 .documents {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+
+  &__section {
+    background-color: $card-background;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    @include mobile-only {
+      padding: 16px;
+      gap: 20px;
+    }
+  }
+
   &__grid {
-    @include responsive-grid(300px, 24px);
+    @include responsive-grid(320px, 24px);
 
     @include mobile-only {
       gap: 16px;
@@ -12,10 +31,40 @@
   }
 }
 
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: $text-color;
+  }
+
+  .section-subtitle {
+    margin: 4px 0 0;
+    color: $text-light;
+    font-size: 14px;
+    max-width: 560px;
+  }
+
+  .btn {
+    align-self: center;
+  }
+}
+
 .document-card {
-  padding: 16px;
-  @include card--interactive;
-  @include flex-inline(16px);
+  padding: 20px;
+  @include card;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+  transition: $transition;
 
   &:hover {
     transform: translateY(-4px);
@@ -27,127 +76,282 @@
   }
 
   @include mobile-only {
-    padding: 12px;
+    grid-template-columns: 1fr;
     gap: 12px;
+    text-align: center;
   }
 
   &__icon {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: $border-radius-sm;
-    background-color: panel-alpha($primary-color, 0.1);
+    background-color: panel-alpha($primary-color, 0.12);
     color: $primary-color;
-    gap: 4px;
-    flex-shrink: 0;
-    @include flex-center;
     @include flex-column;
+    @include flex-center;
+    gap: 6px;
+    font-weight: 600;
 
     .icon {
-      width: 20px;
-      height: 20px;
-
-      @include mobile-only {
-        width: 18px;
-        height: 18px;
-      }
+      width: 22px;
+      height: 22px;
     }
 
     span {
-      font-size: 10px;
-      font-weight: 600;
-
-      @include mobile-only {
-        font-size: 9px;
-      }
+      font-size: 11px;
+      letter-spacing: 0.08em;
     }
 
     @include mobile-only {
-      width: 40px;
-      height: 40px;
+      margin: 0 auto;
     }
   }
 
   &__content {
-    flex: 1;
     min-width: 0;
+    text-align: left;
+
+    @include mobile-only {
+      text-align: center;
+    }
   }
 
   &__title {
-    font-size: 16px;
-    font-weight: 500;
     margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 600;
     color: $text-color;
     @include text-truncate;
-
-    @include mobile-only {
-      font-size: 14px;
-    }
   }
 
-  &__date {
-    font-size: 12px;
-    color: $text-light;
+  &__meta {
     margin: 0;
+    font-size: 13px;
+    color: $text-light;
+  }
 
-    @include mobile-only {
-      font-size: 11px;
-    }
+  &__subtitle {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: $text-lighter;
   }
 
   &__download {
-    color: $text-light;
-    transition: $transition;
-    padding: 8px;
+    border: none;
+    background: transparent;
+    color: $primary-color;
+    padding: 10px;
     border-radius: $border-radius-sm;
-    @include hover-effect(transparent, $primary-color);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: $transition;
+
+    &:hover:not(:disabled) {
+      background-color: panel-alpha($primary-color, 0.12);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
     .icon {
-      width: 20px;
-      height: 20px;
-
-      @include mobile-only {
-        width: 18px;
-        height: 18px;
-      }
-    }
-
-    @include mobile-only {
-      padding: 6px;
-    }
-
-    @include touch-device {
-      padding: 12px;
-    }
-  }
-
-  @include mobile-only {
-    @media (max-width: 360px) {
-      flex-direction: column;
-      text-align: center;
-
-      &__content {
-        order: 2;
-      }
-
-      &__download {
-        order: 3;
-        align-self: center;
-      }
+      width: 22px;
+      height: 22px;
     }
   }
 }
 
-.loading-spinner {
-  text-align: center;
-  padding: 2rem;
-  color: $text-color;
-  @include flex-column;
+.table-container {
+  overflow-x: auto;
+}
 
-  .loading-icon {
-    font-size: 2rem;
-    animation: spin 1s linear infinite;
-    margin-bottom: 0.5rem;
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+  background-color: $card-background;
+
+  th,
+  td {
+    padding: 16px;
+    text-align: left;
   }
+
+  th {
+    background-color: $background-color;
+    color: $text-light;
+    font-weight: 500;
+    font-size: 14px;
+    border-bottom: 1px solid $border-color;
+  }
+
+  td {
+    border-bottom: 1px solid $border-color;
+    color: $text-color;
+    font-size: 14px;
+    vertical-align: top;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  @include mobile-only {
+    min-width: 100%;
+
+    th,
+    td {
+      padding: 12px 8px;
+      font-size: 13px;
+    }
+  }
+}
+
+
+.table__actions {
+  @include flex-inline(8px);
+  align-items: center;
+}
+.table-doc {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &__name {
+    font-weight: 600;
+    color: $text-color;
+    word-break: break-word;
+  }
+
+  &__meta {
+    color: $text-light;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__date {
+    color: $text-light;
+    font-size: 13px;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background-color: panel-alpha($primary-color, 0.12);
+    color: $primary-color;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  &__agent {
+    font-size: 12px;
+    color: $text-lighter;
+  }
+}
+
+.error-state {
+  @include card;
+  padding: 24px;
+  text-align: center;
+  color: $danger-color;
+  display: grid;
+  gap: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: $text-light;
+  }
+
+  .btn {
+    justify-self: center;
+  }
+}
+
+.empty-state {
+  padding: 32px;
+  text-align: center;
+  color: $text-light;
+  @include card;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: panel-alpha($primary-color, 0.12);
+    color: $primary-color;
+    @include flex-center;
+
+    .icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  h3 {
+    margin: 0;
+    color: $text-color;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.btn-icon {
+  border: none;
+  background: transparent;
+  color: $primary-color;
+  padding: 8px;
+  border-radius: $border-radius-sm;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: $transition;
+
+  &:hover:not(:disabled) {
+    background-color: panel-alpha($primary-color, 0.12);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
