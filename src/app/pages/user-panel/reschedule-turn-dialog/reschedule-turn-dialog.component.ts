@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, inject } from '@angular/core';
+import { Component, Inject, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -24,7 +24,7 @@ import { Subject, takeUntil } from 'rxjs';
   templateUrl: './reschedule-turn-dialog.component.html',
   styleUrls: ['./reschedule-turn-dialog.component.scss'],
 })
-export class RescheduleTurnDialogComponent implements OnInit {
+export class RescheduleTurnDialogComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<RescheduleTurnDialogComponent>);
   private readonly scheduleService = inject(ScheduleService);
@@ -44,17 +44,19 @@ export class RescheduleTurnDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    if (this.data.specialtyId) {
-      this.loadAvailableDays(this.data.specialtyId);
-    } else {
+
+    if (!this.data.specialtyId) {
       this.error = 'No se proporcionó la especialidad';
       this.isLoading = false;
+      console.error('Missing specialtyId in dialog data');
+      return;
     }
+    
+    this.loadAvailableDays(this.data.specialtyId);
     this.watchFormChanges();
   }
 
   private initForm(): void {
-    // Convertir la fecha string a Date si existe
     let dateValue = null;
     if (this.data?.currentDate) {
       const dateParts = this.data.currentDate.split('-');
@@ -88,25 +90,32 @@ export class RescheduleTurnDialogComponent implements OnInit {
   }
 
   private loadAvailableDays(specialtyId: string): void {
+    console.log('🔍 Loading schedules for specialty:', specialtyId);
+    
     this.scheduleService.getAvailableDays(specialtyId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: MedicalScheduleDaysResponse) => {
+          console.log('✅ Specialty schedules loaded:', response);
+          
           this.schedules = response.available_days.map(day => ({
             day: day.day,
             start_time: day.start_time,
             end_time: day.end_time
           }));
+          
           this.availableDays = [...new Set(this.schedules.map(s => s.day))];
           this.isLoading = false;
 
-          // Si ya hay una fecha seleccionada, generar los slots
+          console.log('📅 Available days:', this.availableDays);
+
           const currentDate = this.form.get('appointmentDate')?.value;
           if (currentDate) {
             this.generateTimeSlots(currentDate);
           }
         },
         error: (err) => {
+          console.error('❌ Error loading schedules:', err);
           this.error = 'Error al cargar los horarios disponibles';
           this.isLoading = false;
         }
@@ -124,21 +133,29 @@ export class RescheduleTurnDialogComponent implements OnInit {
       'sábado': 'saturday',
       'domingo': 'sunday'
     };
+    
     const englishDay = dayMap[dayOfWeek] || '';
+    console.log('🗓️ Selected date:', date, '→ Day:', englishDay);
+    
     const matchingSchedules = this.schedules.filter(
       s => s.day.toLowerCase() === englishDay.toLowerCase()
     );
 
+    console.log('🔍 Matching schedules for', englishDay, ':', matchingSchedules);
+
     if (!matchingSchedules.length) {
       this.availableTimeSlots = [];
       this.form.get('appointmentTime')?.setValue(null);
+      console.warn('⚠️ No schedules found for', englishDay);
       return;
     }
 
     const allSlots = matchingSchedules.flatMap(schedule =>
       this.generateTimeIntervals(schedule.start_time, schedule.end_time, date)
     );
+    
     this.availableTimeSlots = [...new Set(allSlots)].sort((a, b) => a.localeCompare(b));
+    console.log('⏰ Available time slots:', this.availableTimeSlots);
   }
 
   private generateTimeIntervals(
@@ -206,9 +223,11 @@ export class RescheduleTurnDialogComponent implements OnInit {
       'sábado': 'saturday',
       'domingo': 'sunday'
     };
+    
     const dayOfWeek = date.toLocaleDateString('es-ES', { weekday: 'long' }).toLowerCase();
     const englishDay = dayMap[dayOfWeek] || '';
-    return this.availableDays.includes(englishDay);
+    
+    return this.availableDays.some(day => day.toLowerCase() === englishDay.toLowerCase());
   };
 
   onSubmit(): void {
@@ -229,6 +248,7 @@ export class RescheduleTurnDialogComponent implements OnInit {
       ...(sanitizedReason ? { reason: sanitizedReason } : {})
     };
 
+    console.log('📤 Submitting reschedule request:', payload);
     this.dialogRef.close(payload);
   }
 
@@ -252,7 +272,6 @@ export class RescheduleTurnDialogComponent implements OnInit {
   get timeControl() {
     return this.form.get('appointmentTime') as FormControl;
   }
-
 
   ngOnDestroy(): void {
     this.destroy$.next();

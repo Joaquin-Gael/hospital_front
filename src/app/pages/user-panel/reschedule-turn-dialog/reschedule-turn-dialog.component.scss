@@ -61,9 +61,9 @@ mat-dialog-content {
 }
 
 .dialog-content {
-  @include mix.flex-column;
   gap: 1.5rem;
   padding: 1rem 0;
+  @include mix.flex-column;
 
   @include med.mobile-only {
     gap: 1.25rem;
@@ -138,12 +138,12 @@ mat-dialog-actions {
 }
 
 .loading-spinner {
-  @include mix.flex-center;
-  @include mix.flex-column;
   gap: 1rem;
   padding: 2rem;
   color: $text-light;
-
+  @include mix.flex-center;
+  @include mix.flex-column;
+  
   @include med.mobile-only {
     padding: 1.5rem;
   }
