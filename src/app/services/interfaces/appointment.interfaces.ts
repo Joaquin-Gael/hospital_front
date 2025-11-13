@@ -50,6 +50,12 @@ export interface TurnRescheduleRequest {
   reason?: string | null;
 }
 
+export interface RescheduleTurnDialogData {
+  currentDate?: string;
+  currentTime?: string;
+  specialtyId?: string;
+}
+
 export interface TurnRescheduleResponse {
   message: string;
   turn: TurnResponse;

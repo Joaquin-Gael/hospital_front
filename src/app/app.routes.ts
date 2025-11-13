@@ -92,13 +92,6 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'reschedule-appointment/:id',
-        loadComponent: () =>
-          import(
-            './pages/user-panel/update-appointment/update-appointment.component'
-          ).then((m) => m.UpdateAppointmentComponent),
-      },
-      {
         path: 'history',
         loadComponent: () =>
           import('./pages/user-panel/history/history.component').then(

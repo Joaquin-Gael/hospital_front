@@ -16,7 +16,7 @@ import { LoggerService } from '../../../services/core/logger.service';
 import { NotificationService } from '../../../core/notification';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
-import { RescheduleTurnDialogComponent } from './reschedule-turn-dialog.component';
+import { RescheduleTurnDialogComponent } from '../reschedule-turn-dialog/reschedule-turn-dialog.component';
 
 @Component({
   selector: 'app-appointments',
@@ -134,40 +134,58 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   onReschedule(turnId: string): void {
     const appointment = this.appointments.find((item) => item.turnId === turnId);
-    const dialogRef = this.dialog.open(RescheduleTurnDialogComponent, {
-      data: {
-        currentDate: appointment?.date,
-        currentTime: appointment?.time,
-      },
-    });
-
-    dialogRef
-      .afterClosed()
+    
+    this.loading = true;
+    
+    this.appointmentService.getTurnById(turnId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((result?: TurnRescheduleRequest) => {
-        if (!result) {
-          return;
-        }
-
-        this.loading = true;
-        this.appointmentService
-          .rescheduleTurn(turnId, result)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              this.notificationService.success('Turno reprogramado correctamente');
-              if (this.user?.id) {
-                this.loadAppointments(this.user.id);
-              } else {
-                this.loading = false;
-              }
-            },
-            error: (err) => {
-              this.notificationService.error('Error al reprogramar el turno');
-              this.logger.error('Failed to reschedule turn', err);
-              this.loading = false;
+      .subscribe({
+        next: (turn: Turn) => {
+          this.loading = false;
+          const dialogRef = this.dialog.open(RescheduleTurnDialogComponent, {
+            width: '600px',
+            maxWidth: '95vw',
+            data: {
+              currentDate: turn.date,
+              currentTime: turn.time,
+              specialtyId: turn.service?.[0]?.specialty_id
             },
           });
+
+          dialogRef
+            .afterClosed()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((result?: TurnRescheduleRequest) => {
+              if (!result) {
+                return;
+              }
+
+              this.loading = true;
+              this.appointmentService
+                .rescheduleTurn(turnId, result)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe({
+                  next: () => {
+                    this.notificationService.success('Turno reprogramado correctamente');
+                    if (this.user?.id) {
+                      this.loadAppointments(this.user.id);
+                    } else {
+                      this.loading = false;
+                    }
+                  },
+                  error: (err) => {
+                    this.notificationService.error('Error al reprogramar el turno');
+                    this.logger.error('Failed to reschedule turn', err);
+                    this.loading = false;
+                  },
+                });
+            });
+        },
+        error: (err) => {
+          this.loading = false;
+          this.notificationService.error('Error al cargar los datos del turno');
+          this.logger.error('Failed to load turn details', err);
+        }
       });
   }
 
