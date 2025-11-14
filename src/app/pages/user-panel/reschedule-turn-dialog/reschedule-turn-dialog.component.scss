@@ -3,9 +3,9 @@
 @use '../../../layout/styles/_media-queries.scss' as med;
 
 .reschedule-dialog {
-  @include mix.flex-column;
   min-width: 500px;
   max-width: 600px;
+  @include mix.flex-column;
 
   @include med.mobile-only {
     min-width: unset;
@@ -72,9 +72,9 @@ mat-dialog-content {
 }
 
 .form-field {
-  @include mix.flex-column;
   gap: 0.5rem;
-
+  @include mix.flex-column;
+  
   label {
     font-size: 0.95rem;
     font-weight: 500;

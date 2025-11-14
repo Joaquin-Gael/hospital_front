@@ -1,7 +1,7 @@
 export const TURN_DOCUMENTS_ENDPOINTS = {
-  downloadTurnPdf: (turnId: string) => `turns/${turnId}/pdf`,
+  downloadTurnPdf: (turnId: string) => `medic/turns/${turnId}/pdf`,
   downloadTurnPdfAsAdmin: (userId: string, turnId: string) =>
-    `turns/user/pdf/${userId}/${turnId}`,
-  listMyTurnDocuments: 'turns/documents/me',
-  listMyTurnDocumentDownloads: 'turns/documents/me/downloads',
+    `medic/turns/user/pdf/${userId}/${turnId}`,
+  listMyTurnDocuments: 'medic/turns/documents/me',
+  listMyTurnDocumentDownloads: 'medic/turns/documents/me/downloads',
 } as const;

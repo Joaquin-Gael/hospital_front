@@ -59,12 +59,12 @@
 
 .document-card {
   padding: 20px;
-  @include card;
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 16px;
   align-items: center;
   transition: $transition;
+  @include card;
 
   &:hover {
     transform: translateY(-4px);
@@ -87,10 +87,10 @@
     border-radius: $border-radius-sm;
     background-color: panel-alpha($primary-color, 0.12);
     color: $primary-color;
-    @include flex-column;
-    @include flex-center;
     gap: 6px;
     font-weight: 600;
+    @include flex-column;
+    @include flex-center;
 
     .icon {
       width: 22px;
@@ -212,9 +212,10 @@
 
 
 .table__actions {
-  @include flex-inline(8px);
   align-items: center;
+  @include flex-inline(8px);
 }
+
 .table-doc {
   display: flex;
   flex-direction: column;
@@ -259,12 +260,12 @@
 }
 
 .error-state {
-  @include card;
   padding: 24px;
   text-align: center;
   color: $danger-color;
   display: grid;
   gap: 12px;
+  @include card;
 
   h3 {
     margin: 0;
@@ -286,11 +287,11 @@
   padding: 32px;
   text-align: center;
   color: $text-light;
-  @include card;
   display: grid;
   gap: 12px;
   justify-items: center;
-
+  @include card;
+  
   &__icon {
     width: 56px;
     height: 56px;
