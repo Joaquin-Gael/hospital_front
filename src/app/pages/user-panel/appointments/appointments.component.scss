@@ -17,11 +17,18 @@
       gap: 16px;
     }
   }
+
+  &__empty {
+    grid-column: 1 / -1; // Ocupa todas las columnas del grid
+    width: 100%;
+    @include flex-center;
+  }
 }
 
 .appointment-card {
   overflow: hidden;
-  @include card--interactive;
+  transition: $transition;
+  @include card;
 
   &:hover {
     transform: translateY(-4px);
@@ -34,7 +41,7 @@
 
   &__header {
     padding: 16px;
-    background-color: $primary-bg;
+    background-color: rgba(59, 130, 246, 0.1);
     border-bottom: 1px solid $border-color;
     @include flex-between;
 
@@ -51,7 +58,7 @@
   &__day-name {
     font-size: 12px;
     font-weight: 500;
-    color: $primary-color;
+    color: #3b82f6;
     text-transform: uppercase;
 
     @include mobile-only {
@@ -62,7 +69,7 @@
   &__day {
     font-size: 24px;
     font-weight: 700;
-    color: $primary-color;
+    color: #3b82f6;
     line-height: 1;
 
     @include mobile-only {
@@ -73,7 +80,7 @@
   &__month {
     font-size: 14px;
     font-weight: 500;
-    color: $primary-color;
+    color: #3b82f6;
     text-transform: capitalize;
 
     @include mobile-only {
@@ -82,12 +89,12 @@
   }
 
   &__time {
-    color: $primary-color;
+    color: #3b82f6;
     font-weight: 500;
     @include flex-inline(8px);
 
     .icon {
-      color: $primary-color;
+      color: #3b82f6;
       width: 20px;
       height: 20px;
 
@@ -176,18 +183,21 @@
     text-transform: capitalize;
 
     &.status-waiting {
-      background-color: panel-alpha($warning-color, 0.1);
-      color: $warning-color;
+      background-color: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.2);
     }
 
     &.status-completed {
-      background-color: panel-alpha($success-color, 0.1);
-      color: $success-color;
+      background-color: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.2);
     }
 
     &.status-cancelled {
-      background-color: panel-alpha($danger-color, 0.1);
-      color: $danger-color;
+      background-color: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
     @include mobile-only {
@@ -203,25 +213,38 @@
     }
 
     &--outline {
-      color: $primary-color;
-      border-color: $primary-color;
-      @include hover-effect($primary-bg);
+      color: #3b82f6;
+      border-color: #3b82f6;
+      background-color: transparent;
+
+      &:hover:not([disabled]) {
+        background-color: rgba(59, 130, 246, 0.1);
+        transform: translateY(-1px);
+      }
 
       &[disabled] {
         color: $text-lighter;
         border-color: $border-color;
         cursor: not-allowed;
+        opacity: 0.5;
       }
     }
 
     &--danger {
-      border-color: $danger-color;
-      @include hover-effect(panel-alpha($danger-color, 0.1));
+      color: #ef4444;
+      border: 1px solid #ef4444;
+      background-color: transparent;
+
+      &:hover:not([disabled]) {
+        background-color: rgba(239, 68, 68, 0.1);
+        transform: translateY(-1px);
+      }
 
       &[disabled] {
         color: $text-lighter;
         border-color: $border-color;
         cursor: not-allowed;
+        opacity: 0.5;
       }
     }
   }
@@ -230,9 +253,7 @@
 .empty-state {
   padding: 60px 20px;
   text-align: center;
-  background-color: $background-color;
   border-radius: $border-radius;
-  box-shadow: $box-shadow;
   @include flex-center;
   @include flex-column;
 
@@ -244,8 +265,8 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background-color: $primary-bg;
-    color: $primary-color;
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
     margin-bottom: 24px;
     @include flex-center;
 
@@ -289,8 +310,14 @@
   }
 
   .btn--primary {
-    background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
-    @include hover-effect($primary-dark);
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+
+    &:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
 
     @include mobile-only {
       width: 100%;

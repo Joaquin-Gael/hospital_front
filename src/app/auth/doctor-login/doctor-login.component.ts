@@ -1,34 +1,57 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormGroup,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { trigger, transition, style, animate, state } from '@angular/animations';
+import {
+  trigger,
+  transition,
+  style,
+  animate,
+  state,
+} from '@angular/animations';
 import { NotificationService } from '../../core/notification/services/notification.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { LoggerService } from '../../services/core/logger.service';
 import { StorageService } from '../../services/core/storage.service';
 import { Auth } from '../../services/interfaces/hospital.interfaces';
+import { HeroComponent, HeroData } from '../../shared/hero/hero.component';
 
 @Component({
   selector: 'app-doctor-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, HeroComponent],
   templateUrl: './doctor-login.component.html',
   styleUrls: ['./doctor-login.component.scss'],
   animations: [
     trigger('fadeInOut', [
-      transition(':enter', [style({ opacity: 0 }), animate('300ms ease-in', style({ opacity: 1 }))]),
-      transition(':leave', [animate('300ms ease-out', style({ opacity: 0 }))]),
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms ease-in', style({ opacity: 1 })),
+      ]),
+      transition(':leave', [
+        animate('300ms ease-out', style({ opacity: 0 })),
+      ]),
     ]),
     trigger('slideInOut', [
       transition(':enter', [
         style({ transform: 'translateY(20px)', opacity: 0 }),
-        animate('400ms ease-out', style({ transform: 'translateY(0)', opacity: 1 })),
+        animate(
+          '400ms ease-out',
+          style({ transform: 'translateY(0)', opacity: 1 })
+        ),
       ]),
     ]),
     trigger('buttonState', [
       state('idle', style({ backgroundColor: 'var(--primary-color)' })),
-      state('loading', style({ backgroundColor: 'var(--primary-color-light)' })),
+      state(
+        'loading',
+        style({ backgroundColor: 'var(--primary-color-light)' })
+      ),
       transition('idle <=> loading', animate('300ms ease-in-out')),
     ]),
   ],
@@ -41,6 +64,15 @@ export class DoctorLoginComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
   private readonly logger = inject(LoggerService);
   private readonly storage = inject(StorageService);
+
+  // 👇 hero para médicos
+  readonly heroData: HeroData = {
+    backgroundImage: 'assets/hero-four.png',
+    altText: 'Acceso profesionales de la salud',
+    title: 'Portal de profesionales',
+    subtitle: 'Iniciá sesión para gestionar tus pacientes ',
+    highlightText: ' uso exclusivo médico',
+  };
 
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -66,7 +98,8 @@ export class DoctorLoginComponent implements OnInit {
   onLogin(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
-      this.error = 'Por favor completá correctamente el email y la contraseña.';
+      this.error =
+        'Por favor completá correctamente el email y la contraseña.';
       return;
     }
 
@@ -85,18 +118,20 @@ export class DoctorLoginComponent implements OnInit {
 
     this.authService.doctorLogin(credentials).subscribe({
       next: () => {
-          this.notificationService.success(
-            '¡Inicio de sesión exitoso!\n Redirigiendo...',
-            {
-              duration: 600000,
-              action: {
-                label: 'Cerrar',
-                action: () => this.notificationService.dismissAll(),
-              },
-            }
-          );
+        this.notificationService.success(
+          '¡Inicio de sesión exitoso!\n Redirigiendo...',
+          {
+            duration: 600000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          }
+        );
         this.isLoading = false;
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/medic_panel/home';
+        const returnUrl =
+          this.route.snapshot.queryParams['returnUrl'] ||
+          '/medic_panel/home';
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {

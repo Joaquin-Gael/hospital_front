@@ -31,6 +31,13 @@
   }
 }
 
+@mixin flex-start($align: stretch, $direction: row) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: flex-start;
+  align-items: $align;
+}
+
 // Mixin para focus ring personalizado
 @mixin focus-ring($color: var.$navbar-focus-color, $width: 2px, $offset: 2px) {
   &:focus {

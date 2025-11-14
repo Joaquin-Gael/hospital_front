@@ -26,6 +26,7 @@ import { NavigationButtonsComponent } from '../navigation-buttons/navigation-but
 import { HealthInsuranceSelectionComponent } from '../health-insarunce-selection/health-insarunce-selection.component';
 import { CashesService } from '../../../services/cashes/cashes.service';
 import { PayTurnWithCashResponse } from '../../../services/interfaces/cashes.interfaces';
+import { HeroComponent, HeroData } from '../../../shared/hero/hero.component';
 
 @Component({
   selector: 'app-appointment-scheduler',
@@ -39,7 +40,8 @@ import { PayTurnWithCashResponse } from '../../../services/interfaces/cashes.int
     TimeSelectionComponent,
     AppointmentSummaryComponent,
     NavigationButtonsComponent,
-    HealthInsuranceSelectionComponent
+    HealthInsuranceSelectionComponent,
+    HeroComponent // 👈 AGREGAR HERO
   ],
   templateUrl: './shift.component.html',
   styleUrls: ['./shift.component.scss'],
@@ -75,6 +77,14 @@ export class ShiftsComponent implements OnInit {
   private authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
   private cashesService = inject(CashesService);
+
+  heroData: HeroData = {
+    backgroundImage: 'assets/slider-turnos.jpg',
+    altText: 'Reserva de turnos Hospital SDLG',
+    title: 'Reserva tu turno',
+    subtitle: 'De manera rápida y sencilla ',
+    highlightText: '  24/7'
+  };
 
   // Data properties
   services: Service[] = [];
@@ -244,7 +254,6 @@ export class ShiftsComponent implements OnInit {
         this.appointmentForm.get('appointmentTime')?.setValue(null);
         this.availableTimeSlots = [];
         
-        // Asegura que el spinner se muestre al menos 'minLoadingTime'
         const elapsedTime = Date.now() - startTime;
         const remainingTime = minLoadingTime - elapsedTime;
         
@@ -259,7 +268,7 @@ export class ShiftsComponent implements OnInit {
         
         setTimeout(() => {
           this.isLoading = false;
-          this.currentStep = 1; // Vuelve a paso 1 si hay error
+          this.currentStep = 1;
           this.handleError(error, 'Error al cargar horarios');
         }, remainingTime > 0 ? remainingTime : 0);
       }

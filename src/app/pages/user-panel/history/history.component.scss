@@ -23,6 +23,7 @@
   th, td {
     padding: 16px;
     text-align: left;
+    vertical-align: middle; // CLAVE: alinea verticalmente al centro
 
     @include mobile-only {
       padding: 12px 8px;
@@ -71,8 +72,9 @@
   }
 
   &__date {
+    gap: 2px;
     @include flex-column;
-
+    
     &-day {
       font-weight: 500;
       color: $text-color;
@@ -85,7 +87,6 @@
     &-time {
       font-size: 12px;
       color: $text-light;
-      margin-top: 4px;
 
       @include mobile-only {
         font-size: 11px;
@@ -94,7 +95,10 @@
   }
 
   &__actions {
-    @include flex-inline(8px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start; // Alinea a la izquierda igual que las otras columnas
 
     @include mobile-only {
       flex-direction: column;
@@ -103,39 +107,51 @@
   }
 }
 
+// Alineación específica para la columna de acciones
+th:last-child,
+td:last-child {
+  text-align: left; // Mantiene todo alineado a la izquierda
+}
+
+
 .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 4px 10px;
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 500;
-  background-color: panel-alpha($secondary-color, 0.1);
-  color: $secondary-color;
+  background-color: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
   white-space: nowrap;
-  @include flex-inline(6px, center, center);
 
   &__dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: $secondary-color;
+    background-color: #6b7280;
     flex-shrink: 0;
   }
 
   &--completed {
-    background-color: panel-alpha($success-color, 0.1);
-    color: $success-color;
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
 
     .status-badge__dot {
-      background-color: $success-color;
+      background-color: #10b981;
     }
   }
 
   &--cancelled {
-    background-color: panel-alpha($danger-color, 0.1);
-    color: $danger-color;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
 
     .status-badge__dot {
-      background-color: $danger-color;
+      background-color: #ef4444;
     }
   }
 
@@ -163,15 +179,6 @@
   }
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .btn-icon {
   border: none;
   background: transparent;
@@ -185,13 +192,18 @@
   transition: $transition;
 
   &:hover:not(:disabled) {
-    color: $primary-color;
-    background-color: panel-alpha($primary-color, 0.12);
+    color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.1);
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  .icon {
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -204,3 +216,56 @@
   animation: spin 0.8s linear infinite;
 }
 
+.error-state {
+  padding: 2rem;
+  text-align: center;
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-radius: $border-radius;
+  margin: 1rem 0;
+}
+
+// Empty state dentro de la tabla
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  @include flex-center;
+  @include flex-column;
+
+  &__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    margin-bottom: 24px;
+    @include flex-center;
+
+    .icon {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: $text-color;
+  }
+
+  p {
+    font-size: 14px;
+    color: $text-light;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
