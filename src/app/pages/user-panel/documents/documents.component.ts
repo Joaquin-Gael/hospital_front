@@ -58,7 +58,7 @@ export class DocumentsComponent implements OnInit, OnDestroy {
           this.documents = documents;
           this.documentsById.clear();
           documents.forEach((document) => this.documentsById.set(document.id, document));
-          this.logger.debug('Turn documents loaded', { count: documents.length });
+          this.logger.debug('Turn documents loaded', { count: documents.length, documents });
         },
         error: (err) => {
           this.documentsError = 'No se pudieron cargar los comprobantes generados.';

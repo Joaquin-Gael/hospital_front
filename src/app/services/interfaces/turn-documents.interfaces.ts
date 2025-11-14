@@ -1,12 +1,12 @@
 import { Turn } from './appointment.interfaces';
 import { UserRead } from './user.interfaces';
 
-export interface TurnDocumentSummary {
+export interface TurnDocumentSummary extends TurnDocumentDownloadLog {
   id: string;
   turn_id: string;
   userId: string;
   filePath: string;
-  generatedAt: string;
+  generated_at: string;
   filename: string;
   turn?: Turn | null;
 }
