@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { ChatService } from '../../../services/chat/chat.service';
 import { LoggerService } from '../../../services/core/logger.service';
-import { AuthService } from '../../../services/auth/auth.service';
+import { StorageService } from '../../../services/core/storage.service';
 import { DoctorService } from '../../../services/doctor/doctor.service';
 import { ChatResponse, MessageResponse, DoctorResponse, WebSocketMessage } from '../../../services/interfaces/chat.interfaces';
 import { DoctorMeResponse, Doctor } from '../../../services/interfaces/doctor.interfaces';
@@ -20,7 +20,7 @@ import { DoctorMeResponse, Doctor } from '../../../services/interfaces/doctor.in
 export class MessagesComponent implements OnInit, OnDestroy {
   private readonly chatService = inject(ChatService);
   private readonly logger = inject(LoggerService);
-  private readonly authService = inject(AuthService);  // Nuevo: pa' token
+  private readonly storageService = inject(StorageService);
   private readonly doctorService = inject(DoctorService);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -45,14 +45,14 @@ export class MessagesComponent implements OnInit, OnDestroy {
   private readonly LAST_VIEWED_KEY = 'last_viewed_chats';
 
   ngOnInit(): void {
-    const token = this.authService.getAccessTokenFromCookie();  // Fix: Cookie via auth
+    const token = this.storageService.getAccessToken();
     if (!token) {
       this.logger.info('No auth token found, redirecting to /login');
       this.router.navigate(['/login']);
       return;
     }
 
-    const storedLastViewed = localStorage.getItem(this.LAST_VIEWED_KEY);  // Directo, sin storage service
+    const storedLastViewed = this.storageService.getItem(this.LAST_VIEWED_KEY);
     if (storedLastViewed) {
       this.lastViewed = JSON.parse(storedLastViewed);
     }
@@ -131,7 +131,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       if (!this.messages.find(msg => msg.id === message.id)) {
         this.messages = [...this.messages, message];
         this.lastViewed[message.chat.id] = new Date().toISOString();
-        localStorage.setItem(this.LAST_VIEWED_KEY, JSON.stringify(this.lastViewed));  // Directo
+        this.storageService.setItem(this.LAST_VIEWED_KEY, JSON.stringify(this.lastViewed));
         this.cdr.detectChanges();
         this.scrollToBottom();
       }
@@ -169,7 +169,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.messages = chat.messages || [];
     this.newMessage = '';
     this.lastViewed[chat.id] = new Date().toISOString();
-    localStorage.setItem(this.LAST_VIEWED_KEY, JSON.stringify(this.lastViewed));  // Directo
+    this.storageService.setItem(this.LAST_VIEWED_KEY, JSON.stringify(this.lastViewed));
     this.cdr.detectChanges();
     this.scrollToBottom();
   }

@@ -4,7 +4,7 @@ import { catchError, map, tap, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
-import { AuthService } from '../auth/auth.service'; 
+import { StorageService } from '../core/storage.service';
 import { CHAT_ENDPOINTS } from './chat.endpoints';
 import { ChatResponse, MessageResponse, WebSocketMessage } from '../interfaces/chat.interfaces';
 
@@ -15,7 +15,7 @@ export class ChatService {
   private readonly apiService = inject(ApiService);
   private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
-  private readonly authService = inject(AuthService); 
+  private readonly storageService = inject(StorageService);
 
   private socket: WebSocket | null = null;
   private messageSubject = new Subject<WebSocketMessage>();
@@ -43,12 +43,13 @@ export class ChatService {
       return;
     }
 
-    const token = this.authService.getAccessTokenFromCookie();
+    const token = `Bearer_${this.storageService.getAccessToken()}`;
     if (!token) {
       this.logger.error('No auth token found');
       throw new Error('No authentication token available');
     }
 
+    // Usamos buildWsUrl del ApiService para construir la URL del WebSocket
     const wsUrl$ = this.apiService.buildWsUrl(CHAT_ENDPOINTS.WEBSOCKET(chatId)).pipe(
       map((wsUrl) => `${wsUrl}?token=${token}`)
     );
@@ -123,6 +124,7 @@ export class ChatService {
       errorMessage = 'Solicitud inválida. Verifica los datos enviados.';
     } else if (error.status === 401) {
       errorMessage = 'No autorizado. Por favor, inicia sesión nuevamente.';
+      this.storageService.clearStorage();
       window.location.href = '/login';
     } else if (error.status === 403) {
       errorMessage = 'Acceso denegado. No tienes permisos para realizar esta acción.';
