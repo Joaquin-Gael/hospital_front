@@ -125,6 +125,14 @@ export class StorageService {
     return this.removeToken(key);
   }
 
+  /**
+   * Limpia solo los scopes (método que usábamos en feature/security).
+   * Útil para logout / errores de auth sin volar todo lo demás.
+   */
+  clearScopes(): void {
+    this.removeItem(this.SCOPES_KEY);
+  }
+
   clearStorage(): boolean {
     const results = [
       this.removeTokens(),
