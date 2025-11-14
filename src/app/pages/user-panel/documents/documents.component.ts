@@ -95,24 +95,24 @@ export class DocumentsComponent implements OnInit, OnDestroy {
   }
 
   onDownloadDocument(document: TurnDocumentSummary): void {
-    if (!document.turnId) {
+    if (!document.turn_id) {
       this.notificationService.error('No se encontró el identificador del turno.');
       this.logger.error('Missing turnId in document summary', document);
       return;
     }
 
-    this.downloadTurnDocument(document.turnId, document.filename);
+    this.downloadTurnDocument(document.turn_id, document.filename);
   }
 
   onDownloadFromLog(log: TurnDocumentDownloadLog): void {
-    if (!log.turnId) {
+    if (!log.turn_id) {
       this.notificationService.error('No se encontró el identificador del turno.');
       this.logger.error('Missing turnId in download log', log);
       return;
     }
 
     const filename = this.resolveFilenameFromLog(log);
-    this.downloadTurnDocument(log.turnId, filename);
+    this.downloadTurnDocument(log.turn_id, filename);
   }
 
   private downloadTurnDocument(turnId: string, filename: string | null | undefined): void {
@@ -228,7 +228,7 @@ export class DocumentsComponent implements OnInit, OnDestroy {
       return filename.trim();
     }
 
-    return this.buildFallbackFilename(log.turnId);
+    return this.buildFallbackFilename(log.turn_id);
   }
 
   trackByDocumentId(index: number, document: TurnDocumentSummary): string {

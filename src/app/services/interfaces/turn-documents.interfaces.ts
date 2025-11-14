@@ -3,7 +3,7 @@ import { UserRead } from './user.interfaces';
 
 export interface TurnDocumentSummary {
   id: string;
-  turnId: string;
+  turn_id: string;
   userId: string;
   filePath: string;
   generatedAt: string;
@@ -14,12 +14,12 @@ export interface TurnDocumentSummary {
 export interface TurnDocumentDownloadLog {
   id: string;
   turnDocumentId: string;
-  turnId: string;
+  turn_id: string;
   userId: string;
-  downloadedAt: string;
+  downloaded_at: string;
   channel: string;
-  clientIp?: string | null;
-  userAgent?: string | null;
+  client_ip?: string | null;
+  user_agent?: string | null;
   user?: UserRead | null;
   turn?: Turn | null;
 }

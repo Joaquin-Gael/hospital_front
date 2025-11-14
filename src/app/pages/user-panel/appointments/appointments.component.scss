@@ -4,13 +4,18 @@
 
 .appointments {
   padding: 20px;
-  @include flex-center();
-
+  @include flex-start();
+  
   @include mobile-only {
     padding: 16px;
   }
 
+  &--loading {
+    @include flex-center;
+  }
+
   &__grid {
+    width: 100%;
     @include responsive-grid(320px, 24px);
 
     @include mobile-only {
@@ -19,7 +24,7 @@
   }
 
   &__empty {
-    grid-column: 1 / -1; // Ocupa todas las columnas del grid
+    grid-column: 1 / -1;
     width: 100%;
     @include flex-center;
   }
