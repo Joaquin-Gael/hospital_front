@@ -1,117 +1,136 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { inject, Injector, InjectionToken } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { BehaviorSubject, throwError } from 'rxjs';
+import { catchError, filter, finalize, switchMap, take, tap } from 'rxjs/operators';
 import { AuthService } from '../services/auth/auth.service';
+import { TokenUserResponse } from '../services/interfaces/user.interfaces';
 import { LoggerService } from '../services/core/logger.service';
 import { StorageService } from '../services/core/storage.service';
 
 const PUBLIC_ENDPOINTS = [
   '/users/add',
-  '/auth/login',
   '/auth/doc/login',
   '/id_prefix_api_secret/',
   'medic/chat/',
+  '/auth/refresh'
 ];
 
-const SENSITIVE_ENDPOINTS = ['/auth/refresh', '/auth/logout'];
+class RefreshCoordinator {
+  private refreshSubject = new BehaviorSubject<string | null>(null);
+  private refreshing = false;
 
-let isRefreshing = false;
-
-function readCookie(name: string): string | null {
-  const value = `; ${document.cookie || ''}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) {
-    return parts.pop()?.split(';').shift() || null;
+  start(): void {
+    this.refreshing = true;
+    this.refreshSubject.next(null);
   }
-  return null;
-}
 
-function getCsrfTokenFromCookies(): string | null {
-  const candidates = ['csrf_token', 'csrftoken', 'csrf'];
-  for (const name of candidates) {
-    const v = readCookie(name);
-    if (v) return v;
+  publish(token: string): void {
+    this.refreshSubject.next(token);
   }
-  return null;
+
+  fail(error: HttpErrorResponse): void {
+    if (!this.refreshSubject.closed) {
+      this.refreshSubject.error(error);
+    }
+    this.refreshSubject = new BehaviorSubject<string | null>(null);
+    this.refreshing = false;
+  }
+
+  finish(): void {
+    this.refreshing = false;
+  }
+
+  isRefreshing(): boolean {
+    return this.refreshing;
+  }
+
+  waitForToken() {
+    return this.refreshSubject.pipe(
+      filter((token): token is string => token !== null),
+      take(1)
+    );
+  }
 }
 
-function isEndpointMatch(url: string, endpoints: string[]): boolean {
-  return endpoints.some(endpoint => url.endsWith(endpoint));
-}
+const REFRESH_COORDINATOR = new InjectionToken<RefreshCoordinator>('CUSTOM_INTERCEPTOR_REFRESH_COORDINATOR', {
+  providedIn: 'root',
+  factory: () => new RefreshCoordinator(),
+});
+
+const handleRefreshFailure = (
+  refreshError: HttpErrorResponse,
+  storage: StorageService,
+  router: Router,
+  logger: LoggerService
+) => {
+  const returnUrl = router.routerState.snapshot.url || router.url || '/';
+  storage.clearStorage();
+  logger.error('Failed to refresh authentication token', refreshError);
+  router.navigate(['/login'], { queryParams: { returnUrl } });
+};
 
 export const customInterceptor: HttpInterceptorFn = (req, next) => {
   const logger = inject(LoggerService);
   const router = inject(Router);
-  const authService = inject(AuthService);
-  const storage = inject(StorageService);
+  const storage = inject(StorageService)
+  const injector = inject(Injector);
+  const refreshCoordinator = inject(REFRESH_COORDINATOR);
+  const isPublic = PUBLIC_ENDPOINTS.some(endpoint => req.url.includes(endpoint));
 
-  const isPublic = isEndpointMatch(req.url, PUBLIC_ENDPOINTS);
-  const isSensitive = isEndpointMatch(req.url, SENSITIVE_ENDPOINTS);
+  const accessToken = storage.getAccessToken()
 
-  let headers = req.headers;
 
-  const accessTokenFromCookie = authService.getAccessTokenFromCookie();
-  if (accessTokenFromCookie && !isPublic && !isSensitive) {
-    headers = headers.set('Authorization', `Bearer ${accessTokenFromCookie}`);
-  }
-
-  if (isSensitive) {
-    const csrfToken = getCsrfTokenFromCookies();
-    if (csrfToken) {
-      headers = headers.set('X-CSRF-Token', csrfToken);
-    } else {
-      logger.debug('CSRF token not found in cookies for sensitive request', req.url);
-    }
+  if (isPublic || !accessToken) {
+    return next(req);
   }
 
   const clonedReq = req.clone({
-    withCredentials: true,
-    headers
+    setHeaders: {
+      Authorization: `Bearer ${accessToken}`
+    }
   });
 
   return next(clonedReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      const status = error.status;
-      if (status === 401 && !isPublic) {
-        if (!isRefreshing) {
-          isRefreshing = true;
-
+      if (error.status === 401) {
+        const authService = injector.get(AuthService);
+        if (!refreshCoordinator.isRefreshing()){
+          refreshCoordinator.start();
           return authService.refreshToken().pipe(
-            switchMap(() => {
-              isRefreshing = false;
-
-              const newToken = authService.getAccessTokenFromCookie();
-              let newHeaders = req.headers;
-
-              if (newToken) {
-                newHeaders = newHeaders.set('Authorization', `Bearer ${newToken}`);
-              }
-
-              return next(
-                req.clone({
-                  withCredentials: true,
-                  headers: newHeaders
-                })
-              );
+            tap((response: TokenUserResponse) => {
+              refreshCoordinator.publish(response.access_token);
             }),
-            catchError((refreshError) => {
-              isRefreshing = false;
-              storage.clearScopes();
-              router.navigate(['/home']);
-              logger.error('Error al refrescar el token:', refreshError);
-              return throwError(
-                () =>
-                  new Error('Sesión expirada, por favor iniciá sesión nuevamente.')
-              );
+            switchMap((response: TokenUserResponse) => {
+              const newClonedReq = req.clone({
+                setHeaders: {
+                  Authorization: `Bearer ${response.access_token}`
+                }
+              });
+              return next(newClonedReq);
+            }),
+            catchError((refreshError: HttpErrorResponse) => {
+              refreshCoordinator.fail(refreshError);
+              handleRefreshFailure(refreshError, storage, router, logger);
+              return throwError(() => refreshError);
+            }),
+            finalize(() => {
+              refreshCoordinator.finish();
             })
           );
-        } else {
-          return throwError(() => error);
         }
+
+        return refreshCoordinator.waitForToken().pipe(
+          switchMap((newToken) => {
+            const newClonedReq = req.clone({
+              setHeaders: { Authorization: `Bearer ${newToken}`}
+            });
+            return next(newClonedReq)
+          })
+        )
       }
 
-      logger.error(`Error en la petición ${req.url}:`, error.message);
+      logger.error(`HTTP request to ${req.url} failed`, error);
       return throwError(() => error);
     })
   );
