@@ -5,7 +5,17 @@ import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
 import { USER_ENDPOINTS } from './user-endpoints';
-import { UserRead, UserCreate, UserUpdate, UserDelete, RecoverPasswordPetition, DniVerification, CodeVerification, UpdatePassword } from '../interfaces/user.interfaces';
+import {
+  UserRead,
+  UserCreate,
+  UserUpdate,
+  UserDelete,
+  RecoverPasswordPetition,
+  DniVerification,
+  CodeVerification,
+  UpdatePassword,
+  ChangePasswordRequest,
+} from '../interfaces/user.interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -88,6 +98,21 @@ export class UserService {
     return this.apiService.patch<UserRead>(USER_ENDPOINTS.UPDATE(userId), formData).pipe(
       catchError(error => this.handleError(`Update user ${userId}`, error))
     );
+  }
+
+  /**
+   * Cambia la contraseña de un usuario.
+   * @param userId ID del usuario.
+   * @param body Datos de la solicitud de cambio de contraseña.
+   * @returns Observable con los datos del usuario actualizado.
+   */
+  changePassword(userId: string, body: ChangePasswordRequest): Observable<UserRead> {
+    return this.apiService
+      .patch<{ user: UserRead }>(USER_ENDPOINTS.CHANGE_PASSWORD(userId), body)
+      .pipe(
+        map(response => response.user),
+        catchError(error => this.handleError(`Change password for user ${userId}`, error))
+      );
   }
 
   /**

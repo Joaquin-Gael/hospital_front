@@ -1,30 +1,43 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { switchMap, take } from 'rxjs/operators';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { PasswordStrength } from '../types/change-password.types';
 import { LoggerService } from '../../../../services/core/logger.service';
-
-export interface PasswordChangeResponse {
-  success: boolean;
-  message: string;
-}
+import { UserService } from '../../../../services/user/user.service';
+import { AuthService } from '../../../../services/auth/auth.service';
+import { ChangePasswordRequest, UserRead } from '../../../../services/interfaces/user.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PasswordService {
   private readonly logger = inject(LoggerService);
+  private readonly userService = inject(UserService);
+  private readonly authService = inject(AuthService);
 
   changePassword(
     currentPassword: string,
     newPassword: string
-  ): Observable<PasswordChangeResponse> {
+  ): Observable<UserRead> {
     this.logger.info('Cambiando contraseña');
-    
-    return of({
-      success: true,
-      message: 'Contraseña cambiada correctamente'
-    }).pipe(delay(2000));
+
+    return this.authService.getUser().pipe(
+      take(1),
+      switchMap(user => {
+        if (!user?.id) {
+          this.logger.error('No se pudo obtener el ID del usuario autenticado para el cambio de contraseña');
+          return throwError(() => new Error('No se pudo obtener el usuario autenticado'));
+        }
+
+        const payload: ChangePasswordRequest = {
+          current_password: currentPassword,
+          new_password: newPassword
+        };
+
+        return this.userService.changePassword(user.id, payload);
+      })
+    );
   }
 
   calculatePasswordStrength(password: string): PasswordStrength {

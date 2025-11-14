@@ -1,0 +1,237 @@
+@use '../_shared.scss' as *;
+@use '../../../layout/styles/_mixins.scss' as mix;
+@use '../../../layout/styles/_media-queries.scss' as med;
+
+.reschedule-dialog {
+  @include mix.flex-column;
+  min-width: 500px;
+  max-width: 600px;
+
+  @include med.mobile-only {
+    min-width: unset;
+    max-width: 100%;
+  }
+
+  @include med.tablet-only {
+    min-width: 400px;
+  }
+}
+
+h2[mat-dialog-title] {
+  margin: 0;
+  padding: 1.5rem 1.5rem 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $text-color;
+
+  @include med.mobile-only {
+    font-size: 1.25rem;
+    padding: 1.25rem 1rem 0.75rem;
+  }
+}
+
+mat-dialog-content {
+  padding: 0 1.5rem;
+  max-height: 70vh;
+  overflow-y: auto;
+
+  @include med.mobile-only {
+    padding: 0 1rem;
+    max-height: 60vh;
+  }
+
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $surface-muted;
+    border-radius: $border-radius-sm;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $text-lighter;
+    border-radius: $border-radius-sm;
+
+    &:hover {
+      background: $text-light;
+    }
+  }
+}
+
+.dialog-content {
+  gap: 1.5rem;
+  padding: 1rem 0;
+  @include mix.flex-column;
+
+  @include med.mobile-only {
+    gap: 1.25rem;
+    padding: 0.75rem 0;
+  }
+}
+
+.form-field {
+  @include mix.flex-column;
+  gap: 0.5rem;
+
+  label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: $text-color;
+
+    @include med.mobile-only {
+      font-size: 0.9rem;
+    }
+  }
+
+  textarea {
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 4rem;
+    transition: $transition;
+    background-color: $background-color;
+    color: $text-color;
+
+    @include med.mobile-only {
+      font-size: 0.875rem;
+      padding: 0.625rem;
+      min-height: 3.5rem;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      background-color: $card-background;
+      box-shadow: 0 0 0 3px $primary-soft;
+    }
+
+    &::placeholder {
+      color: $text-lighter;
+    }
+
+    &:disabled {
+      background-color: $surface-muted;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+}
+
+mat-dialog-actions {
+  padding: 1rem 1.5rem 1.5rem;
+  @include mix.flex-inline(0.5rem, center, flex-end);
+
+  @include med.mobile-only {
+    padding: 0.75rem 1rem 1rem;
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+.loading-spinner {
+  gap: 1rem;
+  padding: 2rem;
+  color: $text-light;
+  @include mix.flex-center;
+  @include mix.flex-column;
+  
+  @include med.mobile-only {
+    padding: 1.5rem;
+  }
+
+  .loading-icon {
+    font-size: 2.5rem;
+    animation: spin 1s linear infinite;
+    color: $primary-color;
+
+    @include med.mobile-only {
+      font-size: 2rem;
+    }
+  }
+
+  span {
+    font-size: 0.95rem;
+
+    @include med.mobile-only {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.error-message {
+  padding: 1rem;
+  background-color: $danger-bg;
+  border: 1px solid $danger-color;
+  border-radius: $border-radius;
+  color: $danger-color;
+  text-align: center;
+  font-size: 0.9rem;
+
+  @include med.mobile-only {
+    padding: 0.875rem;
+    font-size: 0.85rem;
+  }
+}
+
+// Animación de spin
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Reducir animaciones para accesibilidad
+@include med.reduce-motion {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .loading-icon {
+    animation: none;
+  }
+}
+
+// Ajustes para dark mode
+@include med.dark-mode {
+  .form-field {
+    textarea {
+      &::placeholder {
+        color: $text-lighter;
+      }
+    }
+  }
+}
+
+// Ajustes para alto contraste
+@include med.high-contrast {
+  .form-field {
+    textarea {
+      border-width: 2px;
+
+      &:focus {
+        border-width: 3px;
+      }
+    }
+  }
+
+  .error-message {
+    border-width: 2px;
+    font-weight: 600;
+  }
+}

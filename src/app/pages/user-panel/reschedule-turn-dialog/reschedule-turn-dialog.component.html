@@ -1,0 +1,66 @@
+<div class="reschedule-dialog">
+  <h2 mat-dialog-title>Reprogramar turno</h2>
+
+  @if (isLoading) {
+  <mat-dialog-content>
+    <div class="loading-spinner">
+      <i class="material-icons loading-icon">hourglass_empty</i>
+      <span>Cargando horarios disponibles...</span>
+    </div>
+  </mat-dialog-content>
+  } @else if (error) {
+  <mat-dialog-content>
+    <div class="error-message">
+      <p>{{ error }}</p>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()">Cerrar</button>
+  </mat-dialog-actions>
+  } @else {
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-dialog-content>
+      <div class="dialog-content">
+        <app-date-selection
+          [dateControl]="dateControl"
+          [minDate]="minDate"
+          [dayFilter]="dayFilter"
+          [isLoading]="isLoading"
+          [error]="error"
+        ></app-date-selection>
+
+        @if (availableTimeSlots.length > 0) {
+        <app-time-selection
+          [timeControl]="timeControl"
+          [availableTimeSlots]="availableTimeSlots"
+          [isLoading]="isLoading"
+          [error]="error"
+        ></app-time-selection>
+        }
+
+        <div class="form-field">
+          <label for="reschedule-reason">Motivo (opcional)</label>
+          <textarea
+            id="reschedule-reason"
+            rows="3"
+            formControlName="reason"
+            placeholder="Escribe un motivo para reprogramar (opcional)"
+          ></textarea>
+        </div>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="form.invalid"
+      >
+        Confirmar reprogramación
+      </button>
+    </mat-dialog-actions>
+  </form>
+  }
+</div>

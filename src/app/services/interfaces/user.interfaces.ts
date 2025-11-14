@@ -78,3 +78,8 @@ export interface UpdatePassword {
   code: string;
   new_password: string;
 }
+
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+}

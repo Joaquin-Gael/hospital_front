@@ -56,8 +56,8 @@ export class ChangePasswordContainer implements OnDestroy {
         finalize(() => this.isSubmitting = false)
       )
       .subscribe({
-        next: (response) => {
-          this.logger.info('Contraseña cambiada exitosamente', response);
+        next: (user) => {
+          this.logger.info('Contraseña cambiada exitosamente', user);
           this.notificationService.success('¡Contraseña cambiada con éxito!', {
             duration: 7000,
             action: {
@@ -72,7 +72,10 @@ export class ChangePasswordContainer implements OnDestroy {
         },
         error: (error) => {
           this.logger.error('Error al cambiar contraseña:', error);
-          this.notificationService.error('Error al cambiar la contraseña. Verifica tu contraseña actual e inténtalo nuevamente.', {
+          const message = error instanceof Error
+            ? error.message
+            : 'Error al cambiar la contraseña. Verifica tu contraseña actual e inténtalo nuevamente.';
+          this.notificationService.error(message, {
             duration: 7000,
             action: {
               label: 'Cerrar',

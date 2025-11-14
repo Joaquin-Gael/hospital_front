@@ -31,14 +31,34 @@ export interface TurnResponse {
   date: string; // ISO 8601
   time: string;
   date_created: string; // ISO 8601
-  date_limit: string; // ISO 8601
+  date_limit: string | null; // ISO 8601 o null cuando no aplica
   user_id: string;
-  doctor_id: string;
-  services: string[];
+  doctor_id: string | null;
+  services: string[]; // Array de UUIDs devueltos por el backend
+  health_insurance: string | null;
   appointment_id: string | null;
-  user?: UserRead;
-  doctor?: Doctor;
+  user?: UserRead | null;
+  doctor?: Doctor | null;
   service?: Service[];
+  services_details?: Service[];
+  appointment?: AppointmentMinimal;
+}
+
+export interface TurnRescheduleRequest {
+  date: string; // ISO 8601, e.g., "2025-08-14"
+  time: string; // HH:mm:ss
+  reason?: string | null;
+}
+
+export interface RescheduleTurnDialogData {
+  currentDate?: string;
+  currentTime?: string;
+  specialtyId?: string;
+}
+
+export interface TurnRescheduleResponse {
+  message: string;
+  turn: TurnResponse;
 }
 
 export interface PayTurnResponse {

@@ -171,3 +171,36 @@
     transform: rotate(360deg);
   }
 }
+
+.btn-icon {
+  border: none;
+  background: transparent;
+  color: $text-light;
+  padding: 8px;
+  border-radius: $border-radius-sm;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: $transition;
+
+  &:hover:not(:disabled) {
+    color: $primary-color;
+    background-color: panel-alpha($primary-color, 0.12);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
