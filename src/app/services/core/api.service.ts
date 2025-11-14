@@ -1,15 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  HttpClient,
-  HttpParams,
-  HttpHeaders,
-  HttpErrorResponse,
-} from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, defer, firstValueFrom, throwError, of } from 'rxjs';
 import { catchError, switchMap, tap, shareReplay, map } from 'rxjs/operators';
 import { LoggerService } from './logger.service';
 import { API_BASE_URL, API_WS_BASE_URL } from './api.tokens';
-import { HttpOptions } from '../interfaces/auth.interfaces';
 
 /**
  * Service to handle HTTP requests to the backend API, encapsulating URL construction
@@ -23,8 +17,6 @@ export class ApiService {
   private readonly baseUrl = inject(API_BASE_URL);
   private readonly baseWsUrl = inject(API_WS_BASE_URL);
   private readonly logger = inject(LoggerService);
-
-  // UUID cacheado como stream frío + shareReplay (patrón de main)
   private readonly uuid$ = this.createUuidStream();
 
   /**
@@ -39,19 +31,14 @@ export class ApiService {
    */
   private createUuidStream(): Observable<string> {
     return defer(() =>
-      this.http.get<{ id_prefix_api_secret: string }>(
-        `${this.baseUrl}/id_prefix_api_secret/`
-      )
+      this.http.get<{ id_prefix_api_secret: string }>(`${this.baseUrl}/id_prefix_api_secret/`)
     ).pipe(
       tap((response) => {
         this.logger.debug('UUID fetched', response.id_prefix_api_secret);
       }),
       map((response) => response.id_prefix_api_secret),
       catchError((err) => {
-        const errorResponse = this.toHttpErrorResponse(
-          err,
-          'No se pudo cargar el UUID de la API'
-        );
+        const errorResponse = this.toHttpErrorResponse(err, 'No se pudo cargar el UUID de la API');
         this.logger.error('Error fetching UUID', errorResponse);
         return throwError(() => errorResponse);
       }),
@@ -65,7 +52,6 @@ export class ApiService {
    * @returns Observable of the constructed URL.
    */
   private buildUrl(endpoint: string): Observable<string> {
-    // Si ya es una URL absoluta, no le metemos UUID ni baseUrl
     if (/^https?:\/\//i.test(endpoint)) {
       return of(endpoint);
     }
@@ -77,10 +63,7 @@ export class ApiService {
         return `${this.baseUrl}/${uuid}/${cleanEndpoint}`;
       }),
       catchError((err) => {
-        const errorResponse = this.toHttpErrorResponse(
-          err,
-          `Error al construir la URL para ${endpoint}`
-        );
+        const errorResponse = this.toHttpErrorResponse(err, `Error al construir la URL para ${endpoint}`);
         this.logger.error('Error building URL', errorResponse);
         return throwError(() => errorResponse);
       })
@@ -99,10 +82,7 @@ export class ApiService {
         return `${this.baseWsUrl}/${uuid}/${cleanEndpoint}`;
       }),
       catchError((err) => {
-        const errorResponse = this.toHttpErrorResponse(
-          err,
-          `Error al construir la URL de WebSocket para ${endpoint}`
-        );
+        const errorResponse = this.toHttpErrorResponse(err, `Error al construir la URL de WebSocket para ${endpoint}`);
         this.logger.error('Error building WebSocket URL', errorResponse);
         return throwError(() => errorResponse);
       })
@@ -112,17 +92,14 @@ export class ApiService {
   /**
    * Performs a GET request to the specified endpoint.
    * @param endpoint The API endpoint.
-   * @param options Optional HTTP options (headers, params, withCredentials, etc.).
+   * @param options Optional HTTP options (e.g., query parameters).
    * @returns Observable of the response data.
    */
-  get<T>(endpoint: string, options?: HttpOptions): Observable<T> {
+  get<T>(endpoint: string, options?: { headers?: HttpHeaders | { [header: string]: string | string[] }, params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.get<T>(url, options)),
       catchError((err) => {
-        const errorResponse = this.toHttpErrorResponse(
-          err,
-          `Error al obtener datos de ${endpoint}`
-        );
+        const errorResponse = this.toHttpErrorResponse(err, `Error al obtener datos de ${endpoint}`);
         this.logger.error(`Error in GET ${endpoint}`, errorResponse);
         return throwError(() => errorResponse);
       })
@@ -133,17 +110,14 @@ export class ApiService {
    * Performs a POST request to the specified endpoint.
    * @param endpoint The API endpoint.
    * @param payload The request body.
-   * @param options Optional HTTP options.
+   * @param options Optional HTTP options (e.g., query parameters).
    * @returns Observable of the response data.
    */
-  post<T>(endpoint: string, payload: any, options?: HttpOptions): Observable<T> {
+  post<T>(endpoint: string, payload: any, options?: { headers?: HttpHeaders | { [header: string]: string | string[] }, params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.post<T>(url, payload, options)),
       catchError((err) => {
-        const errorResponse = this.toHttpErrorResponse(
-          err,
-          `Error al enviar datos a ${endpoint}`
-        );
+        const errorResponse = this.toHttpErrorResponse(err, `Error al enviar datos a ${endpoint}`);
         this.logger.error(`Error in POST ${endpoint}`, errorResponse);
         return throwError(() => errorResponse);
       })
@@ -154,17 +128,14 @@ export class ApiService {
    * Performs a PUT request to the specified endpoint.
    * @param endpoint The API endpoint.
    * @param payload The request body.
-   * @param options Optional HTTP options.
+   * @param options Optional HTTP options (e.g., query parameters).
    * @returns Observable of the response data.
    */
-  put<T>(endpoint: string, payload: any, options?: HttpOptions): Observable<T> {
+  put<T>(endpoint: string, payload: any, options?: { params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.put<T>(url, payload, options)),
       catchError((err) => {
-        const errorResponse = this.toHttpErrorResponse(
-          err,
-          `Error al actualizar datos en ${endpoint}`
-        );
+        const errorResponse = this.toHttpErrorResponse(err, `Error al actualizar datos en ${endpoint}`);
         this.logger.error(`Error in PUT ${endpoint}`, errorResponse);
         return throwError(() => errorResponse);
       })
@@ -174,17 +145,14 @@ export class ApiService {
   /**
    * Performs a DELETE request to the specified endpoint.
    * @param endpoint The API endpoint.
-   * @param options Optional HTTP options.
+   * @param options Optional HTTP options (e.g., query parameters).
    * @returns Observable of the response data.
    */
-  delete<T>(endpoint: string, options?: HttpOptions): Observable<T> {
+  delete<T>(endpoint: string, options?: { params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.delete<T>(url, options)),
       catchError((err) => {
-        const errorResponse = this.toHttpErrorResponse(
-          err,
-          `Error al eliminar datos en ${endpoint}`
-        );
+        const errorResponse = this.toHttpErrorResponse(err, `Error al eliminar datos en ${endpoint}`);
         this.logger.error(`Error in DELETE ${endpoint}`, errorResponse);
         return throwError(() => errorResponse);
       })
@@ -195,17 +163,14 @@ export class ApiService {
    * Performs a PATCH request to the specified endpoint.
    * @param endpoint The API endpoint.
    * @param payload The request body.
-   * @param options Optional HTTP options.
+   * @param options Optional HTTP options (e.g., query parameters).
    * @returns Observable of the response data.
    */
-  patch<T>(endpoint: string, payload: any, options?: HttpOptions): Observable<T> {
+  patch<T>(endpoint: string, payload: any, options?: { headers?: HttpHeaders | { [header: string]: string | string[] }, params?: HttpParams }): Observable<T> {
     return this.buildUrl(endpoint).pipe(
       switchMap((url) => this.http.patch<T>(url, payload, options)),
       catchError((err) => {
-        const errorResponse = this.toHttpErrorResponse(
-          err,
-          `Error al modificar datos en ${endpoint}`
-        );
+        const errorResponse = this.toHttpErrorResponse(err, `Error al modificar datos en ${endpoint}`);
         this.logger.error(`Error in PATCH ${endpoint}`, errorResponse);
         return throwError(() => errorResponse);
       })
@@ -219,10 +184,7 @@ export class ApiService {
 
     return new HttpErrorResponse({
       error: err,
-      status:
-        typeof err === 'object' && err !== null && 'status' in err
-          ? (err as { status: number }).status
-          : 0,
+      status: typeof err === 'object' && err !== null && 'status' in err ? (err as { status: number }).status : 0,
       statusText,
     });
   }
