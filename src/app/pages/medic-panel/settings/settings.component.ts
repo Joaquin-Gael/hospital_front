@@ -5,7 +5,7 @@ import { Subject, takeUntil, Observable, combineLatest } from 'rxjs';
 import { Router } from '@angular/router';
 import { DoctorService } from '../../../services/doctor/doctor.service';
 import { LoggerService } from '../../../services/core/logger.service';
-import { StorageService } from '../../../services/core/storage.service';
+import { AuthService } from '../../../services/auth/auth.service';  // Nuevo: pa' cookie
 import { Doctor, DoctorUpdatePassword, DoctorUpdate, DoctorUpdateResponse } from '../../../services/interfaces/doctor.interfaces';
 import { Specialty } from '../../../services/interfaces/hospital.interfaces';
 import { DoctorDataService } from '../medic-panel/doctor-data.service';
@@ -38,13 +38,13 @@ export class SettingsComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly doctorService = inject(DoctorService);
   private readonly logger = inject(LoggerService);
-  private readonly storageService = inject(StorageService);
+  private readonly authService = inject(AuthService);  // Nuevo: pa' token
   private readonly doctorDataService = inject(DoctorDataService);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    const token = this.storageService.getAccessToken();
+    const token = this.authService.getAccessTokenFromCookie();  // Fix: Cookie via auth
     if (!token) {
       this.logger.info('No auth token found, redirecting to /login');
       this.router.navigate(['/login']);
@@ -231,9 +231,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   saveNotificationSettings(): void {
     this.loading = true;
     this.logger.info('Guardando configuración de notificaciones', this.notificationSettings);
-    // Aquí deberías hacer una llamada al backend para guardar las notificaciones, si es necesario
     setTimeout(() => {
-      // Simulación de guardado
       this.loading = false;
       this.error = null;
       alert('Configuración de notificaciones guardada correctamente');

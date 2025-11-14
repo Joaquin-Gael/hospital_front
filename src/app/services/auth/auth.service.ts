@@ -1,6 +1,8 @@
-import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, EMPTY, Observable, of, throwError, startWith } from 'rxjs';
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap, switchMap } from 'rxjs/operators';
+import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+
 import { ApiService } from '../core/api.service';
 import { LoggerService } from '../core/logger.service';
 import { StorageService } from '../core/storage.service';
@@ -13,7 +15,6 @@ import {
 } from '../interfaces/user.interfaces';
 import { Auth } from '../interfaces/hospital.interfaces';
 import { TokenDoctorsResponse } from '../interfaces/doctor.interfaces';
-import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { API_BASE_URL } from '../core/api.tokens';
 
 @Injectable({
@@ -25,27 +26,86 @@ export class AuthService {
   private readonly logger = inject(LoggerService);
   private readonly apiBaseUrl = inject(API_BASE_URL);
 
-  private loginStatusSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
-  loginStatus$ = this.loginStatusSubject.asObservable();
+  // 🔐 Estado de sesión y scopes con signals
+  private loginStatusSignal = signal<boolean>(false);
+  loginStatus$ = computed(() => this.loginStatusSignal());
 
-  isLoggedIn(): boolean {
-    return !!this.storage.getAccessToken();
+  private scopesSignal = signal<string[]>(this.loadScopesFromStorage());
+  scopes$ = computed(() => this.scopesSignal());
+
+  // 👉 Scopes desde storage al iniciar
+  private loadScopesFromStorage(): string[] {
+    const s = this.storage.getItem('scopes');
+    return s ? JSON.parse(s) : [];
   }
 
+  setLoggedIn(status: boolean): void {
+    this.loginStatusSignal.set(status);
+  }
+
+  isLoggedIn(): boolean {
+    return this.loginStatusSignal();
+  }
+
+  // ========= COOKIES & CSRF HELPERS =========
+
+  private readCookie(name: string): string | null {
+    const cookies = `; ${document.cookie || ''}`;
+    const parts = cookies.split(`; ${name}=`);
+    if (parts.length === 2) {
+      return parts.pop()?.split(';').shift() || null;
+    }
+    return null;
+  }
+
+  // Candidatos para cookie de CSRF
+  private getCsrfTokenFromCookies(): string | null {
+    const candidates = ['csrf_token', 'csrftoken', 'csrf'];
+    for (const name of candidates) {
+      const v = this.readCookie(name);
+      if (v) return v;
+    }
+    return null;
+  }
+
+  // Headers para endpoints sensibles (refresh/logout)
+  private getHeadersForSensitive(csrf: boolean = false): HttpHeaders {
+    if (!csrf) return new HttpHeaders();
+    const csrfToken = this.getCsrfTokenFromCookies();
+    return csrfToken
+      ? new HttpHeaders().set('X-CSRF-Token', csrfToken)
+      : new HttpHeaders();
+  }
+
+  // 👉 Usado por el interceptor para leer token desde cookies
+  getAccessTokenFromCookie(): string {
+    const candidates = ['access_token', 'accessToken', 'access'];
+    for (const n of candidates) {
+      const v = this.readCookie(n);
+      if (v) return v;
+    }
+    return '';
+  }
+
+  // ========= AUTH FLOWS =========
+
   login(credentials: Auth): Observable<TokenUserResponse> {
-    let params = new HttpParams()
-      .set('email', credentials.email)
-      .set('password', credentials.password);
+    const formData = new FormData();
+    formData.append('email', credentials.email);
+    formData.append('password', credentials.password);
+
     return this.apiService
-      .post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, params.toString(), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      .post<TokenUserResponse>(AUTH_ENDPOINTS.LOGIN, formData, {
+        withCredentials: true
       })
       .pipe(
         switchMap((response) => {
-          this.persistSessionTokens(response.access_token, response.refresh_token, 'login');
+          this.setLoggedIn(true);
           return this.hydrateScopes(response);
         }),
-        catchError((error: HttpErrorResponse) => this.handleError('User Login', error))
+        catchError((error: HttpErrorResponse) =>
+          this.handleError('User Login', error)
+        )
       );
   }
 
@@ -58,55 +118,79 @@ export class AuthService {
   exchangeCodeForToken(code: string): Observable<TokenUserResponse> {
     const url = `${this.apiBaseUrl}/api/oauth/google`;
     this.logger.debug(`Intercambiando código en: ${url}`);
-    return this.apiService.post<TokenUserResponse>(url, { code }).pipe(
-      switchMap((response) => {
-        this.logger.debug('Token recibido:', response.access_token);
-        this.persistSessionTokens(response.access_token, response.refresh_token, 'OAuth login');
-        return this.hydrateScopes(response);
-      }),
-      catchError((error: HttpErrorResponse) => this.handleError('OAuth Code Exchange', error))
-    );
+
+    return this.apiService
+      .post<TokenUserResponse>(
+        url,
+        { code },
+        {
+          withCredentials: true
+        }
+      )
+      .pipe(
+        switchMap((response) => {
+          this.logger.debug('Token recibido:', response.access_token);
+          this.setLoggedIn(true);
+          return this.hydrateScopes(response);
+        }),
+        catchError((error: HttpErrorResponse) =>
+          this.handleError('OAuth Code Exchange', error)
+        )
+      );
   }
 
   decode(code: string): Observable<DecodeResponse> {
     this.logger.debug('Decodificando código secreto');
-    return this.apiService.post<DecodeResponse>(AUTH_ENDPOINTS.DECODE, { code }).pipe(
-      switchMap((response) => {
-        this.logger.debug('Access token recibido:', response.access_token);
-        this.persistSessionTokens(response.access_token, null, 'code decode');
-        return this.hydrateScopes(response);
-      }),
-      catchError((error: HttpErrorResponse) => this.handleError('Decode Code', error))
-    );
+    return this.apiService
+      .post<DecodeResponse>(
+        AUTH_ENDPOINTS.DECODE,
+        { code },
+        {
+          withCredentials: true
+        }
+      )
+      .pipe(
+        switchMap((response) => {
+          this.logger.debug('Access token recibido:', response.access_token);
+          this.setLoggedIn(true);
+          return this.hydrateScopes(response);
+        }),
+        catchError((error: HttpErrorResponse) =>
+          this.handleError('Decode Code', error)
+        )
+      );
   }
 
+  /**
+   * Compatibilidad con código viejo que esperaba guardar access_token.
+   * En modo cookies NO guardamos nada, solo marcamos loggedIn.
+   */
   storeAccessToken(accessToken: string): Observable<void> {
-    this.logger.debug('Almacenando access_token:', accessToken);
-    const stored = this.storage.setAccessToken(accessToken);
-    if (!stored) {
-      this.logger.error('No se pudo almacenar el access_token');
-      return throwError(() => new Error('No se pudo almacenar el access_token'));
-    }
-    const storedToken = this.storage.getAccessToken();
-    this.logger.debug('Token almacenado correctamente:', storedToken);
-    this.loginStatusSubject.next(true);
-    return of(void 0);
+    this.logger.debug(
+      'storeAccessToken llamado en modo cookies, token ignorado.',
+      accessToken
+    );
+    this.setLoggedIn(true);
+    return of(undefined);
   }
 
   doctorLogin(credentials: Auth): Observable<TokenDoctorsResponse> {
-    let params = new HttpParams()
-      .set('email', credentials.email)
-      .set('password', credentials.password);
+    const formData = new FormData();
+    formData.append('email', credentials.email);
+    formData.append('password', credentials.password);
+
     return this.apiService
-      .post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, params.toString(), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      .post<TokenDoctorsResponse>(AUTH_ENDPOINTS.DOC_LOGIN, formData, {
+        withCredentials: true
       })
       .pipe(
         switchMap((response) => {
-          this.persistSessionTokens(response.access_token, response.refresh_token, 'doctor login');
+          this.setLoggedIn(true);
           return this.hydrateScopes(response);
         }),
-        catchError((error: HttpErrorResponse) => this.handleError('Doctor Login', error))
+        catchError((error: HttpErrorResponse) =>
+          this.handleError('Doctor Login', error)
+        )
       );
   }
 
@@ -114,102 +198,114 @@ export class AuthService {
     if (!this.isLoggedIn()) {
       return of(null);
     }
-    return this.apiService.get<{ user: UserRead }>(AUTH_ENDPOINTS.ME).pipe(
-      map((response) => response?.user ?? null),
-      catchError(() => of(null))
-    );
+    return this.apiService
+      .get<{ user: UserRead }>(AUTH_ENDPOINTS.ME, {
+        withCredentials: true
+      })
+      .pipe(
+        map((response) => response?.user ?? null),
+        catchError(() => of(null))
+      );
   }
 
   logout(): Observable<void> {
     if (!this.isLoggedIn()) {
       this.clearSession();
-      return of(void 0);
+      return of(undefined);
     }
-    return this.apiService.delete<void>(AUTH_ENDPOINTS.LOGOUT).pipe(
-      tap(() => {
-        this.clearSession();
-      }),
-      map(() => void 0),
-      catchError((error) => {
-        this.logger.warn('Logout request failed', error);
-        this.clearSession();
-        return of(void 0);
+
+    return this.apiService
+      .delete<void>(AUTH_ENDPOINTS.LOGOUT, {
+        withCredentials: true,
+        headers: this.getHeadersForSensitive(true)
       })
-    );
+      .pipe(
+        tap(() => {
+          this.clearSession();
+        }),
+        catchError((error: HttpErrorResponse) => {
+          this.logger.warn('Logout request failed', error);
+          this.clearSession();
+          return of(undefined);
+        })
+      );
   }
 
   refreshToken(): Observable<TokenUserResponse> {
-    const refreshToken = this.storage.getRefreshToken();
-    if (!refreshToken) {
-      this.clearSession();
-      this.logger.error('No refresh token available ')
-    }
-
-    const options = {
-      headers: { Authorization: `Bearer ${refreshToken}` }
-    }
-
-    return this.apiService.get<TokenUserResponse>(AUTH_ENDPOINTS.REFRESH, options).pipe(
-      tap((response) => {
-        this.persistSessionTokens(response.access_token, response.refresh_token, 'refresh');
-      }),
-      catchError((error: HttpErrorResponse) => this.handleError('Refresh token', error))
-    );
+    return this.apiService
+      .get<TokenUserResponse>(AUTH_ENDPOINTS.REFRESH, {
+        withCredentials: true,
+        headers: this.getHeadersForSensitive(true)
+      })
+      .pipe(
+        tap(() => {
+          this.setLoggedIn(true);
+        }),
+        catchError((error: HttpErrorResponse) => {
+          this.setLoggedIn(false);
+          this.clearSession();
+          return this.handleError('Refresh token', error);
+        })
+      );
   }
 
+  // ========= SCOPES =========
+
   getScopes(): Observable<string[]> {
-    return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
-      map((response) => response.scopes),
-      catchError(() => of([]))
-    );
+    return this.apiService
+      .get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES, {
+        withCredentials: true
+      })
+      .pipe(
+        map((response) => response.scopes),
+        catchError(() => of([]))
+      );
   }
 
   setScopes(scopes: string[]): void {
-    const stored = this.storage.setItem('scopes', JSON.stringify(scopes));
-    if (!stored) {
-      this.logger.warn('Scopes could not be stored');
-    }
+    const safeScopes = scopes || [];
+    this.scopesSignal.set(safeScopes);
+    this.storage.setItem('scopes', JSON.stringify(safeScopes));
   }
 
   getStoredScopes(): string[] {
-    const scopes = this.storage.getItem('scopes');
-    return scopes ? JSON.parse(scopes) : [];
+    return this.scopesSignal();
   }
 
+  /**
+   * Helper para hidratar scopes después de cualquier flujo de login.
+   */
   private hydrateScopes<T>(response: T): Observable<T> {
-    return this.apiService.get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES).pipe(
-      tap({
-        next: (scopesResponse) => {
-          this.setScopes(scopesResponse.scopes);
-        },
-        error: () => {
+    return this.apiService
+      .get<ScopesResponse>(AUTH_ENDPOINTS.SCOPES, {
+        withCredentials: true
+      })
+      .pipe(
+        tap({
+          next: (scopesResponse) => {
+            this.setScopes(scopesResponse.scopes);
+          },
+          error: () => {
+            this.setScopes([]);
+          }
+        }),
+        map(() => response),
+        catchError(() => {
+          // Si falla scopes, no rompemos el login, solo limpiamos scopes
           this.setScopes([]);
-        },
-      }),
-      map(() => response),
-      startWith(response),
-      catchError(() => EMPTY)
-    );
+          return of(response);
+        })
+      );
   }
 
-  private persistSessionTokens(accessToken: string, refreshToken: string | null | undefined, context: string): void {
-    const accessStored = this.storage.setAccessToken(accessToken);
-    let refreshStored = true;
-
-    if (refreshToken) {
-      refreshStored = this.storage.setRefreshToken(refreshToken);
-    }
-
-    if (!accessStored || !refreshStored) {
-      this.logger.warn(`Tokens could not be stored after ${context}`);
-    }
-
-    this.loginStatusSubject.next(true);
-  }
+  // ========= SESSION & ERRORES =========
 
   private clearSession(): void {
-    this.storage.clearStorage();
-    this.loginStatusSubject.next(false);
+    if (this.storage.clearStorage) {
+      this.storage.clearStorage();
+    }
+    this.setLoggedIn(false);
+    this.setScopes([]);
   }
 
   private extractErrorDetail(payload: unknown): string | undefined {
@@ -218,12 +314,12 @@ export class AuthService {
     }
 
     if (payload && typeof payload === 'object') {
-      if ('detail' in payload && typeof (payload as { detail: unknown }).detail === 'string') {
-        return (payload as { detail: string }).detail;
+      if ('detail' in payload && typeof (payload as any).detail === 'string') {
+        return (payload as any).detail;
       }
 
-      if ('message' in payload && typeof (payload as { message: unknown }).message === 'string') {
-        return (payload as { message: string }).message;
+      if ('message' in payload && typeof (payload as any).message === 'string') {
+        return (payload as any).message;
       }
     }
 

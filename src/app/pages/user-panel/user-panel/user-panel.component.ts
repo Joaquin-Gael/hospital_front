@@ -177,7 +177,6 @@ export class UserPanelComponent implements OnInit, OnDestroy {
   }
 
   private performLogout(): void {
-    // Mostrar loading durante logout
     this.loading = true;
 
     this.authService.logout()
@@ -198,7 +197,6 @@ export class UserPanelComponent implements OnInit, OnDestroy {
           this.router.navigate(['/login']);
         },
         error: (err) => {
-          // Incluso si hay error, limpiar storage y redirigir
           this.storageService.clearStorage();
           this.removeSidebarOpenClass();
           this.logger.error('Logout error', err);
