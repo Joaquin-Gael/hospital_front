@@ -1,6 +1,5 @@
-@use '../../admin/styles/_vars.scss' as *;
-@use '../../layout/styles/_mixins.scss' as *;
-@use '../../layout/styles/_media-queries.scss' as *;
+@use '../styles/_vars.scss' as *;
+@use '../styles/_mixins.scss' as admin;
 
 .admin-panel {
   display: flex;
@@ -12,29 +11,22 @@
   &__sidebar {
   -webkit-text-fill-color: black;
     width: $sidebar-width;
-    background: linear-gradient(
-      162deg,
-      color-mix(in srgb, #{$hospital-blue-strong} 2%, transparent) 0%,
-      color-mix(in srgb, #{$hospital-blue} 6%, transparent) 45%,
-      color-mix(in srgb, #{$hospital-blue-soft} 8%, transparent) 100%
-    );
-    color: rgba(255, 255, 255, 0.9);
+    @include admin.sidebar-shell();
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     z-index: 1000;
     transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: $shadow-lg;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    @include flex-column;
+    transition: $sidebar-transition;
+    border-right: $sidebar-border;
+    @include admin.flex-column;
 
-    @include desktop-up {
+    @include admin.desktop-up {
       transform: translateX(0);
     }
 
-    @include nav-mobile {
+    @include admin.nav-mobile {
       width: min(86vw, 320px);
       border-radius: 0 24px 24px 0;
       backdrop-filter: blur(18px);
@@ -47,7 +39,7 @@
     }
 
     &.is-collapsed {
-      @include desktop-up {
+      @include admin.desktop-up {
         width: $sidebar-collapsed-width;
         padding-inline: 12px;
 
@@ -80,9 +72,9 @@
     height: $header-height;
     padding: 0 24px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    @include flex-between;
+    @include admin.flex-between;
 
-    @include mobile-only {
+    @include admin.mobile-only {
       padding: 0 20px;
     }
   }
@@ -91,14 +83,14 @@
     font-size: 20px;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.95);
-    @include flex-inline(16px);
+    @include admin.flex-inline(16px);
 
     &-icon {
       width: 40px;
       height: 40px;
       border-radius: 10px;
       background: $primary-strong-gradient;
-      @include flex-center;
+      @include admin.flex-center;
 
       svg {
         width: 24px;
@@ -107,7 +99,7 @@
         color: white;
       }
 
-      @include mobile-only {
+      @include admin.mobile-only {
         width: 36px;
         height: 36px;
 
@@ -122,13 +114,13 @@
       color: inherit;
       text-decoration: none;
       letter-spacing: -0.025em;
-      @include text-truncate;
+      @include admin.text-truncate;
 
       &:hover {
         color: rgba(255, 255, 255, 1);
       }
 
-      @include mobile-only {
+      @include admin.mobile-only {
         font-size: 18px;
       }
     }
@@ -143,7 +135,7 @@
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    @include flex-center;
+    @include admin.flex-center;
 
     &:hover {
       background-color: rgba(255, 255, 255, 0.1);
@@ -160,11 +152,11 @@
       stroke-width: 2.5;
     }
 
-    @include desktop-up {
+    @include admin.desktop-up {
       display: none;
     }
 
-    @include mobile-only {
+    @include admin.mobile-only {
       width: 36px;
       height: 36px;
 
@@ -180,28 +172,10 @@
     padding: 24px 16px;
     overflow-y: auto;
     overflow-x: hidden;
+    @include admin.thin-scrollbar();
 
-    @include mobile-only {
+    @include admin.mobile-only {
       padding: 20px 16px;
-    }
-
-    // Custom scrollbar
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 3px;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.3);
-      }
     }
   }
 
@@ -210,7 +184,7 @@
     margin: 0;
     padding: 0;
     gap: 6px;
-    @include flex-column;
+    @include admin.flex-column;
   }
 
   &__item {
@@ -220,9 +194,9 @@
   &__nav-link {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
-    border-radius: 12px;
+    gap: $sidebar-link-gap;
+    padding: $sidebar-link-padding;
+    border-radius: $sidebar-link-radius;
     color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
     font-weight: 500;
@@ -230,7 +204,7 @@
     text-decoration: none;
     width: 100%;
     min-height: 52px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: $transition-smooth;
     position: relative;
     border: 2px solid transparent;
     overflow: hidden;
@@ -242,13 +216,13 @@
       width: 4px;
       border-radius: 4px;
       background: linear-gradient(
-        180deg, 
-        color-mix(in srgb, #{$hospital-blue-strong} 20%, transparent) 0%, 
+        180deg,
+        color-mix(in srgb, #{$hospital-blue-strong} 20%, transparent) 0%,
         color-mix(in srgb, #{$hospital-blue-soft} 90%, transparent) 100%
       );
       transform: scaleY(0);
       transform-origin: top;
-      transition: transform 0.3s ease;
+      transition: transform 0.3s $transition-timing;
     }
 
     &::after {
@@ -268,7 +242,7 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      transition: opacity 0.3s $transition-timing, transform 0.3s $transition-timing;
     }
 
     &:hover {
@@ -320,18 +294,18 @@
       }
     }
 
-    @include mobile-only {
+    @include admin.mobile-only {
       padding: 14px 18px;
       font-size: 13px;
       min-height: 48px;
       gap: 14px;
     }
 
-    @include nav-mobile {
+    @include admin.nav-mobile {
       padding-inline: 18px 56px;
     }
 
-    @include touch-device {
+    @include admin.touch-device {
       min-height: 56px;
     }
   }
@@ -354,16 +328,16 @@
   &__nav-icon {
     position: relative;
     color: rgba(255, 255, 255, 0.6);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: $transition-smooth;
     flex-shrink: 0;
-    @include flex-center;
+    @include admin.flex-center;
 
     svg {
       width: 22px;
       height: 22px;
       stroke-width: 2;
 
-      @include mobile-only {
+      @include admin.mobile-only {
         width: 20px;
         height: 20px;
       }
@@ -371,9 +345,9 @@
   }
 
   &__nav-text {
-    @include text-truncate;
+    @include admin.text-truncate;
 
-    @include mobile-only {
+    @include admin.mobile-only {
       font-size: 13px;
     }
   }
@@ -382,7 +356,7 @@
     padding: 20px 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 
-    @include mobile-only {
+    @include admin.mobile-only {
       padding: 16px;
     }
   }
@@ -399,8 +373,8 @@
     background-color: transparent;
     text-align: left;
     min-height: 52px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    @include flex-inline(16px);
+    transition: $transition-smooth;
+    @include admin.flex-inline(16px);
 
     &:hover {
       background: $layer-danger-soft;
@@ -421,36 +395,28 @@
       width: 20px;
       height: 20px;
       stroke-width: 2;
-      transition: all 0.3s ease;
+      transition: $transition-smooth;
     }
 
-    @include mobile-only {
+    @include admin.mobile-only {
       padding: 14px 18px;
       font-size: 13px;
       min-height: 48px;
       gap: 14px;
     }
 
-    @include touch-device {
+    @include admin.touch-device {
       min-height: 56px;
     }
   }
 
   &__footer-text {
-    @include text-truncate;
+    @include admin.text-truncate;
   }
 
   &__overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: color-mix(in srgb, #{$hospital-blue-strong} 48%, transparent);
+    @include admin.overlay-base($sidebar-overlay, $transition-smooth);
     z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
     backdrop-filter: blur(8px);
 
     &.visible {
@@ -458,7 +424,7 @@
       visibility: visible;
     }
 
-    @include desktop-up {
+    @include admin.desktop-up {
       display: none;
     }
   }
@@ -468,22 +434,22 @@
     margin-left: $sidebar-width;
     width: calc(100% - #{$sidebar-width});
     min-height: 100vh;
-    transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    @include flex-column;
+    transition: $content-transition;
+    @include admin.flex-column;
 
-    @include mobile-only {
+    @include admin.mobile-only {
       margin-left: 0;
       width: 100%;
     }
 
-    @include tablet-only {
+    @include admin.tablet-only {
       margin-left: 0;
       width: 100%;
     }
   }
 
   &__sidebar.is-collapsed ~ .admin-panel__content {
-    @include desktop-up {
+    @include admin.desktop-up {
       margin-left: $sidebar-collapsed-width;
       width: calc(100% - #{$sidebar-collapsed-width});
     }
@@ -497,7 +463,7 @@
     box-shadow: $shadow-sm;
     z-index: 50;
     position: relative;
-    @include flex-between;
+    @include admin.flex-between;
 
     &::after {
       content: '';
@@ -509,15 +475,15 @@
       background: linear-gradient(90deg, transparent, $border-color, transparent);
     }
 
-    @include mobile-only {
+    @include admin.mobile-only {
       padding: 0 20px;
     }
   }
 
   &__header-left {
-    @include flex-inline(20px);
+    @include admin.flex-inline(20px);
 
-    @include mobile-only {
+    @include admin.mobile-only {
       gap: 16px;
     }
   }
@@ -531,7 +497,7 @@
     color: $text-secondary;
     cursor: pointer;
     transition: all 0.2s ease;
-    @include flex-center;
+    @include admin.flex-center;
 
     &:hover {
       background: $primary-light;
@@ -545,11 +511,11 @@
       stroke-width: 2;
     }
 
-    @include desktop-up {
+    @include admin.desktop-up {
       display: none;
     }
 
-    @include mobile-only {
+    @include admin.mobile-only {
       width: 40px;
       height: 40px;
 
@@ -567,11 +533,11 @@
     color: $text-primary;
     letter-spacing: -0.025em;
 
-    @include mobile-only {
+    @include admin.mobile-only {
       font-size: 20px;
     }
 
-    @include tablet-only {
+    @include admin.tablet-only {
       font-size: 24px;
     }
   }
@@ -597,11 +563,11 @@
       opacity: 0.7;
     }
 
-    @include mobile-only {
+    @include admin.mobile-only {
       padding: 20px;
     }
 
-    @include tablet-only {
+    @include admin.tablet-only {
       padding: 24px;
     }
   }
@@ -627,7 +593,7 @@
 }
 
 // Mejoras de accesibilidad
-@include reduce-motion {
+@include admin.reduce-motion {
   .admin-panel__sidebar,
   .admin-panel__overlay,
   .admin-panel__nav-link,
