@@ -1,0 +1,109 @@
+@use 'sass:math';
+@use '../../../styles/_color-utils.scss' as color-utils;
+@use './_vars.scss' as vars;
+@use './_media-queries.scss' as media;
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-inline($gap: 1rem, $align: center, $justify: flex-start) {
+  display: flex;
+  align-items: $align;
+  justify-content: $justify;
+  gap: $gap;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Envoltorio para superficies de sidebar
+@mixin sidebar-shell($blur: 0px) {
+  background: linear-gradient(
+    162deg,
+    color-utils.mix(vars.$hospital-blue-strong, transparent, 2%) 0%,
+    color-utils.mix(vars.$hospital-blue, transparent, 6%) 45%,
+    color-utils.mix(vars.$hospital-blue-soft, transparent, 8%) 100%
+  );
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: vars.$sidebar-shadow;
+  border-right: vars.$sidebar-border;
+  backdrop-filter: blur($blur);
+}
+
+@mixin focus-ring($color: vars.$primary-color, $width: 3px, $offset: 2px) {
+  outline: $width solid $color !important;
+  outline-offset: $offset;
+  border-radius: math.max($offset, 8px);
+}
+
+@mixin thin-scrollbar($thumb: vars.$sidebar-scroll-thumb, $track: vars.$sidebar-scroll-track) {
+  scrollbar-width: thin;
+  scrollbar-color: #{$thumb} #{$track};
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $track;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $thumb;
+    border-radius: 3px;
+
+    &:hover {
+      background: color-utils.adjust($thumb, $lightness: 6%);
+    }
+  }
+}
+
+@mixin hover-lift($distance: 4px, $shadow: vars.$shadow-md) {
+  transition: vars.$transition-smooth;
+
+  &:hover {
+    transform: translateX($distance);
+    box-shadow: $shadow;
+  }
+}
+
+@mixin surface-layer($bg: vars.$bg-secondary, $border: vars.$border-light) {
+  background: $bg;
+  border: 1px solid $border;
+  border-radius: vars.$sidebar-link-radius;
+}
+
+@mixin overlay-base($background: vars.$sidebar-overlay, $transition: vars.$transition-smooth) {
+  position: fixed;
+  inset: 0;
+  background-color: $background;
+  opacity: 0;
+  visibility: hidden;
+  transition: $transition;
+}
+
+// Re-export de media queries más usadas
+@mixin mobile-only { @include media.mobile-only { @content; } }
+@mixin tablet-only { @include media.tablet-only { @content; } }
+@mixin desktop-up { @include media.desktop-up { @content; } }
+@mixin nav-mobile { @include media.nav-mobile { @content; } }
+@mixin touch-device { @include media.touch-device { @content; } }
+@mixin reduce-motion { @include media.reduce-motion { @content; } }
