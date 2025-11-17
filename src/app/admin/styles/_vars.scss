@@ -1,4 +1,12 @@
-@use '../../../styles/_color-utils.scss';
+@use 'sass:color';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:string';
+@use '../../../styles/_color-utils.scss' as color-utils;
+
+@function rem($value) {
+  @return math.div($value, 16) * 1rem;
+}
 
 // Sistema de colores premium
 $primary-gradient: var(--gradient-primary);
@@ -47,16 +55,35 @@ $shadow-lg: var(--shadow-lg);
 $shadow-glass: var(--shadow-glass);
 $shadow-input: var(--shadow-input);
 
-$sidebar-gradient: var(--gradient-sidebar);
+// Dimensiones y transiciones adaptadas a rem para escalabilidad
+$sidebar-width: rem(280);
+$sidebar-collapsed-width: rem(80);
+$header-height: rem(72);
 
-$sidebar-width: 280px;
-$sidebar-collapsed-width: 80px;
-$header-height: 72px;
-
-$transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+$transition-smooth: all 0.3s $transition-timing;
 $transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-
+// Paleta hospitalaria derivada usando utilidades modernas
 $hospital-blue: color-utils.mix(#1b6fa8, $primary-color, 65%);
 $hospital-blue-strong: color-utils.adjust($hospital-blue, $lightness: -14%);
 $hospital-blue-soft: color-utils.adjust($hospital-blue, $lightness: 12%);
+
+// Esquema de sidebar
+$sidebar-transition: transform 0.3s $transition-timing;
+$sidebar-shadow: $shadow-lg;
+$sidebar-border: 1px solid color-utils.adjust($text-white, $alpha: -0.9);
+$sidebar-overlay: color-utils.adjust($hospital-blue-strong, $alpha: -0.52);
+
+$sidebar-link-padding: rem(16) rem(20);
+$sidebar-link-radius: rem(12);
+$sidebar-link-gap: rem(16);
+
+$sidebar-scroll-thumb: color-utils.adjust($text-white, $alpha: -0.8);
+$sidebar-scroll-track: color-utils.adjust($text-white, $alpha: -0.9);
+
+// Gradientes
+$sidebar-gradient: var(--gradient-sidebar);
+
+// Timing para contenedores principales
+$content-transition: margin-left 0.3s $transition-timing;

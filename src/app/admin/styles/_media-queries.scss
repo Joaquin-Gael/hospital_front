@@ -1,0 +1,49 @@
+@use 'sass:map';
+
+// Breakpoints específicos del panel de administración
+$admin-breakpoints: (
+  mobile: 480px,
+  tablet: 768px,
+  desktop: 1024px,
+);
+
+@function bp($name) {
+  @return map.get($admin-breakpoints, $name);
+}
+
+@mixin mobile-only {
+  @media (max-width: #{bp(mobile) - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media (min-width: bp(mobile)) and (max-width: #{bp(tablet) - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: bp(tablet)) {
+    @content;
+  }
+}
+
+// Navegación compacta
+@mixin nav-mobile {
+  @media (max-width: #{bp(tablet) - 1px}) {
+    @content;
+  }
+}
+
+@mixin touch-device {
+  @media (hover: none) and (pointer: coarse) {
+    @content;
+  }
+}
+
+@mixin reduce-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
