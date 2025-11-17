@@ -51,17 +51,17 @@
               </div>
               <div class="document-card__content">
                 <h3 class="document-card__title">{{ document.filename }}</h3>
-                <p class="document-card__meta">Generado el {{ formatDateTime(document.generatedAt) }}</p>
+                <p class="document-card__meta">Generado el {{ formatDateTime(document.generated_at) }}</p>
                 <p class="document-card__subtitle">{{ getDocumentSubtitle(document) }}</p>
               </div>
               <button
                 class="document-card__download"
                 type="button"
                 title="Descargar comprobante"
-                [disabled]="isDownloading(document.turnId)"
+                [disabled]="isDownloading(document.turn_id)"
                 (click)="onDownloadDocument(document)"
               >
-                <ng-container *ngIf="isDownloading(document.turnId); else documentDownloadIcon">
+                <ng-container *ngIf="isDownloading(document.turn_id); else documentDownloadIcon">
                   <span class="spinner" aria-hidden="true"></span>
                 </ng-container>
                 <ng-template #documentDownloadIcon>
@@ -133,7 +133,7 @@
                   </td>
                   <td>
                     <div class="table-doc__date">
-                      <span>{{ formatDateTime(log.downloadedAt) }}</span>
+                      <span>{{ formatDateTime(log.downloaded_at) }}</span>
                     </div>
                   </td>
                   <td>
@@ -141,8 +141,8 @@
                   </td>
                   <td>
                     <div class="table-doc__meta">
-                      <span>IP: {{ log.clientIp || 'No registrada' }}</span>
-                      <span class="table-doc__agent">{{ log.userAgent || 'Dispositivo desconocido' }}</span>
+                      <span>IP: {{ log.client_ip || 'No registrada' }}</span>
+                      <span class="table-doc__agent">{{ log.user_agent || 'Dispositivo desconocido' }}</span>
                     </div>
                   </td>
                   <td class="table__actions">
@@ -150,10 +150,10 @@
                       class="btn-icon"
                       type="button"
                       title="Descargar nuevamente"
-                      [disabled]="isDownloading(log.turnId)"
+                      [disabled]="isDownloading(log.turn_id)"
                       (click)="onDownloadFromLog(log)"
                     >
-                      <ng-container *ngIf="isDownloading(log.turnId); else downloadLogIcon">
+                      <ng-container *ngIf="isDownloading(log.turn_id); else downloadLogIcon">
                         <span class="spinner" aria-hidden="true"></span>
                       </ng-container>
                       <ng-template #downloadLogIcon>

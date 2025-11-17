@@ -13,11 +13,12 @@ import { Auth } from '../../services/interfaces/hospital.interfaces';
 import { NotificationService } from '../../core/notification/services/notification.service';
 import { LoggerService } from '../../services/core/logger.service';
 import { StorageService } from '../../services/core/storage.service';
+import { HeroComponent, HeroData } from '../../shared/hero/hero.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterModule, HeroComponent],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
@@ -33,7 +34,16 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   showPassword = false;
   isSubmitting = false;
-  showEmailValidationError = false; 
+  showEmailValidationError = false;
+
+  // 👇 data para el hero
+  readonly heroData: HeroData = {
+    backgroundImage: 'assets/hero-three.png',
+    altText: 'Inicio de sesión Hospital SDLG',
+    title: 'Bienvenido a Hospital SDLG',
+    subtitle: 'Ingresá a tu panel de paciente ',
+    highlightText: ' seguro y sencillo',
+  };
 
   readonly loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -57,21 +67,24 @@ export class LoginComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.authService.decode(codeSecret).pipe(takeUntil(this.destroy$)).subscribe({
-          next: () => {
-            this.logger.debug('Token decodificado exitosamente');
-            const redirectTo = decodeURIComponent(fullReturnUrl.split('?')[0]);
-            this.router.navigateByUrl(redirectTo || '/user_panel');
-          },
-          error: (err) => {
-            this.logger.error('Error al decodificar el token:', err);
-            this.notificationService.error(
-              'Error al procesar el inicio de sesión con Google'
-            );
-          },
-        });
+        this.authService
+          .decode(codeSecret)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.logger.debug('Token decodificado exitosamente');
+              const redirectTo = decodeURIComponent(fullReturnUrl.split('?')[0]);
+              this.router.navigateByUrl(redirectTo || '/user_panel');
+            },
+            error: (err) => {
+              this.logger.error('Error al decodificar el token:', err);
+              this.notificationService.error(
+                'Error al procesar el inicio de sesión con Google'
+              );
+            },
+          });
 
-        return; 
+        return;
       } catch (e) {
         this.logger.error('Error al extraer el código secreto:', e);
       }
@@ -84,8 +97,9 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.router.navigateByUrl('/home');
     }
 
-    this.loginForm.get('email')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
+    this.loginForm
+      .get('email')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         if (this.showEmailValidationError) {
           this.showEmailValidationError = false;
@@ -103,7 +117,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onForgotPassword(event: Event): void {
-    event.preventDefault(); 
+    event.preventDefault();
 
     const emailControl = this.loginForm.get('email');
     const emailValue = emailControl?.value?.trim();
@@ -111,7 +125,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (!emailValue || emailControl?.invalid) {
       this.showEmailValidationError = true;
       emailControl?.markAsTouched();
-      
+
       setTimeout(() => {
         const emailInput = document.getElementById('email');
         emailInput?.focus();
@@ -179,13 +193,16 @@ export class LoginComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.isSubmitting = false;
           this.logger.error('Error al iniciar sesión:', err);
-          this.notificationService.error('Error al iniciar sesión, por favor, intenta nuevamente.', {
-            duration: 5000,
-            action: {
-              label: 'Cerrar',
-              action: () => this.notificationService.dismissAll(),
-            },
-          });
+          this.notificationService.error(
+            'Error al iniciar sesión, por favor, intenta nuevamente.',
+            {
+              duration: 5000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            }
+          );
         },
       });
   }

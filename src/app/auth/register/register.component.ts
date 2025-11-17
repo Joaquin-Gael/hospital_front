@@ -1,17 +1,24 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormGroup,
+} from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../services/user/user.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { UserCreate } from '../../services/interfaces/user.interfaces';
-import { NotificationService } from '../../core/notification/services/notification.service'
+import { NotificationService } from '../../core/notification/services/notification.service';
 import { LoggerService } from '../../services/core/logger.service';
+import { HeroComponent, HeroData } from '../../shared/hero/hero.component';
+
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterModule, HeroComponent],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
 })
@@ -20,7 +27,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
-  private readonly loggerService = inject(LoggerService)
+  private readonly loggerService = inject(LoggerService);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
@@ -31,7 +38,16 @@ export class RegisterComponent implements OnInit, OnDestroy {
   passwordStrengthClass = '';
   isSubmitting = false;
   feedbackMessage: string | null = null;
-  feedbackType: 'success' | 'error' | 'warning' | 'info' | null = null; 
+  feedbackType: 'success' | 'error' | 'warning' | 'info' | null = null;
+
+  // 👇 hero para registro
+  readonly heroData: HeroData = {
+    backgroundImage: 'assets/hero-three.png',
+    altText: 'Registro de paciente Hospital SDLG',
+    title: 'Creá tu cuenta de paciente',
+    subtitle: 'Gestioná tus turnos, estudios y datos médicos ',
+    highlightText: ' 100% gratuito',
+  };
 
   readonly bloodTypeOptions = [
     { value: 'A+', label: 'A+' },
@@ -117,7 +133,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
   onRegister() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
-      this.feedbackMessage = 'Por favor completá correctamente todos los campos.';
+      this.feedbackMessage =
+        'Por favor completá correctamente todos los campos.';
       this.feedbackType = 'error';
       return;
     }
@@ -125,7 +142,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.isSubmitting = true;
     this.feedbackMessage = null;
 
-    const { email, first_name, last_name, dni, password, blood_type } = this.registerForm.value;
+    const { email, first_name, last_name, dni, password, blood_type } =
+      this.registerForm.value;
     const username = this.generateUsername(first_name, last_name);
 
     const payload: UserCreate = {
@@ -155,12 +173,15 @@ export class RegisterComponent implements OnInit, OnDestroy {
               },
             }
           );
-          this.loggerService.debug('Usuario registrad: ', payload)
+          this.loggerService.debug('Usuario registrado: ', payload);
           setTimeout(() => this.router.navigateByUrl('/login'), 2000);
         },
         error: (err) => {
           this.isSubmitting = false;
-          const msg = err?.error?.message || err?.message || 'Ocurrió un error inesperado.';
+          const msg =
+            err?.error?.message ||
+            err?.message ||
+            'Ocurrió un error inesperado.';
           this.notificationService.error(
             '¡Error al registrar usuario, por favor intentá nuevamente!',
             {
@@ -171,7 +192,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
               },
             }
           );
-          this.loggerService.error('Algo salió mal: ', msg)
+          this.loggerService.error('Algo salió mal: ', msg);
         },
       });
   }
