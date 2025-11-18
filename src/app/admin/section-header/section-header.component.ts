@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface ActionButton {
@@ -19,5 +19,7 @@ export interface ActionButton {
 export class SectionHeaderComponent {
   @Input() title!: string;
   @Input() subtitle?: string;
+  @Input() icon?: string; // Nuevo: icono para el header
+  @Input() headerClass?: string; // Nuevo: clase de color para el header (ej: 'header-blue', 'header-indigo')
   @Input() actions: ActionButton[] = [];
 }

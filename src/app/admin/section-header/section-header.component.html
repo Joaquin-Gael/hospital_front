@@ -1,28 +1,37 @@
-<div class="section-header">
-  <div class="section-header__title-wrapper">
-    <h2 class="section-header__title">{{ title }}</h2>
-    @if (subtitle) {
-      <p class="section-header__subtitle">{{ subtitle }}</p>
-    }
-  </div>
-
-  @if (actions && actions.length > 0) {
-    <div class="section-header__actions">
-      @for (action of actions; track action.label) {
-        <button
-          class="section-header__action-btn"
-          [class.section-header__action-btn--primary]="action.variant === 'primary' || !action.variant"
-          [class.section-header__action-btn--secondary]="action.variant === 'secondary'"
-          [class.section-header__action-btn--success]="action.variant === 'success'"
-          [class.section-header__action-btn--warning]="action.variant === 'warning'"
-          [class.section-header__action-btn--danger]="action.variant === 'danger'"
-          [attr.aria-label]="action.ariaLabel || action.label"
-          (click)="action.onClick()"
-        >
-          <span class="material-icons">{{ action.icon }}</span>
-          <span class="section-header__action-text">{{ action.label }}</span>
-        </button>
+<div class="base-header {{ headerClass || 'header-blue' }}">
+  <div class="header-container">
+    <div class="header-content">
+      <h1 class="header-title">
+        @if (icon) {
+          <span class="material-icons header-icon">{{ icon }}</span>
+        }
+        {{ title }}
+      </h1>
+      @if (subtitle) {
+        <p class="header-subtitle">{{ subtitle }}</p>
       }
     </div>
-  }
+    
+    @if (actions && actions.length > 0) {
+      <div class="header-actions">
+        <div class="d-flex gap-2 flex-wrap justify-content-end">
+          @for (action of actions; track action.label) {
+            <button
+              class="btn"
+              [class.btn-primary]="action.variant === 'primary' || !action.variant"
+              [class.btn-secondary]="action.variant === 'secondary'"
+              [class.btn-success]="action.variant === 'success'"
+              [class.btn-warning]="action.variant === 'warning'"
+              [class.btn-danger]="action.variant === 'danger'"
+              [attr.aria-label]="action.ariaLabel || action.label"
+              (click)="action.onClick()"
+            >
+              <span class="material-icons">{{ action.icon }}</span>
+              <span class="action-text">{{ action.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
 </div>
