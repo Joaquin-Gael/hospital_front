@@ -2,9 +2,10 @@
   'panel-ui--sidebar-collapsed': isSidebarCollapsed,
   'panel-ui--sidebar-mobile-open': isSidebarMobileOpen
 }">
-  <div 
-    class="panel-ui__overlay" 
-    *ngIf="isSidebarMobileOpen" 
+  <div
+    class="panel-ui__overlay"
+    *ngIf="isSidebarMobileOpen"
+    [class.visible]="isSidebarMobileOpen"
     (click)="closeMobileSidebar()"
     [@fadeInOut]>
   </div>
