@@ -1,59 +1,14 @@
 <div class="admin-panel">
-  <aside class="admin-panel__sidebar" [class.open]="sidebarOpen">
-    <div class="admin-panel__header">
-      <div class="sidebar__logo">
-        <a href="/"><img src="assets/admin-panel-logo.png" alt="Hospital Logo Admin" /></a>
-      </div>
-      
-      <button 
-        class="admin-panel__close-btn"
-        (click)="closeSidebar()"
-        [attr.aria-label]="'Cerrar menú'"
-      >
-        <span class="material-icons">close</span>
-      </button>
-    </div>
-
-    <nav class="admin-panel__nav">
-      <ul class="admin-panel__menu">
-        @for (section of sections; track section.id) {
-          <li class="admin-panel__item">
-            <a
-              [routerLink]="['/admin_panel', section.id]"
-              routerLinkActive="admin-panel__nav-link--active"
-              [attr.aria-current]="activeSection === section.id ? 'page' : null"
-              class="admin-panel__nav-link"
-              (click)="onNavItemClick(section)"
-              [attr.aria-label]="section.label"
-            >
-              <span class="admin-panel__nav-icon">
-                <span class="material-icons">{{ section.icon }}</span>
-              </span>
-              <span class="admin-panel__nav-text">{{ section.label }}</span>
-            </a>
-          </li>
-        }
-      </ul>
-    </nav>
-
-    <div class="admin-panel__footer">
-      <button class="admin-panel__footer-btn" (click)="onLogout()">
-        <span class="material-icons">logout</span>
-        <span class="admin-panel__footer-text">Cerrar Sesión</span>
-      </button>
-    </div>
-  </aside>
-
-  <div class="admin-panel__overlay" 
-       [class.visible]="sidebarOpen"
-       (click)="closeSidebar()"
-       [attr.aria-hidden]="!sidebarOpen">
-  </div>
+  <app-admin-sidebar
+    [activeSection]="activeSection"
+    (sectionSelected)="onSectionSelected($event)"
+    (logout)="onLogout()"
+  ></app-admin-sidebar>
 
   <main class="admin-panel__content">
     <header class="admin-panel__header-bar">
       <div class="admin-panel__header-left">
-        <button 
+        <button
           class="admin-panel__toggle-btn"
           (click)="toggleSidebar()"
           [attr.aria-label]="'Abrir menú'"
