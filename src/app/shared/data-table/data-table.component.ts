@@ -19,6 +19,24 @@ export interface HasIsActive {
   is_active?: boolean;
 }
 
+export interface DataTableActionsConfig {
+  view?: boolean;
+  edit?: boolean;
+  delete?: boolean;
+  ban?: boolean;
+  unban?: boolean;
+  download?: boolean;
+}
+
+const DEFAULT_ACTIONS: Required<DataTableActionsConfig> = {
+  view: true,
+  edit: true,
+  delete: true,
+  ban: true,
+  unban: true,
+  download: true,
+};
+
 @Component({
   selector: 'app-data-table',
   standalone: true,
@@ -36,6 +54,9 @@ export class DataTableComponent<T extends Record<string, any> & HasIsActive> {
   private readonly _showBanUnban = signal<boolean>(false);
   private readonly _enableDownloadReceipt = signal<boolean>(false);
   private readonly _downloadLoading = signal<boolean>(false);
+  private readonly _actions = signal<Required<DataTableActionsConfig>>(
+    DEFAULT_ACTIONS
+  );
 
   @Input({ required: true })
   set data(value: T[] | undefined | null) {
@@ -100,6 +121,14 @@ export class DataTableComponent<T extends Record<string, any> & HasIsActive> {
   }
   get downloadLoading(): boolean {
     return this._downloadLoading();
+  }
+
+  @Input()
+  set actions(value: DataTableActionsConfig | undefined | null) {
+    this._actions.set({ ...DEFAULT_ACTIONS, ...(value ?? {}) });
+  }
+  get actions(): Required<DataTableActionsConfig> {
+    return this._actions();
   }
 
   @Output() readonly edit = new EventEmitter<T>();
