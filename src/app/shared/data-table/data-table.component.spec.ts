@@ -85,4 +85,17 @@ describe('DataTableComponent', () => {
 
     expect(component.currentPage()).toBe(2);
   });
+
+  it('should merge custom action configuration with defaults', () => {
+    component.actions = { edit: false, delete: false };
+
+    expect(component.actions).toEqual({
+      view: true,
+      edit: false,
+      delete: false,
+      ban: true,
+      unban: true,
+      download: true,
+    });
+  });
 });
