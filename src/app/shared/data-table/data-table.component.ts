@@ -34,6 +34,8 @@ export class DataTableComponent<T extends Record<string, any> & HasIsActive> {
   private readonly _searchEnabled = signal<boolean>(true);
   private readonly _pagination = signal<boolean>(true);
   private readonly _showBanUnban = signal<boolean>(false);
+  private readonly _enableDownloadReceipt = signal<boolean>(false);
+  private readonly _downloadLoading = signal<boolean>(false);
 
   @Input({ required: true })
   set data(value: T[] | undefined | null) {
@@ -84,11 +86,28 @@ export class DataTableComponent<T extends Record<string, any> & HasIsActive> {
     return this._showBanUnban();
   }
 
+  @Input()
+  set enableDownloadReceipt(value: boolean | undefined | null) {
+    this._enableDownloadReceipt.set(!!value);
+  }
+  get enableDownloadReceipt(): boolean {
+    return this._enableDownloadReceipt();
+  }
+
+  @Input()
+  set downloadLoading(value: boolean | undefined | null) {
+    this._downloadLoading.set(!!value);
+  }
+  get downloadLoading(): boolean {
+    return this._downloadLoading();
+  }
+
   @Output() readonly edit = new EventEmitter<T>();
   @Output() readonly delete = new EventEmitter<T>();
   @Output() readonly view = new EventEmitter<T>();
   @Output() readonly ban = new EventEmitter<T>();
   @Output() readonly unban = new EventEmitter<T>();
+  @Output() readonly download = new EventEmitter<T>();
 
   readonly searchTerm = signal<string>('');
   readonly currentPage = signal<number>(1);
@@ -186,6 +205,12 @@ export class DataTableComponent<T extends Record<string, any> & HasIsActive> {
 
   onUnban(item: T): void {
     this.unban.emit(item);
+  }
+
+  onDownload(item: T): void {
+    if (!this._downloadLoading()) {
+      this.download.emit(item);
+    }
   }
 
   changePage(page: number): void {
