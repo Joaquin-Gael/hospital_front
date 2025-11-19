@@ -15,7 +15,11 @@ import {
 } from '../../../shared/view-dialog/view-dialog.component';
 import { TurnDocumentsService } from '../../../services/turn-documents/turn-documents.service';
 import { downloadBlob } from '../../../shared/utils/download.utils';
-import { DataTableComponent, TableColumn } from '../../../shared/data-table/data-table.component';
+import {
+  DataTableActionsConfig,
+  DataTableComponent,
+  TableColumn,
+} from '../../../shared/data-table/data-table.component';
 
 @Component({
   selector: 'app-history',
@@ -47,6 +51,15 @@ export class HistoryComponent implements OnInit, OnDestroy {
   error: string | null = null;
   private readonly destroy$ = new Subject<void>();
   private readonly downloadingTurnIds = new Set<string>();
+
+  readonly tableActions: DataTableActionsConfig = {
+    view: true,
+    edit: false,
+    delete: false,
+    ban: false,
+    unban: false,
+    download: true,
+  };
 
   // View dialog properties (siguiendo el patrón del ViewDialogComponent real)
   viewDialogOpen = false;

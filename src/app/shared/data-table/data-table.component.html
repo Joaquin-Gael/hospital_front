@@ -60,7 +60,7 @@
                 }
 
                 <td class="actions-cell">
-                  @if (enableDownloadReceipt) {
+                  @if (actions.download && enableDownloadReceipt) {
                     <button
                       type="button"
                       class="action-button download-button"
@@ -77,34 +77,40 @@
                     </button>
                   }
 
-                  <button
-                    type="button"
-                    class="action-button view-button"
-                    (click)="onView(item)"
-                    aria-label="Ver detalles"
-                  >
-                    <span class="material-icons" aria-hidden="true">visibility</span>
-                  </button>
+                  @if (actions.view) {
+                    <button
+                      type="button"
+                      class="action-button view-button"
+                      (click)="onView(item)"
+                      aria-label="Ver detalles"
+                    >
+                      <span class="material-icons" aria-hidden="true">visibility</span>
+                    </button>
+                  }
 
-                  <button
-                    type="button"
-                    class="action-button edit-button"
-                    (click)="onEdit(item)"
-                    aria-label="Editar"
-                  >
-                    <span class="material-icons" aria-hidden="true">edit</span>
-                  </button>
+                  @if (actions.edit) {
+                    <button
+                      type="button"
+                      class="action-button edit-button"
+                      (click)="onEdit(item)"
+                      aria-label="Editar"
+                    >
+                      <span class="material-icons" aria-hidden="true">edit</span>
+                    </button>
+                  }
 
-                  <button
-                    type="button"
-                    class="action-button delete-button"
-                    (click)="onDelete(item)"
-                    aria-label="Eliminar"
-                  >
-                    <span class="material-icons" aria-hidden="true">delete</span>
-                  </button>
+                  @if (actions.delete) {
+                    <button
+                      type="button"
+                      class="action-button delete-button"
+                      (click)="onDelete(item)"
+                      aria-label="Eliminar"
+                    >
+                      <span class="material-icons" aria-hidden="true">delete</span>
+                    </button>
+                  }
 
-                  @if (showBanUnban && item['is_active']) {
+                  @if (showBanUnban && actions.ban && item['is_active']) {
                     <button
                       type="button"
                       class="action-button ban-button"
@@ -113,7 +119,7 @@
                     >
                       <span class="material-icons" aria-hidden="true">block</span>
                     </button>
-                  } @else if (showBanUnban && !item['is_active']) {
+                  } @else if (showBanUnban && actions.unban && !item['is_active']) {
                     <button
                       type="button"
                       class="action-button unban-button"

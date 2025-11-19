@@ -12,6 +12,7 @@
           [data]="filteredAppointments"
           [columns]="tableColumns"
           [loading]="localLoading"
+          [actions]="tableActions"
           [enableDownloadReceipt]="true"
           [downloadLoading]="isDownloadingAny"
           (view)="onViewDetails($event)"
