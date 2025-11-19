@@ -15,6 +15,7 @@ import {
 } from '../../../shared/view-dialog/view-dialog.component';
 import { TurnDocumentsService } from '../../../services/turn-documents/turn-documents.service';
 import { downloadBlob } from '../../../shared/utils/download.utils';
+import { DataTableComponent, TableColumn } from '../../../shared/data-table/data-table.component';
 
 @Component({
   selector: 'app-history',
@@ -24,7 +25,8 @@ import { downloadBlob } from '../../../shared/utils/download.utils';
   imports: [
     CommonModule,
     LoadingSpinnerComponent,
-    ViewDialogComponent
+    ViewDialogComponent,
+    DataTableComponent,
   ],
 })
 export class HistoryComponent implements OnInit, OnDestroy {
@@ -50,6 +52,27 @@ export class HistoryComponent implements OnInit, OnDestroy {
   viewDialogOpen = false;
   viewDialogItem: any = {};
   viewDialogTitle = '';
+
+  tableColumns: TableColumn[] = [
+    {
+      key: 'date',
+      label: 'Fecha',
+      format: (value: string) => `${this.formatShortDate(value)}`,
+    },
+    {
+      key: 'specialty',
+      label: 'Especialidad',
+    },
+    {
+      key: 'doctorName',
+      label: 'Médico',
+    },
+    {
+      key: 'state',
+      label: 'Estado',
+      format: (value: string) => this.getStateText(value),
+    },
+  ];
 
   // Configuración de columnas para el ViewDialog
   viewDialogColumns: ViewDialogColumn[] = [
@@ -139,6 +162,10 @@ export class HistoryComponent implements OnInit, OnDestroy {
     return this.appointments.length > 0
       ? this.appointments.filter(appointment => appointment.state !== 'waiting')
       : this.localAppointments;
+  }
+
+  get isDownloadingAny(): boolean {
+    return this.downloadingTurnIds.size > 0;
   }
 
   formatShortDate(dateStr: string): string {

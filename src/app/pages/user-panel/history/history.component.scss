@@ -4,216 +4,10 @@
 
 .table-container {
   margin-top: 32px;
-  overflow-x: auto;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow;
 
   @include mobile-only {
     margin: 0 -16px;
-    border-radius: 0;
   }
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: $card-background;
-  min-width: 600px;
-
-  th, td {
-    padding: 16px;
-    text-align: left;
-    vertical-align: middle; // CLAVE: alinea verticalmente al centro
-
-    @include mobile-only {
-      padding: 12px 8px;
-    }
-
-    @include tablet-only {
-      padding: 14px 12px;
-    }
-  }
-
-  th {
-    background-color: $background-color;
-    color: $text-light;
-    font-weight: 500;
-    font-size: 14px;
-    border-bottom: 1px solid $border-color;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-
-    @include mobile-only {
-      font-size: 12px;
-    }
-  }
-
-  td {
-    border-bottom: 1px solid $border-color;
-    color: $text-color;
-    font-size: 14px;
-
-    @include mobile-only {
-      font-size: 13px;
-    }
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-
-  tr:hover td {
-    background-color: $background-color;
-
-    @include touch-device {
-      background-color: transparent;
-    }
-  }
-
-  &__date {
-    gap: 2px;
-    @include flex-column;
-    
-    &-day {
-      font-weight: 500;
-      color: $text-color;
-
-      @include mobile-only {
-        font-size: 13px;
-      }
-    }
-
-    &-time {
-      font-size: 12px;
-      color: $text-light;
-
-      @include mobile-only {
-        font-size: 11px;
-      }
-    }
-  }
-
-  &__actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    justify-content: flex-start; // Alinea a la izquierda igual que las otras columnas
-
-    @include mobile-only {
-      flex-direction: column;
-      gap: 4px;
-    }
-  }
-}
-
-// Alineación específica para la columna de acciones
-th:last-child,
-td:last-child {
-  text-align: left; // Mantiene todo alineado a la izquierda
-}
-
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 500;
-  background-color: rgba(107, 114, 128, 0.1);
-  color: #6b7280;
-  white-space: nowrap;
-
-  &__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #6b7280;
-    flex-shrink: 0;
-  }
-
-  &--completed {
-    background-color: rgba(16, 185, 129, 0.1);
-    color: #10b981;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-
-    .status-badge__dot {
-      background-color: #10b981;
-    }
-  }
-
-  &--cancelled {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-
-    .status-badge__dot {
-      background-color: #ef4444;
-    }
-  }
-
-  @include mobile-only {
-    font-size: 11px;
-    padding: 3px 8px;
-
-    &__dot {
-      width: 6px;
-      height: 6px;
-    }
-  }
-}
-
-.loading-spinner {
-  text-align: center;
-  padding: 2rem;
-  color: $text-color;
-  @include flex-column;
-
-  .loading-icon {
-    font-size: 2rem;
-    animation: spin 1s linear infinite;
-    margin-bottom: 0.5rem;
-  }
-}
-
-.btn-icon {
-  border: none;
-  background: transparent;
-  color: $text-light;
-  padding: 8px;
-  border-radius: $border-radius-sm;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: $transition;
-
-  &:hover:not(:disabled) {
-    color: #3b82f6;
-    background-color: rgba(59, 130, 246, 0.1);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .icon {
-    width: 18px;
-    height: 18px;
-  }
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
 }
 
 .error-state {
@@ -225,47 +19,24 @@ td:last-child {
   margin: 1rem 0;
 }
 
-// Empty state dentro de la tabla
-.empty-state {
-  padding: 60px 20px;
-  text-align: center;
-  @include flex-center;
-  @include flex-column;
+:host ::ng-deep .data-table {
+  .actions-cell {
+    justify-content: flex-start;
+  }
 
-  &__icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background-color: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-    margin-bottom: 24px;
-    @include flex-center;
+  .download-button {
+    color: var(--color-primary);
 
-    .icon {
-      width: 40px;
-      height: 40px;
+    &.is-loading {
+      pointer-events: none;
+      opacity: 0.7;
     }
   }
 
-  h2 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0 0 8px;
-    color: $text-color;
-  }
-
-  p {
-    font-size: 14px;
-    color: $text-light;
-    margin: 0;
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+  .edit-button,
+  .delete-button,
+  .ban-button,
+  .unban-button {
+    display: none;
   }
 }
