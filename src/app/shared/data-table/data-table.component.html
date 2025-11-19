@@ -60,6 +60,23 @@
                 }
 
                 <td class="actions-cell">
+                  @if (enableDownloadReceipt) {
+                    <button
+                      type="button"
+                      class="action-button download-button"
+                      [class.is-loading]="downloadLoading"
+                      [disabled]="downloadLoading"
+                      (click)="onDownload(item)"
+                      aria-label="Descargar comprobante"
+                    >
+                      @if (downloadLoading) {
+                        <span class="button-spinner" aria-hidden="true"></span>
+                      } @else {
+                        <span class="material-icons" aria-hidden="true">download</span>
+                      }
+                    </button>
+                  }
+
                   <button
                     type="button"
                     class="action-button view-button"
