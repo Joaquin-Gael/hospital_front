@@ -1,0 +1,129 @@
+<section class="audit">
+  <app-section-header
+    title="Auditoría"
+    subtitle="Consulta los eventos registrados en el sistema"
+    icon="fact_check"
+    headerClass="header-indigo"
+    [actions]="headerActions"
+  />
+
+  @if (error) {
+    <app-error-message [message]="error" />
+  }
+
+  <div class="audit__filters">
+    <form [formGroup]="filterForm" (ngSubmit)="onApplyFilters()" class="filters-form">
+      <div class="filters-grid">
+        <label class="form-field">
+          <span>Búsqueda</span>
+          <input
+            type="text"
+            formControlName="search"
+            placeholder="Texto libre o descripción"
+          />
+        </label>
+
+        <label class="form-field">
+          <span>Desde</span>
+          <input type="date" formControlName="from_date" />
+        </label>
+
+        <label class="form-field">
+          <span>Hasta</span>
+          <input type="date" formControlName="to_date" />
+        </label>
+
+        <label class="form-field">
+          <span>Actor</span>
+          <input type="text" formControlName="actor_id" placeholder="ID del actor" />
+        </label>
+
+        <label class="form-field">
+          <span>Objetivo</span>
+          <input type="text" formControlName="target_id" placeholder="ID del objetivo" />
+        </label>
+
+        <label class="form-field">
+          <span>Acciones</span>
+          <select formControlName="actions" multiple>
+            @for (action of actions; track action) {
+              <option [ngValue]="action">{{ formatAction(action) }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="form-field">
+          <span>Severidades</span>
+          <select formControlName="severities" multiple>
+            @for (severity of severities; track severity) {
+              <option [ngValue]="severity">{{ formatSeverity(severity) }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="form-field">
+          <span>Tipos de objetivo</span>
+          <select formControlName="target_types" multiple>
+            @for (targetType of targetTypes; track targetType) {
+              <option [ngValue]="targetType">{{ formatTargetType(targetType) }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="form-field">
+          <span>Orden</span>
+          <select formControlName="ordering">
+            <option value="-created_at">Recientes primero</option>
+            <option value="created_at">Antiguos primero</option>
+            <option value="severity">Severidad ascendente</option>
+            <option value="-severity">Severidad descendente</option>
+          </select>
+        </label>
+
+        <label class="form-field">
+          <span>Límite</span>
+          <input type="number" min="1" formControlName="limit" />
+        </label>
+
+        <label class="form-field">
+          <span>Offset</span>
+          <input type="number" min="0" formControlName="offset" />
+        </label>
+      </div>
+
+      <div class="filters-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          <span class="material-icons">filter_alt</span>
+          Aplicar filtros
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="onClearFilters()" [disabled]="loading">
+          <span class="material-icons">refresh</span>
+          Limpiar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="audit__table">
+    @if (loading) {
+      <app-loading-spinner />
+    }
+
+    <app-data-table
+      [data]="auditEvents"
+      [columns]="tableColumns"
+      [loading]="loading"
+      [searchEnabled]="false"
+      [actions]="{ view: true, edit: false, delete: false, ban: false, unban: false, download: false }"
+      (view)="onView($event)"
+    />
+  </div>
+
+  <app-view-dialog
+    [isOpen]="viewDialogOpen"
+    [item]="selectedViewItem"
+    [columns]="viewDialogColumns"
+    title="Detalle del evento"
+    (close)="onCloseDialog()"
+  />
+</section>

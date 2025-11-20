@@ -36,6 +36,7 @@ export class AdminSidebarComponent {
     { id: 'locations', label: 'Ubicaciones', icon: 'location_on' },
     { id: 'users', label: 'Usuarios', icon: 'people' },
     { id: 'cashes', label: 'Cobranzas', icon: 'payments' },
+    { id: 'audit', label: 'Auditoría', icon: 'fact_check' },
   ];
 
   toggleSidebar(): void {

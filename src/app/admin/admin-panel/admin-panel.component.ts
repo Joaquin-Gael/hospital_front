@@ -63,6 +63,12 @@ export class AdminPanelComponent implements OnInit {
       this.activeSection = 'locations';
     } else if (url.includes('/users')) {
       this.activeSection = 'users';
+    } else if (url.includes('/appointments')) {
+      this.activeSection = 'appointments';
+    } else if (url.includes('/cashes')) {
+      this.activeSection = 'cashes';
+    } else if (url.includes('/audit')) {
+      this.activeSection = 'audit';
     } else {
       this.activeSection = 'departments';
     }
