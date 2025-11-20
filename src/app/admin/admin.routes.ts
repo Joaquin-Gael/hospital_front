@@ -56,6 +56,11 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () =>
           import('./users/user-list.component').then((m) => m.UserListComponent),
       },
+      {
+        path: 'cashes',
+        loadComponent: () =>
+          import('./cashes/cashes-list.component').then((m) => m.CashesListComponent),
+      },
     ],
   },
 ];
