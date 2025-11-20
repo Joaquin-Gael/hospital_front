@@ -10,27 +10,33 @@ import { EntityFormComponent, EntityFormPayload, FormField } from '../../shared/
 import { CashesService } from '../../services/cashes/cashes.service';
 import { LoggerService } from '../../services/core/logger.service';
 import { NotificationService } from '../../core/notification';
-import { CashesDetailsRead } from '../../services/interfaces/cashes.interfaces';
 import { HttpErrorResponse } from '@angular/common/http';
 
-interface CashRow extends CashesDetailsRead {
-  formattedAmount: string;
-  formattedCreatedAt: string;
-  formattedUpdatedAt: string;
-  is_active?: boolean;
+// Interfaz adaptada al backend real
+interface CashRow {
+  id: string;
+  income: number;
+  expense: number;
+  date: string;
+  time_transaction: string;
+  balance: number;
+  details?: any;
+  // Campos calculados para mostrar
+  formattedIncome: string;
+  formattedExpense: string;
+  formattedBalance: string;
+  formattedDate: string;
+  formattedTime: string;
+  transactionType: 'Ingreso' | 'Egreso' | 'Sin movimiento';
 }
 
 type CashFormValues = EntityFormPayload & {
   id?: string;
-  turn_id: string;
-  user_id: string;
-  appointment_id?: string | null;
-  amount: number | string;
-  currency: string;
-  status: string;
-  payment_url?: string | null;
-  description?: string | null;
-  receipt_url?: string | null;
+  income: number | string;
+  expense: number | string;
+  date: string;
+  time_transaction?: string;
+  balance?: number | string;
 };
 
 @Component({
@@ -53,7 +59,6 @@ export class CashesListComponent implements OnInit {
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
 
-  readonly defaultStatuses = ['pending', 'paid', 'failed', 'cancelled'];
   readonly tableActions: DataTableActionsConfig = {
     delete: false,
     ban: false,
@@ -72,38 +77,40 @@ export class CashesListComponent implements OnInit {
   viewDialogData: Partial<CashRow> = {};
   viewDialogTitle = signal('');
 
-  statusFilter = signal<'all' | string>('all');
-  turnFilter = signal('');
-  userFilter = signal('');
-  statusOptions = signal<string[]>([...this.defaultStatuses]);
+  // Filtros adaptados
+  transactionTypeFilter = signal<'all' | 'income' | 'expense'>('all');
+  dateFilter = signal('');
 
   readonly filteredCashes = computed<CashRow[]>(() => {
-    const turn = this.turnFilter().trim().toLowerCase();
-    const user = this.userFilter().trim().toLowerCase();
-    const status = this.statusFilter();
+    const type = this.transactionTypeFilter();
+    const date = this.dateFilter().trim();
 
     return this.cashes().filter((cash) => {
-      const matchesTurn = turn ? cash.turn_id?.toLowerCase().includes(turn) : true;
-      const matchesUser = user ? cash.user_id?.toLowerCase().includes(user) : true;
-      const matchesStatus =
-        status === 'all' ? true : cash.status?.toLowerCase() === status.toLowerCase();
+      const matchesType =
+        type === 'all'
+          ? true
+          : type === 'income'
+          ? cash.income > 0
+          : cash.expense > 0;
 
-      return matchesTurn && matchesUser && matchesStatus;
+      const matchesDate = date ? cash.date.includes(date) : true;
+
+      return matchesType && matchesDate;
     });
   });
 
   readonly headerActions: ActionButton[] = [
     {
-      label: 'Nueva cobranza',
+      label: 'Nueva transacción',
       icon: 'add',
-      ariaLabel: 'Crear nuevo registro de cobranza',
+      ariaLabel: 'Crear nueva transacción de caja',
       variant: 'primary',
       onClick: () => this.onAddNew(),
     },
     {
       label: 'Refrescar',
       icon: 'refresh',
-      ariaLabel: 'Actualizar lista de cobranzas',
+      ariaLabel: 'Actualizar lista de transacciones',
       variant: 'secondary',
       onClick: () => this.loadData(),
     },
@@ -111,27 +118,22 @@ export class CashesListComponent implements OnInit {
 
   readonly tableColumns: TableColumn[] = [
     { key: 'id', label: '#ID' },
-    { key: 'turn_id', label: 'Turno' },
-    { key: 'user_id', label: 'Usuario' },
-    { key: 'status', label: 'Estado', format: (value: string) => this.formatStatus(value) },
-    { key: 'formattedAmount', label: 'Monto' },
-    { key: 'currency', label: 'Moneda' },
-    { key: 'formattedCreatedAt', label: 'Creado' },
+    { key: 'formattedDate', label: 'Fecha' },
+    { key: 'formattedTime', label: 'Hora' },
+    { key: 'transactionType', label: 'Tipo' },
+    { key: 'formattedIncome', label: 'Ingreso' },
+    { key: 'formattedExpense', label: 'Egreso' },
+    { key: 'formattedBalance', label: 'Balance' },
   ];
 
   readonly viewDialogColumns: ViewDialogColumn[] = [
-    { key: 'id', label: 'ID de Cobranza' },
-    { key: 'status', label: 'Estado', format: (value: string) => this.formatStatus(value) },
-    { key: 'formattedAmount', label: 'Monto' },
-    { key: 'currency', label: 'Moneda' },
-    { key: 'turn_id', label: 'Turno asociado' },
-    { key: 'appointment_id', label: 'Cita asociada' },
-    { key: 'user_id', label: 'Usuario' },
-    { key: 'payment_url', label: 'URL de pago' },
-    { key: 'receipt_url', label: 'Comprobante' },
-    { key: 'description', label: 'Descripción' },
-    { key: 'formattedCreatedAt', label: 'Creado' },
-    { key: 'formattedUpdatedAt', label: 'Actualizado' },
+    { key: 'id', label: 'ID de Transacción' },
+    { key: 'transactionType', label: 'Tipo de Transacción' },
+    { key: 'formattedIncome', label: 'Ingreso' },
+    { key: 'formattedExpense', label: 'Egreso' },
+    { key: 'formattedBalance', label: 'Balance' },
+    { key: 'formattedDate', label: 'Fecha' },
+    { key: 'formattedTime', label: 'Hora' },
   ];
 
   ngOnInit(): void {
@@ -142,26 +144,14 @@ export class CashesListComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    const params: Record<string, string> = {};
-    if (this.statusFilter() !== 'all') {
-      params['status'] = this.statusFilter();
-    }
-    if (this.turnFilter().trim()) {
-      params['turn_id'] = this.turnFilter().trim();
-    }
-    if (this.userFilter().trim()) {
-      params['user_id'] = this.userFilter().trim();
-    }
-
-    this.cashesService.getCashes(params).subscribe({
+    this.cashesService.getCashes().subscribe({
       next: (cashes) => {
         const mapped = cashes.map((cash) => this.mapCashToRow(cash));
         this.cashes.set(mapped);
-        this.refreshStatusOptions(mapped);
         this.loading.set(false);
       },
       error: (error: HttpErrorResponse) => {
-        this.handleError(error, 'Error al cargar las cobranzas');
+        this.handleError(error, 'Error al cargar las transacciones de caja');
         this.loading.set(false);
       },
     });
@@ -172,8 +162,10 @@ export class CashesListComponent implements OnInit {
     this.selectedCash.set(null);
     this.showForm.set(true);
     this.formInitialData = {
-      status: this.statusOptions()[0] ?? 'pending',
-      currency: 'ARS',
+      income: 0,
+      expense: 0,
+      date: new Date().toISOString().split('T')[0],
+      balance: 0,
     };
   }
 
@@ -182,21 +174,17 @@ export class CashesListComponent implements OnInit {
     this.selectedCash.set(cash);
     this.showForm.set(true);
     this.formInitialData = {
-      turn_id: cash.turn_id,
-      user_id: cash.user_id,
-      appointment_id: cash.appointment_id ?? '',
-      amount: cash.amount,
-      currency: cash.currency,
-      status: cash.status,
-      payment_url: cash.payment_url ?? '',
-      description: cash.description ?? '',
-      receipt_url: cash.receipt_url ?? '',
+      income: cash.income,
+      expense: cash.expense,
+      date: cash.date,
+      time_transaction: cash.time_transaction,
+      balance: cash.balance,
     };
   }
 
   onView(cash: CashRow): void {
     this.viewDialogData = cash;
-    this.viewDialogTitle.set(`Cobranza ${cash.id}`);
+    this.viewDialogTitle.set(`Transacción ${cash.id}`);
     this.viewDialogOpen.set(true);
   }
 
@@ -204,10 +192,15 @@ export class CashesListComponent implements OnInit {
     this.formLoading.set(true);
     this.error.set(null);
 
-    const amount = Number(formData.amount);
+    const income = Number(formData.income);
+    const expense = Number(formData.expense);
+    const balance = Number(formData.balance || 0);
+
     const payload = {
       ...formData,
-      amount,
+      income,
+      expense,
+      balance,
       id: this.formMode() === 'edit' ? this.selectedCash()?.id : undefined,
     };
 
@@ -215,10 +208,10 @@ export class CashesListComponent implements OnInit {
       next: (cash) => {
         this.notificationService.success(
           this.formMode() === 'create'
-            ? 'Cobranza creada correctamente'
-            : 'Cobranza actualizada correctamente'
+            ? 'Transacción creada correctamente'
+            : 'Transacción actualizada correctamente'
         );
-        this.logger.info('Cobranza guardada', cash);
+        this.logger.info('Transacción guardada', cash);
         this.formLoading.set(false);
         this.showForm.set(false);
         this.selectedCash.set(null);
@@ -228,8 +221,8 @@ export class CashesListComponent implements OnInit {
         this.handleError(
           error,
           this.formMode() === 'create'
-            ? 'Error al crear la cobranza'
-            : 'Error al actualizar la cobranza'
+            ? 'Error al crear la transacción'
+            : 'Error al actualizar la transacción'
         );
         this.formLoading.set(false);
       },
@@ -242,28 +235,21 @@ export class CashesListComponent implements OnInit {
     this.formInitialData = null;
   }
 
-  onStatusFilterChange(status: string): void {
-    this.statusFilter.set(status as 'all' | string);
-    this.loadData();
+  onTransactionTypeFilterChange(type: string): void {
+    this.transactionTypeFilter.set(type as 'all' | 'income' | 'expense');
   }
 
-  onTurnFilterChange(turn: string): void {
-    this.turnFilter.set(turn);
-  }
-
-  onUserFilterChange(user: string): void {
-    this.userFilter.set(user);
+  onDateFilterChange(date: string): void {
+    this.dateFilter.set(date);
   }
 
   applyFilters(): void {
-    this.loadData();
+    // Los filtros se aplican automáticamente por el computed
   }
 
   resetFilters(): void {
-    this.statusFilter.set('all');
-    this.turnFilter.set('');
-    this.userFilter.set('');
-    this.loadData();
+    this.transactionTypeFilter.set('all');
+    this.dateFilter.set('');
   }
 
   closeViewDialog(): void {
@@ -274,114 +260,84 @@ export class CashesListComponent implements OnInit {
   get formFields(): FormField<CashFormValues>[] {
     return [
       {
-        key: 'turn_id',
-        label: 'ID de turno',
-        type: 'text',
+        key: 'date',
+        label: 'Fecha',
+        type: 'date',
         required: true,
         validators: [Validators.required],
-        readonly: this.formMode() === 'edit',
       },
       {
-        key: 'user_id',
-        label: 'ID de usuario',
-        type: 'text',
-        required: true,
-        validators: [Validators.required],
-        readonly: this.formMode() === 'edit',
-      },
-      {
-        key: 'appointment_id',
-        label: 'ID de cita (opcional)',
-        type: 'text',
-        required: false,
-      },
-      {
-        key: 'amount',
-        label: 'Monto',
+        key: 'income',
+        label: 'Ingreso',
         type: 'number',
         required: true,
         validators: [Validators.required, Validators.min(0)],
+        placeholder: 'Monto de ingreso',
       },
       {
-        key: 'currency',
-        label: 'Moneda',
-        type: 'text',
+        key: 'expense',
+        label: 'Egreso',
+        type: 'number',
         required: true,
-        validators: [Validators.required, Validators.maxLength(5)],
-        placeholder: 'Ej: ARS, USD',
+        validators: [Validators.required, Validators.min(0)],
+        placeholder: 'Monto de egreso',
       },
       {
-        key: 'status',
-        label: 'Estado',
-        type: 'select',
-        required: true,
-        options: this.statusOptions().map((status) => ({
-          value: status,
-          label: this.formatStatus(status),
-        })),
-      },
-      {
-        key: 'payment_url',
-        label: 'URL de pago',
-        type: 'text',
+        key: 'balance',
+        label: 'Balance',
+        type: 'number',
         required: false,
-      },
-      {
-        key: 'receipt_url',
-        label: 'URL de comprobante',
-        type: 'text',
-        required: false,
-      },
-      {
-        key: 'description',
-        label: 'Descripción',
-        type: 'textarea',
-        required: false,
-        validators: [Validators.maxLength(500)],
+        validators: [Validators.min(0)],
+        placeholder: 'Balance resultante',
       },
     ];
   }
 
   formInitialData: Partial<CashFormValues> | null = null;
 
-  private mapCashToRow(cash: CashesDetailsRead): CashRow {
+  private mapCashToRow(cash: any): CashRow {
+    const income = cash.income || 0;
+    const expense = cash.expense || 0;
+    
+    let transactionType: 'Ingreso' | 'Egreso' | 'Sin movimiento';
+    if (income > 0) transactionType = 'Ingreso';
+    else if (expense > 0) transactionType = 'Egreso';
+    else transactionType = 'Sin movimiento';
+
     return {
-      ...cash,
-      formattedAmount: this.formatAmount(cash.amount, cash.currency),
-      formattedCreatedAt: this.formatDate(cash.created_at),
-      formattedUpdatedAt: this.formatDate(cash.updated_at),
+      id: cash.id,
+      income,
+      expense,
+      date: cash.date,
+      time_transaction: cash.time_transaction,
+      balance: cash.balance || 0,
+      details: cash.details,
+      formattedIncome: this.formatCurrency(income),
+      formattedExpense: this.formatCurrency(expense),
+      formattedBalance: this.formatCurrency(cash.balance || 0),
+      formattedDate: this.formatDate(cash.date),
+      formattedTime: cash.time_transaction || 'N/A',
+      transactionType,
     };
   }
 
-  private refreshStatusOptions(cashes: CashRow[]): void {
-    const statuses = new Set<string>(this.defaultStatuses);
-    cashes.forEach((cash) => {
-      if (cash.status) {
-        statuses.add(cash.status);
-      }
-    });
-    this.statusOptions.set(Array.from(statuses));
-  }
-
-  private formatAmount(amount: number, currency: string): string {
-    if (isNaN(amount)) {
-      return 'N/A';
+  private formatCurrency(amount: number): string {
+    if (isNaN(amount) || amount === 0) {
+      return '-';
     }
-    return `${currency ?? ''} ${amount.toFixed(2)}`.trim();
-  }
-
-  private formatStatus(status: string): string {
-    if (!status) return 'Desconocido';
-    return status
-      .replace(/_/g, ' ')
-      .toLowerCase()
-      .replace(/(^|\s)\S/g, (match) => match.toUpperCase());
+    return `$ ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
   private formatDate(date?: string): string {
     if (!date) return 'Sin fecha';
     const parsed = new Date(date);
-    return isNaN(parsed.getTime()) ? date : parsed.toLocaleString();
+    return isNaN(parsed.getTime()) 
+      ? date 
+      : parsed.toLocaleDateString('es-AR', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit' 
+        });
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {

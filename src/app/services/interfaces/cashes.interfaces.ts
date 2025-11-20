@@ -46,3 +46,33 @@ export interface PayTurnWithCashResponse extends PayTurnResponse {
   cash?: CashesRead | null;
   cash_detail?: CashesDetailsRead | null;
 }
+
+export interface CashesDetailsCreate {
+  description: string;
+  amount: number;
+  date: string;
+  time_transaction?: string;
+  service_id: string;
+  cash_id: string;
+}
+
+// ========== PAYMENT CALLBACKS - Callbacks de Stripe ==========
+export interface CashesPaymentSuccessPayload {
+  paymentIntent?: string;
+  paymentIntentClientSecret?: string;
+  redirectStatus?: string;
+  sessionId?: string;
+  cashId?: string;
+  turnId?: string;
+  appointmentId?: string;
+  metadata?: Record<string, unknown>;
+  rawParams: Record<string, string>;
+}
+
+export interface CashesPaymentCancelPayload {
+  paymentIntent?: string;
+  cashId?: string;
+  turnId?: string;
+  redirectStatus?: string;
+  rawParams: Record<string, string>;
+}
