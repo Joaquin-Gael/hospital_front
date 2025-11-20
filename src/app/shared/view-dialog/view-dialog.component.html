@@ -40,10 +40,10 @@
                     <span>{{ formatDate(item[column.key]) }}</span>
                   }
                   @default {
-                    <span 
-                      [class.view-dialog__empty-value]="!getValue(column, item[column.key])"
+                    <span
+                      [class.view-dialog__empty-value]="getValue(column, item[column.key]) === undefined || getValue(column, item[column.key]) === null"
                       class="view-dialog__value">
-                      {{ getValue(column, item[column.key]) || 'No disponible' }}
+                      {{ getValue(column, item[column.key]) ?? 'No disponible' }}
                     </span>
                   }
                 }

@@ -107,6 +107,13 @@ export class DoctorListComponent implements OnInit {
       ariaLabel: 'Agregar nuevo doctor',
       onClick: () => this.onAddNew(),
     },
+    {
+      label: 'Refrescar',
+      icon: 'refresh',
+      variant: 'secondary',
+      ariaLabel: 'Refrescar lista de doctores',
+      onClick: () => this.loadData(),
+    },
   ];
 
   private readonly passwordPattern =

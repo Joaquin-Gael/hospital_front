@@ -27,9 +27,38 @@
     @if (loading) {
       <app-loading-spinner [message]="'Cargando departamentos...'"></app-loading-spinner>
     } @else {
+      <div class="filters">
+        <div class="filters__group">
+          <label class="filters__label" for="department-search">Búsqueda</label>
+          <input
+            id="department-search"
+            class="filters__input"
+            type="text"
+            [value]="searchTerm"
+            (input)="searchTerm = $any($event.target).value"
+            placeholder="Buscar por nombre o descripción"
+          />
+        </div>
+
+        <div class="filters__group">
+          <label class="filters__label" for="location-filter">Ubicación</label>
+          <select
+            id="location-filter"
+            class="filters__select"
+            [value]="locationFilter"
+            (change)="locationFilter = $any($event.target).value"
+          >
+            <option value="all">Todas</option>
+            <option *ngFor="let location of locations" [value]="location.id">
+              {{ location.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
       <div class="department-section__table-container">
         <app-data-table
-          [data]="departments"
+          [data]="filteredDepartments"
           [columns]="tableColumns"
           [loading]="loading"
           (edit)="onEdit($event)"
