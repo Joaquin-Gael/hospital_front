@@ -1,0 +1,59 @@
+<div class="admin-section">
+  <app-section-header
+    title="Turnos y Citas"
+    subtitle="Administra las reservas de pacientes"
+    icon="event"
+    headerClass="header-indigo"
+    [actions]="headerActions"
+  ></app-section-header>
+
+  <div class="admin-section__content">
+    <app-error-message *ngIf="error" [message]="error"></app-error-message>
+
+    <div class="filters">
+      <label class="filters__label" for="state-filter">Estado</label>
+      <select
+        id="state-filter"
+        class="filters__select"
+        [value]="stateFilter"
+        (change)="onStateFilterChange($any($event.target).value)"
+      >
+        <option *ngFor="let option of stateOptions" [value]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+
+    <app-data-table
+      [columns]="tableColumns"
+      [data]="filteredAppointments"
+      [loading]="loading"
+      (view)="onView($event)"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+    ></app-data-table>
+
+    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+  </div>
+
+  <div class="admin-section__form" *ngIf="showForm">
+    <app-entity-form
+      [fields]="formFields"
+      [initialData]="formInitialData"
+      [mode]="formMode"
+      [loading]="formLoading"
+      [title]="formMode === 'create' ? 'Nuevo turno' : 'Editar turno'"
+      [submitLabel]="formMode === 'create' ? 'Crear' : 'Guardar cambios'"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onFormCancel()"
+    ></app-entity-form>
+  </div>
+
+  <app-view-dialog
+    [isOpen]="viewDialogOpen"
+    [item]="viewDialogData"
+    [columns]="viewDialogColumns"
+    [title]="viewDialogTitle"
+    (close)="closeViewDialog()"
+  ></app-view-dialog>
+</div>

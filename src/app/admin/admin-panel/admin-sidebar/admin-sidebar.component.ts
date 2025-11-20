@@ -29,6 +29,7 @@ export class AdminSidebarComponent {
     { id: 'departments', label: 'Departamentos', icon: 'business' },
     { id: 'specialities', label: 'Especialidades', icon: 'local_hospital' },
     { id: 'doctors', label: 'Doctores', icon: 'person' },
+    { id: 'appointments', label: 'Turnos', icon: 'event' },
     { id: 'schedules', label: 'Horarios', icon: 'schedule' },
     { id: 'health-insurances', label: 'Obras Sociales', icon: 'health_and_safety' },
     { id: 'services', label: 'Servicios', icon: 'medical_services' },
