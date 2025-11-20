@@ -32,7 +32,7 @@ export class ViewDialogComponent {
   }
 
   getValueType(column: ViewDialogColumn, value: any): string {
-    if (!value) return 'default';
+    if (value === null || value === undefined) return 'default';
 
     if (column.key === 'isActive' || typeof value === 'boolean') {
       return 'boolean';

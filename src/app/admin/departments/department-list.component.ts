@@ -64,6 +64,8 @@ export class DepartmentListComponent implements OnInit {
   departments: Department[] = [];
   locations: LocationModel[] = [];
   selectedDepartment: Department | null = null;
+  searchTerm = '';
+  locationFilter: string = 'all';
   loading = false;
   formLoading = false;
   error: string | null = null;
@@ -83,6 +85,13 @@ export class DepartmentListComponent implements OnInit {
       variant: 'primary',
       ariaLabel: 'Agregar nuevo departamento',
       onClick: () => this.onAddNew(),
+    },
+    {
+      label: 'Refrescar',
+      icon: 'refresh',
+      variant: 'secondary',
+      ariaLabel: 'Refrescar departamentos',
+      onClick: () => this.loadData(),
     },
   ];
 
@@ -139,6 +148,20 @@ export class DepartmentListComponent implements OnInit {
 
   private _formFields: FormField<DepartmentFormValues>[] = [];
   formInitialData: Partial<DepartmentFormValues> | null = null;
+
+  get filteredDepartments(): Department[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    return this.departments.filter((department) => {
+      const matchesTerm = term
+        ? `${department.name} ${department.description}`
+            .toLowerCase()
+            .includes(term)
+        : true;
+      const matchesLocation =
+        this.locationFilter === 'all' || department.location_id === this.locationFilter;
+      return matchesTerm && matchesLocation;
+    });
+  }
 
   ngOnInit(): void {
     this.loadData();

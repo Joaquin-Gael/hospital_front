@@ -7,86 +7,88 @@
     [actions]="headerActions"
   ></app-section-header>
 
-  <div class="cashes-section__content">
-    <app-error-message *ngIf="error()" [message]="error()"></app-error-message>
-
-    <div class="filters">
-      <div class="filters__group">
-        <label class="filters__label" for="status-filter">Estado</label>
-        <select
-          id="status-filter"
-          class="filters__select"
-          [value]="statusFilter()"
-          (change)="onStatusFilterChange($any($event.target).value)"
-        >
-          <option value="all">Todos</option>
-          <option *ngFor="let status of statusOptions()" [value]="status">
-            {{ status | titlecase }}
-          </option>
-        </select>
-      </div>
-
-      <div class="filters__group">
-        <label class="filters__label" for="turn-filter">Turno</label>
-        <input
-          id="turn-filter"
-          class="filters__input"
-          type="text"
-          [value]="turnFilter()"
-          placeholder="ID de turno"
-          (input)="onTurnFilterChange($any($event.target).value)"
-        />
-      </div>
-
-      <div class="filters__group">
-        <label class="filters__label" for="user-filter">Usuario</label>
-        <input
-          id="user-filter"
-          class="filters__input"
-          type="text"
-          [value]="userFilter()"
-          placeholder="ID de usuario"
-          (input)="onUserFilterChange($any($event.target).value)"
-        />
-      </div>
-
-      <div class="filters__actions">
-        <button type="button" class="btn btn-primary" (click)="applyFilters()">
-          <span class="material-icons" aria-hidden="true">filter_alt</span>
-          Aplicar filtros
-        </button>
-        <button type="button" class="btn btn-secondary" (click)="resetFilters()">
-          <span class="material-icons" aria-hidden="true">restart_alt</span>
-          Limpiar
-        </button>
-      </div>
+  @if (showForm()) {
+    <div class="cashes-section__form">
+      <app-entity-form
+        [fields]="formFields"
+        [initialData]="formInitialData"
+        [mode]="formMode()"
+        [loading]="formLoading()"
+        [title]="formMode() === 'create' ? 'Nueva cobranza' : 'Editar cobranza'"
+        [submitLabel]="formMode() === 'create' ? 'Crear' : 'Guardar cambios'"
+        (formSubmit)="onFormSubmit($event)"
+        (formCancel)="onFormCancel()"
+      ></app-entity-form>
     </div>
+  } @else {
+    <div class="cashes-section__content">
+      <app-error-message *ngIf="error()" [message]="error()"></app-error-message>
 
-    <app-data-table
-      [columns]="tableColumns"
-      [data]="filteredCashes()"
-      [loading]="loading()"
-      [actions]="tableActions"
-      (view)="onView($event)"
-      (edit)="onEdit($event)"
-      [pagination]="true"
-    ></app-data-table>
+      <div class="filters">
+        <div class="filters__group">
+          <label class="filters__label" for="status-filter">Estado</label>
+          <select
+            id="status-filter"
+            class="filters__select"
+            [value]="statusFilter()"
+            (change)="onStatusFilterChange($any($event.target).value)"
+          >
+            <option value="all">Todos</option>
+            <option *ngFor="let status of statusOptions()" [value]="status">
+              {{ status | titlecase }}
+            </option>
+          </select>
+        </div>
 
-    <app-loading-spinner *ngIf="loading()"></app-loading-spinner>
-  </div>
+        <div class="filters__group">
+          <label class="filters__label" for="turn-filter">Turno</label>
+          <input
+            id="turn-filter"
+            class="filters__input"
+            type="text"
+            [value]="turnFilter()"
+            placeholder="ID de turno"
+            (input)="onTurnFilterChange($any($event.target).value)"
+          />
+        </div>
 
-  <div class="cashes-section__form" *ngIf="showForm()">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="formInitialData"
-      [mode]="formMode()"
-      [loading]="formLoading()"
-      [title]="formMode() === 'create' ? 'Nueva cobranza' : 'Editar cobranza'"
-      [submitLabel]="formMode() === 'create' ? 'Crear' : 'Guardar cambios'"
-      (formSubmit)="onFormSubmit($event)"
-      (formCancel)="onFormCancel()"
-    ></app-entity-form>
-  </div>
+        <div class="filters__group">
+          <label class="filters__label" for="user-filter">Usuario</label>
+          <input
+            id="user-filter"
+            class="filters__input"
+            type="text"
+            [value]="userFilter()"
+            placeholder="ID de usuario"
+            (input)="onUserFilterChange($any($event.target).value)"
+          />
+        </div>
+
+        <div class="filters__actions">
+          <button type="button" class="btn btn-primary" (click)="applyFilters()">
+            <span class="material-icons" aria-hidden="true">filter_alt</span>
+            Aplicar filtros
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="resetFilters()">
+            <span class="material-icons" aria-hidden="true">restart_alt</span>
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <app-data-table
+        [columns]="tableColumns"
+        [data]="filteredCashes()"
+        [loading]="loading()"
+        [actions]="tableActions"
+        (view)="onView($event)"
+        (edit)="onEdit($event)"
+        [pagination]="true"
+      ></app-data-table>
+
+      <app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+    </div>
+  }
 
   <app-view-dialog
     [isOpen]="viewDialogOpen()"
