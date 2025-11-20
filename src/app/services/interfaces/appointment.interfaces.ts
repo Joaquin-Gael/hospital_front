@@ -78,6 +78,7 @@ export interface Turn {
   doctor_id: string;
   appointment_id: string | null;
   service_id: string;
+  health_insurance: string | null;
   user?: UserRead;
   doctor?: Doctor;
   service?: Service[];
