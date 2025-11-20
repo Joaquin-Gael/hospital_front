@@ -33,6 +33,7 @@ import { Service } from '../../services/interfaces/hospital.interfaces';
 import { Validators } from '@angular/forms';
 
 interface AppointmentRow extends Turn {
+  health_insurance?: string | null;
   patientName: string;
   doctorName: string;
   serviceName: string;
@@ -166,7 +167,10 @@ export class AppointmentsListComponent implements OnInit {
         label: 'Servicio',
         type: 'select',
         required: true,
-        options: this.services.map((service) => ({ value: service.id, label: service.name })),
+        options: this.services.map((service) => ({
+          value: service.id,
+          label: service.name ?? 'Servicio sin nombre',
+        })),
         readonly: this.formMode === 'edit',
       },
       {
