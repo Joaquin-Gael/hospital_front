@@ -3,6 +3,7 @@
 @use '../shared.scss' as *;
 
 .notifications {
+  padding: 24px;
   &__list {
     gap: 16px;
     @include flex-column;
