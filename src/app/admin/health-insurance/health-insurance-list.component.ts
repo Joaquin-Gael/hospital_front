@@ -61,6 +61,7 @@ export class HealthInsuranceListComponent implements OnInit {
 
   insurances: HealthInsuranceRead[] = [];
   selectedInsurance: HealthInsuranceRead | null = null;
+  searchTerm = '';
   loading = false;
   formLoading = false;
   error: string | null = null;
@@ -80,6 +81,13 @@ export class HealthInsuranceListComponent implements OnInit {
       variant: 'primary',
       ariaLabel: 'Agregar nueva obra social',
       onClick: () => this.onAddNew(),
+    },
+    {
+      label: 'Refrescar',
+      icon: 'refresh',
+      variant: 'secondary',
+      ariaLabel: 'Refrescar obras sociales',
+      onClick: () => this.loadInsurances(),
     },
   ];
 
@@ -148,6 +156,15 @@ export class HealthInsuranceListComponent implements OnInit {
 
   private _formFields: FormField<HealthInsuranceFormValues>[] = [];
   formInitialData: Partial<HealthInsuranceFormValues> | null = null;
+
+  get filteredInsurances(): HealthInsuranceRead[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.insurances;
+
+    return this.insurances.filter((insurance) =>
+      `${insurance.name} ${insurance.description}`.toLowerCase().includes(term)
+    );
+  }
 
   ngOnInit(): void {
     this.loadInsurances();
