@@ -4,12 +4,15 @@ email: string;
 password: string;
 }
 export interface Service {
-id: string;
-name?: string;
-description?: string;
-price: number;
-icon_code?: string;
-specialty_id: string; // UUID
+  id: string;
+  name?: string;
+  description?: string;
+  price: number;
+  icon_code?: string;
+  is_available: boolean;
+  available_doctors_count?: number | null;
+  specialty?: Specialty | null;
+  specialty_id: string; // UUID
 }
 export interface Specialty {
 id: string; // UUID
