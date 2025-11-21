@@ -12,9 +12,9 @@ import {
   TurnDelete,
   TurnRescheduleRequest,
   TurnRescheduleResponse,
+  TurnPaymentResponse,
   UpdateTurnState,
 } from '../interfaces/appointment.interfaces';
-import { PayTurnWithCashResponse } from '../interfaces/cashes.interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -81,9 +81,9 @@ export class AppointmentService {
    * @param turnData Datos del turno a crear.
    * @returns Observable con los datos del turno creado y la URL de pago.
    */
-  createTurn(turnData: TurnCreate): Observable<PayTurnWithCashResponse> {
+  createTurn(turnData: TurnCreate): Observable<TurnPaymentResponse> {
     this.logger.debug('Creando nuevo turno', turnData);
-    return this.apiService.post<PayTurnWithCashResponse>(APPOINTMENT_ENDPOINTS.CREATE_TURN, turnData).pipe(
+    return this.apiService.post<TurnPaymentResponse>(APPOINTMENT_ENDPOINTS.CREATE_TURN, turnData).pipe(
       catchError((error) => this.handleError('Error creating turn', error))
     );
   }

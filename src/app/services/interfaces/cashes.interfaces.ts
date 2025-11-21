@@ -1,5 +1,3 @@
-import { PayTurnResponse } from './appointment.interfaces';
-
 export interface CashesRead {
   id: string;
   turn_id: string;
@@ -40,9 +38,4 @@ export interface CashesPaymentCancelPayload {
   turnId?: string;
   redirectStatus?: string;
   rawParams: Record<string, string>;
-}
-
-export interface PayTurnWithCashResponse extends PayTurnResponse {
-  cash?: CashesRead | null;
-  cash_detail?: CashesDetailsRead | null;
 }
