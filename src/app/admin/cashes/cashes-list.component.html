@@ -1,22 +1,28 @@
 <div class="cashes-section">
   <app-section-header
-    title="Caja - Movimientos"
-    subtitle="Administra los movimientos de caja del sistema"
+    title="Pagos"
+    subtitle="Administra los pagos registrados por las pasarelas"
     icon="payments"
     headerClass="header-indigo"
     [actions]="headerActions"
   ></app-section-header>
 
-  @if (showForm()) {
+  <div class="legacy-hint">
+    <span class="material-icons" aria-hidden="true">history</span>
+    Las creaciones/ediciones manuales de caja pertenecen a un flujo heredado. Desde aquí solo se
+    listan pagos y se actualiza su estado.
+  </div>
+
+  @if (showStatusForm()) {
     <div class="cashes-section__form">
       <app-entity-form
-        [fields]="formFields"
-        [initialData]="formInitialData"
-        [mode]="formMode()"
+        [fields]="statusFormFields"
+        [initialData]="statusFormInitialData"
+        [mode]="statusFormMode()"
         [loading]="formLoading()"
-        [title]="formMode() === 'create' ? 'Nueva transacción' : 'Editar transacción'"
-        [submitLabel]="formMode() === 'create' ? 'Crear' : 'Guardar cambios'"
-        (formSubmit)="onFormSubmit($event)"
+        title="Actualizar estado del pago"
+        submitLabel="Guardar cambios"
+        (formSubmit)="onStatusFormSubmit($event)"
         (formCancel)="onFormCancel()"
       ></app-entity-form>
     </div>
@@ -24,49 +30,51 @@
     <div class="cashes-section__content">
       <app-error-message *ngIf="error()" [message]="error()"></app-error-message>
 
-      <!-- Filtros adaptados -->
       <div class="filters">
         <div class="filters__group">
-          <label class="filters__label" for="type-filter">Tipo de Transacción</label>
-          <select
-            id="type-filter"
-            class="filters__select"
-            [value]="transactionTypeFilter()"
-            (change)="onTransactionTypeFilterChange($any($event.target).value)"
-          >
-            <option value="all">Todos</option>
-            <option value="income">Ingresos</option>
-            <option value="expense">Egresos</option>
-          </select>
-        </div>
-
-        <div class="filters__group">
-          <label class="filters__label" for="date-filter">Fecha</label>
+          <label class="filters__label" for="user-filter">Usuario</label>
           <input
-            id="date-filter"
+            id="user-filter"
             class="filters__input"
-            type="date"
-            [value]="dateFilter()"
-            (input)="onDateFilterChange($any($event.target).value)"
+            type="text"
+            placeholder="ID o email"
+            [value]="userFilter()"
+            (input)="userFilter.set($any($event.target).value)"
+            (change)="onFiltersChange()"
           />
         </div>
 
+        <div class="filters__group">
+          <label class="filters__label" for="status-filter">Estado</label>
+          <select
+            id="status-filter"
+            class="filters__select"
+            [value]="statusFilter()"
+            (change)="statusFilter.set($any($event.target).value); onFiltersChange()"
+          >
+            <option value="all">Todos</option>
+            @for (status of defaultStatuses; track status) {
+              <option [value]="status">{{ formatStatus(status) }}</option>
+            }
+          </select>
+        </div>
+
         <div class="filters__actions">
-          <button type="button" class="btn btn-secondary" (click)="resetFilters()">
-            <span class="material-icons" aria-hidden="true">restart_alt</span>
-            Limpiar
+          <button type="button" class="btn btn-secondary" (click)="loadData()">
+            <span class="material-icons" aria-hidden="true">refresh</span>
+            Aplicar
           </button>
         </div>
       </div>
 
-      <!-- Tabla de datos -->
       <app-data-table
         [columns]="tableColumns"
-        [data]="filteredCashes()"
+        [data]="filteredPayments()"
         [loading]="loading()"
         [actions]="tableActions"
         (view)="onView($event)"
         (edit)="onEdit($event)"
+        (delete)="onDelete($event)"
         [pagination]="true"
       ></app-data-table>
 
@@ -74,7 +82,6 @@
     </div>
   }
 
-  <!-- Diálogo de vista detallada -->
   <app-view-dialog
     [isOpen]="viewDialogOpen()"
     [item]="viewDialogData"

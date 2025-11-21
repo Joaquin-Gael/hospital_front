@@ -29,6 +29,7 @@ export interface PaymentRead {
   user_id?: string;
   status: PaymentStatus;
   amount: number;
+  amount_total?: number | null;
   currency: string;
   payment_method?: PaymentMethod | null;
   payment_url?: string | null;
@@ -38,6 +39,7 @@ export interface PaymentRead {
   receipt_url?: string | null;
   items?: PaymentItem[];
   metadata?: Record<string, unknown> | null;
+  gateway_metadata?: Record<string, unknown> | null;
   created_at?: string;
   updated_at?: string;
 }
