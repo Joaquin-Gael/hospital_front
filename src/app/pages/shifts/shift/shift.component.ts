@@ -25,7 +25,8 @@ import { AppointmentSummaryComponent } from '../appointment-summary/appointment-
 import { NavigationButtonsComponent } from '../navigation-buttons/navigation-buttons.component';
 import { HealthInsuranceSelectionComponent } from '../health-insarunce-selection/health-insarunce-selection.component';
 import { CashesService } from '../../../services/cashes/cashes.service';
-import { PayTurnWithCashResponse } from '../../../services/interfaces/cashes.interfaces';
+import { TurnPaymentResponse } from '../../../services/interfaces/appointment.interfaces';
+import { PaymentStatus } from '../../../services/interfaces/payment.interfaces';
 import { HeroComponent, HeroData } from '../../../shared/hero/hero.component';
 
 @Component({
@@ -552,13 +553,23 @@ export class ShiftsComponent implements OnInit {
     this.logger.debug('Datos del turno enviados:', turnData);
 
     this.appointmentService.createTurn(turnData).subscribe({
-      next: (response: PayTurnWithCashResponse) => {
+      next: (response: TurnPaymentResponse) => {
         this.logger.debug('Turno creado:', response);
-        if (response.payment_url) {
+        const { payment, payment_url } = response;
+
+        if (payment?.status === PaymentStatus.SUCCEEDED) {
+          this.notificationService.success('Pago confirmado. ¡Gracias por tu reserva!', { duration: 5000 });
+          this.router.navigate(['/user-panel']);
+        } else if (payment_url) {
           this.notificationService.success('Turno creado con éxito. Redirigiendo al pago...', { duration: 5000 });
           if (isPlatformBrowser(this.platformId)) {
-            window.location.href = response.payment_url;
+            window.location.href = payment_url;
           }
+        } else if (payment?.status === PaymentStatus.PENDING || payment?.status === PaymentStatus.REQUIRES_ACTION) {
+          this.notificationService.info('Turno creado. Tu pago está pendiente, revisa tu historial para completarlo.', {
+            duration: 5000
+          });
+          this.router.navigate(['/user-panel']);
         } else {
           this.notificationService.success('Turno creado con éxito', { duration: 5000 });
           this.router.navigate(['/user-panel']);

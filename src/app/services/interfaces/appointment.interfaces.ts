@@ -1,6 +1,7 @@
 import { UserRead } from './user.interfaces';
 import { Doctor } from './doctor.interfaces';
 import { Service } from './hospital.interfaces';
+import { PaymentRead } from './payment.interfaces';
 
 // Estado del turno o cita
 export enum TurnState {
@@ -61,9 +62,10 @@ export interface TurnRescheduleResponse {
   turn: TurnResponse;
 }
 
-export interface PayTurnResponse {
+export interface TurnPaymentResponse {
   turn: TurnResponse;
-  payment_url: string;
+  payment: PaymentRead | null;
+  payment_url: string | null;
 }
 
 export interface Turn {
