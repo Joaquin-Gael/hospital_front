@@ -18,6 +18,34 @@
       ></app-step-indicator>
     </div>
 
+    <div *ngIf="paymentStatus" class="payment-status-banner">
+      <span class="status-badge" [ngClass]="paymentStatus">
+        {{ getPaymentStatusLabel(paymentStatus) }}
+      </span>
+      <p
+        *ngIf="paymentStatus === PaymentStatus.PENDING || paymentStatus === PaymentStatus.REQUIRES_ACTION"
+        class="status-description"
+      >
+        Estamos esperando la confirmación del pago. Actualizaremos el estado automáticamente.
+      </p>
+      <p *ngIf="paymentStatus === PaymentStatus.SUCCEEDED" class="status-description">
+        Pago confirmado. Estamos redirigiéndote a tu panel.
+      </p>
+      <p *ngIf="paymentStatus === PaymentStatus.CANCELED" class="status-description">
+        El pago fue cancelado. Puedes intentar nuevamente desde tu historial.
+      </p>
+
+      <div *ngIf="paymentStatus === PaymentStatus.FAILED && paymentMetadata" class="payment-error-details">
+        <h4>Detalle del error del pago</h4>
+        <dl>
+          <ng-container *ngFor="let entry of getPaymentMetadataEntries()">
+            <dt>{{ entry.key }}</dt>
+            <dd>{{ entry.value }}</dd>
+          </ng-container>
+        </dl>
+      </div>
+    </div>
+
     <!-- Contenido del formulario -->
     <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="appointment-form">
       <!-- Paso 1: Selección de Servicio -->

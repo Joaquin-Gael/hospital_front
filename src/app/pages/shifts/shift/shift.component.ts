@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { HttpErrorResponse, HttpParams } from '@angular/common/http';
@@ -26,8 +26,11 @@ import { NavigationButtonsComponent } from '../navigation-buttons/navigation-but
 import { HealthInsuranceSelectionComponent } from '../health-insarunce-selection/health-insarunce-selection.component';
 import { CashesService } from '../../../services/cashes/cashes.service';
 import { TurnPaymentResponse } from '../../../services/interfaces/appointment.interfaces';
-import { PaymentStatus } from '../../../services/interfaces/payment.interfaces';
+import { PaymentRead, PaymentStatus } from '../../../services/interfaces/payment.interfaces';
 import { HeroComponent, HeroData } from '../../../shared/hero/hero.component';
+import { PaymentsService } from '../../../services/payments/payments.service';
+import { Subscription, interval, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-appointment-scheduler',
@@ -64,7 +67,7 @@ import { HeroComponent, HeroData } from '../../../shared/hero/hero.component';
     ])
   ]
 })
-export class ShiftsComponent implements OnInit {
+export class ShiftsComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private serviceService = inject(ServiceService);
   private scheduleService = inject(ScheduleService);
@@ -78,6 +81,7 @@ export class ShiftsComponent implements OnInit {
   private authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
   private cashesService = inject(CashesService);
+  private paymentsService = inject(PaymentsService);
 
   heroData: HeroData = {
     backgroundImage: 'assets/slider-turnos.jpg',
@@ -104,6 +108,10 @@ export class ShiftsComponent implements OnInit {
   isLoading = false;
   currentStep = 1;
   totalSteps = 4;
+  paymentStatus: PaymentStatus | null = null;
+  paymentMetadata: Record<string, unknown> | null = null;
+  private paymentStatusSubscription: Subscription | null = null;
+  PaymentStatus = PaymentStatus;
 
   reasonOptions: ReasonOption[] = [
     { id: 1, name: 'Primera consulta' },
@@ -119,6 +127,10 @@ export class ShiftsComponent implements OnInit {
     this.watchFormChanges();
     this.loadCurrentUser();
     this.handleStripeCallback();
+  }
+
+  ngOnDestroy(): void {
+    this.paymentStatusSubscription?.unsubscribe();
   }
 
   private loadCurrentUser(): void {
@@ -528,6 +540,9 @@ export class ShiftsComponent implements OnInit {
       return;
     }
 
+    this.paymentStatus = null;
+    this.paymentMetadata = null;
+    this.stopPaymentStatusPolling();
     this.isLoading = true;
     const formValue = this.appointmentForm.value;
     const service = this.getSelectedService();
@@ -557,23 +572,7 @@ export class ShiftsComponent implements OnInit {
         this.logger.debug('Turno creado:', response);
         const { payment, payment_url } = response;
 
-        if (payment?.status === PaymentStatus.SUCCEEDED) {
-          this.notificationService.success('Pago confirmado. ¡Gracias por tu reserva!', { duration: 5000 });
-          this.router.navigate(['/user-panel']);
-        } else if (payment_url) {
-          this.notificationService.success('Turno creado con éxito. Redirigiendo al pago...', { duration: 5000 });
-          if (isPlatformBrowser(this.platformId)) {
-            window.location.href = payment_url;
-          }
-        } else if (payment?.status === PaymentStatus.PENDING || payment?.status === PaymentStatus.REQUIRES_ACTION) {
-          this.notificationService.info('Turno creado. Tu pago está pendiente, revisa tu historial para completarlo.', {
-            duration: 5000
-          });
-          this.router.navigate(['/user-panel']);
-        } else {
-          this.notificationService.success('Turno creado con éxito', { duration: 5000 });
-          this.router.navigate(['/user-panel']);
-        }
+        this.handlePaymentFlow(payment, payment_url);
         this.isLoading = false;
       },
       error: (error: HttpErrorResponse) => {
@@ -637,6 +636,134 @@ export class ShiftsComponent implements OnInit {
     const url = new URL(window.location.href);
     url.search = '';
     window.history.replaceState({}, document.title, url.toString());
+  }
+
+  private handlePaymentFlow(payment: PaymentRead | null, fallbackPaymentUrl: string | null): void {
+    const redirectUrl = payment?.payment_url || fallbackPaymentUrl;
+
+    if (redirectUrl) {
+      this.notificationService.success('Turno creado con éxito. Redirigiendo al pago...', { duration: 5000 });
+      if (isPlatformBrowser(this.platformId)) {
+        window.location.href = redirectUrl;
+      }
+      return;
+    }
+
+    if (!payment) {
+      this.notificationService.success('Turno creado con éxito', { duration: 5000 });
+      this.router.navigate(['/user-panel']);
+      return;
+    }
+
+    this.updatePaymentState(payment);
+
+    if (payment.status === PaymentStatus.SUCCEEDED) {
+      this.notificationService.success('Pago confirmado. ¡Gracias por tu reserva!', { duration: 5000 });
+      this.router.navigate(['/user-panel']);
+      return;
+    }
+
+    if (payment.status === PaymentStatus.FAILED) {
+      this.notificationService.error('El pago no se pudo completar. Revisa el detalle e intenta nuevamente.', {
+        duration: 5000
+      });
+      return;
+    }
+
+    if (payment.status === PaymentStatus.CANCELED) {
+      this.notificationService.info('El pago fue cancelado. Puedes intentarlo nuevamente desde tu historial.', {
+        duration: 5000
+      });
+      return;
+    }
+
+    this.notificationService.info('Turno creado. Estamos esperando la confirmación del pago.', {
+      duration: 5000
+    });
+    this.startPaymentStatusPolling(payment.id);
+  }
+
+  private startPaymentStatusPolling(paymentId: string): void {
+    this.stopPaymentStatusPolling();
+
+    this.paymentStatusSubscription = interval(3000)
+      .pipe(
+        switchMap(() =>
+          this.paymentsService.get(paymentId).pipe(
+            catchError((error) => {
+              this.logger.error('Error al consultar el estado del pago', error);
+              return of(null);
+            })
+          )
+        )
+      )
+      .subscribe((payment) => {
+        if (!payment) {
+          return;
+        }
+
+        this.updatePaymentState(payment);
+
+        if (payment.status === PaymentStatus.SUCCEEDED) {
+          this.notificationService.success('Pago confirmado. ¡Gracias por tu reserva!', { duration: 5000 });
+          this.router.navigate(['/user-panel']);
+          this.stopPaymentStatusPolling();
+          return;
+        }
+
+        if (payment.status === PaymentStatus.FAILED) {
+          this.notificationService.error('El pago no se pudo completar. Revisa el detalle e intenta nuevamente.', {
+            duration: 5000
+          });
+          this.stopPaymentStatusPolling();
+          return;
+        }
+
+        if (payment.status === PaymentStatus.CANCELED) {
+          this.notificationService.info('El pago fue cancelado. Puedes intentarlo nuevamente desde tu historial.', {
+            duration: 5000
+          });
+          this.stopPaymentStatusPolling();
+        }
+      });
+  }
+
+  private stopPaymentStatusPolling(): void {
+    this.paymentStatusSubscription?.unsubscribe();
+    this.paymentStatusSubscription = null;
+  }
+
+  private updatePaymentState(payment: PaymentRead): void {
+    this.paymentStatus = payment.status;
+    this.paymentMetadata = payment.metadata ?? null;
+    this.cdr.detectChanges();
+  }
+
+  getPaymentStatusLabel(status: PaymentStatus | null): string {
+    switch (status) {
+      case PaymentStatus.PENDING:
+      case PaymentStatus.REQUIRES_ACTION:
+        return 'Pendiente';
+      case PaymentStatus.SUCCEEDED:
+        return 'Pagado';
+      case PaymentStatus.FAILED:
+        return 'Fallido';
+      case PaymentStatus.CANCELED:
+        return 'Cancelado';
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  getPaymentMetadataEntries(): { key: string; value: string }[] {
+    if (!this.paymentMetadata) {
+      return [];
+    }
+
+    return Object.entries(this.paymentMetadata).map(([key, value]) => ({
+      key,
+      value: typeof value === 'string' ? value : JSON.stringify(value)
+    }));
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
