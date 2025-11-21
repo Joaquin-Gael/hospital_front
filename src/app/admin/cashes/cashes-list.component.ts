@@ -7,30 +7,35 @@ import { ErrorMessageComponent } from '../error-message/error-message.component'
 import { DataTableComponent, DataTableActionsConfig, TableColumn } from '../../shared/data-table/data-table.component';
 import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog/view-dialog.component';
 import { EntityFormComponent, EntityFormPayload, FormField } from '../../shared/entity-form/entity-form.component';
-import { CashesService } from '../../services/cashes/cashes.service';
 import { LoggerService } from '../../services/core/logger.service';
 import { NotificationService } from '../../core/notification';
-import { CashesDetailsRead } from '../../services/interfaces/cashes.interfaces';
 import { HttpErrorResponse } from '@angular/common/http';
+import {
+  PaymentCreatePayload,
+  PaymentMethod,
+  PaymentRead,
+  PaymentStatus,
+  PaymentStatusUpdatePayload,
+} from '../../services/interfaces/payment.interfaces';
+import { PaymentsService } from '../../services/payments/payments.service';
 
-interface CashRow extends CashesDetailsRead {
+interface PaymentRow extends PaymentRead {
   formattedAmount: string;
   formattedCreatedAt: string;
   formattedUpdatedAt: string;
-  is_active?: boolean;
 }
 
-type CashFormValues = EntityFormPayload & {
+type PaymentFormValues = EntityFormPayload & {
   id?: string;
   turn_id: string;
-  user_id: string;
-  appointment_id?: string | null;
   amount: number | string;
   currency: string;
-  status: string;
+  status: PaymentStatus;
+  payment_method?: PaymentMethod | '';
   payment_url?: string | null;
-  description?: string | null;
-  receipt_url?: string | null;
+  success_url: string;
+  cancel_url: string;
+  metadata?: string;
 };
 
 @Component({
@@ -49,11 +54,17 @@ type CashFormValues = EntityFormPayload & {
   styleUrls: ['./cashes-list.component.scss'],
 })
 export class CashesListComponent implements OnInit {
-  private readonly cashesService = inject(CashesService);
+  private readonly paymentsService = inject(PaymentsService);
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
 
-  readonly defaultStatuses = ['pending', 'paid', 'failed', 'cancelled'];
+  readonly defaultStatuses = [
+    PaymentStatus.PENDING,
+    PaymentStatus.REQUIRES_ACTION,
+    PaymentStatus.SUCCEEDED,
+    PaymentStatus.FAILED,
+    PaymentStatus.CANCELED,
+  ];
   readonly tableActions: DataTableActionsConfig = {
     delete: false,
     ban: false,
@@ -61,15 +72,15 @@ export class CashesListComponent implements OnInit {
     download: false,
   };
 
-  cashes = signal<CashRow[]>([]);
+  cashes = signal<PaymentRow[]>([]);
   loading = signal(false);
   formLoading = signal(false);
   error = signal<string | null>(null);
   showForm = signal(false);
   formMode = signal<'create' | 'edit'>('create');
-  selectedCash = signal<CashRow | null>(null);
+  selectedCash = signal<PaymentRow | null>(null);
   viewDialogOpen = signal(false);
-  viewDialogData: Partial<CashRow> = {};
+  viewDialogData: Partial<PaymentRow> = {};
   viewDialogTitle = signal('');
 
   statusFilter = signal<'all' | string>('all');
@@ -77,7 +88,7 @@ export class CashesListComponent implements OnInit {
   userFilter = signal('');
   statusOptions = signal<string[]>([...this.defaultStatuses]);
 
-  readonly filteredCashes = computed<CashRow[]>(() => {
+  readonly filteredCashes = computed<PaymentRow[]>(() => {
     const turn = this.turnFilter().trim().toLowerCase();
     const user = this.userFilter().trim().toLowerCase();
     const status = this.statusFilter();
@@ -114,19 +125,24 @@ export class CashesListComponent implements OnInit {
     { key: 'turn_id', label: 'Turno' },
     { key: 'user_id', label: 'Usuario' },
     { key: 'status', label: 'Estado', format: (value: string) => this.formatStatus(value) },
+    { key: 'payment_method', label: 'Método de pago' },
+    { key: 'provider', label: 'Proveedor' },
     { key: 'formattedAmount', label: 'Monto' },
     { key: 'currency', label: 'Moneda' },
     { key: 'formattedCreatedAt', label: 'Creado' },
   ];
 
   readonly viewDialogColumns: ViewDialogColumn[] = [
-    { key: 'id', label: 'ID de Cobranza' },
+    { key: 'id', label: 'ID de Pago' },
     { key: 'status', label: 'Estado', format: (value: string) => this.formatStatus(value) },
     { key: 'formattedAmount', label: 'Monto' },
     { key: 'currency', label: 'Moneda' },
     { key: 'turn_id', label: 'Turno asociado' },
     { key: 'appointment_id', label: 'Cita asociada' },
     { key: 'user_id', label: 'Usuario' },
+    { key: 'payment_method', label: 'Método de pago' },
+    { key: 'provider', label: 'Proveedor' },
+    { key: 'external_id', label: 'ID externo' },
     { key: 'payment_url', label: 'URL de pago' },
     { key: 'receipt_url', label: 'Comprobante' },
     { key: 'description', label: 'Descripción' },
@@ -153,15 +169,15 @@ export class CashesListComponent implements OnInit {
       params['user_id'] = this.userFilter().trim();
     }
 
-    this.cashesService.getCashes(params).subscribe({
-      next: (cashes) => {
-        const mapped = cashes.map((cash) => this.mapCashToRow(cash));
+    this.paymentsService.list(params).subscribe({
+      next: (payments) => {
+        const mapped = payments.map((payment) => this.mapPaymentToRow(payment));
         this.cashes.set(mapped);
         this.refreshStatusOptions(mapped);
         this.loading.set(false);
       },
       error: (error: HttpErrorResponse) => {
-        this.handleError(error, 'Error al cargar las cobranzas');
+        this.handleError(error, 'Error al cargar los pagos');
         this.loading.set(false);
       },
     });
@@ -172,65 +188,98 @@ export class CashesListComponent implements OnInit {
     this.selectedCash.set(null);
     this.showForm.set(true);
     this.formInitialData = {
-      status: this.statusOptions()[0] ?? 'pending',
+      status: (this.statusOptions()[0] as PaymentStatus) ?? PaymentStatus.PENDING,
       currency: 'ARS',
     };
   }
 
-  onEdit(cash: CashRow): void {
+  onEdit(cash: PaymentRow): void {
     this.formMode.set('edit');
     this.selectedCash.set(cash);
     this.showForm.set(true);
     this.formInitialData = {
       turn_id: cash.turn_id,
-      user_id: cash.user_id,
-      appointment_id: cash.appointment_id ?? '',
       amount: cash.amount,
       currency: cash.currency,
-      status: cash.status,
+      status: cash.status as PaymentStatus,
       payment_url: cash.payment_url ?? '',
-      description: cash.description ?? '',
-      receipt_url: cash.receipt_url ?? '',
+      payment_method: cash.payment_method ?? '',
+      success_url: '',
+      cancel_url: '',
+      metadata: cash.metadata ? JSON.stringify(cash.metadata) : '',
     };
   }
 
-  onView(cash: CashRow): void {
+  onView(cash: PaymentRow): void {
     this.viewDialogData = cash;
-    this.viewDialogTitle.set(`Cobranza ${cash.id}`);
+    this.viewDialogTitle.set(`Pago ${cash.id}`);
     this.viewDialogOpen.set(true);
   }
 
-  onFormSubmit(formData: CashFormValues): void {
+  onFormSubmit(formData: PaymentFormValues): void {
     this.formLoading.set(true);
     this.error.set(null);
 
     const amount = Number(formData.amount);
-    const payload = {
-      ...formData,
-      amount,
-      id: this.formMode() === 'edit' ? this.selectedCash()?.id : undefined,
+    const metadata = this.parseMetadata(formData.metadata);
+    if (metadata instanceof Error) {
+      this.notificationService.error('El metadato debe ser un JSON válido.');
+      this.formLoading.set(false);
+      return;
+    }
+
+    if (this.formMode() === 'create') {
+      const payload: PaymentCreatePayload = {
+        turn_id: formData.turn_id,
+        amount,
+        currency: formData.currency,
+        success_url: formData.success_url,
+        cancel_url: formData.cancel_url,
+        payment_method: formData.payment_method || undefined,
+        metadata: metadata || undefined,
+      };
+
+      this.paymentsService.create(payload).subscribe({
+        next: (payment) => {
+          this.notificationService.success('Pago creado correctamente');
+          this.logger.info('Pago guardado', payment);
+          this.formLoading.set(false);
+          this.showForm.set(false);
+          this.selectedCash.set(null);
+          this.loadData();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.handleError(error, 'Error al crear el pago');
+          this.formLoading.set(false);
+        },
+      });
+      return;
+    }
+
+    const paymentId = this.selectedCash()?.id;
+    if (!paymentId) {
+      this.notificationService.error('No se encontró el pago a actualizar.');
+      this.formLoading.set(false);
+      return;
+    }
+
+    const payload: PaymentStatusUpdatePayload = {
+      status: formData.status,
+      payment_url: formData.payment_url ?? null,
+      metadata: metadata || null,
     };
 
-    this.cashesService.createOrUpdateCash(payload).subscribe({
-      next: (cash) => {
-        this.notificationService.success(
-          this.formMode() === 'create'
-            ? 'Cobranza creada correctamente'
-            : 'Cobranza actualizada correctamente'
-        );
-        this.logger.info('Cobranza guardada', cash);
+    this.paymentsService.updateStatus(paymentId, payload).subscribe({
+      next: (payment) => {
+        this.notificationService.success('Pago actualizado correctamente');
+        this.logger.info('Pago actualizado', payment);
         this.formLoading.set(false);
         this.showForm.set(false);
         this.selectedCash.set(null);
         this.loadData();
       },
       error: (error: HttpErrorResponse) => {
-        this.handleError(
-          error,
-          this.formMode() === 'create'
-            ? 'Error al crear la cobranza'
-            : 'Error al actualizar la cobranza'
-        );
+        this.handleError(error, 'Error al actualizar el pago');
         this.formLoading.set(false);
       },
     });
@@ -271,8 +320,8 @@ export class CashesListComponent implements OnInit {
     this.viewDialogData = {};
   }
 
-  get formFields(): FormField<CashFormValues>[] {
-    return [
+  get formFields(): FormField<PaymentFormValues>[] {
+    const baseFields: FormField<PaymentFormValues>[] = [
       {
         key: 'turn_id',
         label: 'ID de turno',
@@ -282,25 +331,12 @@ export class CashesListComponent implements OnInit {
         readonly: this.formMode() === 'edit',
       },
       {
-        key: 'user_id',
-        label: 'ID de usuario',
-        type: 'text',
-        required: true,
-        validators: [Validators.required],
-        readonly: this.formMode() === 'edit',
-      },
-      {
-        key: 'appointment_id',
-        label: 'ID de cita (opcional)',
-        type: 'text',
-        required: false,
-      },
-      {
         key: 'amount',
         label: 'Monto',
         type: 'number',
         required: true,
         validators: [Validators.required, Validators.min(0)],
+        readonly: this.formMode() === 'edit',
       },
       {
         key: 'currency',
@@ -309,6 +345,7 @@ export class CashesListComponent implements OnInit {
         required: true,
         validators: [Validators.required, Validators.maxLength(5)],
         placeholder: 'Ej: ARS, USD',
+        readonly: this.formMode() === 'edit',
       },
       {
         key: 'status',
@@ -321,39 +358,69 @@ export class CashesListComponent implements OnInit {
         })),
       },
       {
+        key: 'payment_method',
+        label: 'Método de pago',
+        type: 'select',
+        required: false,
+        options: [
+          { value: '', label: 'No especificado' },
+          { value: PaymentMethod.CARD, label: 'Tarjeta' },
+          { value: PaymentMethod.CASH, label: 'Efectivo' },
+          { value: PaymentMethod.TRANSFER, label: 'Transferencia' },
+          { value: PaymentMethod.PIX, label: 'Pix' },
+          { value: PaymentMethod.OTHER, label: 'Otro' },
+        ],
+      },
+      {
         key: 'payment_url',
         label: 'URL de pago',
         type: 'text',
         required: false,
       },
       {
-        key: 'receipt_url',
-        label: 'URL de comprobante',
-        type: 'text',
-        required: false,
-      },
-      {
-        key: 'description',
-        label: 'Descripción',
+        key: 'metadata',
+        label: 'Metadata (JSON)',
         type: 'textarea',
         required: false,
-        validators: [Validators.maxLength(500)],
+        validators: [Validators.maxLength(1000)],
+        placeholder: '{"orderId": "123"}',
       },
     ];
+
+    if (this.formMode() === 'create') {
+      baseFields.splice(3, 0,
+        {
+          key: 'success_url',
+          label: 'URL de éxito',
+          type: 'text',
+          required: true,
+          validators: [Validators.required],
+        },
+        {
+          key: 'cancel_url',
+          label: 'URL de cancelación',
+          type: 'text',
+          required: true,
+          validators: [Validators.required],
+        }
+      );
+    }
+
+    return baseFields;
   }
 
-  formInitialData: Partial<CashFormValues> | null = null;
+  formInitialData: Partial<PaymentFormValues> | null = null;
 
-  private mapCashToRow(cash: CashesDetailsRead): CashRow {
+  private mapPaymentToRow(payment: PaymentRead): PaymentRow {
     return {
-      ...cash,
-      formattedAmount: this.formatAmount(cash.amount, cash.currency),
-      formattedCreatedAt: this.formatDate(cash.created_at),
-      formattedUpdatedAt: this.formatDate(cash.updated_at),
+      ...payment,
+      formattedAmount: this.formatAmount(payment.amount, payment.currency),
+      formattedCreatedAt: this.formatDate(payment.created_at),
+      formattedUpdatedAt: this.formatDate(payment.updated_at),
     };
   }
 
-  private refreshStatusOptions(cashes: CashRow[]): void {
+  private refreshStatusOptions(cashes: PaymentRow[]): void {
     const statuses = new Set<string>(this.defaultStatuses);
     cashes.forEach((cash) => {
       if (cash.status) {
@@ -370,7 +437,7 @@ export class CashesListComponent implements OnInit {
     return `${currency ?? ''} ${amount.toFixed(2)}`.trim();
   }
 
-  private formatStatus(status: string): string {
+  private formatStatus(status: string | PaymentStatus): string {
     if (!status) return 'Desconocido';
     return status
       .replace(/_/g, ' ')
@@ -382,6 +449,16 @@ export class CashesListComponent implements OnInit {
     if (!date) return 'Sin fecha';
     const parsed = new Date(date);
     return isNaN(parsed.getTime()) ? date : parsed.toLocaleString();
+  }
+
+  private parseMetadata(value?: string): Record<string, unknown> | Error | null {
+    if (!value) return null;
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      this.logger.warn('No se pudo parsear el metadata del pago', error);
+      return error instanceof Error ? error : new Error('Invalid metadata JSON');
+    }
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
