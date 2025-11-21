@@ -21,9 +21,19 @@ import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading
             <div
               class="service-card"
               [class.selected]="serviceControl.value === service.id"
-              (click)="onServiceSelect(service.id)"
+              [class.disabled]="!service.is_available"
+              (click)="onServiceSelect(service)"
               [attr.aria-label]="'Seleccionar servicio ' + service.name"
+              [attr.aria-disabled]="!service.is_available"
+              role="button"
             >
+              <div class="availability-badge" [class.unavailable]="!service.is_available">
+                @if (service.is_available) {
+                  <span>Cupos: {{ service.available_doctors_count ?? 0 }}</span>
+                } @else {
+                  <span>Sin cupos</span>
+                }
+              </div>
               <div class="service-icon">
                 <i class="material-icons">{{ service.icon_code || "question_mark" }}</i>
               </div>
@@ -70,9 +80,13 @@ export class ServiceSelectionComponent {
   @Input() error: string | null = null;
   @Output() serviceChange = new EventEmitter<string>();
 
-  onServiceSelect(serviceId: string): void {
-    this.serviceControl.setValue(serviceId);
-    this.serviceChange.emit(serviceId);
+  onServiceSelect(service: Service): void {
+    if (!service.is_available) {
+      return;
+    }
+
+    this.serviceControl.setValue(service.id);
+    this.serviceChange.emit(service.id);
   }
 
   getErrorMessage(): string {

@@ -42,6 +42,7 @@
     cursor: pointer;
     transition: $transition;
     align-items: center;
+    position: relative;
     @include mix.flex-column;
 
     &:hover {
@@ -71,6 +72,45 @@
       .service-price {
         color: $primary-color;
         font-weight: 600;
+      }
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      box-shadow: none;
+      transform: none;
+      border-color: $border-color;
+
+      .service-icon {
+        background-color: $background-light;
+
+        i {
+          color: $text-secondary;
+          transform: none;
+        }
+      }
+
+      .service-price {
+        color: $text-secondary;
+      }
+    }
+
+    .availability-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      background-color: $success-alpha;
+      color: $text-primary;
+      font-size: 0.8rem;
+      font-weight: 600;
+      @include mix.flex-center;
+
+      &.unavailable {
+        background-color: $error-alpha;
+        color: $error-color;
       }
     }
 
