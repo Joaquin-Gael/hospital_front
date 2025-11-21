@@ -83,10 +83,9 @@ export class CashesListComponent implements OnInit {
   viewDialogData: Partial<PaymentRow> = {};
   viewDialogTitle = signal('');
 
-  statusFilter = signal<'all' | string>('all');
-  turnFilter = signal('');
-  userFilter = signal('');
-  statusOptions = signal<string[]>([...this.defaultStatuses]);
+  // Filtros adaptados
+  transactionTypeFilter = signal<'all' | 'income' | 'expense'>('all');
+  dateFilter = signal('');
 
   readonly filteredCashes = computed<PaymentRow[]>(() => {
     const turn = this.turnFilter().trim().toLowerCase();
@@ -94,27 +93,31 @@ export class CashesListComponent implements OnInit {
     const status = this.statusFilter();
 
     return this.cashes().filter((cash) => {
-      const matchesTurn = turn ? cash.turn_id?.toLowerCase().includes(turn) : true;
-      const matchesUser = user ? cash.user_id?.toLowerCase().includes(user) : true;
-      const matchesStatus =
-        status === 'all' ? true : cash.status?.toLowerCase() === status.toLowerCase();
+      const matchesType =
+        type === 'all'
+          ? true
+          : type === 'income'
+          ? cash.income > 0
+          : cash.expense > 0;
 
-      return matchesTurn && matchesUser && matchesStatus;
+      const matchesDate = date ? cash.date.includes(date) : true;
+
+      return matchesType && matchesDate;
     });
   });
 
   readonly headerActions: ActionButton[] = [
     {
-      label: 'Nueva cobranza',
+      label: 'Nueva transacción',
       icon: 'add',
-      ariaLabel: 'Crear nuevo registro de cobranza',
+      ariaLabel: 'Crear nueva transacción de caja',
       variant: 'primary',
       onClick: () => this.onAddNew(),
     },
     {
       label: 'Refrescar',
       icon: 'refresh',
-      ariaLabel: 'Actualizar lista de cobranzas',
+      ariaLabel: 'Actualizar lista de transacciones',
       variant: 'secondary',
       onClick: () => this.loadData(),
     },
@@ -173,7 +176,6 @@ export class CashesListComponent implements OnInit {
       next: (payments) => {
         const mapped = payments.map((payment) => this.mapPaymentToRow(payment));
         this.cashes.set(mapped);
-        this.refreshStatusOptions(mapped);
         this.loading.set(false);
       },
       error: (error: HttpErrorResponse) => {
@@ -291,28 +293,21 @@ export class CashesListComponent implements OnInit {
     this.formInitialData = null;
   }
 
-  onStatusFilterChange(status: string): void {
-    this.statusFilter.set(status as 'all' | string);
-    this.loadData();
+  onTransactionTypeFilterChange(type: string): void {
+    this.transactionTypeFilter.set(type as 'all' | 'income' | 'expense');
   }
 
-  onTurnFilterChange(turn: string): void {
-    this.turnFilter.set(turn);
-  }
-
-  onUserFilterChange(user: string): void {
-    this.userFilter.set(user);
+  onDateFilterChange(date: string): void {
+    this.dateFilter.set(date);
   }
 
   applyFilters(): void {
-    this.loadData();
+    // Los filtros se aplican automáticamente por el computed
   }
 
   resetFilters(): void {
-    this.statusFilter.set('all');
-    this.turnFilter.set('');
-    this.userFilter.set('');
-    this.loadData();
+    this.transactionTypeFilter.set('all');
+    this.dateFilter.set('');
   }
 
   closeViewDialog(): void {
@@ -448,7 +443,13 @@ export class CashesListComponent implements OnInit {
   private formatDate(date?: string): string {
     if (!date) return 'Sin fecha';
     const parsed = new Date(date);
-    return isNaN(parsed.getTime()) ? date : parsed.toLocaleString();
+    return isNaN(parsed.getTime()) 
+      ? date 
+      : parsed.toLocaleDateString('es-AR', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit' 
+        });
   }
 
   private parseMetadata(value?: string): Record<string, unknown> | Error | null {

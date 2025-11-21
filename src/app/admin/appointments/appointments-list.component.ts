@@ -33,7 +33,7 @@ import { Service } from '../../services/interfaces/hospital.interfaces';
 import { Validators } from '@angular/forms';
 
 interface AppointmentRow extends Turn {
-  health_insurance?: string | null;
+  // health_insurance ya está definida en Turn, no necesitas redefinirla
   patientName: string;
   doctorName: string;
   serviceName: string;

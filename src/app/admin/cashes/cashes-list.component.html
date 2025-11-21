@@ -1,7 +1,7 @@
 <div class="cashes-section">
   <app-section-header
-    title="Cobranzas"
-    subtitle="Administra los cobros registrados en el sistema"
+    title="Caja - Movimientos"
+    subtitle="Administra los movimientos de caja del sistema"
     icon="payments"
     headerClass="header-indigo"
     [actions]="headerActions"
@@ -14,7 +14,7 @@
         [initialData]="formInitialData"
         [mode]="formMode()"
         [loading]="formLoading()"
-        [title]="formMode() === 'create' ? 'Nueva cobranza' : 'Editar cobranza'"
+        [title]="formMode() === 'create' ? 'Nueva transacción' : 'Editar transacción'"
         [submitLabel]="formMode() === 'create' ? 'Crear' : 'Guardar cambios'"
         (formSubmit)="onFormSubmit($event)"
         (formCancel)="onFormCancel()"
@@ -24,51 +24,34 @@
     <div class="cashes-section__content">
       <app-error-message *ngIf="error()" [message]="error()"></app-error-message>
 
+      <!-- Filtros adaptados -->
       <div class="filters">
         <div class="filters__group">
-          <label class="filters__label" for="status-filter">Estado</label>
+          <label class="filters__label" for="type-filter">Tipo de Transacción</label>
           <select
-            id="status-filter"
+            id="type-filter"
             class="filters__select"
-            [value]="statusFilter()"
-            (change)="onStatusFilterChange($any($event.target).value)"
+            [value]="transactionTypeFilter()"
+            (change)="onTransactionTypeFilterChange($any($event.target).value)"
           >
             <option value="all">Todos</option>
-            <option *ngFor="let status of statusOptions()" [value]="status">
-              {{ status | titlecase }}
-            </option>
+            <option value="income">Ingresos</option>
+            <option value="expense">Egresos</option>
           </select>
         </div>
 
         <div class="filters__group">
-          <label class="filters__label" for="turn-filter">Turno</label>
+          <label class="filters__label" for="date-filter">Fecha</label>
           <input
-            id="turn-filter"
+            id="date-filter"
             class="filters__input"
-            type="text"
-            [value]="turnFilter()"
-            placeholder="ID de turno"
-            (input)="onTurnFilterChange($any($event.target).value)"
-          />
-        </div>
-
-        <div class="filters__group">
-          <label class="filters__label" for="user-filter">Usuario</label>
-          <input
-            id="user-filter"
-            class="filters__input"
-            type="text"
-            [value]="userFilter()"
-            placeholder="ID de usuario"
-            (input)="onUserFilterChange($any($event.target).value)"
+            type="date"
+            [value]="dateFilter()"
+            (input)="onDateFilterChange($any($event.target).value)"
           />
         </div>
 
         <div class="filters__actions">
-          <button type="button" class="btn btn-primary" (click)="applyFilters()">
-            <span class="material-icons" aria-hidden="true">filter_alt</span>
-            Aplicar filtros
-          </button>
           <button type="button" class="btn btn-secondary" (click)="resetFilters()">
             <span class="material-icons" aria-hidden="true">restart_alt</span>
             Limpiar
@@ -76,6 +59,7 @@
         </div>
       </div>
 
+      <!-- Tabla de datos -->
       <app-data-table
         [columns]="tableColumns"
         [data]="filteredCashes()"
@@ -90,6 +74,7 @@
     </div>
   }
 
+  <!-- Diálogo de vista detallada -->
   <app-view-dialog
     [isOpen]="viewDialogOpen()"
     [item]="viewDialogData"

@@ -138,7 +138,8 @@ export class UserPanelComponent implements OnInit, OnDestroy {
   private removeSidebarOpenClass(): void {
     document.body.classList.remove('sidebar-open');
   }
-
+  
+    
   onEditProfile(): void {
     this.router.navigate(['/user_panel/edit-profile']);
   }
