@@ -24,6 +24,9 @@ export interface PaymentItem {
 
 export interface PaymentRead {
   id: string;
+  turn_id?: string;
+  appointment_id?: string | null;
+  user_id?: string;
   status: PaymentStatus;
   amount: number;
   currency: string;
@@ -31,6 +34,8 @@ export interface PaymentRead {
   payment_url?: string | null;
   provider?: string | null;
   external_id?: string | null;
+  description?: string | null;
+  receipt_url?: string | null;
   items?: PaymentItem[];
   metadata?: Record<string, unknown> | null;
   created_at?: string;
