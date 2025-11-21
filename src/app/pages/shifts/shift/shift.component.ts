@@ -237,10 +237,10 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.serviceService.getServices().subscribe({
       next: (services) => {
-        this.services = services.map((s) => ({
-          ...s,
-          duration: undefined,
-          isActive: true,
+        this.services = services.map((service) => ({
+          ...service,
+          is_available: service.is_available,
+          available_doctors_count: service.available_doctors_count,
         }));
         this.isLoading = false;
       },
