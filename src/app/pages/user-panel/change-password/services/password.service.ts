@@ -31,7 +31,7 @@ export class PasswordService {
         }
 
         const payload: ChangePasswordRequest = {
-          current_password: currentPassword,
+          old_password: currentPassword,  // Usar old_password
           new_password: newPassword
         };
 
@@ -39,7 +39,7 @@ export class PasswordService {
       })
     );
   }
-
+  
   calculatePasswordStrength(password: string): PasswordStrength {
     const criteria = [
       { test: /[a-z]/.test(password), points: 1 }, // minúsculas
