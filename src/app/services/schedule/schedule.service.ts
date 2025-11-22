@@ -11,6 +11,7 @@ import {
   MedicalScheduleUpdate,
   MedicalScheduleDelete,
   MedicalScheduleDaysResponse,
+  MedicalScheduleDaysRequest,
 } from '../interfaces/hospital.interfaces';
 import { MedicalSchedule } from '../../services/interfaces/doctor.interfaces';
 
@@ -56,11 +57,22 @@ export class ScheduleService {
   }
 
   getAvailableDays(
-    specialtyId: string
+    request: MedicalScheduleDaysRequest | string
   ): Observable<MedicalScheduleDaysResponse> {
+    const { specialtyId, date } =
+      typeof request === 'string'
+        ? { specialtyId: request, date: undefined }
+        : request;
+
+    let params = new HttpParams();
+    if (date) {
+      params = params.set('date', date);
+    }
+
     return this.apiService
       .get<MedicalScheduleDaysResponse>(
-        SCHEDULE_ENDPOINTS.GET_DAYS(specialtyId)
+        SCHEDULE_ENDPOINTS.GET_DAYS({ specialtyId, date }),
+        date ? { params } : undefined
       )
       .pipe(
         map((response) => {
