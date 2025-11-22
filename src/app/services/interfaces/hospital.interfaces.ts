@@ -111,7 +111,11 @@ id: string; // UUID
 message: string;
 }
 export interface MedicalScheduleDaysResponse{
-available_days: MedicalScheduleCreate[];
+  available_days: MedicalScheduleCreate[];
+}
+export interface MedicalScheduleDaysRequest {
+  specialtyId: string;
+  date?: string;
 }
 // Agrega esta interfaz en doctor.interfaces.ts (asumiendo que es el archivo importado)
 export interface MedicalSchedule {
