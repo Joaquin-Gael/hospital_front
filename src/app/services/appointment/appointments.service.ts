@@ -12,7 +12,10 @@ import {
   TurnDelete,
   TurnRescheduleRequest,
   TurnRescheduleResponse,
+  TurnPaymentResult,
   TurnPaymentResponse,
+  TurnPaymentError,
+  TurnPaymentErrorType,
   UpdateTurnState,
 } from '../interfaces/appointment.interfaces';
 
@@ -81,10 +84,11 @@ export class AppointmentService {
    * @param turnData Datos del turno a crear.
    * @returns Observable con los datos del turno creado y la URL de pago.
    */
-  createTurn(turnData: TurnCreate): Observable<TurnPaymentResponse> {
+  createTurn(turnData: TurnCreate): Observable<TurnPaymentResult> {
     this.logger.debug('Creando nuevo turno', turnData);
     return this.apiService.post<TurnPaymentResponse>(APPOINTMENT_ENDPOINTS.CREATE_TURN, turnData).pipe(
-      catchError((error) => this.handleError('Error creating turn', error))
+      map((response) => ({ success: true, ...response })),
+      catchError((error) => this.handleTurnCreationError(error))
     );
   }
 
@@ -159,5 +163,64 @@ export class AppointmentService {
     }
 
     return throwError(() => new Error(errorMessage));
+  }
+
+  private handleTurnCreationError(error: unknown): Observable<TurnPaymentError> {
+    this.logger.error('Error creating turn', error);
+    const typedError = this.mapTurnCreationError(error);
+    return throwError(() => typedError);
+  }
+
+  private mapTurnCreationError(error: unknown): TurnPaymentError {
+    const defaultError: TurnPaymentError = {
+      success: false,
+      type: TurnPaymentErrorType.UNKNOWN,
+      message: 'No se pudo crear el turno. Intenta de nuevo más tarde.'
+    };
+
+    if (typeof error === 'object' && error !== null && 'status' in error) {
+      const httpError = error as { status: number; error?: { detail?: string } };
+      const detail = httpError.error?.detail ?? '';
+      const normalizedDetail = detail.toLowerCase();
+
+      if (httpError.status === 409 || normalizedDetail.includes('completo')) {
+        return {
+          success: false,
+          type: TurnPaymentErrorType.SLOT_UNAVAILABLE,
+          message: detail || 'El horario seleccionado ya no está disponible.',
+          status: httpError.status
+        };
+      }
+
+      if (
+        normalizedDetail.includes('existe un turno') ||
+        normalizedDetail.includes('ya tienes un turno') ||
+        normalizedDetail.includes('turno duplicado')
+      ) {
+        return {
+          success: false,
+          type: TurnPaymentErrorType.APPOINTMENT_CONFLICT,
+          message: detail || 'Ya existe un turno reservado en este horario.',
+          status: httpError.status
+        };
+      }
+
+      if (normalizedDetail.includes('fuera de horario') || normalizedDetail.includes('no disponible en esta franja')) {
+        return {
+          success: false,
+          type: TurnPaymentErrorType.OUT_OF_SCHEDULE,
+          message: detail || 'El horario seleccionado está fuera de la agenda disponible.',
+          status: httpError.status
+        };
+      }
+
+      return {
+        ...defaultError,
+        message: detail || defaultError.message,
+        status: httpError.status
+      };
+    }
+
+    return defaultError;
   }
 }

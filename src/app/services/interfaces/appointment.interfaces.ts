@@ -68,6 +68,35 @@ export interface TurnPaymentResponse {
   payment_url: string | null;
 }
 
+export enum TurnPaymentErrorType {
+  SLOT_UNAVAILABLE = 'slot_unavailable',
+  APPOINTMENT_CONFLICT = 'appointment_conflict',
+  OUT_OF_SCHEDULE = 'out_of_schedule',
+  UNKNOWN = 'unknown'
+}
+
+export interface TurnPaymentError {
+  success: false;
+  type: TurnPaymentErrorType;
+  message: string;
+  status?: number;
+}
+
+export interface TurnPaymentSuccess extends TurnPaymentResponse {
+  success: true;
+}
+
+export type TurnPaymentResult = TurnPaymentSuccess | TurnPaymentError;
+
+export const isTurnPaymentError = (
+  value: unknown
+): value is TurnPaymentError =>
+  typeof value === 'object' &&
+  value !== null &&
+  'success' in value &&
+  (value as { success?: unknown }).success === false &&
+  'type' in value;
+
 export interface Turn {
   id: string;
   reason: string;
