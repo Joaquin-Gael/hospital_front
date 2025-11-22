@@ -64,16 +64,33 @@
         [dateControl]="dateControl"
         [minDate]="minDate"
         [dayFilter]="dayFilter"
-        [isLoading]="isLoading"
+        [isLoading]="isLoading || isRecalculatingAvailability"
         [error]="error"
       ></app-date-selection>
+
+      <div *ngIf="isRecalculatingAvailability" class="recalculating-loader">
+        <i class="material-icons loading-icon spin">autorenew</i>
+        <span>Recalculando disponibilidad para la fecha seleccionada...</span>
+      </div>
+
+      <div
+        *ngIf="!isLoading && !isRecalculatingAvailability && availabilityEmpty"
+        class="empty-availability"
+        role="status"
+      >
+        <i class="material-icons">event_busy</i>
+        <div>
+          <p class="title">No hay fechas disponibles para esta especialidad.</p>
+          <p class="subtitle">Prueba seleccionando otra fecha o servicio.</p>
+        </div>
+      </div>
 
       <!-- Paso 3: Selección de Hora -->
       <app-time-selection
         *ngIf="currentStep === 3"
         [timeControl]="timeControl"
         [availableTimeSlots]="availableTimeSlots"
-        [isLoading]="isLoading"
+        [isLoading]="isLoading || isRecalculatingAvailability"
         [error]="error"
       ></app-time-selection>
 

@@ -106,8 +106,10 @@ export class ShiftsComponent implements OnInit, OnDestroy {
   buttonState = 'inactive';
   showCustomReason = false;
   isLoading = false;
+  isRecalculatingAvailability = false;
   currentStep = 1;
   totalSteps = 4;
+  availabilityEmpty = false;
   paymentStatus: PaymentStatus | null = null;
   paymentMetadata: Record<string, unknown> | null = null;
   private paymentStatusSubscription: Subscription | null = null;
@@ -197,6 +199,10 @@ export class ShiftsComponent implements OnInit, OnDestroy {
   watchFormChanges(): void {
     this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
       if (date) {
+        const selectedService = this.getSelectedService();
+        if (selectedService?.specialty_id) {
+          this.loadAvailableDays(selectedService.specialty_id, date);
+        }
         this.generateTimeSlots(date);
       } else {
         this.availableTimeSlots = [];
@@ -220,9 +226,11 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     const selectedService = this.services.find(s => s.id === serviceId);
     if (selectedService && selectedService.specialty_id) {
       this.isLoading = true;
+      this.availabilityEmpty = false;
       this.nextStep();
       this.loadAvailableDays(selectedService.specialty_id);
     } else {
+      this.availabilityEmpty = false;
       this.resetSchedules();
     }
   }
@@ -251,47 +259,73 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadAvailableDays(specialtyId: string): void {
-    const minLoadingTime = 500; 
+  loadAvailableDays(specialtyId: string, selectedDate?: Date): void {
+    const minLoadingTime = 500;
     const startTime = Date.now();
-    
-    this.scheduleService.getAvailableDays(specialtyId).subscribe({
-      next: (response: MedicalScheduleDaysResponse) => {
-        this.schedules = response.available_days.map(day => ({
-          day: day.day,
-          start_time: day.start_time,
-          end_time: day.end_time
-        }));
-        this.availableDays = [...new Set(this.schedules.map(s => s.day))];
-        this.appointmentForm.get('appointmentDate')?.setValue(null);
-        this.appointmentForm.get('appointmentTime')?.setValue(null);
-        this.availableTimeSlots = [];
-        
-        const elapsedTime = Date.now() - startTime;
-        const remainingTime = minLoadingTime - elapsedTime;
-        
-        setTimeout(() => {
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        }, remainingTime > 0 ? remainingTime : 0);
-      },
-      error: (error: HttpErrorResponse) => {
-        const elapsedTime = Date.now() - startTime;
-        const remainingTime = minLoadingTime - elapsedTime;
-        
-        setTimeout(() => {
-          this.isLoading = false;
-          this.currentStep = 1;
-          this.handleError(error, 'Error al cargar horarios');
-        }, remainingTime > 0 ? remainingTime : 0);
-      }
-    });
+    const formattedDate = selectedDate ? this.formatDateISO(selectedDate) : undefined;
+    const isDateRefresh = !!formattedDate;
+
+    if (isDateRefresh) {
+      this.isRecalculatingAvailability = true;
+    }
+
+    this.scheduleService
+      .getAvailableDays({ specialtyId, date: formattedDate })
+      .subscribe({
+        next: (response: MedicalScheduleDaysResponse) => {
+          this.schedules = response.available_days.map(day => ({
+            day: day.day,
+            start_time: day.start_time,
+            end_time: day.end_time
+          }));
+          this.availableDays = [...new Set(this.schedules.map(s => s.day))];
+          this.availabilityEmpty = this.availableDays.length === 0;
+
+          if (!isDateRefresh) {
+            this.appointmentForm.get('appointmentDate')?.setValue(null);
+          }
+          this.appointmentForm.get('appointmentTime')?.setValue(null);
+          this.availableTimeSlots = [];
+
+          if (selectedDate) {
+            this.generateTimeSlots(selectedDate);
+          }
+
+          const elapsedTime = Date.now() - startTime;
+          const remainingTime = minLoadingTime - elapsedTime;
+
+          setTimeout(() => {
+            if (isDateRefresh) {
+              this.isRecalculatingAvailability = false;
+            } else {
+              this.isLoading = false;
+            }
+            this.cdr.detectChanges();
+          }, remainingTime > 0 ? remainingTime : 0);
+        },
+        error: (error: HttpErrorResponse) => {
+          const elapsedTime = Date.now() - startTime;
+          const remainingTime = minLoadingTime - elapsedTime;
+
+          setTimeout(() => {
+            if (isDateRefresh) {
+              this.isRecalculatingAvailability = false;
+            } else {
+              this.isLoading = false;
+            }
+            this.currentStep = 1;
+            this.handleError(error, 'Error al cargar horarios');
+          }, remainingTime > 0 ? remainingTime : 0);
+        }
+      });
   }
 
   private resetSchedules(): void {
     this.schedules = [];
     this.availableDays = [];
     this.availableTimeSlots = [];
+    this.availabilityEmpty = false;
+    this.isRecalculatingAvailability = false;
     this.appointmentForm.get('appointmentDate')?.setValue(null);
     this.appointmentForm.get('appointmentTime')?.setValue(null);
   }
