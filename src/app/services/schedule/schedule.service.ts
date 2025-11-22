@@ -188,7 +188,11 @@ export class ScheduleService {
           errorMessage = httpError.error?.detail ?? 'Forbidden action';
           break;
         case 404:
-          errorMessage = httpError.error?.detail ?? 'Resource not found';
+          if (message.toLowerCase().includes('available days')) {
+            errorMessage = 'Especialidad no encontrada';
+          } else {
+            errorMessage = httpError.error?.detail ?? 'Resource not found';
+          }
           break;
         default:
           errorMessage = httpError.error?.detail ?? 'Server error';
