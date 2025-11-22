@@ -14,6 +14,7 @@ import {
   TurnRescheduleResponse,
   TurnPaymentResult,
   TurnPaymentResponse,
+  TurnPaymentSuccess,
   TurnPaymentError,
   TurnPaymentErrorType,
   UpdateTurnState,
@@ -79,6 +80,7 @@ export class AppointmentService {
     );
   }
 
+
   /**
    * Crea un nuevo turno.
    * @param turnData Datos del turno a crear.
@@ -87,7 +89,7 @@ export class AppointmentService {
   createTurn(turnData: TurnCreate): Observable<TurnPaymentResult> {
     this.logger.debug('Creando nuevo turno', turnData);
     return this.apiService.post<TurnPaymentResponse>(APPOINTMENT_ENDPOINTS.CREATE_TURN, turnData).pipe(
-      map((response) => ({ success: true, ...response })),
+      map((response): TurnPaymentSuccess => ({ success: true as const, ...response })),
       catchError((error) => this.handleTurnCreationError(error))
     );
   }

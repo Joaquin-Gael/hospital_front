@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, HostListener, Input, Output, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { LoggerService } from '../../../services/core/logger.service';
+import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
 
 interface Section {
   id: string;
@@ -12,12 +14,13 @@ interface Section {
 @Component({
   selector: 'app-admin-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MatDialogModule],
   templateUrl: './admin-sidebar.component.html',
   styleUrls: ['./admin-sidebar.component.scss'],
 })
 export class AdminSidebarComponent {
   private readonly logger = inject(LoggerService);
+  private readonly dialog = inject(MatDialog);
 
   @Input() activeSection: string = 'departments';
   @Output() sectionSelected = new EventEmitter<string>();
@@ -60,7 +63,23 @@ export class AdminSidebarComponent {
   }
 
   onLogout(): void {
-    this.logout.emit();
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Cerrar sesión',
+        message: '¿Estás seguro de que deseas cerrar sesión como administrador?'
+      },
+      maxWidth: '400px',
+      width: '90%'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.logger.info('Admin logout confirmed');
+        this.logout.emit();
+      } else {
+        this.logger.debug('Admin logout cancelled');
+      }
+    });
   }
 
   @HostListener('document:keydown.escape', ['$event'])

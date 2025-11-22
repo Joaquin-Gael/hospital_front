@@ -301,7 +301,7 @@ export class CashesListComponent implements OnInit {
     return `${currency ?? ''} ${Number(amount).toFixed(2)}`.trim();
   }
 
-  private formatStatus(status: string | PaymentStatus): string {
+  public formatStatus(status: string | PaymentStatus): string {
     if (!status) return 'Desconocido';
     return status
       .replace(/_/g, ' ')

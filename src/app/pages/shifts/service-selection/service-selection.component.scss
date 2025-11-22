@@ -102,14 +102,14 @@
       right: 12px;
       padding: 0.35rem 0.75rem;
       border-radius: 999px;
-      background-color: $success-alpha;
+      background-color: rgba($success-color, 0.1);
       color: $text-primary;
       font-size: 0.8rem;
       font-weight: 600;
       @include mix.flex-center;
 
       &.unavailable {
-        background-color: $error-alpha;
+        background-color: rgba($error-color, 0.1);
         color: $error-color;
       }
     }
