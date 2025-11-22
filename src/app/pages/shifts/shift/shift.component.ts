@@ -800,7 +800,7 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     }));
   }
 
-  private handleError(error: HttpErrorResponse, defaultMessage: string): void {
+  private handleError(error: HttpErrorResponse | Error, defaultMessage: string): void {
     this.logger.error('Error en ShiftsComponent:', error);
     const errorMessages: { [key: number]: string } = {
       400: 'Datos de la solicitud inválidos. Verifica los campos ingresados.',
@@ -811,7 +811,20 @@ export class ShiftsComponent implements OnInit, OnDestroy {
       409: 'Conflicto al crear el turno. Intenta con otro horario.',
       500: 'Error en el servidor. Intenta de nuevo más tarde.'
     };
-    const message = errorMessages[error.status] || error.error?.detail || defaultMessage;
+
+    let message = defaultMessage;
+
+    if (error instanceof Error) {
+      message = error.message || defaultMessage;
+    } else {
+      message =
+        errorMessages[error.status] || error.error?.detail || defaultMessage;
+
+      if (error.status === 404 && error.error?.detail === 'Especialidad no encontrada') {
+        message = error.error.detail;
+      }
+    }
+
     this.notificationService.error(message, { duration: 5000 });
     this.error = message;
   }
