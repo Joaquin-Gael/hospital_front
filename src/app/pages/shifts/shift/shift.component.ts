@@ -14,7 +14,14 @@ import { AuthService } from '../../../services/auth/auth.service';
 import { NotificationService } from '../../../core/notification';
 import { MedicalScheduleDaysResponse, Service, MedicalScheduleCreate } from '../../../services/interfaces/hospital.interfaces';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
-import { TurnState, TurnCreate } from '../../../services/interfaces/appointment.interfaces';
+import {
+  TurnState,
+  TurnCreate,
+  TurnPaymentError,
+  TurnPaymentErrorType,
+  TurnPaymentResult,
+  isTurnPaymentError
+} from '../../../services/interfaces/appointment.interfaces';
 import { HealthInsuranceRead } from '../../../services/interfaces/health-insurance.interfaces';
 import { ReasonOption } from '../interfaces/appointment.interfaces';
 import { StepIndicatorComponent } from '../step-indicator/step-indicator.component';
@@ -25,7 +32,6 @@ import { AppointmentSummaryComponent } from '../appointment-summary/appointment-
 import { NavigationButtonsComponent } from '../navigation-buttons/navigation-buttons.component';
 import { HealthInsuranceSelectionComponent } from '../health-insarunce-selection/health-insarunce-selection.component';
 import { CashesService } from '../../../services/cashes/cashes.service';
-import { TurnPaymentResponse } from '../../../services/interfaces/appointment.interfaces';
 import { PaymentRead, PaymentStatus } from '../../../services/interfaces/payment.interfaces';
 import { HeroComponent, HeroData } from '../../../shared/hero/hero.component';
 import { PaymentsService } from '../../../services/payments/payments.service';
@@ -602,15 +608,30 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     this.logger.debug('Datos del turno enviados:', turnData);
 
     this.appointmentService.createTurn(turnData).subscribe({
-      next: (response: TurnPaymentResponse) => {
+      next: (response: TurnPaymentResult) => {
+        if (!response.success) {
+          const message = this.mapTurnPaymentError(response);
+          this.notificationService.error(message, { duration: 5000 });
+          this.error = message;
+          this.isLoading = false;
+          return;
+        }
+
         this.logger.debug('Turno creado:', response);
         const { payment, payment_url } = response;
 
         this.handlePaymentFlow(payment, payment_url);
         this.isLoading = false;
       },
-      error: (error: HttpErrorResponse) => {
-        this.handleError(error, 'Error al crear el turno');
+      error: (error: TurnPaymentError | HttpErrorResponse) => {
+        if (isTurnPaymentError(error)) {
+          const message = this.mapTurnPaymentError(error);
+          this.notificationService.error(message, { duration: 5000 });
+          this.error = message;
+        } else {
+          this.handleError(error as HttpErrorResponse, 'Error al crear el turno');
+        }
+
         this.isLoading = false;
       }
     });
@@ -771,6 +792,19 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     this.paymentStatus = payment.status;
     this.paymentMetadata = payment.metadata ?? null;
     this.cdr.detectChanges();
+  }
+
+  private mapTurnPaymentError(error: TurnPaymentError): string {
+    switch (error.type) {
+      case TurnPaymentErrorType.SLOT_UNAVAILABLE:
+        return 'El horario se acaba de completar, elige otro disponible.';
+      case TurnPaymentErrorType.APPOINTMENT_CONFLICT:
+        return 'Ya tienes un turno reservado en este horario. Revisa tus reservas o elige otro momento.';
+      case TurnPaymentErrorType.OUT_OF_SCHEDULE:
+        return 'El horario seleccionado ya no está dentro de la agenda disponible. Por favor, escoge otra hora.';
+      default:
+        return error.message || 'No se pudo crear el turno. Intenta de nuevo más tarde.';
+    }
   }
 
   getPaymentStatusLabel(status: PaymentStatus | null): string {
