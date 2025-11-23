@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, finalize, takeUntil } from 'rxjs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import {
   AppointmentViewModel,
@@ -265,59 +265,115 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       appointment.paymentUrl &&
       appointment.paymentStatus === PaymentStatus.PENDING
     ) {
-      this.openPaymentUrl(appointment.paymentUrl);
-      this.startPaymentStatusCheck(appointment.turnId, true);
-      return;
+      const wasOpened = this.openPaymentUrl(appointment.paymentUrl);
+
+      if (wasOpened) {
+        this.startPaymentStatusCheck(appointment.turnId, true);
+        return;
+      }
+
+      this.logger.warn(
+        'Payment URL could not be opened, attempting to recreate session',
+        {
+          turnId: appointment.turnId,
+          paymentUrl: appointment.paymentUrl,
+        }
+      );
     }
 
+    this.retryResumePaymentWithNewSession(appointment);
+  }
+
+  private openPaymentUrl(url: string): boolean {
+    try {
+      const openedWindow = window.open(url, '_blank', 'noopener,noreferrer');
+
+      if (!openedWindow || openedWindow.closed) {
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      this.logger.error('Failed to open payment URL', error);
+      return false;
+    }
+  }
+
+  private retryResumePaymentWithNewSession(
+    appointment: AppointmentViewModel
+  ): void {
     this.setPaymentRetrying(appointment.turnId, true);
 
     this.paymentsService
       .recreateTurnPaymentSession(appointment.turnId)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.setPaymentRetrying(appointment.turnId, false))
+      )
       .subscribe({
         next: ({ payment, payment_url }) => {
           const redirectUrl = payment_url ?? payment?.payment_url ?? null;
 
-          this.updateAppointmentPayment(
-            appointment.turnId,
-            {
-              paymentUrl: redirectUrl,
-              paymentStatus: payment?.status ?? appointment.paymentStatus,
-              paymentGatewaySessionId: this.extractGatewaySessionId(payment ?? null),
-              paymentId: payment?.id ?? appointment.paymentId,
-              paymentMethod:
-                payment?.payment_method ??
-                payment?.provider ??
-                appointment.paymentMethod,
-              paymentMetadata: payment?.metadata ?? appointment.paymentMetadata,
-            }
-          );
+          this.updateAppointmentPayment(appointment.turnId, {
+            paymentUrl: redirectUrl,
+            paymentStatus: payment?.status ?? appointment.paymentStatus,
+            paymentGatewaySessionId: this.extractGatewaySessionId(payment ?? null),
+            paymentId: payment?.id ?? appointment.paymentId,
+            paymentMethod:
+              payment?.payment_method ??
+              payment?.provider ??
+              appointment.paymentMethod,
+            paymentMetadata: payment?.metadata ?? appointment.paymentMetadata,
+          });
 
-          if (redirectUrl) {
-            this.openPaymentUrl(redirectUrl);
-          } else {
+          if (!redirectUrl) {
             this.notificationService.error(
               'No se pudo obtener un enlace de pago. Intenta nuevamente más tarde.'
             );
+            return;
+          }
+
+          const wasOpened = this.openPaymentUrl(redirectUrl);
+
+          if (!wasOpened) {
+            this.notificationService.error(
+              'No pudimos abrir el nuevo enlace de pago. Intenta nuevamente más tarde.'
+            );
+            return;
           }
 
           this.startPaymentStatusCheck(appointment.turnId, true);
-
-          this.setPaymentRetrying(appointment.turnId, false);
         },
         error: (err) => {
           this.logger.error('Failed to recreate payment session', err);
-          this.notificationService.error(
-            'No pudimos reanudar el pago. Por favor, intenta de nuevo.'
-          );
-          this.setPaymentRetrying(appointment.turnId, false);
+
+          const message = this.buildResumePaymentErrorMessage(err);
+
+          this.notificationService.error(message);
         },
       });
   }
 
-  private openPaymentUrl(url: string): void {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  private buildResumePaymentErrorMessage(error: unknown): string {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Error desconocido al reanudar el pago';
+
+    if (this.isExpiredPaymentError(error)) {
+      return (
+        'El enlace de pago ya no está disponible y no pudimos generar uno nuevo. ' +
+        'Por favor, intenta nuevamente más tarde o comunícate con soporte.'
+      );
+    }
+
+    return `No pudimos reanudar el pago (${message}). Por favor, intenta de nuevo más tarde.`;
+  }
+
+  private isExpiredPaymentError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : `${error ?? ''}`;
+
+    return /404|not found|expir/i.test(message);
   }
 
   private updateAppointmentPayment(
