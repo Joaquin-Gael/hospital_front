@@ -1,7 +1,12 @@
 import { UserRead } from './user.interfaces';
 import { Doctor } from './doctor.interfaces';
 import { Service } from './hospital.interfaces';
-import { PaymentMethod, PaymentRead, PaymentStatus } from './payment.interfaces';
+import {
+  Payment,
+  PaymentMethod,
+  PaymentRead,
+  PaymentStatus,
+} from './payment.interfaces';
 
 // Estado del turno o cita
 export enum TurnState {
@@ -43,6 +48,9 @@ export interface TurnResponse {
   service?: Service[];
   services_details?: Service[];
   appointment?: AppointmentMinimal;
+  payment?: Payment | null;
+  payment_url?: string | null;
+  payment_status?: PaymentStatus | null;
 }
 
 export interface TurnRescheduleRequest {
@@ -64,8 +72,9 @@ export interface TurnRescheduleResponse {
 
 export interface TurnPaymentResponse {
   turn: TurnResponse;
-  payment: PaymentRead | null;
+  payment: Payment | null;
   payment_url: string | null;
+  payment_status?: PaymentStatus | null;
 }
 
 export enum TurnPaymentErrorType {
@@ -114,7 +123,8 @@ export interface Turn {
   doctor?: Doctor;
   service?: Service[];
   appointment?: AppointmentMinimal;
-  payment?: PaymentRead | null;
+  payment?: Payment | null;
+  payment_status?: PaymentStatus | null;
   payment_url?: string | null;
 }
 
