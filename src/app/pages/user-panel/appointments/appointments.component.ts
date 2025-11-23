@@ -133,8 +133,8 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         ? `${turn.doctor.first_name} ${turn.doctor.last_name}`.trim()
         : 'Sin médico asignado',
       state: turn.state,
-      paymentStatus: turn.payment?.status ?? null,
-      paymentUrl: turn.payment?.payment_url ?? turn.payment_url ?? null,
+      paymentStatus: turn.payment_status ?? turn.payment?.status ?? null,
+      paymentUrl: turn.payment_url ?? turn.payment?.payment_url ?? null,
       paymentId: turn.payment?.id ?? null,
       paymentGatewaySessionId: this.extractGatewaySessionId(turn.payment),
       paymentMethod: turn.payment?.payment_method ?? turn.payment?.provider ?? null,
@@ -306,12 +306,13 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         finalize(() => this.setPaymentRetrying(appointment.turnId, false))
       )
       .subscribe({
-        next: ({ payment, payment_url }) => {
+        next: ({ payment, payment_url, payment_status }) => {
           const redirectUrl = payment_url ?? payment?.payment_url ?? null;
 
           this.updateAppointmentPayment(appointment.turnId, {
             paymentUrl: redirectUrl,
-            paymentStatus: payment?.status ?? appointment.paymentStatus,
+            paymentStatus:
+              payment_status ?? payment?.status ?? appointment.paymentStatus,
             paymentGatewaySessionId: this.extractGatewaySessionId(payment ?? null),
             paymentId: payment?.id ?? appointment.paymentId,
             paymentMethod:
