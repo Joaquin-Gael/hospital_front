@@ -167,6 +167,7 @@ export interface AppointmentViewModel {
   state: TurnState;
   paymentStatus: PaymentStatus | null;
   paymentUrl: string | null;
+  paymentId: string | null;
   paymentGatewaySessionId: string | null;
   paymentMethod: PaymentMethod | string | null;
   paymentMetadata: Record<string, unknown> | null;

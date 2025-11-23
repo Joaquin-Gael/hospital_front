@@ -50,6 +50,9 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   error: string | null = null;
   loading: boolean = true;
   paymentRetrying: Record<string, boolean> = {};
+  private readonly paymentStatusMaxAttempts = 5;
+  private readonly paymentStatusBaseDelayMs = 2000;
+  private paymentStatusTimers: Record<string, ReturnType<typeof setTimeout> | null> = {};
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
@@ -103,6 +106,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         next: (turns: Turn[]) => {
           console.log('Turns received:', turns);
           this.appointments = this.mapTurnsToAppointments(turns);
+          this.startInitialPaymentStatusChecks();
           this.loading = false;
           this.logger.debug(
             'Appointments loaded successfully',
@@ -131,6 +135,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       state: turn.state,
       paymentStatus: turn.payment?.status ?? null,
       paymentUrl: turn.payment?.payment_url ?? turn.payment_url ?? null,
+      paymentId: turn.payment?.id ?? null,
       paymentGatewaySessionId: this.extractGatewaySessionId(turn.payment),
       paymentMethod: turn.payment?.payment_method ?? turn.payment?.provider ?? null,
       paymentMetadata: turn.payment?.metadata ?? null,
@@ -261,6 +266,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       appointment.paymentStatus === PaymentStatus.PENDING
     ) {
       this.openPaymentUrl(appointment.paymentUrl);
+      this.startPaymentStatusCheck(appointment.turnId, true);
       return;
     }
 
@@ -275,9 +281,17 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
           this.updateAppointmentPayment(
             appointment.turnId,
-            redirectUrl,
-            payment?.status ?? appointment.paymentStatus,
-            this.extractGatewaySessionId(payment ?? null)
+            {
+              paymentUrl: redirectUrl,
+              paymentStatus: payment?.status ?? appointment.paymentStatus,
+              paymentGatewaySessionId: this.extractGatewaySessionId(payment ?? null),
+              paymentId: payment?.id ?? appointment.paymentId,
+              paymentMethod:
+                payment?.payment_method ??
+                payment?.provider ??
+                appointment.paymentMethod,
+              paymentMetadata: payment?.metadata ?? appointment.paymentMetadata,
+            }
           );
 
           if (redirectUrl) {
@@ -287,6 +301,8 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
               'No se pudo obtener un enlace de pago. Intenta nuevamente más tarde.'
             );
           }
+
+          this.startPaymentStatusCheck(appointment.turnId, true);
 
           this.setPaymentRetrying(appointment.turnId, false);
         },
@@ -306,18 +322,47 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   private updateAppointmentPayment(
     turnId: string,
-    paymentUrl: string | null,
-    paymentStatus: PaymentStatus | null,
-    gatewaySessionId: string | null
+    updates: {
+      paymentUrl?: string | null;
+      paymentStatus?: PaymentStatus | null;
+      paymentGatewaySessionId?: string | null;
+      paymentId?: string | null;
+      paymentMethod?: PaymentMethod | string | null;
+      paymentMetadata?: Record<string, unknown> | null;
+    }
   ): void {
     this.appointments = this.appointments.map((appointment) =>
       appointment.turnId !== turnId
         ? appointment
         : {
             ...appointment,
-            paymentUrl,
-            paymentStatus,
-            paymentGatewaySessionId: gatewaySessionId,
+            paymentUrl:
+              updates.paymentUrl !== undefined
+                ? updates.paymentUrl
+                : appointment.paymentUrl,
+            paymentStatus:
+              updates.paymentStatus !== undefined
+                ? updates.paymentStatus
+                : appointment.paymentStatus,
+            paymentGatewaySessionId:
+              updates.paymentGatewaySessionId !== undefined
+                ? updates.paymentGatewaySessionId
+                : appointment.paymentGatewaySessionId,
+            paymentId:
+              updates.paymentId !== undefined
+                ? updates.paymentId
+                : appointment.paymentId,
+            paymentMethod:
+              updates.paymentMethod !== undefined
+                ? updates.paymentMethod
+                : appointment.paymentMethod,
+            paymentMetadata:
+              updates.paymentMetadata !== undefined
+                ? updates.paymentMetadata
+                : appointment.paymentMetadata,
+            paymentMetadataEntries: this.buildPaymentMetadataEntries(
+              updates.paymentMetadata ?? appointment.paymentMetadata
+            ),
           }
     );
   }
@@ -327,6 +372,141 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       ...this.paymentRetrying,
       [turnId]: value,
     };
+  }
+
+  private startInitialPaymentStatusChecks(): void {
+    this.appointments.forEach((appointment) =>
+      this.startPaymentStatusCheck(appointment.turnId, true)
+    );
+  }
+
+  private shouldMonitorPaymentStatus(
+    appointment: AppointmentViewModel
+  ): boolean {
+    const hasActionableStatus =
+      appointment.paymentStatus === PaymentStatus.PENDING ||
+      appointment.paymentStatus === PaymentStatus.REQUIRES_ACTION ||
+      appointment.paymentStatus === PaymentStatus.FAILED;
+
+    return (
+      hasActionableStatus &&
+      (!!appointment.paymentId || !!appointment.paymentGatewaySessionId)
+    );
+  }
+
+  private startPaymentStatusCheck(turnId: string, immediate = false): void {
+    const appointment = this.appointments.find((item) => item.turnId === turnId);
+
+    if (!appointment || !this.shouldMonitorPaymentStatus(appointment)) {
+      return;
+    }
+
+    this.schedulePaymentStatusCheck(appointment, 1, immediate);
+  }
+
+  private schedulePaymentStatusCheck(
+    appointment: AppointmentViewModel,
+    attempt: number,
+    immediate: boolean
+  ): void {
+    const delay = immediate
+      ? 0
+      : this.paymentStatusBaseDelayMs * Math.pow(2, attempt - 1);
+
+    this.clearPaymentStatusTimer(appointment.turnId);
+
+    this.paymentStatusTimers[appointment.turnId] = setTimeout(() => {
+      this.fetchPaymentStatus(appointment.turnId, attempt);
+    }, delay);
+  }
+
+  private fetchPaymentStatus(turnId: string, attempt: number): void {
+    const appointment = this.appointments.find((item) => item.turnId === turnId);
+
+    if (!appointment || !this.shouldMonitorPaymentStatus(appointment)) {
+      return;
+    }
+
+    const status$ = appointment.paymentId
+      ? this.paymentsService.get(appointment.paymentId)
+      : appointment.paymentGatewaySessionId
+        ? this.paymentsService.getStatusBySession(
+            appointment.paymentGatewaySessionId
+          )
+        : null;
+
+    if (!status$) {
+      return;
+    }
+
+    status$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (payment) => {
+          this.handlePaymentStatusResponse(turnId, payment);
+
+          if (
+            !this.isTerminalPaymentStatus(payment.status) &&
+            attempt < this.paymentStatusMaxAttempts
+          ) {
+            this.schedulePaymentStatusCheck(appointment, attempt + 1, false);
+          }
+        },
+        error: (err) => {
+          this.logger.error('Failed to fetch payment status', err);
+          this.notificationService.error(
+            'No se pudo verificar el estado del pago. Intenta nuevamente.'
+          );
+
+          if (attempt < this.paymentStatusMaxAttempts) {
+            this.schedulePaymentStatusCheck(appointment, attempt + 1, false);
+          }
+        },
+      });
+  }
+
+  private handlePaymentStatusResponse(turnId: string, payment: PaymentRead): void {
+    this.updateAppointmentPayment(turnId, {
+      paymentId: payment.id ?? null,
+      paymentUrl: payment.payment_url ?? null,
+      paymentStatus: payment.status ?? null,
+      paymentGatewaySessionId: this.extractGatewaySessionId(payment),
+      paymentMethod: payment.payment_method ?? payment.provider ?? null,
+      paymentMetadata: payment.metadata ?? null,
+    });
+
+    if (payment.status === PaymentStatus.SUCCEEDED) {
+      this.notificationService.success('Pago confirmado correctamente.');
+      this.clearPaymentStatusTimer(turnId);
+      return;
+    }
+
+    if (payment.status === PaymentStatus.CANCELED) {
+      this.notificationService.info('El pago fue cancelado.');
+      this.clearPaymentStatusTimer(turnId);
+    }
+  }
+
+  private isTerminalPaymentStatus(status: PaymentStatus | null): boolean {
+    return (
+      status === PaymentStatus.SUCCEEDED || status === PaymentStatus.CANCELED
+    );
+  }
+
+  private clearPaymentStatusTimer(turnId: string): void {
+    const timer = this.paymentStatusTimers[turnId];
+
+    if (timer) {
+      clearTimeout(timer);
+    }
+
+    delete this.paymentStatusTimers[turnId];
+  }
+
+  private clearAllPaymentStatusTimers(): void {
+    Object.keys(this.paymentStatusTimers).forEach((turnId) =>
+      this.clearPaymentStatusTimer(turnId)
+    );
   }
 
   private extractGatewaySessionId(payment: PaymentRead | null): string | null {
@@ -457,6 +637,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.clearAllPaymentStatusTimers();
     this.destroy$.next();
     this.destroy$.complete();
   }

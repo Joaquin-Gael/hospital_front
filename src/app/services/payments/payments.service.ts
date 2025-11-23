@@ -89,6 +89,21 @@ export class PaymentsService {
     );
   }
 
+  getStatusBySession(sessionId: string): Observable<PaymentRead> {
+    const params = this.normalizeParams({ session_id: sessionId });
+
+    return this.apiService
+      .get<PaymentRead>(PAYMENTS_ENDPOINTS.statusBySession(), { params })
+      .pipe(
+        catchError((error) =>
+          this.handleError(
+            `Failed to fetch payment status for session ${sessionId}`,
+            error
+          )
+        )
+      );
+  }
+
   private normalizeParams(
     params?: QueryParamsInput
   ): HttpParams | undefined {
