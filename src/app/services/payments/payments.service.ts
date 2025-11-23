@@ -11,6 +11,7 @@ import {
   PaymentRead,
   PaymentStatusUpdatePayload,
 } from '../interfaces/payment.interfaces';
+import { TurnPaymentResponse } from '../interfaces/appointment.interfaces';
 
 type QueryValue = string | number | boolean | Array<string | number | boolean>;
 
@@ -61,6 +62,23 @@ export class PaymentsService {
       .pipe(
         catchError((error) =>
           this.handleError(`Failed to update payment ${paymentId} status`, error)
+        )
+      );
+  }
+
+  recreateTurnPaymentSession(turnId: string): Observable<TurnPaymentResponse> {
+    this.logger.debug(`Recreating payment session for turn ${turnId}`);
+
+    return this.apiService
+      .post<TurnPaymentResponse>(PAYMENTS_ENDPOINTS.recreateTurnSession(), {
+        turn_id: turnId,
+      })
+      .pipe(
+        catchError((error) =>
+          this.handleError(
+            `Failed to recreate payment session for turn ${turnId}`,
+            error
+          )
         )
       );
   }

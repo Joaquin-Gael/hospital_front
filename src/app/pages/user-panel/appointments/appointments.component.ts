@@ -11,6 +11,7 @@ import {
 } from '../../../services/interfaces/appointment.interfaces';
 import {
   PaymentMethod,
+  PaymentRead,
   PaymentStatus,
 } from '../../../services/interfaces/payment.interfaces';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
@@ -21,6 +22,7 @@ import { NotificationService } from '../../../core/notification';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
 import { RescheduleTurnDialogComponent } from '../reschedule-turn-dialog/reschedule-turn-dialog.component';
+import { PaymentsService } from '../../../services/payments/payments.service';
 
 @Component({
   selector: 'app-appointments',
@@ -37,6 +39,7 @@ import { RescheduleTurnDialogComponent } from '../reschedule-turn-dialog/resched
 export class AppointmentsComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly appointmentService = inject(AppointmentService);
+  private readonly paymentsService = inject(PaymentsService);
   private readonly logger = inject(LoggerService);
   private readonly router = inject(Router);
   private readonly notificationService = inject(NotificationService);
@@ -46,6 +49,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   user: UserRead | null = null;
   error: string | null = null;
   loading: boolean = true;
+  paymentRetrying: Record<string, boolean> = {};
   private readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
@@ -127,6 +131,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       state: turn.state,
       paymentStatus: turn.payment?.status ?? null,
       paymentUrl: turn.payment?.payment_url ?? turn.payment_url ?? null,
+      paymentGatewaySessionId: this.extractGatewaySessionId(turn.payment),
       paymentMethod: turn.payment?.payment_method ?? turn.payment?.provider ?? null,
       paymentMetadata: turn.payment?.metadata ?? null,
       paymentMetadataEntries: this.buildPaymentMetadataEntries(
@@ -230,6 +235,116 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     };
 
     return methodLabels[paymentMethod] ?? this.toTitleCase(`${paymentMethod}`);
+  }
+
+  shouldShowResumePayment(appointment: AppointmentViewModel): boolean {
+    const isRetryableStatus =
+      appointment.paymentStatus === PaymentStatus.PENDING ||
+      appointment.paymentStatus === PaymentStatus.FAILED;
+    const hasLinkOrSession =
+      !!appointment.paymentUrl || !!appointment.paymentGatewaySessionId;
+
+    return isRetryableStatus && hasLinkOrSession;
+  }
+
+  isPaymentRetrying(turnId: string): boolean {
+    return Boolean(this.paymentRetrying[turnId]);
+  }
+
+  onResumePayment(appointment: AppointmentViewModel): void {
+    if (this.isPaymentRetrying(appointment.turnId)) {
+      return;
+    }
+
+    if (
+      appointment.paymentUrl &&
+      appointment.paymentStatus === PaymentStatus.PENDING
+    ) {
+      this.openPaymentUrl(appointment.paymentUrl);
+      return;
+    }
+
+    this.setPaymentRetrying(appointment.turnId, true);
+
+    this.paymentsService
+      .recreateTurnPaymentSession(appointment.turnId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ payment, payment_url }) => {
+          const redirectUrl = payment_url ?? payment?.payment_url ?? null;
+
+          this.updateAppointmentPayment(
+            appointment.turnId,
+            redirectUrl,
+            payment?.status ?? appointment.paymentStatus,
+            this.extractGatewaySessionId(payment ?? null)
+          );
+
+          if (redirectUrl) {
+            this.openPaymentUrl(redirectUrl);
+          } else {
+            this.notificationService.error(
+              'No se pudo obtener un enlace de pago. Intenta nuevamente más tarde.'
+            );
+          }
+
+          this.setPaymentRetrying(appointment.turnId, false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to recreate payment session', err);
+          this.notificationService.error(
+            'No pudimos reanudar el pago. Por favor, intenta de nuevo.'
+          );
+          this.setPaymentRetrying(appointment.turnId, false);
+        },
+      });
+  }
+
+  private openPaymentUrl(url: string): void {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  private updateAppointmentPayment(
+    turnId: string,
+    paymentUrl: string | null,
+    paymentStatus: PaymentStatus | null,
+    gatewaySessionId: string | null
+  ): void {
+    this.appointments = this.appointments.map((appointment) =>
+      appointment.turnId !== turnId
+        ? appointment
+        : {
+            ...appointment,
+            paymentUrl,
+            paymentStatus,
+            paymentGatewaySessionId: gatewaySessionId,
+          }
+    );
+  }
+
+  private setPaymentRetrying(turnId: string, value: boolean): void {
+    this.paymentRetrying = {
+      ...this.paymentRetrying,
+      [turnId]: value,
+    };
+  }
+
+  private extractGatewaySessionId(payment: PaymentRead | null): string | null {
+    if (!payment) {
+      return null;
+    }
+
+    const metadata = payment.gateway_metadata as
+      | { session_id?: string; sessionId?: string }
+      | null
+      | undefined;
+
+    return (
+      payment.gateway_session_id ??
+      metadata?.session_id ??
+      metadata?.sessionId ??
+      null
+    );
   }
 
   onReschedule(turnId: string): void {
