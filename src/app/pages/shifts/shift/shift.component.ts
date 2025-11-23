@@ -789,9 +789,29 @@ export class ShiftsComponent implements OnInit, OnDestroy {
   }
 
   private updatePaymentState(payment: Payment): void {
-    this.paymentStatus = payment.status;
+    this.paymentStatus = this.normalizePaymentStatus(payment.status);
     this.paymentMetadata = payment.metadata ?? null;
     this.cdr.detectChanges();
+  }
+
+  private normalizePaymentStatus(
+    status: PaymentStatus | string | null | undefined
+  ): PaymentStatus | null {
+    if (!status) {
+      return null;
+    }
+
+    const normalized = `${status}`.toLowerCase();
+    const validStatuses: PaymentStatus[] = [
+      PaymentStatus.PENDING,
+      PaymentStatus.SUCCEEDED,
+      PaymentStatus.FAILED,
+      PaymentStatus.CANCELLED
+    ];
+
+    return validStatuses.includes(normalized as PaymentStatus)
+      ? (normalized as PaymentStatus)
+      : null;
   }
 
   private mapTurnPaymentError(error: TurnPaymentError): string {
@@ -807,8 +827,10 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     }
   }
 
-  getPaymentStatusLabel(status: PaymentStatus | null): string {
-    switch (status) {
+  getPaymentStatusLabel(status: PaymentStatus | string | null): string {
+    const normalizedStatus = this.normalizePaymentStatus(status);
+
+    switch (normalizedStatus) {
       case PaymentStatus.PENDING:
         return 'Pendiente';
       case PaymentStatus.SUCCEEDED:
