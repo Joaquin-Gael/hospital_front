@@ -168,6 +168,13 @@ export class HistoryComponent implements OnInit, OnDestroy {
         specialty: turn.service?.[0]?.name ?? 'Sin especialidad',
         doctorName: turn.doctor ? `${turn.doctor.first_name} ${turn.doctor.last_name}`.trim() : 'Sin médico asignado',
         state: turn.state,
+        paymentStatus: turn.payment?.status ?? null,
+        paymentUrl: turn.payment?.payment_url ?? turn.payment_url ?? null,
+        paymentId: turn.payment?.id ?? null,
+        paymentGatewaySessionId: turn.payment?.gateway_session_id ?? null,
+        paymentMethod: turn.payment?.payment_method ?? turn.payment?.provider ?? null,
+        paymentMetadata: turn.payment?.metadata ?? null,
+        paymentMetadataEntries: [],
       }));
   }
 
