@@ -35,6 +35,7 @@ export interface PaymentRead {
   payment_url?: string | null;
   provider?: string | null;
   external_id?: string | null;
+  gateway_session_id?: string | null;
   description?: string | null;
   receipt_url?: string | null;
   items?: PaymentItem[];

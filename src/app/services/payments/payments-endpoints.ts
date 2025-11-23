@@ -4,4 +4,5 @@ export const PAYMENTS_ENDPOINTS = {
   create: () => 'payments',
   updateStatus: (paymentId: string) => `payments/${paymentId}/status`,
   delete: (paymentId: string) => `payments/${paymentId}`,
+  recreateTurnSession: () => 'payments/turn',
 } as const;
