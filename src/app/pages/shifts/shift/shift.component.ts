@@ -725,7 +725,7 @@ export class ShiftsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (payment.status === PaymentStatus.CANCELED) {
+    if (payment.status === PaymentStatus.CANCELLED) {
       this.notificationService.info('El pago fue cancelado. Puedes intentarlo nuevamente desde tu historial.', {
         duration: 5000
       });
@@ -774,7 +774,7 @@ export class ShiftsComponent implements OnInit, OnDestroy {
           return;
         }
 
-        if (payment.status === PaymentStatus.CANCELED) {
+        if (payment.status === PaymentStatus.CANCELLED) {
           this.notificationService.info('El pago fue cancelado. Puedes intentarlo nuevamente desde tu historial.', {
             duration: 5000
           });
@@ -810,13 +810,12 @@ export class ShiftsComponent implements OnInit, OnDestroy {
   getPaymentStatusLabel(status: PaymentStatus | null): string {
     switch (status) {
       case PaymentStatus.PENDING:
-      case PaymentStatus.REQUIRES_ACTION:
         return 'Pendiente';
       case PaymentStatus.SUCCEEDED:
         return 'Pagado';
       case PaymentStatus.FAILED:
         return 'Fallido';
-      case PaymentStatus.CANCELED:
+      case PaymentStatus.CANCELLED:
         return 'Cancelado';
       default:
         return 'Desconocido';

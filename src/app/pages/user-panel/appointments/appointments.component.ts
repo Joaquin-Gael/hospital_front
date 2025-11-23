@@ -200,11 +200,9 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         return 'Pago completado';
       case PaymentStatus.PENDING:
         return 'Pago pendiente';
-      case PaymentStatus.REQUIRES_ACTION:
-        return 'Acción requerida';
       case PaymentStatus.FAILED:
         return 'Pago fallido';
-      case PaymentStatus.CANCELED:
+      case PaymentStatus.CANCELLED:
         return 'Pago cancelado';
       default:
         return 'Sin información de pago';
@@ -216,10 +214,9 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       case PaymentStatus.SUCCEEDED:
         return 'payment-status--success';
       case PaymentStatus.PENDING:
-      case PaymentStatus.REQUIRES_ACTION:
         return 'payment-status--pending';
       case PaymentStatus.FAILED:
-      case PaymentStatus.CANCELED:
+      case PaymentStatus.CANCELLED:
         return 'payment-status--error';
       default:
         return 'payment-status--none';
@@ -235,8 +232,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       [PaymentMethod.CARD]: 'Tarjeta',
       [PaymentMethod.CASH]: 'Efectivo',
       [PaymentMethod.TRANSFER]: 'Transferencia',
-      [PaymentMethod.PIX]: 'Pix',
-      [PaymentMethod.OTHER]: 'Otro',
     };
 
     return methodLabels[paymentMethod] ?? this.toTitleCase(`${paymentMethod}`);
@@ -441,7 +436,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   ): boolean {
     const hasActionableStatus =
       appointment.paymentStatus === PaymentStatus.PENDING ||
-      appointment.paymentStatus === PaymentStatus.REQUIRES_ACTION ||
       appointment.paymentStatus === PaymentStatus.FAILED;
 
     return (
@@ -537,7 +531,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (payment.status === PaymentStatus.CANCELED) {
+    if (payment.status === PaymentStatus.CANCELLED) {
       this.notificationService.info('El pago fue cancelado.');
       this.clearPaymentStatusTimer(turnId);
     }
@@ -545,7 +539,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   private isTerminalPaymentStatus(status: PaymentStatus | null): boolean {
     return (
-      status === PaymentStatus.SUCCEEDED || status === PaymentStatus.CANCELED
+      status === PaymentStatus.SUCCEEDED || status === PaymentStatus.CANCELLED
     );
   }
 

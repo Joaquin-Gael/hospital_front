@@ -23,7 +23,7 @@
         {{ getPaymentStatusLabel(paymentStatus) }}
       </span>
       <p
-        *ngIf="paymentStatus === PaymentStatus.PENDING || paymentStatus === PaymentStatus.REQUIRES_ACTION"
+        *ngIf="paymentStatus === PaymentStatus.PENDING"
         class="status-description"
       >
         Estamos esperando la confirmación del pago. Actualizaremos el estado automáticamente.
@@ -31,7 +31,7 @@
       <p *ngIf="paymentStatus === PaymentStatus.SUCCEEDED" class="status-description">
         Pago confirmado. Estamos redirigiéndote a tu panel.
       </p>
-      <p *ngIf="paymentStatus === PaymentStatus.CANCELED" class="status-description">
+      <p *ngIf="paymentStatus === PaymentStatus.CANCELLED" class="status-description">
         El pago fue cancelado. Puedes intentar nuevamente desde tu historial.
       </p>
 

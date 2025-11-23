@@ -14,9 +14,6 @@ import { PaymentRead, PaymentStatus, PaymentStatusUpdatePayload } from '../../se
 import { PaymentsService } from '../../services/payments/payments.service';
 
 interface PaymentRow extends PaymentRead {
-  amount_total?: number | null;
-  gateway_metadata?: Record<string, unknown> | null;
-  formattedAmount: string;
   formattedAmountTotal: string;
   formattedCreatedAt: string;
   formattedUpdatedAt: string;
@@ -50,10 +47,9 @@ export class CashesListComponent implements OnInit {
 
   readonly defaultStatuses = [
     PaymentStatus.PENDING,
-    PaymentStatus.REQUIRES_ACTION,
     PaymentStatus.SUCCEEDED,
     PaymentStatus.FAILED,
-    PaymentStatus.CANCELED,
+    PaymentStatus.CANCELLED,
   ];
   readonly tableActions: DataTableActionsConfig = {
     ban: false,
@@ -115,7 +111,6 @@ export class CashesListComponent implements OnInit {
     { key: 'id', label: 'ID de Pago' },
     { key: 'status', label: 'Estado', format: (value: string) => this.formatStatus(value) },
     { key: 'formattedAmountTotal', label: 'Monto total' },
-    { key: 'formattedAmount', label: 'Monto informado' },
     { key: 'currency', label: 'Moneda' },
     { key: 'turn_id', label: 'Turno asociado' },
     { key: 'appointment_id', label: 'Cita asociada' },
@@ -282,13 +277,9 @@ export class CashesListComponent implements OnInit {
   statusFormInitialData: Partial<StatusFormValues> | null = null;
 
   private mapPaymentToRow(payment: PaymentRead): PaymentRow {
-    const amountTotal = (payment as PaymentRow).amount_total ?? payment.amount;
     return {
       ...payment,
-      amount_total: amountTotal,
-      gateway_metadata: (payment as PaymentRow).gateway_metadata ?? null,
-      formattedAmount: this.formatAmount(payment.amount, payment.currency),
-      formattedAmountTotal: this.formatAmount(amountTotal, payment.currency),
+      formattedAmountTotal: this.formatAmount(payment.amount_total, payment.currency),
       formattedCreatedAt: this.formatDate(payment.created_at),
       formattedUpdatedAt: this.formatDate(payment.updated_at),
     };
