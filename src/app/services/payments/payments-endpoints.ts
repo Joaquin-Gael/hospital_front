@@ -1,7 +1,7 @@
 export const PAYMENTS_ENDPOINTS = {
   list: () => 'payments',
   detail: (paymentId: string) => `payments/${paymentId}`,
-  create: () => 'payments',
+  create: () => 'payments/add',
   updateStatus: (paymentId: string) => `payments/${paymentId}/status`,
   delete: (paymentId: string) => `payments/${paymentId}`,
   recreateTurnSession: () => 'payments/turn',
