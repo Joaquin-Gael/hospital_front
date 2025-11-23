@@ -123,26 +123,75 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   private mapTurnsToAppointments(turns: Turn[]): AppointmentViewModel[] {
-    return turns.map((turn) => ({
-      id: turn.appointment_id ?? turn.id,
-      turnId: turn.id,
-      date: turn.date,
-      time: turn.time.split(':').slice(0, 2).join(':'),
-      specialty: turn.service?.[0]?.name ?? 'Sin especialidad',
-      doctorName: turn.doctor
-        ? `${turn.doctor.first_name} ${turn.doctor.last_name}`.trim()
-        : 'Sin médico asignado',
-      state: turn.state,
-      paymentStatus: turn.payment_status ?? turn.payment?.status ?? null,
-      paymentUrl: turn.payment_url ?? turn.payment?.payment_url ?? null,
-      paymentId: turn.payment?.id ?? null,
-      paymentGatewaySessionId: this.extractGatewaySessionId(turn.payment),
-      paymentMethod: turn.payment?.payment_method ?? turn.payment?.provider ?? null,
-      paymentMetadata: turn.payment?.metadata ?? null,
-      paymentMetadataEntries: this.buildPaymentMetadataEntries(
-        turn.payment?.metadata ?? null
-      ),
-    }));
+    return turns.map((turn) => {
+      const paymentStatus = this.normalizePaymentStatus(
+        turn.payment_status ?? turn.payment?.status ?? null
+      );
+      const paymentUrl = turn.payment_url ?? turn.payment?.payment_url ?? null;
+      const paymentMethod = this.normalizePaymentMethod(
+        turn.payment?.payment_method ?? turn.payment?.provider ?? null
+      );
+
+      return {
+        id: turn.appointment_id ?? turn.id,
+        turnId: turn.id,
+        date: turn.date,
+        time: turn.time.split(':').slice(0, 2).join(':'),
+        specialty: turn.service?.[0]?.name ?? 'Sin especialidad',
+        doctorName: turn.doctor
+          ? `${turn.doctor.first_name} ${turn.doctor.last_name}`.trim()
+          : 'Sin médico asignado',
+        state: turn.state,
+        paymentStatus,
+        paymentUrl,
+        paymentId: turn.payment?.id ?? null,
+        paymentGatewaySessionId: this.extractGatewaySessionId(turn.payment),
+        paymentMethod,
+        paymentMetadata: turn.payment?.metadata ?? null,
+        paymentMetadataEntries: this.buildPaymentMetadataEntries(
+          turn.payment?.metadata ?? null
+        ),
+      };
+    });
+  }
+
+  private normalizePaymentStatus(
+    status: PaymentStatus | string | null | undefined
+  ): PaymentStatus | null {
+    if (!status) {
+      return null;
+    }
+
+    const normalized = `${status}`.toLowerCase();
+    const validStatuses: PaymentStatus[] = [
+      PaymentStatus.PENDING,
+      PaymentStatus.SUCCEEDED,
+      PaymentStatus.FAILED,
+      PaymentStatus.CANCELLED,
+    ];
+
+    return validStatuses.includes(normalized as PaymentStatus)
+      ? (normalized as PaymentStatus)
+      : null;
+  }
+
+  private normalizePaymentMethod(
+    method: PaymentMethod | string | null | undefined
+  ): PaymentMethod | null {
+    if (!method) {
+      return null;
+    }
+
+    const normalized = `${method}`.toLowerCase();
+    const validMethods: PaymentMethod[] = [
+      PaymentMethod.CARD,
+      PaymentMethod.CASH,
+      PaymentMethod.TRANSFER,
+    ];
+
+    return validMethods.includes(normalized as PaymentMethod)
+      ? (normalized as PaymentMethod)
+      : null;
   }
 
   private buildPaymentMetadataEntries(
@@ -194,8 +243,10 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       : this.appointments;
   }
 
-  getPaymentStatusLabel(status: PaymentStatus | null): string {
-    switch (status) {
+  getPaymentStatusLabel(status: PaymentStatus | string | null): string {
+    const normalizedStatus = this.normalizePaymentStatus(status);
+
+    switch (normalizedStatus) {
       case PaymentStatus.SUCCEEDED:
         return 'Pago completado';
       case PaymentStatus.PENDING:
@@ -209,8 +260,10 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     }
   }
 
-  getPaymentStatusClass(status: PaymentStatus | null): string {
-    switch (status) {
+  getPaymentStatusClass(status: PaymentStatus | string | null): string {
+    const normalizedStatus = this.normalizePaymentStatus(status);
+
+    switch (normalizedStatus) {
       case PaymentStatus.SUCCEEDED:
         return 'payment-status--success';
       case PaymentStatus.PENDING:
@@ -224,17 +277,18 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   getPaymentMethodLabel(paymentMethod: PaymentMethod | string | null): string {
-    if (!paymentMethod) {
-      return 'Método no especificado';
+    const normalizedMethod = this.normalizePaymentMethod(paymentMethod);
+
+    switch (normalizedMethod) {
+      case PaymentMethod.CARD:
+        return 'Tarjeta';
+      case PaymentMethod.CASH:
+        return 'Efectivo';
+      case PaymentMethod.TRANSFER:
+        return 'Transferencia';
+      default:
+        return 'Método no especificado';
     }
-
-    const methodLabels: Record<string, string> = {
-      [PaymentMethod.CARD]: 'Tarjeta',
-      [PaymentMethod.CASH]: 'Efectivo',
-      [PaymentMethod.TRANSFER]: 'Transferencia',
-    };
-
-    return methodLabels[paymentMethod] ?? this.toTitleCase(`${paymentMethod}`);
   }
 
   shouldShowResumePayment(appointment: AppointmentViewModel): boolean {
@@ -394,7 +448,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
                 : appointment.paymentUrl,
             paymentStatus:
               updates.paymentStatus !== undefined
-                ? updates.paymentStatus
+                ? this.normalizePaymentStatus(updates.paymentStatus)
                 : appointment.paymentStatus,
             paymentGatewaySessionId:
               updates.paymentGatewaySessionId !== undefined
@@ -406,7 +460,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
                 : appointment.paymentId,
             paymentMethod:
               updates.paymentMethod !== undefined
-                ? updates.paymentMethod
+                ? this.normalizePaymentMethod(updates.paymentMethod)
                 : appointment.paymentMethod,
             paymentMetadata:
               updates.paymentMetadata !== undefined
