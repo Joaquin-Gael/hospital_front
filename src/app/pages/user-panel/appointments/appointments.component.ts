@@ -9,6 +9,10 @@ import {
   TurnRescheduleRequest,
   TurnState,
 } from '../../../services/interfaces/appointment.interfaces';
+import {
+  PaymentMethod,
+  PaymentStatus,
+} from '../../../services/interfaces/payment.interfaces';
 import { UserRead } from '../../../services/interfaces/user.interfaces';
 import { AppointmentService } from '../../../services/appointment/appointments.service';
 import { AuthService } from '../../../services/auth/auth.service';
@@ -121,7 +125,55 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         ? `${turn.doctor.first_name} ${turn.doctor.last_name}`.trim()
         : 'Sin médico asignado',
       state: turn.state,
+      paymentStatus: turn.payment?.status ?? null,
+      paymentUrl: turn.payment?.payment_url ?? turn.payment_url ?? null,
+      paymentMethod: turn.payment?.payment_method ?? turn.payment?.provider ?? null,
+      paymentMetadata: turn.payment?.metadata ?? null,
+      paymentMetadataEntries: this.buildPaymentMetadataEntries(
+        turn.payment?.metadata ?? null
+      ),
     }));
+  }
+
+  private buildPaymentMetadataEntries(
+    metadata: Record<string, unknown> | null
+  ): { label: string; value: string }[] {
+    if (!metadata) {
+      return [];
+    }
+
+    const labelMap: Record<string, string> = {
+      health_insurance: 'Obra social',
+      discount: 'Descuento',
+      coupon: 'Cupón',
+      plan: 'Plan',
+    };
+
+    return Object.entries(metadata)
+      .filter(([, value]) => value !== null && value !== undefined)
+      .map(([key, value]) => ({
+        label: labelMap[key] ?? this.toTitleCase(key.replace(/_/g, ' ')),
+        value: this.formatMetadataValue(value),
+      }));
+  }
+
+  private formatMetadataValue(value: unknown): string {
+    if (typeof value === 'string' || typeof value === 'number') {
+      return `${value}`;
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 'Sí' : 'No';
+    }
+
+    return JSON.stringify(value);
+  }
+
+  private toTitleCase(value: string): string {
+    return value
+      .split(' ')
+      .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+      .join(' ');
   }
 
   get filteredAppointments(): AppointmentViewModel[] {
@@ -130,6 +182,54 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
           (appointment) => appointment.state === 'waiting'
         )
       : this.appointments;
+  }
+
+  getPaymentStatusLabel(status: PaymentStatus | null): string {
+    switch (status) {
+      case PaymentStatus.SUCCEEDED:
+        return 'Pago completado';
+      case PaymentStatus.PENDING:
+        return 'Pago pendiente';
+      case PaymentStatus.REQUIRES_ACTION:
+        return 'Acción requerida';
+      case PaymentStatus.FAILED:
+        return 'Pago fallido';
+      case PaymentStatus.CANCELED:
+        return 'Pago cancelado';
+      default:
+        return 'Sin información de pago';
+    }
+  }
+
+  getPaymentStatusClass(status: PaymentStatus | null): string {
+    switch (status) {
+      case PaymentStatus.SUCCEEDED:
+        return 'payment-status--success';
+      case PaymentStatus.PENDING:
+      case PaymentStatus.REQUIRES_ACTION:
+        return 'payment-status--pending';
+      case PaymentStatus.FAILED:
+      case PaymentStatus.CANCELED:
+        return 'payment-status--error';
+      default:
+        return 'payment-status--none';
+    }
+  }
+
+  getPaymentMethodLabel(paymentMethod: PaymentMethod | string | null): string {
+    if (!paymentMethod) {
+      return 'Método no especificado';
+    }
+
+    const methodLabels: Record<string, string> = {
+      [PaymentMethod.CARD]: 'Tarjeta',
+      [PaymentMethod.CASH]: 'Efectivo',
+      [PaymentMethod.TRANSFER]: 'Transferencia',
+      [PaymentMethod.PIX]: 'Pix',
+      [PaymentMethod.OTHER]: 'Otro',
+    };
+
+    return methodLabels[paymentMethod] ?? this.toTitleCase(`${paymentMethod}`);
   }
 
   onReschedule(turnId: string): void {
