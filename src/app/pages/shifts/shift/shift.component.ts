@@ -32,7 +32,7 @@ import { AppointmentSummaryComponent } from '../appointment-summary/appointment-
 import { NavigationButtonsComponent } from '../navigation-buttons/navigation-buttons.component';
 import { HealthInsuranceSelectionComponent } from '../health-insarunce-selection/health-insarunce-selection.component';
 import { CashesService } from '../../../services/cashes/cashes.service';
-import { PaymentRead, PaymentStatus } from '../../../services/interfaces/payment.interfaces';
+import { Payment, PaymentStatus } from '../../../services/interfaces/payment.interfaces';
 import { HeroComponent, HeroData } from '../../../shared/hero/hero.component';
 import { PaymentsService } from '../../../services/payments/payments.service';
 import { Subscription, interval, of } from 'rxjs';
@@ -693,7 +693,7 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     window.history.replaceState({}, document.title, url.toString());
   }
 
-  private handlePaymentFlow(payment: PaymentRead | null, fallbackPaymentUrl: string | null): void {
+  private handlePaymentFlow(payment: Payment | null, fallbackPaymentUrl: string | null): void {
     const redirectUrl = payment?.payment_url || fallbackPaymentUrl;
 
     if (redirectUrl) {
@@ -788,7 +788,7 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     this.paymentStatusSubscription = null;
   }
 
-  private updatePaymentState(payment: PaymentRead): void {
+  private updatePaymentState(payment: Payment): void {
     this.paymentStatus = payment.status;
     this.paymentMetadata = payment.metadata ?? null;
     this.cdr.detectChanges();
