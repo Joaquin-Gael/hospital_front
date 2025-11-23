@@ -136,6 +136,22 @@
                 </p>
               }
 
+              @if (shouldShowResumePayment(appointment)) {
+                <button
+                  class="btn btn--primary btn--sm payment-resume-button"
+                  type="button"
+                  (click)="onResumePayment(appointment)"
+                  [disabled]="isPaymentRetrying(appointment.turnId)"
+                >
+                  @if (isPaymentRetrying(appointment.turnId)) {
+                    <span class="button-spinner" aria-hidden="true"></span>
+                    Reintentando...
+                  } @else {
+                    Reanudar pago
+                  }
+                </button>
+              }
+
               <div
                 class="appointment-card__metadata"
                 aria-label="Detalles de pago"
