@@ -1,7 +1,7 @@
 import { UserRead } from './user.interfaces';
 import { Doctor } from './doctor.interfaces';
 import { Service } from './hospital.interfaces';
-import { PaymentRead } from './payment.interfaces';
+import { PaymentMethod, PaymentRead, PaymentStatus } from './payment.interfaces';
 
 // Estado del turno o cita
 export enum TurnState {
@@ -114,6 +114,8 @@ export interface Turn {
   doctor?: Doctor;
   service?: Service[];
   appointment?: AppointmentMinimal;
+  payment?: PaymentRead | null;
+  payment_url?: string | null;
 }
 
 export interface UpdateTurnState {
@@ -163,4 +165,9 @@ export interface AppointmentViewModel {
   specialty: string;
   doctorName: string;
   state: TurnState;
+  paymentStatus: PaymentStatus | null;
+  paymentUrl: string | null;
+  paymentMethod: PaymentMethod | string | null;
+  paymentMetadata: Record<string, unknown> | null;
+  paymentMetadataEntries: { label: string; value: string }[];
 }
