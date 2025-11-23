@@ -166,6 +166,35 @@
     }
   }
 
+  &__payment {
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    background-color: rgba(59, 130, 246, 0.03);
+
+    @include mobile-only {
+      margin-top: 12px;
+      padding: 10px;
+    }
+  }
+
+  &__payment-header {
+    @include flex-between;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  &__section-title {
+    font-weight: 600;
+    color: $text-color;
+  }
+
+  &__metadata {
+    margin-top: 8px;
+  }
+
   &__footer {
     padding: 16px;
     border-top: 1px solid $border-color;
@@ -209,6 +238,101 @@
       font-size: 11px;
       padding: 4px 8px;
     }
+  }
+
+  .payment-status {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: $border-radius-sm;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: none;
+    border: 1px solid transparent;
+  }
+
+  .payment-status--success {
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #0f9f77;
+    border-color: rgba(16, 185, 129, 0.2);
+  }
+
+  .payment-status--pending {
+    background-color: rgba(245, 158, 11, 0.12);
+    color: #b7791f;
+    border-color: rgba(245, 158, 11, 0.2);
+  }
+
+  .payment-status--error {
+    background-color: rgba(239, 68, 68, 0.12);
+    color: #c24133;
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+
+  .payment-status--none {
+    background-color: rgba(107, 114, 128, 0.1);
+    color: #4b5563;
+    border-color: rgba(107, 114, 128, 0.2);
+  }
+
+  .payment-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
+  .payment-text {
+    margin: 0;
+    color: $text-light;
+    font-size: 14px;
+  }
+
+  .metadata-list {
+    margin: 8px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px 12px;
+  }
+
+  .metadata-list__item {
+    background-color: white;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    padding: 8px 10px;
+  }
+
+  .metadata-list dt {
+    margin: 0;
+    color: $text-light;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .metadata-list dd {
+    margin: 4px 0 0;
+    color: $text-color;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .btn {

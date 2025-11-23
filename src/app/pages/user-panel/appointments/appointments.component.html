@@ -103,6 +103,74 @@
                 {{ appointment.state | titlecase }}
               </span>
             </div>
+
+            <div
+              class="appointment-card__payment"
+              role="region"
+              aria-label="Información de pago"
+            >
+              <div class="appointment-card__payment-header">
+                <span class="appointment-card__section-title">Pago</span>
+                <span
+                  class="payment-status"
+                  [ngClass]="getPaymentStatusClass(appointment.paymentStatus)"
+                  aria-live="polite"
+                >
+                  {{ getPaymentStatusLabel(appointment.paymentStatus) }}
+                </span>
+              </div>
+
+              @if (appointment.paymentUrl) {
+                <a
+                  class="payment-link"
+                  [href]="appointment.paymentUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Completar pago
+                  <span class="visually-hidden">(abre en una nueva pestaña)</span>
+                </a>
+              } @else {
+                <p class="payment-text" role="note">
+                  No hay enlace de pago disponible.
+                </p>
+              }
+
+              <div
+                class="appointment-card__metadata"
+                aria-label="Detalles de pago"
+              >
+                @if (
+                  appointment.paymentMethod ||
+                  appointment.paymentMetadataEntries.length > 0
+                ) {
+                  <dl class="metadata-list">
+                    @if (appointment.paymentMethod) {
+                      <div class="metadata-list__item">
+                        <dt>Método</dt>
+                        <dd>
+                          {{ getPaymentMethodLabel(appointment.paymentMethod) }}
+                        </dd>
+                      </div>
+                    }
+
+                    @for (
+                      item of appointment.paymentMetadataEntries;
+                      track item.label + item.value
+                    ) {
+                      <div class="metadata-list__item">
+                        <dt>{{ item.label }}</dt>
+                        <dd>{{ item.value }}</dd>
+                      </div>
+                    }
+                  </dl>
+                } @else {
+                  <p class="payment-text" role="note">
+                    No hay información de pago adicional.
+                  </p>
+                }
+              </div>
+            </div>
           </div>
 
           <div class="appointment-card__footer">
