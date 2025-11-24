@@ -145,7 +145,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         paymentStatus,
         paymentUrl,
         paymentId: turn.payment?.id ?? null,
-        paymentGatewaySessionId: this.extractGatewaySessionId(turn.payment),
+        paymentGatewaySessionId: this.extractGatewaySessionId(turn.payment ?? null),
         paymentMethod,
         paymentMetadata: turn.payment?.metadata ?? null,
         paymentMetadataEntries: this.buildPaymentMetadataEntries(

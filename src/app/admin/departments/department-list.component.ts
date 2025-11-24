@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   SectionHeaderComponent,
   ActionButton,
@@ -53,7 +53,6 @@ type DepartmentFormValues = DepartmentCreate & EntityFormPayload;
   templateUrl: './department-list.component.html',
   styleUrls: ['./department-list.component.scss'],
 })
-
 export class DepartmentListComponent implements OnInit {
   private departmentService = inject(DepartmentService);
   private logger = inject(LoggerService);
@@ -64,8 +63,6 @@ export class DepartmentListComponent implements OnInit {
   departments: Department[] = [];
   locations: LocationModel[] = [];
   selectedDepartment: Department | null = null;
-  searchTerm = '';
-  locationFilter: string = 'all';
   loading = false;
   formLoading = false;
   error: string | null = null;
@@ -95,17 +92,17 @@ export class DepartmentListComponent implements OnInit {
     },
   ];
 
+  // CORREGIDO: Agregado sortable y mejor formato
   tableColumns: TableColumn[] = [
-    { key: 'name', label: 'Nombre' },
-    { key: 'description', label: 'Descripción' },
-    { key: 'associatedLocationName', label: 'Ubicación' }, 
+    { key: 'name', label: 'Nombre', sortable: true },
+    { key: 'description', label: 'Descripción', sortable: true },
+    { key: 'associatedLocationName', label: 'Ubicación', sortable: true }, 
   ];
 
   viewDialogColumns: ViewDialogColumn[] = [
     { key: 'name', label: 'Nombre' },
     { key: 'description', label: 'Descripción' },
     { key: 'associatedLocationName', label: 'Ubicación' },
-    //key: 'created_at', label: 'Fecha de Creación' },
   ];
 
   baseFormFields: FormField<DepartmentFormValues>[] = [
@@ -129,7 +126,7 @@ export class DepartmentListComponent implements OnInit {
     },
     {
       key: 'location_id',
-      label: 'ID de Ubicación',
+      label: 'Ubicación',
       type: 'select',
       required: true,
       validators: [Validators.required],
@@ -149,20 +146,6 @@ export class DepartmentListComponent implements OnInit {
   private _formFields: FormField<DepartmentFormValues>[] = [];
   formInitialData: Partial<DepartmentFormValues> | null = null;
 
-  get filteredDepartments(): Department[] {
-    const term = this.searchTerm.trim().toLowerCase();
-    return this.departments.filter((department) => {
-      const matchesTerm = term
-        ? `${department.name} ${department.description}`
-            .toLowerCase()
-            .includes(term)
-        : true;
-      const matchesLocation =
-        this.locationFilter === 'all' || department.location_id === this.locationFilter;
-      return matchesTerm && matchesLocation;
-    });
-  }
-
   ngOnInit(): void {
     this.loadData();
   }
@@ -177,30 +160,38 @@ export class DepartmentListComponent implements OnInit {
     }).subscribe({
       next: (result) => {
         this.locations = result.locations;
-        this.departments = result.departments.map((department) => {
-          return {
-            ...department,
-            associatedLocationName: result.locations.find((s) => s.id === department.location_id)?.name || 'Desconocida',
-          };
-        });
+        
+        // CORREGIDO: Mapear con nombre de ubicación
+        this.departments = result.departments.map((department) => ({
+          ...department,
+          associatedLocationName: result.locations.find(
+            (loc) => loc.id === department.location_id
+          )?.name || 'Sin ubicación',
+        }));
+
+        // Actualizar opciones del select de ubicaciones
         const locationFieldIndex = this.baseFormFields.findIndex(
           (f) => f.key === 'location_id'
         );
+        
         if (locationFieldIndex !== -1) {
           this.baseFormFields[locationFieldIndex].options = this.locations.map(
-            (s) => ({
-              value: s.id.toString(),
-              label: s.name,
+            (loc) => ({
+              value: loc.id.toString(),
+              label: loc.name,
             })
           );
           this._formFields = [];
         }
+        
         this.loading = false;
+        this.logger.info('Departamentos cargados correctamente', {
+          count: this.departments.length,
+        });
       },
-      error: (error) => {
-        this.error = 'Error al cargar los datos. Intenta nuevamente.';
+      error: (error: HttpErrorResponse) => {
+        this.handleError(error, 'Error al cargar los departamentos');
         this.loading = false;
-        this.logger.error('Failed to load departments or locations', error);
       },
     });
   }
@@ -210,7 +201,8 @@ export class DepartmentListComponent implements OnInit {
     this.selectedDepartment = null;
     this.formInitialData = null;
     this.showForm = true;
-    this.logger.debug('Opening form for new department');
+    this.error = null;
+    this.logger.debug('Abriendo formulario para nuevo departamento');
   }
 
   onEdit(department: Department): void {
@@ -222,45 +214,52 @@ export class DepartmentListComponent implements OnInit {
       location_id: department.location_id,
     };
     this.showForm = true;
-    this.logger.debug('Opening form for editing department', department);
+    this.error = null;
+    this.logger.debug('Editando departamento', { id: department.id });
   }
 
   onView(department: Department): void {
     this.viewDialogData = department;
     this.viewDialogTitle = `Departamento: ${department.name}`;
     this.viewDialogOpen = true;
-    this.logger.debug('Opening view dialog for department', department);
+    this.logger.debug('Visualizando departamento', { id: department.id });
   }
 
   onDelete(department: Department): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Eliminar Departamento',
-        message: `¿Está seguro de eliminar el departamento "${department.name}"?`,
+        message: `¿Está seguro de eliminar el departamento "${department.name}"? Esta acción no se puede deshacer.`,
       },
     });
 
-    dialogRef.afterClosed().subscribe((result: boolean) => {
-      if (result) {
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
         this.loading = true;
 
         this.departmentService.deleteDepartment(department.id).subscribe({
           next: () => {
-            this.departments = this.departments.filter((d) => d.id !== department.id);
+            // Actualizar lista local
+            this.departments = this.departments.filter(
+              (d) => d.id !== department.id
+            );
+            
             this.loading = false;
             this.notificationService.success(
-              '¡Departamento eliminado con éxito!',
+              `Departamento "${department.name}" eliminado correctamente`,
               {
-                duration: 7000,
+                duration: 5000,
                 action: {
                   label: 'Cerrar',
                   action: () => this.notificationService.dismissAll(),
                 },
               }
             );
-            this.logger.info(
-              `Departamento "${department.name}" eliminado correctamente`
-            );
+            
+            this.logger.info('Departamento eliminado', {
+              id: department.id,
+              name: department.name,
+            });
           },
           error: (error: HttpErrorResponse) => {
             this.handleError(
@@ -278,69 +277,51 @@ export class DepartmentListComponent implements OnInit {
     this.formLoading = true;
     this.error = null;
 
-    const createPayload: DepartmentCreate = {
-      name: formData.name,
-      description: formData.description?.toString() ?? '',
-      location_id: formData.location_id,
-    };
-
-    const updatePayload: DepartmentUpdate = {
-      name: formData.name,
-      description: formData.description?.toString() ?? '',
+    const payload: DepartmentCreate = {
+      name: formData.name.trim(),
+      description: formData.description?.toString().trim() || '',
       location_id: formData.location_id,
     };
 
     const request =
       this.formMode === 'create'
-        ? this.departmentService.addDepartment(createPayload)
+        ? this.departmentService.addDepartment(payload)
         : this.departmentService.updateDepartment(
             this.selectedDepartment!.id,
-            updatePayload
+            payload as DepartmentUpdate
           );
 
     request.subscribe({
-      next: () => {
+      next: (response) => {
         this.formLoading = false;
         this.showForm = false;
         this.selectedDepartment = null;
         this.formInitialData = null;
+        
+        // Recargar datos para reflejar cambios
         this.loadData();
-        this.logger.info(
-          `Department ${
-            this.formMode === 'create' ? 'created' : 'updated'
-          } successfully`
-        );
+        
+        const action = this.formMode === 'create' ? 'creado' : 'actualizado';
         this.notificationService.success(
-          `¡Departamento ${
-            this.formMode === 'create' ? 'creado' : 'actualizado'
-          } con éxito!`,
+          `Departamento ${action} correctamente`,
           {
-            duration: 7000,
+            duration: 5000,
             action: {
               label: 'Cerrar',
               action: () => this.notificationService.dismissAll(),
             },
           }
         );
+        
+        this.logger.info(`Departamento ${action}`, { data: response });
       },
-      error: (error) => {
+      error: (error: HttpErrorResponse) => {
         this.formLoading = false;
-        this.error = `Error al ${
-          this.formMode === 'create' ? 'crear' : 'actualizar'
-        } el departamento. Intenta nuevamente.`;
-        this.logger.error(`Failed to ${this.formMode} department`, error);
-        this.notificationService.success(
-          `¡Ocurrió un error al ${
-            this.formMode === 'create' ? 'crear' : 'actualizar'
-          } el departamento!`,
-          {
-            duration: 7000,
-            action: {
-              label: 'Cerrar',
-              action: () => this.notificationService.dismissAll(),
-            },
-          }
-        );
+        const action = this.formMode === 'create' ? 'crear' : 'actualizar';
+        this.handleError(error, `Error al ${action} el departamento`);
+        
+        // CORREGIDO: No cerrar el formulario en caso de error
+        // para que el usuario pueda corregir
       },
     });
   }
@@ -349,16 +330,41 @@ export class DepartmentListComponent implements OnInit {
     this.showForm = false;
     this.selectedDepartment = null;
     this.formInitialData = null;
-    this.logger.debug('Form cancelled');
+    this.error = null;
+    this.logger.debug('Formulario cancelado');
   }
 
   closeViewDialog(): void {
     this.viewDialogOpen = false;
     this.viewDialogData = {};
+    this.viewDialogTitle = '';
+  }
+
+  // NUEVO: Método para retry desde el data-table
+  onRetry(): void {
+    this.logger.info('Reintentando cargar departamentos');
+    this.loadData();
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
-    this.logger.error('Error en LocationListComponent:', error);
-    this.error = error.error?.detail || error.message || defaultMessage;
+    this.logger.error('Error en DepartmentListComponent:', error);
+    
+    let errorMessage = defaultMessage;
+    
+    if (error.error?.detail) {
+      errorMessage = `${defaultMessage}: ${error.error.detail}`;
+    } else if (error.message) {
+      errorMessage = `${defaultMessage}: ${error.message}`;
+    }
+    
+    this.error = errorMessage;
+    
+    this.notificationService.error(errorMessage, {
+      duration: 7000,
+      action: {
+        label: 'Cerrar',
+        action: () => this.notificationService.dismissAll(),
+      },
+    });
   }
 }

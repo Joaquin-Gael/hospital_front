@@ -6,13 +6,24 @@
     [actions]="headerActions">
   </app-section-header>
 
-  <app-error-message 
-    [message]="error" 
-    (close)="error = null">
-  </app-error-message>
+  <!-- Error global (fuera del formulario) -->
+  @if (error && !showForm) {
+    <app-error-message 
+      [message]="error" 
+      (close)="error = null">
+    </app-error-message>
+  }
 
   @if (showForm) {
     <div class="department-section__form-container">
+      <!-- Error dentro del formulario -->
+      @if (error) {
+        <app-error-message 
+          [message]="error" 
+          (close)="error = null">
+        </app-error-message>
+      }
+      
       <app-entity-form
         [fields]="formFields"
         [initialData]="formInitialData"
@@ -24,51 +35,36 @@
       </app-entity-form>
     </div>
   } @else {
-    @if (loading) {
+    @if (loading && departments.length === 0) {
+      <!-- Solo mostrar spinner si no hay datos aún -->
       <app-loading-spinner [message]="'Cargando departamentos...'"></app-loading-spinner>
     } @else {
-      <div class="filters">
-        <div class="filters__group">
-          <label class="filters__label" for="department-search">Búsqueda</label>
-          <input
-            id="department-search"
-            class="filters__input"
-            type="text"
-            [value]="searchTerm"
-            (input)="searchTerm = $any($event.target).value"
-            placeholder="Buscar por nombre o descripción"
-          />
-        </div>
-
-        <div class="filters__group">
-          <label class="filters__label" for="location-filter">Ubicación</label>
-          <select
-            id="location-filter"
-            class="filters__select"
-            [value]="locationFilter"
-            (change)="locationFilter = $any($event.target).value"
-          >
-            <option value="all">Todas</option>
-            <option *ngFor="let location of locations" [value]="location.id">
-              {{ location.name }}
-            </option>
-          </select>
-        </div>
-      </div>
-
       <div class="department-section__table-container">
         <app-data-table
-          [data]="filteredDepartments"
+          [data]="departments"
           [columns]="tableColumns"
           [loading]="loading"
+          [searchEnabled]="true"
+          [pagination]="true"
+          [error]="error"
+          [actions]="{
+            view: true,
+            edit: true,
+            delete: true,
+            ban: false,
+            unban: false,
+            download: false
+          }"
           (edit)="onEdit($event)"
           (delete)="onDelete($event)"
-          (view)="onView($event)">
+          (view)="onView($event)"
+          (retry)="onRetry()">
         </app-data-table>
       </div>
     }
   }
 
+  <!-- View Dialog -->
   <app-view-dialog
     [isOpen]="viewDialogOpen"
     [item]="viewDialogData"

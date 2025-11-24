@@ -121,15 +121,7 @@
               </div>
 
               @if (appointment.paymentUrl) {
-                <a
-                  class="payment-link"
-                  [href]="appointment.paymentUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Completar pago
-                  <span class="visually-hidden">(abre en una nueva pestaña)</span>
-                </a>
+
               } @else {
                 <p class="payment-text" role="note">
                   No hay enlace de pago disponible.
