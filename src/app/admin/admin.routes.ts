@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { AdminPanelComponent } from './admin-panel/admin-panel.component';
 
+// Rutas hijas del módulo de administración. Cada sección se carga de forma
+// diferida para reducir el bundle inicial del panel.
 export const ADMIN_ROUTES: Routes = [
   {
     path: '',
