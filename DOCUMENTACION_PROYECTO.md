@@ -208,3 +208,29 @@ Este documento resume la estructura mínima para armar el informe final del proy
 - Código fuente (estructura del proyecto), diagramas completos y documentación técnica adicional.
 - Actas de reunión, capturas de pruebas y reportes de QA.
 - Mapas de navegación, diagrama de componentes, backlog priorizado y bitácora de versiones.
+
+## 7) Manual técnico de módulos (Angular)
+
+### 7.a Rutas públicas y shell principal
+- El archivo de rutas `app.routes.ts` define `LayoutComponent` como shell común y enruta las páginas públicas: `home`, `contact`, `authorities`, `about-appointments`, autenticación (`login`, `register`, `doctor-login`, `recovery-password`) y el flujo de turnos (`shifts`) protegido por `authGuard`.【F:src/app/app.routes.ts†L1-L78】
+- Las rutas protegidas se agrupan por panel: `/admin_panel` carga lazy las rutas de administración; `/user_panel` y `/medic_panel` usan componentes shell (`UserPanelComponent`, `MedicPanelComponent`) con children lazy para cada submódulo.【F:src/app/app.routes.ts†L80-L170】
+
+### 7.b Autenticación y protección de navegación
+- `authGuard` valida sesión mediante `AuthService`; si no hay login, registra el intento con `LoggerService`, guarda `returnUrl` y redirige a `/login`.【F:src/app/auth.guard.ts†L1-L26】
+- `AdminPanelComponent` solo habilita navegación si el usuario tiene el scope `admin`; en caso contrario registra el intento y redirige a `home`. También centraliza el cierre de sesión limpiando `StorageService` y devolviendo al login.【F:src/app/admin/admin-panel/admin-panel.component.ts†L1-L63】【F:src/app/admin/admin-panel/admin-panel.component.ts†L71-L91】
+
+### 7.c Panel de administración (`/admin_panel`)
+- `admin.routes.ts` organiza los catálogos institucionales como rutas hijas: departamentos, doctores, obras sociales, sedes, turnos, horarios, servicios, especialidades, usuarios, cajas y auditoría. Cada sección se carga bajo el shell de `AdminPanelComponent`.【F:src/app/admin/admin.routes.ts†L1-L60】
+- El componente del panel mantiene la sección activa según la URL, controla la visibilidad de la barra lateral y expone eventos de selección para sincronizar el menú con el router.【F:src/app/admin/admin-panel/admin-panel.component.ts†L28-L63】
+
+### 7.d Panel de usuario (`/user_panel`)
+- Las rutas hijas cubren gestión de turnos (`appointments`), historial (`history`), notificaciones, documentos, perfil, cambio de contraseña, recuperación y edición de datos. La ruta por defecto redirige a `appointments` para priorizar la vista principal del paciente.【F:src/app/app.routes.ts†L92-L140】
+- `UserDataService` comparte en memoria el usuario autenticado, sus turnos y obras sociales a través de `BehaviorSubject`, facilitando sincronización entre componentes del panel y reduciendo llamadas duplicadas a la API cuando se integre backend real.【F:src/app/pages/user-panel/services/user-data.service.ts†L1-L41】
+
+### 7.e Panel médico (`/medic_panel`)
+- El shell `MedicPanelComponent` aloja vistas especializadas para perfil del médico (`home`), pacientes, agenda de turnos, historia clínica, mensajería, estadísticas y configuración. El router redirige a `home` como entrada principal.【F:src/app/app.routes.ts†L142-L190】
+- `DoctorDataService` mantiene en estado reactivo los datos del médico, sus horarios y especialidades; ofrece utilitarios para obtener nombres de especialidad y registrar acciones en el logger, permitiendo que componentes como `doctor-profile`, `appointment-schedule` o `statistics` consuman la misma fuente de verdad.【F:src/app/pages/medic-panel/medic-panel/doctor-data.service.ts†L1-L41】【F:src/app/pages/medic-panel/medic-panel/doctor-data.service.ts†L43-L58】
+
+### 7.f Componentes compartidos y layout
+- `LayoutComponent` (referenciado en las rutas públicas) compone el header/footer global y aloja `RouterOutlet` para todas las páginas anónimas, asegurando consistencia visual entre landing, contacto y guías de turnos.【F:src/app/app.routes.ts†L8-L40】
+- Los paneles admin/usuario/médico también exponen componentes de navegación propios (barra lateral, encabezado), integrando servicios de logger y almacenamiento para trazabilidad y persistencia de sesión, como se observa en el manejo de eventos de `AdminPanelComponent`.【F:src/app/admin/admin-panel/admin-panel.component.ts†L12-L63】【F:src/app/admin/admin-panel/admin-panel.component.ts†L71-L91】
