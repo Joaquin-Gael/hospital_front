@@ -33,7 +33,7 @@
 
   &__title-icon {
     font-size: 32px;
-    color: $warning-color;
+    color: $warning-color-base;
 
     @include mobile-only {
       font-size: 28px;
@@ -69,10 +69,10 @@
   &__progress-bar {
     width: 100%;
     height: 8px;
-    background: panel-tint($surface-muted, -4%);
+    background: #e5e7eb;
     border-radius: 4px;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px panel-alpha(var(--surface-primary-dark), 0.05);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 
     @include mobile-only {
       height: 6px;
@@ -81,10 +81,10 @@
 
   &__progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, $success-color, panel-tint($success-color, 12%));
+    background: linear-gradient(90deg, $success-color-base, #14b87e);
     border-radius: 4px;
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px panel-alpha($success-color, 0.3);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 
     @include reduce-motion {
       transition-duration: 0s;
@@ -109,7 +109,7 @@
     background: $card-background;
     border-radius: 16px;
     padding: 32px;
-    box-shadow: 0 4px 24px panel-alpha(var(--surface-primary-dark), 0.08);
+    box-shadow: $box-shadow-md;
     border: 1px solid $border-color;
 
     @include mobile-only {
@@ -138,7 +138,7 @@
   &__section-title {
     font-size: 18px;
     font-weight: 600;
-    color: panel-tint($text-color, -8%);
+    color: $text-color;
     margin: 0 0 16px 0;
     @include flex-inline(8px, center, flex-start);
 
@@ -150,7 +150,7 @@
 
   &__section-check {
     font-size: 20px;
-    color: $success-color;
+    color: $success-color-base;
     line-height: 1;
     animation: checkmark-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
@@ -181,7 +181,7 @@
   &__dropzone {
     position: relative;
     min-height: 220px;
-    border: 2px dashed panel-tint($border-color, 8%);
+    border: 2px dashed #d1d5db;
     border-radius: 12px;
     background: $surface-muted;
     cursor: pointer;
@@ -195,9 +195,10 @@
     }
 
     &:hover {
-      border-color: $primary-color;
-      background: panel-alpha($info-color, 0.12);
+      border-color: $primary-color-base;
+      background: rgba(59, 130, 246, 0.05);
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
 
       @include reduce-motion {
         transform: none;
@@ -210,10 +211,10 @@
     }
 
     &--dragging {
-      border-color: $primary-color;
-      background: panel-alpha($primary-color, 0.18);
+      border-color: $primary-color-base;
+      background: rgba(59, 130, 246, 0.1);
       transform: scale(1.02);
-      box-shadow: 0 8px 25px panel-alpha($primary-color, 0.15);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
 
       @include reduce-motion {
         transform: none;
@@ -221,20 +222,20 @@
     }
 
     &--success {
-      border-color: $success-color;
-      background: panel-alpha($success-color, 0.12);
+      border-color: $success-color-base;
+      background: rgba(16, 185, 129, 0.05);
 
       &:hover {
-        background: panel-alpha($success-color, 0.16);
+        background: rgba(16, 185, 129, 0.08);
       }
     }
 
     &--error {
-      border-color: $danger-color;
-      background: panel-alpha($danger-color, 0.16);
+      border-color: $danger-color-base;
+      background: rgba(239, 68, 68, 0.05);
 
       &:hover {
-        background: panel-alpha($danger-color, 0.16);
+        background: rgba(239, 68, 68, 0.08);
       }
     }
 
@@ -277,7 +278,7 @@
     margin: 0 0 8px 0;
 
     strong {
-      color: $primary-color;
+      color: $primary-color-base;
       font-weight: 600;
     }
 
@@ -316,7 +317,7 @@
     height: auto;
     object-fit: contain;
     border-radius: 8px;
-    box-shadow: 0 4px 12px panel-alpha(var(--surface-primary-dark), 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   &__file-info {
@@ -324,8 +325,8 @@
     bottom: 8px;
     left: 8px;
     right: 48px;
-    background: panel-alpha(var(--surface-primary-dark), 0.75);
-    color: var(--text-white);
+    background: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
     padding: 6px 10px;
     border-radius: 6px;
     font-size: 12px;
@@ -372,7 +373,7 @@
 
   &__error-icon {
     font-size: 36px;
-    color: panel-tint($danger-color, -10%);
+    color: $danger-color-base;
     line-height: 1;
 
     @include mobile-only {
@@ -382,7 +383,7 @@
 
   &__error-text {
     font-size: 14px;
-    color: panel-tint($danger-color, -10%);
+    color: $danger-color-base;
     margin: 0;
     font-weight: 500;
     line-height: 1.4;
@@ -393,29 +394,34 @@
   }
 
   &__retry-btn {
-    background: $warning-color;
-    color: var(--text-white);
+    background: $warning-color-base;
+    color: #ffffff;
     border: none;
-    padding: 8px 16px;
+    padding: 10px 20px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     @include flex-inline(6px, center, center);
 
     &:hover {
-      background: panel-tint($warning-color, -10%);
+      background: darken($warning-color-base, 8%);
       transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 
       @include reduce-motion {
         transform: none;
       }
     }
 
+    &:active {
+      transform: translateY(0);
+    }
+
     @include mobile-only {
-      padding: 6px 12px;
-      font-size: 11px;
+      padding: 8px 16px;
+      font-size: 12px;
     }
   }
 
@@ -427,8 +433,8 @@
     height: 36px;
     border: none;
     border-radius: 50%;
-    background: panel-alpha($danger-color, 0.9);
-    color: var(--text-white);
+    background: rgba(239, 68, 68, 0.9);
+    color: #ffffff;
     font-size: 24px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -437,12 +443,17 @@
     @include flex-center;
 
     &:hover:not(:disabled) {
-      background: panel-tint($danger-color, -10%);
+      background: darken($danger-color-base, 8%);
       transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 
       @include reduce-motion {
         transform: none;
       }
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(1.05);
     }
 
     &:disabled {
@@ -466,7 +477,7 @@
   &__actions {
     text-align: center;
     padding-top: 24px;
-    border-top: 1px solid panel-tint($surface-muted, -4%);
+    border-top: 1px solid $border-color;
     gap: 12px;
     @include flex-column;
 
@@ -477,8 +488,8 @@
   }
 
   &__submit-btn {
-    background: linear-gradient(135deg, $warning-color 0%, panel-tint($warning-color, -10%) 100%);
-    color: var(--text-white);
+    background: linear-gradient(135deg, $warning-color-base 0%, darken($warning-color-base, 10%) 100%);
+    color: #ffffff;
     border: none;
     border-radius: 12px;
     padding: 16px 32px;
@@ -487,7 +498,7 @@
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     min-width: 240px;
-    box-shadow: 0 4px 14px panel-alpha($warning-color, 0.25);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
     position: relative;
     overflow: hidden;
 
@@ -497,7 +508,8 @@
 
     &:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px panel-alpha($warning-color, 0.35);
+      box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35);
+      background: linear-gradient(135deg, darken($warning-color-base, 5%) 0%, darken($warning-color-base, 15%) 100%);
 
       @include reduce-motion {
         transform: none;
@@ -509,19 +521,20 @@
     }
 
     &--disabled {
-      background: panel-tint($border-color, 8%);
-      color: $text-lighter;
+      background: #d1d5db;
+      color: #9ca3af;
       cursor: not-allowed;
       box-shadow: none;
 
       &:hover {
-        background: panel-tint($border-color, 8%);
+        background: #d1d5db;
         transform: none;
       }
     }
 
     &--loading {
       pointer-events: none;
+      background: linear-gradient(135deg, $warning-color-base 0%, darken($warning-color-base, 8%) 100%);
       
       .dni-uploader__submit-spinner {
         animation: spin 1s linear infinite;
@@ -558,10 +571,10 @@
   }
 
   &__retry-all-btn {
-    background: $primary-color;
-    color: var(--text-white);
+    background: $primary-color-base;
+    color: #ffffff;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
@@ -570,12 +583,17 @@
     @include flex-inline(8px, center, center);
 
     &:hover {
-      background: $primary-dark;
+      background: darken($primary-color-base, 8%);
       transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 
       @include reduce-motion {
         transform: none;
       }
+    }
+
+    &:active {
+      transform: translateY(0);
     }
 
     @include mobile-only {
@@ -592,21 +610,21 @@
     @include flex-inline(8px, center, center);
 
     &--success {
-      background: panel-alpha($success-color, 0.16);
-      color: panel-tint($success-color, -18%);
-      border: 1px solid panel-tint($success-color, 24%);
+      background: rgba(16, 185, 129, 0.1);
+      color: darken($success-color-base, 15%);
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
     &--warning {
-      background: panel-alpha($warning-color, 0.16);
-      color: panel-tint($warning-color, -20%);
-      border: 1px solid panel-tint($warning-color, 18%);
+      background: rgba(245, 158, 11, 0.1);
+      color: darken($warning-color-base, 15%);
+      border: 1px solid rgba(245, 158, 11, 0.3);
     }
 
     &--info {
-      background: panel-alpha($info-color, 0.18);
-      color: panel-tint($info-color, -20%);
-      border: 1px solid panel-tint($info-color, 18%);
+      background: rgba(6, 182, 212, 0.1);
+      color: darken($info-color-base, 15%);
+      border: 1px solid rgba(6, 182, 212, 0.3);
     }
 
     @include mobile-only {
@@ -628,14 +646,14 @@
     margin-bottom: 24px;
 
     @include mobile-only {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
   }
 
   &__tips {
-    background: linear-gradient(135deg, panel-tint($surface-muted, -6%) 0%, panel-tint($surface-muted, -8%) 100%);
-    border: 1px solid panel-tint($border-color, 4%);
-    border-left: 4px solid $primary-color;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    border: 1px solid $border-color;
+    border-left: 4px solid $primary-color-base;
     border-radius: 12px;
     padding: 20px;
     position: relative;
@@ -648,7 +666,7 @@
       right: 0;
       width: 100px;
       height: 100px;
-      background: radial-gradient(circle, panel-alpha($primary-color, 0.1) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -661,7 +679,7 @@
   &__tips-title {
     font-size: 16px;
     font-weight: 600;
-    color: panel-tint($info-color, -20%);
+    color: $text-color;
     margin: 0 0 12px 0;
     @include flex-inline(10px, center, flex-start);
 
@@ -672,7 +690,7 @@
 
     i.material-icons {
       font-size: 20px;
-      color: $primary-color;
+      color: $primary-color-base;
 
       @include mobile-only {
         font-size: 18px;
@@ -694,7 +712,7 @@
 
   &__tips-list li {
     font-size: 14px;
-    color: panel-tint($text-color, -12%);
+    color: $text-light;
     line-height: 1.5;
     padding-left: 20px;
     position: relative;
@@ -707,13 +725,13 @@
       top: 0.6em;
       width: 6px;
       height: 6px;
-      background: $primary-color;
+      background: $primary-color-base;
       border-radius: 50%;
       transform: translateY(-50%);
     }
 
     &:hover {
-      color: panel-tint($text-color, -16%);
+      color: $text-color;
     }
 
     @include mobile-only {
@@ -729,14 +747,6 @@
     }
     50% {
       opacity: 0.7;
-    }
-  }
-
-  &__submit-btn:disabled {
-    animation: pulse 2s ease-in-out infinite;
-
-    @include reduce-motion {
-      animation: none;
     }
   }
 
@@ -761,7 +771,7 @@
 
   // Focus visible para accesibilidad
   :focus-visible {
-    outline: 3px solid $primary-color;
+    outline: 3px solid $primary-color-base;
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -774,6 +784,18 @@
     }
     
     &__submit-btn:hover:not(:disabled) {
+      transform: none;
+    }
+
+    &__remove-btn:hover:not(:disabled) {
+      transform: none;
+    }
+
+    &__retry-btn:hover {
+      transform: none;
+    }
+
+    &__retry-all-btn:hover {
       transform: none;
     }
   }
