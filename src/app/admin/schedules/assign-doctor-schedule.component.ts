@@ -32,65 +32,69 @@ type AssignFormValues = EntityFormPayload & {
   template: `
     <div class="assign-dialog">
       <mat-dialog-content>
-        <div *ngIf="error" class="error-message" role="alert">
-          {{ error }}
-          <button class="close-button" (click)="error = null" aria-label="Cerrar mensaje de error">
-            <span class="material-icons">close</span>
-          </button>
-        </div>
+        @if (error) {
+          <div class="error-message" role="alert">
+            {{ error }}
+            <button 
+              class="close-button" 
+              (click)="error = null" 
+              aria-label="Cerrar mensaje de error">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
+        }
+        
         <app-entity-form
           [fields]="formFields"
           [title]="title"
           [submitLabel]="'Asociar'"
           [loading]="loading"
           (formSubmit)="onSubmit($event)"
-          (formCancel)="onCancel()"
-        ></app-entity-form>
+          (formCancel)="onCancel()">
+        </app-entity-form>
       </mat-dialog-content>
     </div>
   `,
   styles: `
-    @use 'sass:color';
-
     .assign-dialog {
       min-width: 400px;
       padding: 24px;
       background-color: #fff;
       border-radius: 8px;
     }
-    h2 {
-      margin: 0 0 24px 0;
-      font-size: 1.5rem;
-      font-weight: 500;
-      color: #333;
-      border-bottom: 1px solid #e0e0e0;
-      padding-bottom: 16px;
-    }
+
     .error-message {
-      background-color: #f44336;
-      background-color: color.adjust(#f44336, $lightness: 35%);
+      background-color: #ffebee;
       border-left: 4px solid #f44336;
-      color: color.adjust(#f44336, $lightness: 20%);
+      color: #c62828;
       padding: 12px 16px;
       margin-bottom: 24px;
       border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      font-size: 0.9rem;
     }
+
     .close-button {
       background: none;
       border: none;
-      color: color.adjust(#f44336, $lightness: 20%);
+      color: #c62828;
       cursor: pointer;
       padding: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-    }
-    .close-button:hover {
-      background-color: rgba(0, 0, 0, 0.05);
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+
+      .material-icons {
+        font-size: 18px;
+      }
     }
   `
 })
@@ -99,6 +103,16 @@ export class AssignDoctorScheduleComponent {
   error: string | null = null;
   title: string;
   formFields: FormField<AssignFormValues>[] = [];
+
+  private readonly daysMap: Record<string, string> = {
+    'Sunday': 'Domingo',
+    'Monday': 'Lunes',
+    'Tuesday': 'Martes',
+    'Wednesday': 'Miércoles',
+    'Thursday': 'Jueves',
+    'Friday': 'Viernes',
+    'Saturday': 'Sábado'
+  };
 
   constructor(
     private dialogRef: MatDialogRef<AssignDoctorScheduleComponent>,
@@ -121,9 +135,10 @@ export class AssignDoctorScheduleComponent {
           .filter(d => d.is_active) 
           .map(d => ({
             value: d.id,
-            label: `${d.first_name} ${d.last_name} (${d.dni})`
+            label: `${d.first_name} ${d.last_name} (DNI: ${d.dni})`
           })),
-        defaultValue: this.data.doctorId || ''
+        defaultValue: this.data.doctorId || '',
+        readonly: !!this.data.doctorId
       },
       {
         key: 'scheduleId',
@@ -133,38 +148,15 @@ export class AssignDoctorScheduleComponent {
         validators: [Validators.required],
         options: this.data.schedules.map(s => ({
           value: s.id,
-          label: `${this.getDayLabel(s.day)} ${s.start_time}-${s.end_time}`
+          label: `${this.daysMap[s.day] || s.day} ${s.start_time}-${s.end_time}`
         })),
-        defaultValue: this.data.scheduleId || ''
+        defaultValue: this.data.scheduleId || '',
+        readonly: !!this.data.scheduleId
       }
     ];
   }
 
-  private getDayLabel(englishDay: string): string {
-    const daysMap: { [key: string]: string } = {
-      'Sunday': 'Domingo',
-      'Monday': 'Lunes',
-      'Tuesday': 'Martes',
-      'Wednesday': 'Miércoles',
-      'Thursday': 'Jueves',
-      'Friday': 'Viernes',
-      'Saturday': 'Sábado'
-    };
-    return daysMap[englishDay] || englishDay;
-  }
-
   onSubmit(formData: AssignFormValues): void {
-    if (this.data.doctorId && formData.doctorId !== this.data.doctorId) {
-      this.error = 'El ID del doctor no coincide con el contexto seleccionado.';
-      this.loading = false;
-      return;
-    }
-    if (this.data.scheduleId && formData.scheduleId !== this.data.scheduleId) {
-      this.error = 'El ID del horario no coincide con el contexto seleccionado.';
-      this.loading = false;
-      return;
-    }
-
     this.loading = true;
     this.error = null;
 

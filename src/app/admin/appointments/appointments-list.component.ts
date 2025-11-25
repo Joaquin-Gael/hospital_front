@@ -18,8 +18,7 @@ import { ServiceService } from '../../services/service/service.service';
 import { DoctorService } from '../../services/doctor/doctor.service';
 import { LoggerService } from '../../services/core/logger.service';
 import { NotificationService } from '../../core/notification';
-import { forkJoin, lastValueFrom, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { forkJoin, lastValueFrom } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   Turn,
@@ -33,13 +32,11 @@ import { Service } from '../../services/interfaces/hospital.interfaces';
 import { Validators } from '@angular/forms';
 
 interface AppointmentRow extends Turn {
-  // health_insurance ya está definida en Turn, no necesitas redefinirla
   patientName: string;
   doctorName: string;
   serviceName: string;
   appointmentDate: string;
   appointmentTime: string;
-  is_active?: boolean;
 }
 
 interface AppointmentFormValues extends EntityFormPayload {
@@ -78,7 +75,6 @@ export class AppointmentsListComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
 
   appointments: AppointmentRow[] = [];
-  filteredAppointments: AppointmentRow[] = [];
   users: UserRead[] = [];
   doctors: Doctor[] = [];
   services: Service[] = [];
@@ -91,16 +87,14 @@ export class AppointmentsListComponent implements OnInit {
   viewDialogOpen = false;
   viewDialogData: any = {};
   viewDialogTitle = '';
-  stateFilter: TurnState | 'all' = 'all';
 
-  readonly stateOptions = [
-    { value: 'all', label: 'Todos los estados' },
-    { value: TurnState.WAITING, label: 'Pendiente' },
-    { value: TurnState.ACCEPTED, label: 'Aceptado' },
-    { value: TurnState.FINISHED, label: 'Finalizado' },
-    { value: TurnState.CANCELLED, label: 'Cancelado' },
-    { value: TurnState.REJECTED, label: 'Rechazado' },
-  ];
+  readonly stateLabels: Record<TurnState, string> = {
+    [TurnState.WAITING]: 'Pendiente',
+    [TurnState.ACCEPTED]: 'Aceptado',
+    [TurnState.FINISHED]: 'Finalizado',
+    [TurnState.CANCELLED]: 'Cancelado',
+    [TurnState.REJECTED]: 'Rechazado',
+  };
 
   headerActions: ActionButton[] = [
     {
@@ -110,25 +104,39 @@ export class AppointmentsListComponent implements OnInit {
       ariaLabel: 'Crear nuevo turno',
       onClick: () => this.onAddNew(),
     },
-    {
-      label: 'Refrescar',
-      icon: 'refresh',
-      variant: 'secondary',
-      ariaLabel: 'Refrescar lista de turnos',
-      onClick: () => this.loadData(),
-    },
   ];
 
   tableColumns: TableColumn[] = [
-    { key: 'patientName', label: 'Paciente' },
-    { key: 'doctorName', label: 'Doctor' },
-    { key: 'serviceName', label: 'Servicio' },
-    { key: 'appointmentDate', label: 'Fecha' },
-    { key: 'appointmentTime', label: 'Hora' },
+    { 
+      key: 'patientName', 
+      label: 'Paciente',
+      sortable: true
+    },
+    { 
+      key: 'doctorName', 
+      label: 'Doctor',
+      sortable: true
+    },
+    { 
+      key: 'serviceName', 
+      label: 'Servicio',
+      sortable: true
+    },
+    { 
+      key: 'appointmentDate', 
+      label: 'Fecha',
+      sortable: true
+    },
+    { 
+      key: 'appointmentTime', 
+      label: 'Hora',
+      sortable: true
+    },
     {
       key: 'state',
       label: 'Estado',
-      format: (value: string) => this.formatState(value as TurnState),
+      sortable: true,
+      format: (value: string) => this.stateLabels[value as TurnState] ?? value,
     },
   ];
 
@@ -139,7 +147,11 @@ export class AppointmentsListComponent implements OnInit {
     { key: 'reason', label: 'Motivo' },
     { key: 'appointmentDate', label: 'Fecha' },
     { key: 'appointmentTime', label: 'Hora' },
-    { key: 'state', label: 'Estado', format: (value: string) => this.formatState(value as TurnState) },
+    { 
+      key: 'state', 
+      label: 'Estado', 
+      format: (value: string) => this.stateLabels[value as TurnState] ?? value 
+    },
   ];
 
   get formFields(): FormField<AppointmentFormValues>[] {
@@ -149,7 +161,7 @@ export class AppointmentsListComponent implements OnInit {
         label: 'Motivo',
         type: 'text',
         required: true,
-        validators: [Validators.required],
+        validators: [Validators.required, Validators.maxLength(500)],
       },
       {
         key: 'user_id',
@@ -158,8 +170,9 @@ export class AppointmentsListComponent implements OnInit {
         required: true,
         options: this.users.map((user) => ({
           value: user.id,
-          label: `${user.first_name} ${user.last_name} (${user.dni})`,
+          label: `${user.first_name} ${user.last_name} (DNI: ${user.dni})`,
         })),
+        validators: [Validators.required],
         readonly: this.formMode === 'edit',
       },
       {
@@ -171,14 +184,16 @@ export class AppointmentsListComponent implements OnInit {
           value: service.id,
           label: service.name ?? 'Servicio sin nombre',
         })),
+        validators: [Validators.required],
         readonly: this.formMode === 'edit',
       },
       {
         key: 'health_insurance',
-        label: 'Obra Social',
+        label: 'Obra Social (Opcional)',
         type: 'text',
         required: false,
-        placeholder: 'ID de obra social (opcional)',
+        placeholder: 'ID de obra social',
+        readonly: this.formMode === 'edit',
       },
       {
         key: 'date',
@@ -192,28 +207,24 @@ export class AppointmentsListComponent implements OnInit {
         label: 'Hora',
         type: 'text',
         required: true,
-        validators: [Validators.required, Validators.pattern(/^([0-1]?\d|2[0-3]):[0-5]\d$/)],
-        placeholder: 'HH:mm',
+        validators: [
+          Validators.required, 
+          Validators.pattern(/^([0-1]?\d|2[0-3]):[0-5]\d$/)
+        ],
+        placeholder: 'HH:mm (ej: 14:30)',
       },
       {
         key: 'state',
         label: 'Estado',
         type: 'select',
         required: true,
-        options: this.stateOptions
-          .filter((option) => option.value !== 'all')
-          .map((option) => ({ value: option.value as TurnState, label: option.label })),
-        defaultValue: TurnState.WAITING,
+        options: Object.entries(this.stateLabels).map(([value, label]) => ({
+          value: value as TurnState,
+          label,
+        })),
+        validators: [Validators.required],
       },
     ];
-
-    if (this.formMode === 'edit') {
-      return baseFields.map((field) =>
-        field.key === 'health_insurance'
-          ? { ...field, readonly: true }
-          : field
-      );
-    }
 
     return baseFields;
   }
@@ -224,15 +235,11 @@ export class AppointmentsListComponent implements OnInit {
     this.loadData();
   }
 
-  onStateFilterChange(value: string): void {
-    this.stateFilter = value as TurnState | 'all';
-    this.applyFilters();
-  }
-
   onView(turn: AppointmentRow): void {
     this.viewDialogData = turn;
     this.viewDialogTitle = 'Detalle del turno';
     this.viewDialogOpen = true;
+    this.logger.debug('Opening view dialog for appointment', turn);
   }
 
   onEdit(turn: AppointmentRow): void {
@@ -240,36 +247,54 @@ export class AppointmentsListComponent implements OnInit {
     this.formMode = 'edit';
     this.showForm = true;
     this.formInitialData = {
-      reason: turn.reason,
-      user_id: turn.user_id,
-      service_id: turn.service_id,
-      health_insurance: turn.health_insurance,
-      date: turn.date,
+      reason: turn.reason ?? '',
+      user_id: turn.user_id ?? '',
+      service_id: turn.service_id ?? '',
+      health_insurance: turn.health_insurance ?? '',
+      date: turn.date ?? '',
       time: turn.time?.substring(0, 5) ?? '',
-      state: turn.state,
+      state: turn.state ?? TurnState.WAITING,
     };
+    this.logger.debug('Opening form for editing appointment', turn);
   }
 
   onDelete(turn: AppointmentRow): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Eliminar turno',
-        message: '¿Estás seguro de que deseas eliminar este turno?',
+        message: `¿Está seguro de eliminar el turno de ${turn.patientName}?`,
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        this.formLoading = true;
+        this.loading = true;
+        
         this.appointmentService.deleteTurn(turn.id).subscribe({
           next: () => {
-            this.notificationService.success('Turno eliminado correctamente');
-            this.formLoading = false;
-            this.loadData();
+            this.appointments = this.appointments.filter((a) => a.id !== turn.id);
+            this.loading = false;
+            this.logger.info(`Turno eliminado correctamente`);
+            
+            this.notificationService.success('¡Turno eliminado correctamente!', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
           },
           error: (err: HttpErrorResponse) => {
             this.handleError(err, 'Error al eliminar el turno');
-            this.formLoading = false;
+            this.loading = false;
+            
+            this.notificationService.error('Ocurrió un error al eliminar el turno', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
           },
         });
       }
@@ -280,11 +305,17 @@ export class AppointmentsListComponent implements OnInit {
     this.formMode = 'create';
     this.showForm = true;
     this.selectedTurn = null;
+    
+    const today = new Date().toISOString().split('T')[0];
+    
     this.formInitialData = {
       state: TurnState.WAITING,
-      date: new Date().toISOString().split('T')[0],
+      date: today,
       time: '09:00',
-    } as Partial<AppointmentFormValues>;
+      reason: '',
+    };
+    
+    this.logger.debug('Opening form for new appointment');
   }
 
   onFormCancel(): void {
@@ -292,6 +323,7 @@ export class AppointmentsListComponent implements OnInit {
     this.formLoading = false;
     this.formInitialData = null;
     this.selectedTurn = null;
+    this.logger.debug('Form cancelled');
   }
 
   onFormSubmit(payload: AppointmentFormValues): void {
@@ -317,18 +349,14 @@ export class AppointmentsListComponent implements OnInit {
       users: this.userService.getUsers(),
       doctors: this.doctorService.getDoctors(),
       services: this.serviceService.getServices(),
-      // Intento de reutilizar el endpoint de citas para obtener datos extendidos cuando esté disponible
-      appointments: this.appointmentService
-        .getAppointments(0)
-        .pipe(catchError(() => of([] as any))),
     }).subscribe({
       next: ({ turns, users, doctors, services }) => {
         this.users = users;
         this.doctors = doctors;
         this.services = services;
         this.appointments = this.mapTurns(turns);
-        this.applyFilters();
         this.loading = false;
+        this.logger.info(`Cargados ${this.appointments.length} turnos`);
       },
       error: (err: HttpErrorResponse) => {
         this.handleError(err, 'Error al cargar los turnos');
@@ -341,87 +369,102 @@ export class AppointmentsListComponent implements OnInit {
     return turns.map((turn) => {
       const user = this.users.find((u) => u.id === turn.user_id) || turn.user;
       const doctor = this.doctors.find((d) => d.id === turn.doctor_id) || turn.doctor;
-      const service =
-        this.services.find((s) => s.id === turn.service_id) || turn.service?.[0];
+      const service = this.services.find((s) => s.id === turn.service_id) || turn.service?.[0];
 
       return {
         ...turn,
-        patientName: user ? `${user.first_name} ${user.last_name}` : turn.user_id,
-        doctorName: doctor ? `${doctor.first_name} ${doctor.last_name}` : 'Sin asignar',
+        patientName: user 
+          ? `${user.first_name} ${user.last_name}` 
+          : turn.user_id,
+        doctorName: doctor 
+          ? `${doctor.first_name} ${doctor.last_name}` 
+          : 'Sin asignar',
         serviceName: service?.name || 'Sin servicio',
         appointmentDate: turn.date,
         appointmentTime: turn.time?.substring(0, 5) ?? 'N/A',
-        is_active: turn.state !== TurnState.CANCELLED && turn.state !== TurnState.REJECTED,
       };
     });
   }
 
-  private applyFilters(): void {
-    if (this.stateFilter === 'all') {
-      this.filteredAppointments = [...this.appointments];
-      return;
-    }
-
-    this.filteredAppointments = this.appointments.filter(
-      (appointment) => appointment.state === this.stateFilter
-    );
-  }
-
   private createTurn(payload: AppointmentFormValues): void {
     this.formLoading = true;
+    
     const turnData: TurnCreate = {
-      reason: payload.reason,
+      reason: payload.reason.trim(),
       state: TurnState.WAITING,
       date: payload.date,
       time: payload.time,
       date_created: new Date().toISOString().split('T')[0],
       user_id: payload.user_id,
       services: [payload.service_id],
-      health_insurance: payload.health_insurance ?? null,
+      health_insurance: payload.health_insurance?.trim() || null,
     };
 
     this.appointmentService.createTurn(turnData).subscribe({
       next: () => {
-        this.notificationService.success('Turno creado correctamente');
         this.formLoading = false;
         this.showForm = false;
+        this.formInitialData = null;
+        
         this.loadData();
+        
+        this.logger.info('Turno creado correctamente');
+        this.notificationService.success('¡Turno creado correctamente!', {
+          duration: 7000,
+          action: {
+            label: 'Cerrar',
+            action: () => this.notificationService.dismissAll(),
+          },
+        });
       },
       error: (err: HttpErrorResponse) => {
         this.handleError(err, 'Error al crear el turno');
         this.formLoading = false;
+        
+        this.notificationService.error('Ocurrió un error al crear el turno', {
+          duration: 7000,
+          action: {
+            label: 'Cerrar',
+            action: () => this.notificationService.dismissAll(),
+          },
+        });
       },
     });
   }
 
   private updateTurn(turn: AppointmentRow, payload: AppointmentFormValues): void {
-    const actions = [] as Array<Promise<void>>;
+    const actions: Array<Promise<void>> = [];
     this.formLoading = true;
 
+    // Actualizar estado si cambió
     if (payload.state !== turn.state) {
       actions.push(
         lastValueFrom(
           this.appointmentService.updateTurnState(turn.id, payload.state)
         ).then(() => {
-          this.notificationService.success('Estado actualizado correctamente');
+          this.logger.info('Estado actualizado correctamente');
         })
       );
     }
 
+    // Reprogramar si cambió fecha, hora o motivo
     const shouldReschedule =
-      payload.date !== turn.date || payload.time !== turn.appointmentTime || payload.reason !== turn.reason;
+      payload.date !== turn.date || 
+      payload.time !== turn.appointmentTime || 
+      payload.reason !== turn.reason;
 
     if (shouldReschedule) {
       const reschedulePayload: TurnRescheduleRequest = {
         date: payload.date,
         time: payload.time,
-        reason: payload.reason,
+        reason: payload.reason.trim(),
       };
+      
       actions.push(
         lastValueFrom(
           this.appointmentService.rescheduleTurn(turn.id, reschedulePayload)
         ).then(() => {
-          this.notificationService.success('Turno reprogramado correctamente');
+          this.logger.info('Turno reprogramado correctamente');
         })
       );
     }
@@ -431,29 +474,34 @@ export class AppointmentsListComponent implements OnInit {
         this.formLoading = false;
         this.showForm = false;
         this.selectedTurn = null;
+        this.formInitialData = null;
+        
         this.loadData();
+        
+        this.notificationService.success('¡Turno actualizado correctamente!', {
+          duration: 7000,
+          action: {
+            label: 'Cerrar',
+            action: () => this.notificationService.dismissAll(),
+          },
+        });
       })
       .catch((error: HttpErrorResponse) => {
         this.handleError(error, 'Error al actualizar el turno');
         this.formLoading = false;
+        
+        this.notificationService.error('Ocurrió un error al actualizar el turno', {
+          duration: 7000,
+          action: {
+            label: 'Cerrar',
+            action: () => this.notificationService.dismissAll(),
+          },
+        });
       });
-  }
-
-  private formatState(state: TurnState): string {
-    const labels: Record<TurnState, string> = {
-      [TurnState.WAITING]: 'Pendiente',
-      [TurnState.ACCEPTED]: 'Aceptado',
-      [TurnState.FINISHED]: 'Finalizado',
-      [TurnState.CANCELLED]: 'Cancelado',
-      [TurnState.REJECTED]: 'Rechazado',
-    };
-
-    return labels[state] ?? state;
   }
 
   private handleError(error: HttpErrorResponse, message: string): void {
     this.logger.error(message, error);
-    this.notificationService.error(message);
-    this.error = error.message || message;
+    this.error = error.error?.detail || error.message || message;
   }
 }

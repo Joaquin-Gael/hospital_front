@@ -4,7 +4,7 @@ import { SectionHeaderComponent, ActionButton } from '../section-header/section-
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { ErrorMessageComponent } from '../error-message/error-message.component';
 import { ViewDialogComponent, ViewDialogColumn } from '../../shared/view-dialog/view-dialog.component';
-import { DataTableComponent } from '../../shared/data-table/data-table.component';
+import { DataTableComponent, TableColumn } from '../../shared/data-table/data-table.component';
 import {
   EntityFormComponent,
   EntityFormPayload,
@@ -13,6 +13,7 @@ import {
 import { ScheduleService } from '../../services/schedule/schedule.service';
 import { DoctorService } from '../../services/doctor/doctor.service';
 import { LoggerService } from '../../services/core/logger.service';
+import { NotificationService } from '../../core/notification';
 import { HttpErrorResponse } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { Validators } from '@angular/forms';
@@ -22,7 +23,6 @@ import { AssignDoctorScheduleComponent } from './assign-doctor-schedule.componen
 import { MedicalScheduleCreate, MedicalScheduleUpdate } from '../../services/interfaces/hospital.interfaces';
 import { MedicalSchedule, Doctor } from '../../services/interfaces/doctor.interfaces';
 
-// Interfaz extendida para incluir el nombre del doctor en la visualización
 interface ExtendedSchedule extends MedicalSchedule {
   doctorName: string;
 }
@@ -54,6 +54,7 @@ export class ScheduleListComponent implements OnInit {
   private doctorService = inject(DoctorService);
   private logger = inject(LoggerService);
   private dialog = inject(MatDialog);
+  private notificationService = inject(NotificationService);
 
   schedules: ExtendedSchedule[] = [];
   doctors: Doctor[] = [];
@@ -64,7 +65,6 @@ export class ScheduleListComponent implements OnInit {
   formLoading = false;
   error: string | null = null;
 
-  // View dialog
   viewDialogOpen = false;
   viewDialogData: any = {};
   viewDialogTitle = '';
@@ -86,7 +86,7 @@ export class ScheduleListComponent implements OnInit {
     }
   ];
 
-  daysOfWeek = [
+  readonly daysOfWeek = [
     { value: '0', label: 'Domingo' },
     { value: '1', label: 'Lunes' },
     { value: '2', label: 'Martes' },
@@ -96,24 +96,53 @@ export class ScheduleListComponent implements OnInit {
     { value: '6', label: 'Sábado' },
   ];
 
-  private englishDays = [
+  private readonly englishDays = [
     'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
   ];
 
-  tableColumns = [
+  private readonly daysMap: Record<string, string> = {
+    'Sunday': 'Domingo',
+    'Monday': 'Lunes',
+    'Tuesday': 'Martes',
+    'Wednesday': 'Miércoles',
+    'Thursday': 'Jueves',
+    'Friday': 'Viernes',
+    'Saturday': 'Sábado'
+  };
+
+  tableColumns: TableColumn[] = [
     {
       key: 'day',
       label: 'Día',
-      format: (value: string) => this.getDayLabel(value)
+      sortable: true,
+      format: (value: string) => this.daysMap[value] || value
     },
-    { key: 'start_time', label: 'Hora Inicio' },
-    { key: 'end_time', label: 'Hora Fin' },
+    { 
+      key: 'start_time', 
+      label: 'Hora Inicio',
+      sortable: true
+    },
+    { 
+      key: 'end_time', 
+      label: 'Hora Fin',
+      sortable: true
+    },
+    { 
+      key: 'doctorName', 
+      label: 'Doctor Asignado',
+      sortable: true
+    },
   ];
 
   viewDialogColumns: ViewDialogColumn[] = [
-    { key: 'day', label: 'Día', format: (value: string) => this.getDayLabel(value) },
+    { 
+      key: 'day', 
+      label: 'Día', 
+      format: (value: string) => this.daysMap[value] || value 
+    },
     { key: 'start_time', label: 'Hora Inicio' },
     { key: 'end_time', label: 'Hora Fin' },
+    { key: 'doctorName', label: 'Doctor Asignado' },
   ];
 
   private baseFormFields: FormField<ScheduleFormValues>[] = [
@@ -127,17 +156,25 @@ export class ScheduleListComponent implements OnInit {
     },
     {
       key: 'startTime',
-      label: 'Hora de inicio (HH:mm)',
+      label: 'Hora de inicio',
       type: 'text',
       required: true,
-      validators: [Validators.required, Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)]
+      validators: [
+        Validators.required, 
+        Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+      ],
+      placeholder: 'HH:mm (ej: 09:00)'
     },
     {
       key: 'endTime',
-      label: 'Hora de fin (HH:mm)',
+      label: 'Hora de fin',
       type: 'text',
       required: true,
-      validators: [Validators.required, Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)]
+      validators: [
+        Validators.required, 
+        Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+      ],
+      placeholder: 'HH:mm (ej: 18:00)'
     }
   ];
 
@@ -167,12 +204,13 @@ export class ScheduleListComponent implements OnInit {
         this.doctors = doctors;
         this.schedules = schedules.map((s: MedicalSchedule) => ({
           ...s,
-          doctorName: this.getDoctorName(s.doctors?.[0]) || 'N/A'
+          doctorName: this.getDoctorName(s.doctors?.[0]) || 'Sin asignar'
         }));
         this.loading = false;
+        this.logger.info(`Cargados ${this.schedules.length} horarios`);
       },
       error: (err: HttpErrorResponse) => {
-        this.handleError(err, 'Error cargando datos');
+        this.handleError(err, 'Error al cargar los horarios');
         this.loading = false;
       }
     });
@@ -193,9 +231,26 @@ export class ScheduleListComponent implements OnInit {
       if (result?.success) {
         this.error = null;
         this.logger.info('Doctor asociado a horario correctamente');
+        
+        this.notificationService.success('¡Doctor asociado correctamente!', {
+          duration: 7000,
+          action: {
+            label: 'Cerrar',
+            action: () => this.notificationService.dismissAll(),
+          },
+        });
+        
         this.loadData();
       } else if (result?.error) {
         this.error = result.error;
+        
+        this.notificationService.error('Ocurrió un error al asociar el doctor', {
+          duration: 7000,
+          action: {
+            label: 'Cerrar',
+            action: () => this.notificationService.dismissAll(),
+          },
+        });
       }
     });
   }
@@ -203,37 +258,65 @@ export class ScheduleListComponent implements OnInit {
   onAddNew(): void {
     this.formMode = 'create';
     this.selectedSchedule = null;
-    this.updateInitialData();
+    this.formInitialData = null;
     this.showForm = true;
+    this.logger.debug('Opening form for new schedule');
   }
 
   onEdit(schedule: ExtendedSchedule): void {
     this.formMode = 'edit';
     this.selectedSchedule = { ...schedule };
-    this.updateInitialData();
+    
+    const dayIndex = this.englishDays.indexOf(schedule.day);
+    this.formInitialData = {
+      day: dayIndex >= 0 ? dayIndex.toString() : '',
+      startTime: schedule.start_time ?? '',
+      endTime: schedule.end_time ?? ''
+    };
+    
     this.showForm = true;
+    this.logger.debug('Opening form for editing schedule', schedule);
   }
 
   onDelete(schedule: ExtendedSchedule): void {
+    const dayLabel = this.daysMap[schedule.day] || schedule.day;
+    
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Eliminar Horario',
-        message: `¿Está seguro de eliminar el siguiente horario?`
+        message: `¿Está seguro de eliminar el horario del ${dayLabel} de ${schedule.start_time} a ${schedule.end_time}?`
       }
     });
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.loading = true;
+        
         this.scheduleService.deleteSchedule(schedule.id).subscribe({
           next: () => {
             this.schedules = this.schedules.filter(s => s.id !== schedule.id);
             this.loading = false;
-            this.logger.info(`Horario "${schedule.day} ${schedule.start_time}-${schedule.end_time}" eliminado correctamente`);
+            this.logger.info(`Horario eliminado correctamente`);
+            
+            this.notificationService.success('¡Horario eliminado correctamente!', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
           },
           error: (err: HttpErrorResponse) => {
             this.handleError(err, 'Error al eliminar el horario');
             this.loading = false;
+            
+            this.notificationService.error('Ocurrió un error al eliminar el horario', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
           }
         });
       }
@@ -241,8 +324,9 @@ export class ScheduleListComponent implements OnInit {
   }
 
   onView(schedule: ExtendedSchedule): void {
+    const dayLabel = this.daysMap[schedule.day] || schedule.day;
     this.viewDialogData = schedule;
-    this.viewDialogTitle = `Horario: ${this.getDayLabel(schedule.day)} ${schedule.start_time}-${schedule.end_time}`;
+    this.viewDialogTitle = `Horario: ${dayLabel} ${schedule.start_time}-${schedule.end_time}`;
     this.viewDialogOpen = true;
     this.logger.debug('Opening view dialog for schedule', schedule);
   }
@@ -258,106 +342,110 @@ export class ScheduleListComponent implements OnInit {
       return;
     }
 
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: this.formMode === 'create' ? 'Crear Horario' : 'Actualizar Horario',
-        message: `¿Está seguro de ${this.formMode === 'create' ? 'crear' : 'actualizar'} el horario para el ${this.getDayLabel(this.englishDays[+formData.day])} de ${formData.startTime} a ${formData.endTime}?`
-      }
-    });
+    this.formLoading = true;
+    this.error = null;
 
-    dialogRef.afterClosed().subscribe((result: boolean) => {
-      if (!result) return;
+    const dayName = this.englishDays[+formData.day];
 
-      this.formLoading = true;
-      this.error = null;
+    if (this.formMode === 'create') {
+      const scheduleData: MedicalScheduleCreate = {
+        day: dayName,
+        start_time: formData.startTime.trim(),
+        end_time: formData.endTime.trim()
+      };
 
-      if (this.formMode === 'create') {
-        const scheduleData: MedicalScheduleCreate = {
-          day: this.englishDays[+formData.day],
-          start_time: formData.startTime,
-          end_time: formData.endTime
-        };
+      this.scheduleService.addSchedule(scheduleData).subscribe({
+        next: (newSchedule: MedicalSchedule) => {
+          this.schedules = [...this.schedules, {
+            ...newSchedule,
+            doctorName: 'Sin asignar'
+          }];
+          
+          this.formLoading = false;
+          this.showForm = false;
+          this.formInitialData = null;
+          
+          this.logger.info('Horario creado correctamente');
+          this.notificationService.success('¡Horario creado correctamente!', {
+            duration: 7000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          });
+        },
+        error: (err: HttpErrorResponse) => {
+          this.handleError(err, 'Error al crear el horario');
+          this.formLoading = false;
+          
+          this.notificationService.error('Ocurrió un error al crear el horario', {
+            duration: 7000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          });
+        }
+      });
+    } else if (this.selectedSchedule) {
+      const scheduleData: MedicalScheduleUpdate = {
+        id: this.selectedSchedule.id,
+        day: dayName,
+        start_time: formData.startTime.trim(),
+        end_time: formData.endTime.trim()
+      };
 
-        this.scheduleService.addSchedule(scheduleData).subscribe({
-          next: (newSchedule: MedicalSchedule) => {
-            this.schedules.push({
-              ...newSchedule,
-              doctorName: 'N/A'
-            });
-            this.formLoading = false;
-            this.showForm = false;
-            this.logger.info(`Horario "${scheduleData.day} ${scheduleData.start_time}-${scheduleData.end_time}" creado correctamente`);
-          },
-          error: (err: HttpErrorResponse) => {
-            this.handleError(err, 'Error al crear el horario');
-            this.formLoading = false;
+      this.scheduleService.updateSchedule(scheduleData).subscribe({
+        next: (updatedSchedule: MedicalSchedule) => {
+          const index = this.schedules.findIndex(s => s.id === this.selectedSchedule!.id);
+          if (index !== -1) {
+            this.schedules[index] = {
+              ...updatedSchedule,
+              doctorName: this.schedules[index].doctorName
+            };
           }
-        });
-      } else if (this.selectedSchedule) {
-        const scheduleData: MedicalScheduleUpdate = {
-          id: this.selectedSchedule.id,
-          day: this.englishDays[+formData.day],
-          start_time: formData.startTime,
-          end_time: formData.endTime
-        };
-
-        this.scheduleService.updateSchedule(scheduleData).subscribe({
-          next: (updatedSchedule: MedicalSchedule) => {
-            const index = this.schedules.findIndex(s => s.id === this.selectedSchedule!.id);
-            if (index !== -1) {
-              this.schedules[index] = {
-                ...updatedSchedule,
-                doctorName: this.schedules[index].doctorName
-              };
-            }
-            this.formLoading = false;
-            this.showForm = false;
-            this.logger.info(`Horario "${scheduleData.day} ${scheduleData.start_time}-${scheduleData.end_time}" actualizado correctamente`);
-          },
-          error: (err: HttpErrorResponse) => {
-            this.handleError(err, 'Error al actualizar el horario');
-            this.formLoading = false;
-          }
-        });
-      }
-    });
+          
+          this.formLoading = false;
+          this.showForm = false;
+          this.selectedSchedule = null;
+          this.formInitialData = null;
+          
+          this.logger.info('Horario actualizado correctamente');
+          this.notificationService.success('¡Horario actualizado correctamente!', {
+            duration: 7000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          });
+        },
+        error: (err: HttpErrorResponse) => {
+          this.handleError(err, 'Error al actualizar el horario');
+          this.formLoading = false;
+          
+          this.notificationService.error('Ocurrió un error al actualizar el horario', {
+            duration: 7000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          });
+        }
+      });
+    }
   }
 
   onFormCancel(): void {
     this.showForm = false;
+    this.selectedSchedule = null;
     this.formInitialData = null;
-  }
-
-  private updateInitialData(): void {
-    if (this.formMode === 'edit' && this.selectedSchedule) {
-      const dayIndex = this.englishDays.indexOf(this.selectedSchedule.day);
-      this.formInitialData = {
-        day: dayIndex >= 0 ? dayIndex.toString() : '',
-        startTime: this.selectedSchedule.start_time,
-        endTime: this.selectedSchedule.end_time
-      };
-    } else {
-      this.formInitialData = null;
-    }
+    this.logger.debug('Form cancelled');
   }
 
   private getDoctorName(doctorId?: string): string {
     if (!doctorId) return '';
     const doctor = this.doctors.find(d => d.id === doctorId);
     return doctor ? `${doctor.first_name} ${doctor.last_name}` : '';
-  }
-
-  private getDayLabel(englishDay: string): string {
-    const daysMap: { [key: string]: string } = {
-      'Sunday': 'Domingo',
-      'Monday': 'Lunes',
-      'Tuesday': 'Martes',
-      'Wednesday': 'Miércoles',
-      'Thursday': 'Jueves',
-      'Friday': 'Viernes',
-      'Saturday': 'Sábado'
-    };
-    return daysMap[englishDay] || englishDay;
   }
 
   private validateTimes(startTime: string, endTime: string): boolean {
@@ -368,17 +456,17 @@ export class ScheduleListComponent implements OnInit {
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
     this.logger.error('Error en ScheduleListComponent:', error);
+    
     let errorMessage = defaultMessage;
     if (error.status === 422 && error.error?.detail) {
       const details = error.error.detail;
-      if (Array.isArray(details)) {
-        errorMessage = details.map((err: any) => `${err.loc.join('.')} (${err.type}): ${err.msg}`).join('; ');
-      } else {
-        errorMessage = details || defaultMessage;
-      }
+      errorMessage = Array.isArray(details)
+        ? details.map((err: any) => `${err.loc.join('.')}: ${err.msg}`).join('; ')
+        : details || defaultMessage;
     } else {
       errorMessage = error.error?.detail || error.error?.message || error.message || defaultMessage;
     }
+    
     this.error = errorMessage;
   }
 }

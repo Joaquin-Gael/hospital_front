@@ -52,7 +52,6 @@ type HealthInsuranceFormValues = HealthInsuranceCreate & EntityFormPayload;
   templateUrl: './health-insurance-list.component.html',
   styleUrls: ['./health-insurance-list.component.scss'],
 })
-
 export class HealthInsuranceListComponent implements OnInit {
   private service = inject(HealthInsuranceService);
   private logger = inject(LoggerService);
@@ -61,7 +60,6 @@ export class HealthInsuranceListComponent implements OnInit {
 
   insurances: HealthInsuranceRead[] = [];
   selectedInsurance: HealthInsuranceRead | null = null;
-  searchTerm = '';
   loading = false;
   formLoading = false;
   error: string | null = null;
@@ -82,21 +80,23 @@ export class HealthInsuranceListComponent implements OnInit {
       ariaLabel: 'Agregar nueva obra social',
       onClick: () => this.onAddNew(),
     },
-    {
-      label: 'Refrescar',
-      icon: 'refresh',
-      variant: 'secondary',
-      ariaLabel: 'Refrescar obras sociales',
-      onClick: () => this.loadInsurances(),
-    },
   ];
 
   tableColumns: TableColumn[] = [
-    { key: 'name', label: 'Nombre' },
-    { key: 'description', label: 'Descripción' },
+    { 
+      key: 'name', 
+      label: 'Nombre',
+      sortable: true
+    },
+    { 
+      key: 'description', 
+      label: 'Descripción',
+      sortable: true
+    },
     {
       key: 'discount',
       label: 'Descuento (%)',
+      sortable: true,
       format: (value: number) => `${value}%`,
     },
   ];
@@ -108,11 +108,6 @@ export class HealthInsuranceListComponent implements OnInit {
       key: 'discount',
       label: 'Descuento (%)',
       format: (value: number) => `${value}%`,
-    },
-    {
-      key: 'isActive',
-      label: 'Activo',
-      format: (value?: boolean) => (value ? 'Sí' : 'No'),
     },
   ];
 
@@ -145,10 +140,8 @@ export class HealthInsuranceListComponent implements OnInit {
   ];
 
   get formFields(): FormField<HealthInsuranceFormValues>[] {
-    if (this._formFields.length === 0 || this.lastFormMode !== this.formMode) {
-      this._formFields = this.baseFormFields.map((field) => ({
-        ...field,
-      }));
+    if (this.lastFormMode !== this.formMode) {
+      this._formFields = [...this.baseFormFields];
       this.lastFormMode = this.formMode;
     }
     return this._formFields;
@@ -156,15 +149,6 @@ export class HealthInsuranceListComponent implements OnInit {
 
   private _formFields: FormField<HealthInsuranceFormValues>[] = [];
   formInitialData: Partial<HealthInsuranceFormValues> | null = null;
-
-  get filteredInsurances(): HealthInsuranceRead[] {
-    const term = this.searchTerm.trim().toLowerCase();
-    if (!term) return this.insurances;
-
-    return this.insurances.filter((insurance) =>
-      `${insurance.name} ${insurance.description}`.toLowerCase().includes(term)
-    );
-  }
 
   ngOnInit(): void {
     this.loadInsurances();
@@ -176,11 +160,9 @@ export class HealthInsuranceListComponent implements OnInit {
 
     this.service.getAll().subscribe({
       next: (insurances) => {
-        this.insurances = insurances.map((insurance: HealthInsuranceRead) => ({
-          ...insurance,
-          isActive: true, // Valor por en efecto 🗿🚬
-        }));
+        this.insurances = insurances;
         this.loading = false;
+        this.logger.info(`Cargadas ${this.insurances.length} obras sociales`);
       },
       error: (error: HttpErrorResponse) => {
         this.handleError(error, 'Error al cargar las obras sociales');
@@ -201,8 +183,8 @@ export class HealthInsuranceListComponent implements OnInit {
     this.formMode = 'edit';
     this.selectedInsurance = insurance;
     this.formInitialData = {
-      name: insurance.name,
-      description: insurance.description,
+      name: insurance.name ?? '',
+      description: insurance.description ?? '',
       discount: insurance.discount,
     };
     this.showForm = true;
@@ -234,11 +216,10 @@ export class HealthInsuranceListComponent implements OnInit {
               (i) => i.id !== insurance.id
             );
             this.loading = false;
-            this.logger.info(
-              `Obra social "${insurance.name}" eliminada correctamente`
-            );
+            this.logger.info(`Obra social "${insurance.name}" eliminada correctamente`);
+            
             this.notificationService.success(
-              `¡Obra social eliminada correctamente!`,
+              '¡Obra social eliminada correctamente!',
               {
                 duration: 7000,
                 action: {
@@ -253,8 +234,9 @@ export class HealthInsuranceListComponent implements OnInit {
               error,
               `Error al eliminar la obra social "${insurance.name}"`
             );
+            
             this.notificationService.error(
-              '¡Ocurrió un error al eliminar la obra social!',
+              'Ocurrió un error al eliminar la obra social',
               {
                 duration: 7000,
                 action: {
@@ -263,6 +245,7 @@ export class HealthInsuranceListComponent implements OnInit {
                 },
               }
             );
+            
             this.loading = false;
           },
         });
@@ -274,27 +257,22 @@ export class HealthInsuranceListComponent implements OnInit {
     this.formLoading = true;
     this.error = null;
 
-    const discount = Number(formData.discount);
-
     const createPayload: HealthInsuranceCreate = {
-      name: formData.name,
-      description: formData.description ?? '',
-      discount,
+      name: formData.name.trim(),
+      description: formData.description?.trim() ?? '',
+      discount: formData.discount,
     };
 
     const updatePayload: HealthInsuranceUpdate = {
-      name: formData.name,
-      description: formData.description ?? '',
-      discount,
+      name: formData.name.trim(),
+      description: formData.description?.trim() ?? '',
+      discount: formData.discount,
     };
 
     const request =
       this.formMode === 'create'
         ? this.service.create(createPayload)
-        : this.service.update(
-            this.selectedInsurance!.id,
-            updatePayload
-          );
+        : this.service.update(this.selectedInsurance!.id, updatePayload);
 
     request.subscribe({
       next: () => {
@@ -302,16 +280,15 @@ export class HealthInsuranceListComponent implements OnInit {
         this.showForm = false;
         this.selectedInsurance = null;
         this.formInitialData = null;
+        
+        // Recargar datos
         this.loadInsurances();
-        this.logger.info(
-          `Obra social ${
-            this.formMode === 'create' ? 'creada' : 'actualizada'
-          } correctamente`
-        );
+        
+        const action = this.formMode === 'create' ? 'creada' : 'actualizada';
+        this.logger.info(`Obra social ${action} correctamente`);
+        
         this.notificationService.success(
-          `¡Obra social ${
-            this.formMode === 'create' ? 'creada' : 'actualizada'
-          } con éxito!`,
+          `¡Obra social ${action} con éxito!`,
           {
             duration: 7000,
             action: {
@@ -323,16 +300,12 @@ export class HealthInsuranceListComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         this.formLoading = false;
-        this.handleError(
-          error,
-          `Error al ${
-            this.formMode === 'create' ? 'crear' : 'actualizar'
-          } la obra social`
-        );
+        const action = this.formMode === 'create' ? 'crear' : 'actualizar';
+        
+        this.handleError(error, `Error al ${action} la obra social`);
+        
         this.notificationService.error(
-          `¡Ocurrió un error al ${
-            this.formMode === 'create' ? 'crear' : 'actualizar'
-          } la obra social!`,
+          `Ocurrió un error al ${action} la obra social`,
           {
             duration: 7000,
             action: {

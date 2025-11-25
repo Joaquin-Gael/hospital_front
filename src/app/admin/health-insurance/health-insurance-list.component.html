@@ -27,25 +27,13 @@
     @if (loading) {
       <app-loading-spinner [message]="'Cargando obras sociales...'"></app-loading-spinner>
     } @else {
-      <div class="filters">
-        <div class="filters__group">
-          <label class="filters__label" for="insurance-search">Búsqueda</label>
-          <input
-            id="insurance-search"
-            class="filters__input"
-            type="text"
-            [value]="searchTerm"
-            (input)="searchTerm = $any($event.target).value"
-            placeholder="Buscar por nombre o descripción"
-          />
-        </div>
-      </div>
-
       <div class="health-insurance-section__table-container">
         <app-data-table
-          [data]="filteredInsurances"
+          [data]="insurances"
           [columns]="tableColumns"
           [loading]="loading"
+          [searchEnabled]="true"
+          [pagination]="true"
           (edit)="onEdit($event)"
           (delete)="onDelete($event)"
           (view)="onView($event)">

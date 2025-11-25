@@ -84,16 +84,24 @@ export class LocationListComponent implements OnInit {
       ariaLabel: 'Agregar nueva ubicación',
       onClick: () => this.onAddNew(),
     },
+    {
+      label: 'Refrescar',
+      icon: 'refresh',
+      variant: 'secondary',
+      ariaLabel: 'Refrescar ubicaciones',
+      onClick: () => this.loadLocations(),
+    },
   ];
 
+  // CORREGIDO: Agregado sortable y mejorado formato
   tableColumns: TableColumn[] = [
-    { key: 'name', label: 'Nombre' },
-    { key: 'description', label: 'Descripción' },
-    { key: 'id', label: 'ID de Ubicación' },
-    {
-      key: 'departmentCount',
-      label: 'Número de Departamentos',
-      format: (value: number) => (value || 0).toString(),
+    { key: 'name', label: 'Nombre', sortable: true },
+    { key: 'description', label: 'Descripción', sortable: true },
+    { 
+      key: 'departmentCount', 
+      label: 'Departamentos', 
+      sortable: true,
+      format: (value: number) => value ? `${value} dept${value !== 1 ? 's' : ''}` : 'Sin departamentos'
     },
   ];
 
@@ -111,7 +119,7 @@ export class LocationListComponent implements OnInit {
   formFields: FormField<LocationFormValues>[] = [
     {
       key: 'name',
-      label: 'Nombre',
+      label: 'Nombre de la Ubicación',
       type: 'text',
       required: true,
       validators: [
@@ -139,12 +147,16 @@ export class LocationListComponent implements OnInit {
 
     this.locationService.getLocations().subscribe({
       next: (locations) => {
-        this.logger.debug('Datos recibidos en loadLocations', locations);
-        this.locations = locations.map((l) => ({
-          ...l,
-          departmentCount: l.departments?.length || 0,
+        // Mapear ubicaciones con conteo de departamentos
+        this.locations = locations.map((location) => ({
+          ...location,
+          departmentCount: location.departments?.length || 0,
         }));
+        
         this.loading = false;
+        this.logger.info('Ubicaciones cargadas correctamente', {
+          count: this.locations.length,
+        });
       },
       error: (error: HttpErrorResponse) => {
         this.handleError(error, 'Error al cargar las ubicaciones');
@@ -158,7 +170,8 @@ export class LocationListComponent implements OnInit {
     this.selectedLocation = null;
     this.formInitialData = null;
     this.showForm = true;
-    this.logger.debug('Opening form for new location');
+    this.error = null;
+    this.logger.debug('Abriendo formulario para nueva ubicación');
   }
 
   onEdit(location: ExtendedLocation): void {
@@ -169,45 +182,67 @@ export class LocationListComponent implements OnInit {
       description: location.description,
     };
     this.showForm = true;
-    this.logger.debug('Opening form for editing location', location);
+    this.error = null;
+    this.logger.debug('Editando ubicación', { id: location.id });
   }
 
   onView(location: ExtendedLocation): void {
     this.viewDialogData = location;
     this.viewDialogTitle = `Ubicación: ${location.name}`;
     this.viewDialogOpen = true;
-    this.logger.debug('Opening view dialog for location', location);
+    this.logger.debug('Visualizando ubicación', { id: location.id });
   }
 
   onDelete(location: ExtendedLocation): void {
+    // MEJORADO: Validar si tiene departamentos asociados
+    if (location.departmentCount && location.departmentCount > 0) {
+      this.notificationService.warning(
+        `No se puede eliminar la ubicación "${location.name}" porque tiene ${location.departmentCount} departamento${location.departmentCount !== 1 ? 's' : ''} asociado${location.departmentCount !== 1 ? 's' : ''}.`,
+        {
+          duration: 7000,
+          action: {
+            label: 'Entendido',
+            action: () => this.notificationService.dismissAll(),
+          },
+        }
+      );
+      return;
+    }
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Eliminar Ubicación',
-        message: `¿Está seguro de eliminar la ubicación "${location.name}"?`,
+        message: `¿Está seguro de eliminar la ubicación "${location.name}"? Esta acción no se puede deshacer.`,
       },
     });
 
-    dialogRef.afterClosed().subscribe((result: boolean) => {
-      if (result) {
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
         this.loading = true;
 
         this.locationService.deleteLocation(location.id).subscribe({
           next: () => {
-            this.locations = this.locations.filter((l) => l.id !== location.id);
+            // Actualizar lista local
+            this.locations = this.locations.filter(
+              (l) => l.id !== location.id
+            );
+            
             this.loading = false;
             this.notificationService.success(
-              '¡Ubicación eliminada con éxito!',
+              `Ubicación "${location.name}" eliminada correctamente`,
               {
-                duration: 7000,
+                duration: 5000,
                 action: {
                   label: 'Cerrar',
                   action: () => this.notificationService.dismissAll(),
                 },
               }
             );
-            this.logger.info(
-              `Ubicación "${location.name}" eliminada correctamente`
-            );
+            
+            this.logger.info('Ubicación eliminada', {
+              id: location.id,
+              name: location.name,
+            });
           },
           error: (error: HttpErrorResponse) => {
             this.handleError(
@@ -225,23 +260,20 @@ export class LocationListComponent implements OnInit {
     this.formLoading = true;
     this.error = null;
 
-    const createPayload: LocationCreate = {
-      name: formData.name,
-      description: formData.description ?? '',
-    };
-
-    const updatePayload: LocationUpdate = {
-      name: formData.name,
-      description: formData.description ?? '',
-      location_id: this.selectedLocation?.id ?? '',
+    const payload: LocationCreate = {
+      name: formData.name.trim(),
+      description: formData.description?.trim() || '',
     };
 
     const request =
       this.formMode === 'create'
-        ? this.locationService.addLocation(createPayload)
+        ? this.locationService.addLocation(payload)
         : this.locationService.updateLocation(
             this.selectedLocation!.id,
-            updatePayload
+            {
+              ...payload,
+              location_id: this.selectedLocation!.id,
+            } as LocationUpdate
           );
 
     request.subscribe({
@@ -250,45 +282,30 @@ export class LocationListComponent implements OnInit {
         this.showForm = false;
         this.selectedLocation = null;
         this.formInitialData = null;
+        
+        // Recargar datos para reflejar cambios
         this.loadLocations();
-        this.logger.info(
-          `Ubicación ${
-            this.formMode === 'create' ? 'creada' : 'actualizada'
-          } correctamente`
-        );
+        
+        const action = this.formMode === 'create' ? 'creada' : 'actualizada';
         this.notificationService.success(
-          `¡Ubicación ${
-            this.formMode === 'create' ? 'creada' : 'actualizada'
-          } con éxito!`,
+          `Ubicación ${action} correctamente`,
           {
-            duration: 6000,
+            duration: 5000,
             action: {
               label: 'Cerrar',
               action: () => this.notificationService.dismissAll(),
             },
           }
         );
+        
+        this.logger.info(`Ubicación ${action}`, { data: result });
       },
       error: (error: HttpErrorResponse) => {
         this.formLoading = false;
-        this.handleError(
-          error,
-          `Error al ${
-            this.formMode === 'create' ? 'crear' : 'actualizar'
-          } la ubicación`
-        );
-        this.notificationService.error(
-          `¡Ocurrió un error al ${
-            this.formMode === 'create' ? 'crear' : 'actualizar'
-          } la ubicación!`,
-          {
-            duration: 8000,
-            action: {
-              label: 'Cerrar',
-              action: () => this.notificationService.dismissAll(),
-            },
-          }
-        );
+        const action = this.formMode === 'create' ? 'crear' : 'actualizar';
+        this.handleError(error, `Error al ${action} la ubicación`);
+        
+        // No cerrar formulario en caso de error
       },
     });
   }
@@ -297,16 +314,41 @@ export class LocationListComponent implements OnInit {
     this.showForm = false;
     this.selectedLocation = null;
     this.formInitialData = null;
-    this.logger.debug('Form cancelled');
+    this.error = null;
+    this.logger.debug('Formulario cancelado');
   }
 
   closeViewDialog(): void {
     this.viewDialogOpen = false;
     this.viewDialogData = {};
+    this.viewDialogTitle = '';
+  }
+
+  // NUEVO: Método para retry desde el data-table
+  onRetry(): void {
+    this.logger.info('Reintentando cargar ubicaciones');
+    this.loadLocations();
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
     this.logger.error('Error en LocationListComponent:', error);
-    this.error = error.error?.detail || error.message || defaultMessage;
+    
+    let errorMessage = defaultMessage;
+    
+    if (error.error?.detail) {
+      errorMessage = `${defaultMessage}: ${error.error.detail}`;
+    } else if (error.message) {
+      errorMessage = `${defaultMessage}: ${error.message}`;
+    }
+    
+    this.error = errorMessage;
+    
+    this.notificationService.error(errorMessage, {
+      duration: 7000,
+      action: {
+        label: 'Cerrar',
+        action: () => this.notificationService.dismissAll(),
+      },
+    });
   }
 }

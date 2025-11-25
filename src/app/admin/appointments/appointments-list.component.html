@@ -1,54 +1,46 @@
-<div class="admin-section">
+<div class="appointments-section">
   <app-section-header
     title="Turnos y Citas"
     subtitle="Administra las reservas de pacientes"
     icon="event"
-    headerClass="header-indigo"
-    [actions]="headerActions"
-  ></app-section-header>
+    [actions]="headerActions">
+  </app-section-header>
+
+  <app-error-message
+    *ngIf="error"
+    [message]="error"
+    (close)="error = null">
+  </app-error-message>
 
   @if (showForm) {
-    <div class="admin-section__form">
+    <div class="appointments-section__form-container">
       <app-entity-form
         [fields]="formFields"
         [initialData]="formInitialData"
-        [mode]="formMode"
-        [loading]="formLoading"
         [title]="formMode === 'create' ? 'Nuevo turno' : 'Editar turno'"
         [submitLabel]="formMode === 'create' ? 'Crear' : 'Guardar cambios'"
+        [loading]="formLoading"
         (formSubmit)="onFormSubmit($event)"
-        (formCancel)="onFormCancel()"
-      ></app-entity-form>
+        (formCancel)="onFormCancel()">
+      </app-entity-form>
     </div>
   } @else {
-    <div class="admin-section__content">
-      <app-error-message *ngIf="error" [message]="error"></app-error-message>
-
-      <div class="filters">
-        <label class="filters__label" for="state-filter">Estado</label>
-        <select
-          id="state-filter"
-          class="filters__select"
-          [value]="stateFilter"
-          (change)="onStateFilterChange($any($event.target).value)"
-        >
-          <option *ngFor="let option of stateOptions" [value]="option.value">
-            {{ option.label }}
-          </option>
-        </select>
+    @if (loading) {
+      <app-loading-spinner [message]="'Cargando turnos...'"></app-loading-spinner>
+    } @else {
+      <div class="appointments-section__table-container">
+        <app-data-table
+          [data]="appointments"
+          [columns]="tableColumns"
+          [loading]="loading"
+          [searchEnabled]="true"
+          [pagination]="true"
+          (view)="onView($event)"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)">
+        </app-data-table>
       </div>
-
-      <app-data-table
-        [columns]="tableColumns"
-        [data]="filteredAppointments"
-        [loading]="loading"
-        (view)="onView($event)"
-        (edit)="onEdit($event)"
-        (delete)="onDelete($event)"
-      ></app-data-table>
-
-      <app-loading-spinner *ngIf="loading"></app-loading-spinner>
-    </div>
+    }
   }
 
   <app-view-dialog
@@ -56,6 +48,6 @@
     [item]="viewDialogData"
     [columns]="viewDialogColumns"
     [title]="viewDialogTitle"
-    (close)="closeViewDialog()"
-  ></app-view-dialog>
+    (close)="closeViewDialog()">
+  </app-view-dialog>
 </div>

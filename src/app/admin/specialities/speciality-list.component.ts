@@ -38,6 +38,11 @@ import { forkJoin } from 'rxjs';
 
 type SpecialityFormValues = EntityFormPayload & SpecialtyCreate;
 
+// IMPORTANTE: Extender Specialty para incluir el campo adicional
+interface SpecialtyWithDepartment extends Specialty {
+  associatedDepartmentName?: string;
+}
+
 @Component({
   selector: 'app-speciality-list',
   standalone: true,
@@ -58,13 +63,14 @@ type SpecialityFormValues = EntityFormPayload & SpecialtyCreate;
 export class SpecialityListComponent implements OnInit {
   private specialityService = inject(SpecialityService);
   private departmentService = inject(DepartmentService);
-  private notificationService = inject(NotificationService)
+  private notificationService = inject(NotificationService);
   private logger = inject(LoggerService);
   private dialog = inject(MatDialog);
 
-  specialities: Specialty[] = [];
+  // CAMBIO 1: Usar el tipo extendido
+  specialities: SpecialtyWithDepartment[] = [];
   departments: Department[] = [];
-  selectedSpeciality: Specialty | null = null;
+  selectedSpeciality: SpecialtyWithDepartment | null = null;
   loading = false;
   formLoading = false;
   error: string | null = null;
@@ -87,10 +93,23 @@ export class SpecialityListComponent implements OnInit {
     },
   ];
 
+  // CAMBIO 2: Configurar columnas con sortable
   tableColumns: TableColumn[] = [
-    { key: 'name', label: 'Nombre' },
-    { key: 'description', label: 'Descripción' },
-    { key: 'associatedDepartmentName', label: 'Departamento' },
+    { 
+      key: 'name', 
+      label: 'Nombre',
+      sortable: true  // Explícitamente sortable
+    },
+    { 
+      key: 'description', 
+      label: 'Descripción',
+      sortable: true
+    },
+    { 
+      key: 'associatedDepartmentName', 
+      label: 'Departamento',
+      sortable: true
+    },
   ];
 
   viewDialogColumns: ViewDialogColumn[] = [
@@ -120,18 +139,18 @@ export class SpecialityListComponent implements OnInit {
     },
     {
       key: 'department_id',
-      label: 'Departamento ID',
+      label: 'Departamento',  // CAMBIO 3: Mejor label
       type: 'select',
       required: true,
       validators: [Validators.required],
+      options: [],  // Se llena dinámicamente
     },
   ];
 
   get formFields(): FormField<SpecialityFormValues>[] {
-    if (this._formFields.length === 0 || this.lastFormMode !== this.formMode) {
-      this._formFields = this.baseFormFields.map((field) => ({
-        ...field,
-      }));
+    // CAMBIO 4: Simplificar la lógica de regeneración
+    if (this.lastFormMode !== this.formMode) {
+      this._formFields = [...this.baseFormFields];
       this.lastFormMode = this.formMode;
     }
     return this._formFields;
@@ -153,27 +172,35 @@ export class SpecialityListComponent implements OnInit {
       departments: this.departmentService.getDepartments(),
     }).subscribe({
       next: (result) => {
-        this.departments = result.departments,
-        this.specialities = result.specialities.map((specialty) => {
-          return {
-            ...specialty,
-            associatedDepartmentName:
-              result.departments.find((d) => d.id === specialty.department_id)?.name ||
-              'Desconocido',
-          };
-        });
+        // CAMBIO 5: Guardar departamentos primero
+        this.departments = result.departments;
+
+        // CAMBIO 6: Mapear especialidades con nombre de departamento
+        this.specialities = result.specialities.map((specialty) => ({
+          ...specialty,
+          associatedDepartmentName:
+            this.departments.find((d) => d.id === specialty.department_id)?.name ||
+            'Desconocido',
+        }));
+
+        // CAMBIO 7: Actualizar opciones del form field
         const departmentFieldIndex = this.baseFormFields.findIndex(
           (f) => f.key === 'department_id'
         );
+        
         if (departmentFieldIndex !== -1) {
-          this.baseFormFields[departmentFieldIndex].options =
-            this.departments.map((s) => ({
-              value: s.id.toString(),
-              label: s.name,
-            }));
+          this.baseFormFields[departmentFieldIndex].options = this.departments.map((dept) => ({
+            value: dept.id,  // ID como string directo
+            label: dept.name,
+          }));
+          
+          // Forzar regeneración de form fields
           this._formFields = [];
+          this.lastFormMode = null;
         }
+
         this.loading = false;
+        this.logger.info(`Cargadas ${this.specialities.length} especialidades`);
       },
       error: (error: HttpErrorResponse) => {
         this.handleError(
@@ -193,26 +220,28 @@ export class SpecialityListComponent implements OnInit {
     this.logger.debug('Opening form for new speciality');
   }
 
-  onEdit(speciality: Specialty): void {
+  onEdit(speciality: SpecialtyWithDepartment): void {
     this.formMode = 'edit';
     this.selectedSpeciality = speciality;
+    
     this.formInitialData = {
       name: speciality.name ?? '',
       description: speciality.description ?? '',
       department_id: speciality.department_id ?? '',
     };
+    
     this.showForm = true;
     this.logger.debug('Opening form for editing speciality', speciality);
   }
 
-  onView(speciality: Specialty): void {
+  onView(speciality: SpecialtyWithDepartment): void {
     this.viewDialogData = speciality;
     this.viewDialogTitle = `Especialidad: ${speciality.name}`;
     this.viewDialogOpen = true;
     this.logger.debug('Opening view dialog for speciality', speciality);
   }
 
-  onDelete(speciality: Specialty): void {
+  onDelete(speciality: SpecialtyWithDepartment): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Eliminar Especialidad',
@@ -226,13 +255,14 @@ export class SpecialityListComponent implements OnInit {
 
         this.specialityService.deleteSpeciality(speciality.id).subscribe({
           next: () => {
+            // CAMBIO 9: Filtrar sin recargar todo
             this.specialities = this.specialities.filter(
               (s) => s.id !== speciality.id
             );
+            
             this.loading = false;
-            this.logger.info(
-              `Especialidad "${speciality.name}" eliminada correctamente`
-            );
+            this.logger.info(`Especialidad "${speciality.name}" eliminada correctamente`);
+            
             this.notificationService.success(
               '¡Especialidad eliminada con éxito!',
               {
@@ -249,8 +279,9 @@ export class SpecialityListComponent implements OnInit {
               error,
               `Error al eliminar la especialidad "${speciality.name}"`
             );
+            
             this.notificationService.error(
-              '¡Ocurrió un error al eliminar la especialidad!',
+              'Ocurrió un error al eliminar la especialidad',
               {
                 duration: 7000,
                 action: {
@@ -259,6 +290,7 @@ export class SpecialityListComponent implements OnInit {
                 },
               }
             );
+            
             this.loading = false;
           },
         });
@@ -271,14 +303,14 @@ export class SpecialityListComponent implements OnInit {
     this.error = null;
 
     const createPayload: SpecialtyCreate = {
-      name: formData.name,
-      description: formData.description ?? '',
+      name: formData.name.trim(),
+      description: formData.description?.trim() ?? '',
       department_id: formData.department_id,
     };
 
     const updatePayload: SpecialtyUpdate = {
-      name: formData.name,
-      description: formData.description ?? '',
+      name: formData.name.trim(),
+      description: formData.description?.trim() ?? '',
       department_id: formData.department_id,
     };
 
@@ -296,16 +328,15 @@ export class SpecialityListComponent implements OnInit {
         this.showForm = false;
         this.selectedSpeciality = null;
         this.formInitialData = null;
+        
+        // Recargar datos para reflejar cambios
         this.loadData();
-        this.logger.info(
-          `Especialidad ${
-            this.formMode === 'create' ? 'creada' : 'actualizada'
-          } correctamente`
-        );
+        
+        const action = this.formMode === 'create' ? 'creada' : 'actualizada';
+        this.logger.info(`Especialidad ${action} correctamente`);
+        
         this.notificationService.success(
-          `Especialidad ${
-            this.formMode === 'create' ? 'creada' : 'actualizada'
-          } con éxito!`,
+          `¡Especialidad ${action} con éxito!`,
           {
             duration: 7000,
             action: {
@@ -317,16 +348,12 @@ export class SpecialityListComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         this.formLoading = false;
-        this.handleError(
-          error,
-          `Error al ${
-            this.formMode === 'create' ? 'crear' : 'actualizar'
-          } la especialidad`
-        );
+        const action = this.formMode === 'create' ? 'crear' : 'actualizar';
+        
+        this.handleError(error, `Error al ${action} la especialidad`);
+        
         this.notificationService.error(
-          `¡Ocurrió un error al ${
-            this.formMode === 'create' ? 'crear' : 'actualizar'
-          } con éxito!`,
+          `Ocurrió un error al ${action} la especialidad`,
           {
             duration: 7000,
             action: {

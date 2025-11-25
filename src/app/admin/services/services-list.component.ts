@@ -36,8 +36,12 @@ import { SpecialityService } from '../../services/speciality/speciality.service'
 import { forkJoin } from 'rxjs';
 import { NotificationService } from '../../core/notification';
 
-type ServiceFormValues = EntityFormPayload &
-  ServiceCreate;
+type ServiceFormValues = EntityFormPayload & ServiceCreate;
+
+// Tipo extendido para incluir el nombre de especialidad
+interface ServiceWithSpecialty extends Service {
+  associatedSpecialtyName?: string;
+}
 
 @Component({
   selector: 'app-service-list',
@@ -56,7 +60,6 @@ type ServiceFormValues = EntityFormPayload &
   templateUrl: './services-list.component.html',
   styleUrls: ['./services-list.component.scss'],
 })
-
 export class ServiceListComponent implements OnInit {
   private serviceService = inject(ServiceService);
   private logger = inject(LoggerService);
@@ -64,9 +67,9 @@ export class ServiceListComponent implements OnInit {
   private specialityService = inject(SpecialityService);
   private notificationService = inject(NotificationService);
 
-  services: Service[] = [];
+  services: ServiceWithSpecialty[] = [];
   specialities: Specialty[] = [];
-  selectedService: Service | null = null;
+  selectedService: ServiceWithSpecialty | null = null;
   loading = false;
   formLoading = false;
   error: string | null = null;
@@ -90,15 +93,32 @@ export class ServiceListComponent implements OnInit {
   ];
 
   tableColumns: TableColumn[] = [
-    { key: 'name', label: 'Nombre' },
-    { key: 'description', label: 'Descripción' },
+    { 
+      key: 'name', 
+      label: 'Nombre',
+      sortable: true
+    },
+    { 
+      key: 'description', 
+      label: 'Descripción',
+      sortable: true
+    },
     {
       key: 'price',
       label: 'Precio',
+      sortable: true,
       format: (value: number) => `$${value.toFixed(2)}`,
     },
-    { key: 'icon_code', label: 'Icono' },
-    { key: 'associatedSpecialtyName', label: 'Especialidad' },
+    { 
+      key: 'icon_code', 
+      label: 'Icono',
+      sortable: true
+    },
+    { 
+      key: 'associatedSpecialtyName', 
+      label: 'Especialidad',
+      sortable: true
+    },
   ];
 
   viewDialogColumns: ViewDialogColumn[] = [
@@ -141,10 +161,10 @@ export class ServiceListComponent implements OnInit {
     },
     {
       key: 'icon_code',
-      label: 'Icono',
+      label: 'Código de Icono',
       type: 'text',
       required: true,
-      validators: [Validators.required],
+      validators: [Validators.required, Validators.maxLength(50)],
     },
     {
       key: 'specialty_id',
@@ -152,14 +172,13 @@ export class ServiceListComponent implements OnInit {
       type: 'select',
       required: true,
       validators: [Validators.required],
+      options: [],
     },
   ];
 
   get formFields(): FormField<ServiceFormValues>[] {
-    if (this._formFields.length === 0 || this.lastFormMode !== this.formMode) {
-      this._formFields = this.baseFormFields.map((field) => ({
-        ...field,
-      }));
+    if (this.lastFormMode !== this.formMode) {
+      this._formFields = [...this.baseFormFields];
       this.lastFormMode = this.formMode;
     }
     return this._formFields;
@@ -181,28 +200,35 @@ export class ServiceListComponent implements OnInit {
       services: this.serviceService.getServices(),
     }).subscribe({
       next: (result) => {
+        // Guardar especialidades
         this.specialities = result.specialities;
-        this.services = result.services.map((service) => {
-          return {
-            ...service,
-            associatedSpecialtyName:
-              this.specialities.find((s) => s.id === service.specialty_id)
-                ?.name || 'Desconocida',
-          };
-        });
+
+        // Mapear servicios con nombre de especialidad
+        this.services = result.services.map((service) => ({
+          ...service,
+          associatedSpecialtyName:
+            this.specialities.find((s) => s.id === service.specialty_id)?.name || 
+            'Desconocida',
+        }));
+
+        // Actualizar opciones del select
         const specialityFieldIndex = this.baseFormFields.findIndex(
           (f) => f.key === 'specialty_id'
         );
+        
         if (specialityFieldIndex !== -1) {
-          this.baseFormFields[specialityFieldIndex].options =
-            this.specialities.map((s) => ({
-              value: s.id.toString(),
-              label: s.name,
-            }));
+          this.baseFormFields[specialityFieldIndex].options = this.specialities.map((s) => ({
+            value: s.id,  // ID como string
+            label: s.name,
+          }));
+          
+          // Forzar regeneración
           this._formFields = [];
-          this.loading = false;
+          this.lastFormMode = null;
         }
+
         this.loading = false;
+        this.logger.info(`Cargados ${this.services.length} servicios`);
       },
       error: (error: HttpErrorResponse) => {
         this.handleError(error, 'Error al cargar los datos');
@@ -219,7 +245,7 @@ export class ServiceListComponent implements OnInit {
     this.logger.debug('Opening form for new service');
   }
 
-  onEdit(service: Service): void {
+  onEdit(service: ServiceWithSpecialty): void {
     this.formMode = 'edit';
     this.selectedService = service;
     this.formInitialData = {
@@ -227,20 +253,20 @@ export class ServiceListComponent implements OnInit {
       description: service.description ?? '',
       price: service.price,
       icon_code: service.icon_code ?? '',
-      specialty_id: service.specialty_id,
+      specialty_id: service.specialty_id ?? '',
     };
     this.showForm = true;
     this.logger.debug('Opening form for editing service', service);
   }
 
-  onView(service: Service): void {
+  onView(service: ServiceWithSpecialty): void {
     this.viewDialogData = service;
     this.viewDialogTitle = `Servicio: ${service.name}`;
     this.viewDialogOpen = true;
     this.logger.debug('Opening view dialog for service', service);
   }
 
-  onDelete(service: Service): void {
+  onDelete(service: ServiceWithSpecialty): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Eliminar Servicio',
@@ -252,13 +278,13 @@ export class ServiceListComponent implements OnInit {
       if (result) {
         this.loading = true;
 
-        this.serviceService.deleteService(service.id.toString()).subscribe({
+        // ID ya es string, no hacer .toString()
+        this.serviceService.deleteService(service.id).subscribe({
           next: () => {
             this.services = this.services.filter((s) => s.id !== service.id);
             this.loading = false;
-            this.logger.info(
-              `Servicio "${service.name}" eliminado correctamente`
-            );
+            this.logger.info(`Servicio "${service.name}" eliminado correctamente`);
+            
             this.notificationService.success('¡Servicio eliminado con éxito!', {
               duration: 7000,
               action: {
@@ -273,8 +299,9 @@ export class ServiceListComponent implements OnInit {
               `Error al eliminar el servicio "${service.name}"`
             );
             this.loading = false;
+            
             this.notificationService.error(
-              '¡Ocurrió un error al eliminar el servicio',
+              'Ocurrió un error al eliminar el servicio',
               {
                 duration: 7000,
                 action: {
@@ -293,29 +320,28 @@ export class ServiceListComponent implements OnInit {
     this.formLoading = true;
     this.error = null;
 
-    const price = Number(formData.price);
-
+    // El price viene como number del form
     const createPayload: ServiceCreate = {
-      name: formData.name,
-      description: formData.description ?? '',
-      price,
+      name: formData.name.trim(),
+      description: formData.description?.trim() ?? '',
+      price: formData.price,
       specialty_id: formData.specialty_id,
-      icon_code: formData.icon_code ?? '',
+      icon_code: formData.icon_code?.trim() ?? '',
     };
 
     const updatePayload: ServiceUpdate = {
-      name: formData.name,
-      description: formData.description ?? '',
-      price,
+      name: formData.name.trim(),
+      description: formData.description?.trim() ?? '',
+      price: formData.price,
       specialty_id: formData.specialty_id,
-      icon_code: formData.icon_code ?? '',
+      icon_code: formData.icon_code?.trim() ?? '',
     };
 
     const request =
       this.formMode === 'create'
         ? this.serviceService.createService(createPayload)
         : this.serviceService.updateService(
-            this.selectedService!.id.toString(),
+            this.selectedService!.id,  // ID es string
             updatePayload
           );
 
@@ -323,17 +349,17 @@ export class ServiceListComponent implements OnInit {
       next: () => {
         this.formLoading = false;
         this.showForm = false;
+        this.selectedService = null;
         this.formInitialData = null;
+        
+        // Recargar datos
         this.loadData();
-        this.logger.info(
-          `Servicio ${
-            this.formMode === 'create' ? 'creado' : 'actualizado'
-          } correctamente`
-        );
+        
+        const action = this.formMode === 'create' ? 'creado' : 'actualizado';
+        this.logger.info(`Servicio ${action} correctamente`);
+        
         this.notificationService.success(
-          `¡Servicio ${
-            this.formMode === 'create' ? 'creado' : 'actualizado'
-          } con éxito!`,
+          `¡Servicio ${action} con éxito!`,
           {
             duration: 7000,
             action: {
@@ -345,16 +371,12 @@ export class ServiceListComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         this.formLoading = false;
-        this.handleError(
-          error,
-          `Error al ${
-            this.formMode === 'create' ? 'crear' : 'actualizar'
-          } el servicio`
-        );
+        const action = this.formMode === 'create' ? 'crear' : 'actualizar';
+        
+        this.handleError(error, `Error al ${action} el servicio`);
+        
         this.notificationService.error(
-          `¡Ocurrió un error al ${
-            this.formMode === 'create' ? 'crear' : 'actualizar'
-          } el servicio!`,
+          `Ocurrió un error al ${action} el servicio`,
           {
             duration: 7000,
             action: {

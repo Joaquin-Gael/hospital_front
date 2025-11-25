@@ -1,103 +1,93 @@
 <div class="user-section">
-  <!-- Header usando el componente section-header -->
   <app-section-header
     title="Gestión de Usuarios"
     subtitle="Administra los usuarios del sistema hospitalario"
     icon="person"
-    [actions]="headerActions"
-  >
+    [actions]="headerActions">
   </app-section-header>
 
-  <!-- Error message -->
-  <app-error-message [message]="error" (close)="error = null">
+  <app-error-message 
+    *ngIf="error" 
+    [message]="error" 
+    (close)="error = null">
   </app-error-message>
 
-  <!-- Form container (cuando showForm es true) -->
   @if (showForm) {
-  <div class="user-section__form-container">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="formInitialData"
-      [title]="formMode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario'"
-      [submitLabel]="
-        formMode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario'
-      "
-      [loading]="formLoading"
-      [enableImageUpload]="true"
-      (formSubmit)="onFormSubmit($event)"
-      (formCancel)="onFormCancel()"
-      (imageSelected)="onImageSelected($event)"
-      (filesSelected)="onFilesSelected($event)"
-    >
-    </app-entity-form>
-  </div>
-  } @else {
-  <!-- Loading spinner -->
-  @if (loading) {
-  <app-loading-spinner [message]="'Cargando usuarios...'"></app-loading-spinner>
-  } @else {
-  <!-- Data table container -->
-  <div class="user-section__table-container">
-    <app-data-table
-      [data]="users"
-      [columns]="tableColumns"
-      [loading]="loading"
-      [showBanUnban]="true"
-      (edit)="onEdit($event)"
-      (delete)="onDelete($event)"
-      (view)="onView($event)"
-      (ban)="onBanEvent($event)"
-      (unban)="onUnbanEvent($event)"
-    >
-    </app-data-table>
-  </div>
-
-  <!-- Empty state -->
-  @if (!loading && !users.length) {
-  <div class="user-section__empty">
-    <div class="empty-state">
-      <div class="empty-state__icon">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-      </div>
-      <h3 class="empty-state__title">No hay usuarios registrados</h3>
-      <p class="empty-state__message">
-        Comienza agregando el primer usuario al sistema
-      </p>
-      <button class="empty-state__button" (click)="onAddNew()">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <line x1="19" y1="8" x2="19" y2="14" />
-          <line x1="22" y1="11" x2="16" y2="11" />
-        </svg>
-        Agregar Primer Usuario
-      </button>
+    <div class="user-section__form-container">
+      <app-entity-form
+        [fields]="formFields"
+        [initialData]="formInitialData"
+        [title]="formMode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario'"
+        [submitLabel]="formMode === 'create' ? 'Crear Usuario' : 'Actualizar Usuario'"
+        [loading]="formLoading"
+        [enableImageUpload]="true"
+        (formSubmit)="onFormSubmit($event)"
+        (formCancel)="onFormCancel()"
+        (imageSelected)="onImageSelected($event)"
+        (filesSelected)="onFilesSelected($event)">
+      </app-entity-form>
     </div>
-  </div>
-  } } }
+  } @else {
+    @if (loading) {
+      <app-loading-spinner [message]="'Cargando usuarios...'"></app-loading-spinner>
+    } @else if (users.length === 0) {
+      <div class="user-section__empty">
+        <div class="empty-state">
+          <div class="empty-state__icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </div>
+          <h3 class="empty-state__title">No hay usuarios registrados</h3>
+          <p class="empty-state__message">
+            Comienza agregando el primer usuario al sistema
+          </p>
+          <button class="empty-state__button" (click)="onAddNew()">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <line x1="19" y1="8" x2="19" y2="14" />
+              <line x1="22" y1="11" x2="16" y2="11" />
+            </svg>
+            Agregar Primer Usuario
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="user-section__table-container">
+        <app-data-table
+          [data]="users"
+          [columns]="tableColumns"
+          [loading]="loading"
+          [searchEnabled]="true"
+          [pagination]="true"
+          [showBanUnban]="true"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)"
+          (view)="onView($event)"
+          (ban)="onBanEvent($event)"
+          (unban)="onUnbanEvent($event)">
+        </app-data-table>
+      </div>
+    }
+  }
 
-  <!-- View dialog -->
   <app-view-dialog
     [isOpen]="viewDialogOpen"
     [item]="viewDialogData"
     [columns]="viewDialogColumns"
     [title]="viewDialogTitle"
-    (close)="closeViewDialog()"
-  >
+    (close)="closeViewDialog()">
   </app-view-dialog>
 </div>

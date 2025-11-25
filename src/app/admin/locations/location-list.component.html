@@ -1,59 +1,78 @@
 <div class="location-section">
-  <!-- Header usando el componente section-header -->
+  <!-- Header -->
   <app-section-header
     title="Gestión de Ubicaciones"
     subtitle="Administra las ubicaciones del sistema hospitalario"
     icon="location_on"
-    [actions]="headerActions"
-  >
+    [actions]="headerActions">
   </app-section-header>
 
-  <!-- Error message -->
-  <app-error-message [message]="error" (close)="error = null">
-  </app-error-message>
+  <!-- Error global (fuera del formulario) -->
+  @if (error && !showForm) {
+    <app-error-message 
+      [message]="error" 
+      (close)="error = null">
+    </app-error-message>
+  }
 
-  <!-- Form container (cuando showForm es true) -->
   @if (showForm) {
-  <div class="location-section__form-container">
-    <app-entity-form
-      [fields]="formFields"
-      [initialData]="formInitialData"
-      [title]="formMode === 'create' ? 'Nueva Ubicación' : 'Editar Ubicación'"
-      [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
-      [loading]="formLoading"
-      (formSubmit)="onFormSubmit($event)"
-      (formCancel)="onFormCancel()"
-    >
-    </app-entity-form>
-  </div>
+    <div class="location-section__form-container">
+      <!-- Error dentro del formulario -->
+      @if (error) {
+        <app-error-message 
+          [message]="error" 
+          (close)="error = null">
+        </app-error-message>
+      }
+      
+      <app-entity-form
+        [fields]="formFields"
+        [initialData]="formInitialData"
+        [title]="formMode === 'create' ? 'Nueva Ubicación' : 'Editar Ubicación'"
+        [submitLabel]="formMode === 'create' ? 'Crear' : 'Actualizar'"
+        [loading]="formLoading"
+        (formSubmit)="onFormSubmit($event)"
+        (formCancel)="onFormCancel()">
+      </app-entity-form>
+    </div>
   } @else {
-  <!-- Loading spinner -->
-  @if (loading) {
-  <app-loading-spinner
-    [message]="'Cargando ubicaciones...'"
-  ></app-loading-spinner>
-  } @else {
-  <!-- Data table container -->
-  <div class="location-section__table-container">
-    <app-data-table
-      [data]="locations"
-      [columns]="tableColumns"
-      [loading]="loading"
-      (edit)="onEdit($event)"
-      (delete)="onDelete($event)"
-      (view)="onView($event)"
-    >
-    </app-data-table>
-  </div>
-  } }
+    @if (loading && locations.length === 0) {
+      <!-- Solo mostrar spinner si no hay datos aún -->
+      <app-loading-spinner 
+        [message]="'Cargando ubicaciones...'">
+      </app-loading-spinner>
+    } @else {
+      <div class="location-section__table-container">
+        <app-data-table
+          [data]="locations"
+          [columns]="tableColumns"
+          [loading]="loading"
+          [searchEnabled]="true"
+          [pagination]="true"
+          [error]="error"
+          [actions]="{
+            view: true,
+            edit: true,
+            delete: true,
+            ban: false,
+            unban: false,
+            download: false
+          }"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)"
+          (view)="onView($event)"
+          (retry)="onRetry()">
+        </app-data-table>
+      </div>
+    }
+  }
 
-  <!-- View dialog -->
+  <!-- View Dialog -->
   <app-view-dialog
     [isOpen]="viewDialogOpen"
     [item]="viewDialogData"
     [columns]="viewDialogColumns"
     [title]="viewDialogTitle"
-    (close)="closeViewDialog()"
-  >
+    (close)="closeViewDialog()">
   </app-view-dialog>
 </div>

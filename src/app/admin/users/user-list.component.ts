@@ -23,6 +23,7 @@ import { UserService } from '../../services/user/user.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { HealthInsuranceService } from '../../services/health_insarunce/health-insurance.service';
 import { LoggerService } from '../../services/core/logger.service';
+import { NotificationService } from '../../core/notification';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Validators } from '@angular/forms';
 import {
@@ -77,6 +78,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   private healthInsuranceService = inject(HealthInsuranceService);
   private logger = inject(LoggerService);
   private dialog = inject(MatDialog);
+  private notificationService = inject(NotificationService);
   private readonly destroy$ = new Subject<void>();
 
   users: ExtendedUser[] = [];
@@ -110,7 +112,13 @@ export class UserListComponent implements OnInit, OnDestroy {
   ];
 
   private baseFormFields: FormField<UserFormValues>[] = [
-    { key: 'username', label: 'Usuario', type: 'text', required: true },
+    { 
+      key: 'username', 
+      label: 'Usuario', 
+      type: 'text', 
+      required: true,
+      validators: [Validators.required, Validators.minLength(3), Validators.maxLength(50)]
+    },
     {
       key: 'email',
       label: 'Email',
@@ -118,8 +126,20 @@ export class UserListComponent implements OnInit, OnDestroy {
       required: true,
       validators: [Validators.required, Validators.email],
     },
-    { key: 'first_name', label: 'Nombre', type: 'text', required: true },
-    { key: 'last_name', label: 'Apellido', type: 'text', required: true },
+    { 
+      key: 'first_name', 
+      label: 'Nombre', 
+      type: 'text', 
+      required: true,
+      validators: [Validators.required, Validators.maxLength(100)]
+    },
+    { 
+      key: 'last_name', 
+      label: 'Apellido', 
+      type: 'text', 
+      required: true,
+      validators: [Validators.required, Validators.maxLength(100)]
+    },
     {
       key: 'dni',
       label: 'DNI',
@@ -136,14 +156,22 @@ export class UserListComponent implements OnInit, OnDestroy {
         Validators.minLength(8),
         Validators.pattern(this.passwordPattern),
       ],
+      placeholder: 'Mínimo 8 caracteres, incluye mayúscula, minúscula, número y símbolo'
     },
-    { key: 'address', label: 'Dirección', type: 'text', required: false },
+    { 
+      key: 'address', 
+      label: 'Dirección', 
+      type: 'text', 
+      required: false,
+      validators: [Validators.maxLength(200)]
+    },
     {
       key: 'telephone',
       label: 'Teléfono',
       type: 'text',
       required: false,
       validators: [Validators.pattern(/^\+?\d{9,15}$/)],
+      placeholder: '+54123456789'
     },
     {
       key: 'health_insurance',
@@ -158,6 +186,7 @@ export class UserListComponent implements OnInit, OnDestroy {
       type: 'select',
       required: false,
       options: [
+        { value: '', label: 'Sin especificar' },
         { value: 'A+', label: 'A+' },
         { value: 'A-', label: 'A-' },
         { value: 'B+', label: 'B+' },
@@ -177,17 +206,13 @@ export class UserListComponent implements OnInit, OnDestroy {
   ];
 
   get formFields(): FormField<UserFormValues>[] {
-    if (this._formFields.length === 0 || this.lastFormMode !== this.formMode) {
+    if (this.lastFormMode !== this.formMode) {
       this._formFields = this.baseFormFields.map((field) => ({
         ...field,
-        required:
-          field.key === 'password'
-            ? this.formMode === 'create'
-            : field.required,
-        validators:
-          field.key === 'password' && this.formMode === 'edit'
-            ? []
-            : field.validators || [],
+        required: field.key === 'password' ? this.formMode === 'create' : field.required,
+        validators: field.key === 'password' && this.formMode === 'edit' 
+          ? [] 
+          : field.validators || [],
       }));
       this.lastFormMode = this.formMode;
     }
@@ -200,50 +225,70 @@ export class UserListComponent implements OnInit, OnDestroy {
   tableColumns: TableColumn[] = [
     {
       key: 'img_profile',
-      label: 'Imagen',
+      label: 'Foto',
+      sortable: false,
       format: (value: string | null) =>
         value
           ? `<img src="${value}" alt="Profile" class="table__image" />`
-          : 'Sin imagen',
+          : '<span class="table__no-image">Sin foto</span>',
     },
-    { key: 'username', label: 'Usuario' },
-    { key: 'email', label: 'Email' },
-    { key: 'first_name', label: 'Nombre' },
-    { key: 'last_name', label: 'Apellido' },
-    { key: 'dni', label: 'DNI' },
-    { key: 'address', label: 'Dirección' },
-    { key: 'telephone', label: 'Teléfono' },
-    { key: 'blood_type', label: 'Tipo de Sangre' },
+    { 
+      key: 'username', 
+      label: 'Usuario',
+      sortable: true
+    },
+    { 
+      key: 'email', 
+      label: 'Email',
+      sortable: true
+    },
+    { 
+      key: 'first_name', 
+      label: 'Nombre',
+      sortable: true
+    },
+    { 
+      key: 'last_name', 
+      label: 'Apellido',
+      sortable: true
+    },
+    { 
+      key: 'dni', 
+      label: 'DNI',
+      sortable: true
+    },
+    { 
+      key: 'telephone', 
+      label: 'Teléfono',
+      sortable: false
+    },
+    { 
+      key: 'blood_type', 
+      label: 'Tipo Sangre',
+      sortable: true
+    },
     {
       key: 'health_insurance_name',
       label: 'Obra Social',
+      sortable: true,
       format: (value: string) => value || 'Sin obra social',
     },
     {
       key: 'is_active',
       label: 'Activo',
-      format: (value: boolean) => (value ? 'Sí' : 'No'),
-    },
-    {
-      key: 'is_admin',
-      label: 'Admin',
-      format: (value: boolean) => (value ? 'Sí' : 'No'),
-    },
-    {
-      key: 'is_superuser',
-      label: 'Superusuario',
-      format: (value: boolean) => (value ? 'Sí' : 'No'),
+      sortable: true,
+      format: (value: boolean) => (value ? '✓ Sí' : '✗ No'),
     },
   ];
 
   viewDialogColumns: ViewDialogColumn[] = [
     {
       key: 'img_profile',
-      label: 'Imagen',
+      label: 'Foto',
       format: (value: string | null) =>
         value
-          ? `<img src="${value}" alt="Profile" style="width:64px;height:64px;border-radius:50%;object-fit:cover;" />`
-          : 'Sin imagen',
+          ? `<img src="${value}" alt="Profile" style="width:80px;height:80px;border-radius:50%;object-fit:cover;box-shadow:0 4px 8px rgba(0,0,0,0.1);" />`
+          : 'Sin foto',
     },
     { key: 'username', label: 'Usuario' },
     { key: 'email', label: 'Email' },
@@ -253,12 +298,11 @@ export class UserListComponent implements OnInit, OnDestroy {
     { key: 'address', label: 'Dirección' },
     { key: 'telephone', label: 'Teléfono' },
     { key: 'blood_type', label: 'Tipo de Sangre' },
-    /*
     {
       key: 'health_insurance_name',
       label: 'Obra Social',
       format: (value?: string) => value || 'Sin obra social',
-    },*/
+    },
     {
       key: 'is_active',
       label: 'Activo',
@@ -266,7 +310,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     },
     {
       key: 'is_admin',
-      label: 'Admin',
+      label: 'Administrador',
       format: (value?: boolean) => (value ? 'Sí' : 'No'),
     },
     {
@@ -292,84 +336,53 @@ export class UserListComponent implements OnInit, OnDestroy {
       next: (result) => {
         this.healthInsurances = result.healthInsurances;
         this.isSuperuser = result.userAuth?.is_superuser || false;
+        
         this.users = result.users.map((user) => ({
           ...user,
           health_insurance_name: user.health_insurance
-            ? this.healthInsurances.find(
-                (hi) => hi.id === user.health_insurance[0]
-              )?.name || 'Obra social no encontrada'
+            ? this.healthInsurances.find((hi) => hi.id === user.health_insurance[0])?.name || 
+              'Obra social no encontrada'
             : 'Sin obra social',
         }));
+        
         this.updateHealthInsuranceOptions();
-        this.updateFormFields();
+        this.updateFormFieldsPermissions();
         this.loading = false;
+        this.logger.info(`Cargados ${this.users.length} usuarios`);
       },
       error: (error: HttpErrorResponse) => {
-        this.handleError(
-          error,
-          'Error al cargar los datos o verificar permisos'
-        );
+        this.handleError(error, 'Error al cargar los datos');
         this.loading = false;
       },
     });
   }
 
   private updateHealthInsuranceOptions(): void {
-    const healthInsuranceField = this.baseFormFields.find(
-      (f) => f.key === 'health_insurance'
-    );
+    const healthInsuranceField = this.baseFormFields.find((f) => f.key === 'health_insurance');
     if (healthInsuranceField) {
       healthInsuranceField.options = [
         { value: '', label: 'Sin obra social' },
         ...this.healthInsurances.map((hi) => ({
-          value: hi.id.toString(),
+          value: hi.id,
           label: hi.name,
         })),
       ];
       this._formFields = [];
+      this.lastFormMode = null;
     }
   }
 
-  private updateFormFields(): void {
-    if (this.formMode === 'create') {
-      const passwordField = this.baseFormFields.find(
-        (f) => f.key === 'password'
-      );
-      if (passwordField) {
-        passwordField.required = true;
-        passwordField.validators = [
-          Validators.required,
-          Validators.minLength(8),
-          Validators.pattern(this.passwordPattern),
-        ];
-      }
-    } else {
-      const passwordField = this.baseFormFields.find(
-        (f) => f.key === 'password'
-      );
-      if (passwordField) {
-        passwordField.required = false;
-        passwordField.validators = [];
-      }
-    }
-
+  private updateFormFieldsPermissions(): void {
     if (!this.isSuperuser) {
-      const restrictedFields = [
-        'username',
-        'first_name',
-        'last_name',
-        'is_active',
-        'is_admin',
-        'is_superuser',
-      ];
+      const restrictedFields = ['username', 'first_name', 'last_name'];
       this.baseFormFields.forEach((field) => {
         if (restrictedFields.includes(field.key)) {
           field.readonly = true;
         }
       });
     }
-
     this._formFields = [];
+    this.lastFormMode = null;
   }
 
   onAddNew(): void {
@@ -378,7 +391,6 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.imgProfile = undefined;
     this.imagePreview = null;
     this.formInitialData = null;
-    this.updateFormFields();
     this.showForm = true;
     this.logger.debug('Opening form for new user');
   }
@@ -389,8 +401,8 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.imgProfile = undefined;
     this.imagePreview = user.img_profile || null;
     this.formInitialData = {
-      username: user.username,
-      email: user.email,
+      username: user.username ?? '',
+      email: user.email ?? '',
       first_name: user.first_name ?? '',
       last_name: user.last_name ?? '',
       dni: user.dni ?? '',
@@ -400,7 +412,6 @@ export class UserListComponent implements OnInit, OnDestroy {
       blood_type: user.blood_type ?? '',
       health_insurance: user.health_insurance?.[0] ?? '',
     };
-    this.updateFormFields();
     this.showForm = true;
     this.logger.debug('Opening form for editing user', user);
   }
@@ -423,158 +434,155 @@ export class UserListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.loading = true;
-        this.userService
-          .deleteUser(user.id.toString())
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              this.users = this.users.filter((u) => u.id !== user.id);
-              this.loading = false;
-              this.logger.info(
-                `Usuario "${user.username}" eliminado correctamente`
-              );
-            },
-            error: (error: HttpErrorResponse) => {
-              this.handleError(
-                error,
-                `Error al eliminar al usuario "${user.username}"`
-              );
-              this.loading = false;
-            },
-          });
+        
+        this.userService.deleteUser(user.id).pipe(takeUntil(this.destroy$)).subscribe({
+          next: () => {
+            this.users = this.users.filter((u) => u.id !== user.id);
+            this.loading = false;
+            this.logger.info(`Usuario "${user.username}" eliminado correctamente`);
+            
+            this.notificationService.success('¡Usuario eliminado correctamente!', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
+          },
+          error: (error: HttpErrorResponse) => {
+            this.handleError(error, `Error al eliminar al usuario "${user.username}"`);
+            this.loading = false;
+            
+            this.notificationService.error('Ocurrió un error al eliminar el usuario', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
+          },
+        });
       }
     });
   }
 
   onFormSubmit(formData: UserFormValues): void {
-    const passwordValue = formData.password ?? '';
+    this.formLoading = true;
+    this.error = null;
 
-    if (passwordValue && !this.passwordPattern.test(passwordValue)) {
-      this.error =
-        'La contraseña debe tener al menos 8 caracteres, incluyendo una letra minúscula, una mayúscula, un número y un carácter especial (@$!%*?&#).';
-      this.formLoading = false;
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      this.error = 'Por favor, ingresa un correo electrónico válido.';
-      this.formLoading = false;
-      return;
-    }
-    if (!formData.dni) {
-      this.error = 'El DNI es requerido.';
-      this.formLoading = false;
-      return;
-    }
+    const healthInsuranceId = formData.health_insurance?.trim() || '';
+    
+    if (this.formMode === 'create') {
+      const userData: UserCreate = {
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        password: formData.password?.trim() || '',
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        dni: formData.dni.trim(),
+        telephone: formData.telephone?.trim() || undefined,
+        address: formData.address?.trim() || undefined,
+        blood_type: formData.blood_type?.trim() || '',
+        health_insurance: healthInsuranceId ? [healthInsuranceId] : [],
+      };
 
-    const action = this.formMode === 'create' ? 'crear' : 'editar';
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: `${action.charAt(0).toUpperCase() + action.slice(1)} Usuario`,
-        message: `¿Está seguro de ${action} al usuario "${formData.first_name} ${formData.last_name}"?`,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result: boolean) => {
-      if (!result) return;
-
-      this.formLoading = true;
-      this.error = null;
-
-      const healthInsuranceId = formData.health_insurance ?? '';
-      if (this.formMode === 'create') {
-        const userData: UserCreate = {
-          username: formData.username,
-          email: formData.email,
-          password: passwordValue,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          dni: formData.dni,
-          telephone: formData.telephone || undefined,
-          address: formData.address || undefined,
-          blood_type: formData.blood_type || '',
-          health_insurance: healthInsuranceId ? [healthInsuranceId] : [],
-        };
-
-        this.userService
-          .createUser(userData)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (newUser: UserRead) => {
-              const userWithHealthInsurance: ExtendedUser = {
-                ...newUser,
-                health_insurance_name: newUser.health_insurance
-                  ? this.healthInsurances.find(
-                      (hi) => hi.id === newUser.health_insurance[0]
-                    )?.name || 'Obra social no encontrada'
-                  : 'Sin obra social',
-              };
-              this.users.push(userWithHealthInsurance);
-              this.formLoading = false;
-              this.showForm = false;
-              this.imgProfile = undefined;
-              this.imagePreview = null;
-              this.formInitialData = null;
-              this.logger.info(
-                `Usuario "${newUser.username}" creado correctamente`
-              );
-            },
-            error: (error: HttpErrorResponse) => {
-              this.handleError(error, 'Error al crear el usuario');
-              this.formLoading = false;
+      this.userService.createUser(userData).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (newUser: UserRead) => {
+          const userWithHealthInsurance: ExtendedUser = {
+            ...newUser,
+            health_insurance_name: newUser.health_insurance
+              ? this.healthInsurances.find((hi) => hi.id === newUser.health_insurance[0])?.name || 
+                'Obra social no encontrada'
+              : 'Sin obra social',
+          };
+          
+          this.users = [...this.users, userWithHealthInsurance];
+          this.formLoading = false;
+          this.showForm = false;
+          this.imgProfile = undefined;
+          this.imagePreview = null;
+          this.formInitialData = null;
+          
+          this.logger.info(`Usuario "${newUser.username}" creado correctamente`);
+          this.notificationService.success('¡Usuario creado correctamente!', {
+            duration: 7000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
             },
           });
-      } else if (this.selectedUser) {
-        const healthInsuranceUpdate =
-          formData.health_insurance === undefined
-            ? undefined
-            : healthInsuranceId
-              ? [healthInsuranceId]
-              : [];
-
-        const updateData: UserUpdate = {
-          username: this.isSuperuser ? formData.username : undefined,
-          first_name: this.isSuperuser ? formData.first_name : undefined,
-          last_name: this.isSuperuser ? formData.last_name : undefined,
-          telephone: formData.telephone || undefined,
-          address: formData.address || undefined,
-          health_insurance: healthInsuranceUpdate,
-        };
-
-        this.userService
-          .updateUser(this.selectedUser.id.toString(), updateData)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (updatedUser: UserRead) => {
-              const userWithHealthInsurance: ExtendedUser = {
-                ...updatedUser,
-                health_insurance_name: updatedUser.health_insurance
-                  ? this.healthInsurances.find(
-                      (hi) => hi.id === updatedUser.health_insurance[0]
-                    )?.name || 'Obra social no encontrada'
-                  : 'Sin obra social',
-              };
-              const index = this.users.findIndex(
-                (u) => u.id === updatedUser.id
-              );
-              if (index !== -1) {
-                this.users[index] = userWithHealthInsurance;
-              }
-              this.formLoading = false;
-              this.showForm = false;
-              this.imgProfile = undefined;
-              this.imagePreview = null;
-              this.formInitialData = null;
-              this.logger.info(
-                `Usuario "${updatedUser.username}" actualizado correctamente`
-              );
-            },
-            error: (error: HttpErrorResponse) => {
-              this.handleError(error, 'Error al actualizar el usuario');
-              this.formLoading = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.handleError(error, 'Error al crear el usuario');
+          this.formLoading = false;
+          
+          this.notificationService.error('Ocurrió un error al crear el usuario', {
+            duration: 7000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
             },
           });
-      }
-    });
+        },
+      });
+    } else if (this.selectedUser) {
+      const healthInsuranceUpdate = formData.health_insurance === undefined
+        ? undefined
+        : healthInsuranceId ? [healthInsuranceId] : [];
+
+      const updateData: UserUpdate = {
+        username: this.isSuperuser ? formData.username.trim() : undefined,
+        first_name: this.isSuperuser ? formData.first_name.trim() : undefined,
+        last_name: this.isSuperuser ? formData.last_name.trim() : undefined,
+        telephone: formData.telephone?.trim() || undefined,
+        address: formData.address?.trim() || undefined,
+        health_insurance: healthInsuranceUpdate,
+      };
+
+      this.userService.updateUser(this.selectedUser.id, updateData).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (updatedUser: UserRead) => {
+          const userWithHealthInsurance: ExtendedUser = {
+            ...updatedUser,
+            health_insurance_name: updatedUser.health_insurance
+              ? this.healthInsurances.find((hi) => hi.id === updatedUser.health_insurance[0])?.name || 
+                'Obra social no encontrada'
+              : 'Sin obra social',
+          };
+          
+          const index = this.users.findIndex((u) => u.id === updatedUser.id);
+          if (index !== -1) {
+            this.users[index] = userWithHealthInsurance;
+          }
+          
+          this.formLoading = false;
+          this.showForm = false;
+          this.imgProfile = undefined;
+          this.imagePreview = null;
+          this.formInitialData = null;
+          
+          this.logger.info(`Usuario "${updatedUser.username}" actualizado correctamente`);
+          this.notificationService.success('¡Usuario actualizado correctamente!', {
+            duration: 7000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          });
+        },
+        error: (error: HttpErrorResponse) => {
+          this.handleError(error, 'Error al actualizar el usuario');
+          this.formLoading = false;
+          
+          this.notificationService.error('Ocurrió un error al actualizar el usuario', {
+            duration: 7000,
+            action: {
+              label: 'Cerrar',
+              action: () => this.notificationService.dismissAll(),
+            },
+          });
+        },
+      });
+    }
   }
 
   onFormCancel(): void {
@@ -591,7 +599,6 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.viewDialogData = {};
   }
 
-  // Métodos para manejo de imágenes
   onImageSelected(file: File): void {
     this.imgProfile = file;
     const reader = new FileReader();
@@ -612,7 +619,6 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.logger.debug('Image removed');
   }
 
-  // Métodos para ban/unban
   onBanEvent(event: ExtendedUser): void {
     this.onBan(event);
   }
@@ -632,35 +638,44 @@ export class UserListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.loading = true;
-        this.userService
-          .banUser(user.id.toString())
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (bannedUser: UserRead) => {
-              const index = this.users.findIndex((u) => u.id === bannedUser.id);
-              if (index !== -1) {
-                this.users[index] = {
-                  ...bannedUser,
-                  health_insurance_name: bannedUser.health_insurance
-                    ? this.healthInsurances.find(
-                        (hi) => hi.id === bannedUser.health_insurance[0]
-                      )?.name || 'Obra social no encontrada'
-                    : 'Sin obra social',
-                };
-              }
-              this.loading = false;
-              this.logger.info(
-                `Usuario "${user.username}" baneado correctamente`
-              );
-            },
-            error: (error: HttpErrorResponse) => {
-              this.handleError(
-                error,
-                `Error al banear al usuario "${user.username}"`
-              );
-              this.loading = false;
-            },
-          });
+        
+        this.userService.banUser(user.id).pipe(takeUntil(this.destroy$)).subscribe({
+          next: (bannedUser: UserRead) => {
+            const index = this.users.findIndex((u) => u.id === bannedUser.id);
+            if (index !== -1) {
+              this.users[index] = {
+                ...bannedUser,
+                health_insurance_name: bannedUser.health_insurance
+                  ? this.healthInsurances.find((hi) => hi.id === bannedUser.health_insurance[0])?.name || 
+                    'Obra social no encontrada'
+                  : 'Sin obra social',
+              };
+            }
+            
+            this.loading = false;
+            this.logger.info(`Usuario "${user.username}" baneado correctamente`);
+            
+            this.notificationService.success('¡Usuario baneado correctamente!', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
+          },
+          error: (error: HttpErrorResponse) => {
+            this.handleError(error, `Error al banear al usuario "${user.username}"`);
+            this.loading = false;
+            
+            this.notificationService.error('Ocurrió un error al banear el usuario', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
+          },
+        });
       }
     });
   }
@@ -676,61 +691,63 @@ export class UserListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.loading = true;
-        this.userService
-          .unbanUser(user.id.toString())
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (unbannedUser: UserRead) => {
-              const index = this.users.findIndex(
-                (u) => u.id === unbannedUser.id
-              );
-              if (index !== -1) {
-                this.users[index] = {
-                  ...unbannedUser,
-                  health_insurance_name: unbannedUser.health_insurance
-                    ? this.healthInsurances.find(
-                        (hi) => hi.id === unbannedUser.health_insurance[0]
-                      )?.name || 'Obra social no encontrada'
-                    : 'Sin obra social',
-                };
-              }
-              this.loading = false;
-              this.logger.info(
-                `Usuario "${user.username}" desbaneado correctamente`
-              );
-            },
-            error: (error: HttpErrorResponse) => {
-              this.handleError(
-                error,
-                `Error al desbanear al usuario "${user.username}"`
-              );
-              this.loading = false;
-            },
-          });
+        
+        this.userService.unbanUser(user.id).pipe(takeUntil(this.destroy$)).subscribe({
+          next: (unbannedUser: UserRead) => {
+            const index = this.users.findIndex((u) => u.id === unbannedUser.id);
+            if (index !== -1) {
+              this.users[index] = {
+                ...unbannedUser,
+                health_insurance_name: unbannedUser.health_insurance
+                  ? this.healthInsurances.find((hi) => hi.id === unbannedUser.health_insurance[0])?.name || 
+                    'Obra social no encontrada'
+                  : 'Sin obra social',
+              };
+            }
+            
+            this.loading = false;
+            this.logger.info(`Usuario "${user.username}" desbaneado correctamente`);
+            
+            this.notificationService.success('¡Usuario desbaneado correctamente!', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
+          },
+          error: (error: HttpErrorResponse) => {
+            this.handleError(error, `Error al desbanear al usuario "${user.username}"`);
+            this.loading = false;
+            
+            this.notificationService.error('Ocurrió un error al desbanear el usuario', {
+              duration: 7000,
+              action: {
+                label: 'Cerrar',
+                action: () => this.notificationService.dismissAll(),
+              },
+            });
+          },
+        });
       }
     });
   }
 
   private handleError(error: HttpErrorResponse, defaultMessage: string): void {
     this.logger.error('Error en UserListComponent:', error);
+    
     let errorMessage = defaultMessage;
     if (error.status === 422 && error.error?.detail) {
       const details = error.error.detail;
       errorMessage = Array.isArray(details)
-        ? details
-            .map((err: any) => `${err.loc.join('.')} (${err.type}): ${err.msg}`)
-            .join('; ')
+        ? details.map((err: any) => `${err.loc.join('.')}: ${err.msg}`).join('; ')
         : details || defaultMessage;
     } else if (error.status === 403) {
-      errorMessage =
-        'No tienes permisos para realizar esta acción. Contacta a un administrador.';
+      errorMessage = 'No tienes permisos para realizar esta acción.';
     } else {
-      errorMessage =
-        error.error?.detail ||
-        error.error?.message ||
-        error.message ||
-        defaultMessage;
+      errorMessage = error.error?.detail || error.error?.message || error.message || defaultMessage;
     }
+    
     this.error = errorMessage;
   }
 
