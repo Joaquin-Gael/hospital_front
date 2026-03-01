@@ -8,6 +8,14 @@ import { AuthService } from '../../services/auth/auth.service';
 import { StorageService } from '../../services/core/storage.service';
 import { AdminSidebarComponent } from './admin-sidebar/admin-sidebar.component';
 
+/**
+ * Contenedor principal del panel de administración.
+ *
+ * Responsabilidades principales:
+ * - Verificar que el usuario tenga el scope `admin` antes de permitir el acceso.
+ * - Mantener sincronizada la sección activa con la ruta actual para resaltar el menú correcto.
+ * - Delegar el control del sidebar y del cierre de sesión a servicios compartidos.
+ */
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
@@ -47,6 +55,8 @@ export class AdminPanelComponent implements OnInit {
   private setActiveSectionFromRoute(): void {
     const url = this.router.url.toLowerCase();
 
+    // Sección activa según la URL; mantener el orden de evaluación
+    // para que las coincidencias más específicas tengan prioridad.
     if (url.includes('/departments')) {
       this.activeSection = 'departments';
     } else if (url.includes('/specialities')) {

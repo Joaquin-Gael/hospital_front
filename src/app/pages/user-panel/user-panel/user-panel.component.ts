@@ -14,6 +14,14 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../../shared/loading-spinner/loading-spinner.component';
 
+/**
+ * Contenedor del panel de usuario.
+ *
+ * Responsabilidades:
+ * - Validar sesión y cargar el perfil del usuario antes de mostrar subsecciones.
+ * - Gestionar el estado del sidebar (apertura, colapso y accesibilidad con teclado).
+ * - Orquestar acciones globales como logout y navegación a flujos de perfil.
+ */
 @Component({
   selector: 'app-user-panel',
   templateUrl: './user-panel.component.html',

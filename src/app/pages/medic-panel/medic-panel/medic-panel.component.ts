@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { DoctorService } from '../../../services/doctor/doctor.service';
-import { SpecialityService } from '../../../services/speciality/speciality.service'; 
+import { SpecialityService } from '../../../services/speciality/speciality.service';
 import { LoggerService } from '../../../services/core/logger.service';
 import { StorageService } from '../../../services/core/storage.service';
 import { AuthService } from '../../../services/auth/auth.service';
@@ -13,6 +13,17 @@ import { DoctorDataService } from './doctor-data.service';
 import { NotificationService } from '../../../core/notification';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+
+/**
+ * Shell del panel médico encargado de preparar el contexto de datos para
+ * las subsecciones (agenda, historias clínicas, mensajes, etc.).
+ *
+ * Qué resuelve:
+ * - Valida que exista un token antes de renderizar el panel.
+ * - Obtiene la información del doctor y las especialidades requeridas por
+ *   el resto de componentes y las centraliza en `DoctorDataService`.
+ * - Expone una ruta de cierre de sesión coherente con la UX del panel.
+ */
 @Component({
   selector: 'app-medic-panel',
   templateUrl: './medic-panel.component.html',
@@ -43,6 +54,7 @@ export class MedicPanelComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Carga inicial: datos personales del médico + catálogo de especialidades.
     forkJoin({
       doctorResponse: this.doctorService.getMe(),
       specialities: this.specialityService.getSpecialities(),
